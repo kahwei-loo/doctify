@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <!-- Icon-only design, bold and clear -->
+
+  <!-- Document icon with thicker lines -->
+  <g transform="translate(20, 20)">
+    <!-- Main document shape with rounded corners -->
+    <path d="M 10 5 L 55 5 L 75 25 L 75 85 Q 75 90 70 90 L 10 90 Q 5 90 5 85 L 5 10 Q 5 5 10 5 Z"
+          fill="none"
+          stroke="#3b82f6"
+          stroke-width="8"
+          stroke-linecap="round"
+          stroke-linejoin="round"/>
+
+    <!-- Folded corner -->
+    <path d="M 55 5 L 55 25 L 75 25"
+          fill="none"
+          stroke="#3b82f6"
+          stroke-width="8"
+          stroke-linecap="round"
+          stroke-linejoin="round"/>
+
+    <!-- AI indicator - bold dot -->
+    <circle cx="60" cy="70" r="10" fill="#3b82f6" opacity="0.3"/>
+    <circle cx="60" cy="70" r="7" fill="#3b82f6"/>
+  </g>
+</svg>

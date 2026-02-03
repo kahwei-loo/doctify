@@ -1,0 +1,116 @@
+{
+  "text": "doc_type: receipt\ndate: 2023-10-01\ncurrency: RM\nvendor_name: MIX STORE\nseller_reg_no: 202401012345\nbuyer_name: Loo Kah Wei\nline_items: [{'itemNo': '', 'description': '元芸滋补饮品(水蜜桃味)', 'quantity': 3.5, 'unitPrice': 3.5, 'amount': 12.25}, {'itemNo': '', 'description': 'MIX Plastic Bag (L)', 'quantity': 0.2, 'unitPrice': 0.2, 'amount': 0.04}]\nfield_confidences: {'documentDate': 1, 'currency': 1, 'totalExcludingTax': 1, 'totalTaxAmount': 1, 'totalPayableAmount': 1, 'sellerName': 1, 'buyerName': 1, 'lineItems': 1, 'payment_method': 1}",
+  "confidence": 0.41000000000000003,
+  "metadata": {
+    "confidence": 0.41000000000000003,
+    "document_type": "receipt",
+    "document_type_confidence": 1,
+    "field_confidences": {
+      "documentDate": 1,
+      "currency": 1,
+      "totalExcludingTax": 1,
+      "totalTaxAmount": 1,
+      "totalPayableAmount": 1,
+      "sellerName": 1,
+      "buyerName": 1,
+      "lineItems": 1,
+      "payment_method": 1
+    },
+    "token_usage": {
+      "prompt_tokens": 26321,
+      "completion_tokens": 295,
+      "total_tokens": 26616
+    },
+    "total_token_usage": {
+      "prompt_tokens": 78868,
+      "completion_tokens": 753,
+      "total_tokens": 79621
+    },
+    "l25_metadata": {
+      "enabled": true,
+      "prompt_enhanced": true,
+      "retry_count": 2,
+      "retry_reasons": [
+        "low_overall_confidence",
+        "missing_critical_fields",
+        "low_overall_confidence",
+        "missing_critical_fields"
+      ],
+      "was_corrected": false,
+      "corrections": {},
+      "validation": {
+        "is_valid": true,
+        "error_count": 0,
+        "warning_count": 1,
+        "errors": [],
+        "warnings": [
+          {
+            "code": "line_items_mismatch",
+            "message": "Line items total (12.29) doesn't match subtotal (15)",
+            "field": "line_items"
+          }
+        ],
+        "corrections": {},
+        "confidence_adjustment": 0
+      }
+    },
+    "errors": [],
+    "process_time": 22.385461568832397,
+    "model": "openai/gpt-4o-mini",
+    "provider": "openai"
+  },
+  "extracted_data": {
+    "doc_type": "receipt",
+    "document_number": "",
+    "date": "2023-10-01",
+    "currency": "RM",
+    "total_excluding_tax": 15,
+    "total_tax_amount": 0,
+    "total_payable_amount": 13,
+    "tax_type": "",
+    "tax_rate": 0,
+    "vendor_name": "MIX STORE",
+    "seller_reg_no": "202401012345",
+    "seller_tax_id": "",
+    "buyer_name": "Loo Kah Wei",
+    "line_items": [
+      {
+        "itemNo": "",
+        "description": "元芸滋补饮品(水蜜桃味)",
+        "quantity": 3.5,
+        "unitPrice": 3.5,
+        "amount": 12.25
+      },
+      {
+        "itemNo": "",
+        "description": "MIX Plastic Bag (L)",
+        "quantity": 0.2,
+        "unitPrice": 0.2,
+        "amount": 0.04
+      }
+    ],
+    "doc_type_confidence": 1,
+    "field_confidences": {
+      "documentDate": 1,
+      "currency": 1,
+      "totalExcludingTax": 1,
+      "totalTaxAmount": 1,
+      "totalPayableAmount": 1,
+      "sellerName": 1,
+      "buyerName": 1,
+      "lineItems": 1,
+      "payment_method": 1
+    }
+  },
+  "confidence_scores": {
+    "documentDate": 1,
+    "currency": 1,
+    "totalExcludingTax": 1,
+    "totalTaxAmount": 1,
+    "totalPayableAmount": 1,
+    "sellerName": 1,
+    "buyerName": 1,
+    "lineItems": 1,
+    "payment_method": 1
+  }
+}

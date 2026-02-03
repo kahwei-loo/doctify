@@ -1,0 +1,128 @@
+# ============================================================================
+# Development Dependencies
+# ============================================================================
+# Additional packages required for local development, testing, and code quality
+# Install with: pip install -r requirements/dev.txt
+
+# Include base dependencies
+-r base.txt
+
+# ============================================================================
+# API Rate Limiting (also in prod.txt)
+# ============================================================================
+slowapi==0.1.9  # Rate limiting for FastAPI
+
+# ============================================================================
+# Testing Framework
+# ============================================================================
+
+# Core testing tools
+pytest==8.0.0  # Testing framework
+pytest-asyncio==0.23.8  # Async test support (0.23.8+ has bug fixes for Package.obj issue)
+pytest-cov==4.1.0  # Code coverage plugin
+pytest-mock==3.12.0  # Mocking support
+pytest-xdist==3.5.0  # Parallel test execution
+
+# Test utilities
+faker==22.0.0  # Fake data generation for tests
+factory-boy==3.3.0  # Test fixtures factory
+freezegun==1.4.0  # Mock datetime for tests
+responses==0.24.1  # Mock HTTP requests
+
+# ============================================================================
+# Code Quality and Linting
+# ============================================================================
+
+# Code formatters
+black==24.1.0  # Code formatter
+isort==5.12.0  # Import sorter (5.13.0 excluded by pylint 3.0.3)
+
+# Linters
+flake8==7.0.0  # Style guide enforcement
+flake8-docstrings==1.7.0  # Docstring linting
+flake8-bugbear==24.1.17  # Additional bug checks
+flake8-comprehensions==3.14.0  # Comprehension checks
+pyflakes==3.2.0  # Error detection
+
+# Type checking
+mypy==1.8.0  # Static type checker
+types-redis==4.6.0  # Type stubs for redis
+types-requests==2.31.0  # Type stubs for requests
+
+# Security scanning
+bandit==1.7.6  # Security issue finder
+# safety==3.0.1  # DISABLED: Conflicts with pydantic v2 (safety 3.0.1 requires pydantic<2.0)
+pip-audit==2.6.1  # Dependency vulnerability scanner (pydantic v2 compatible)
+
+# ============================================================================
+# Development Tools
+# ============================================================================
+
+# Task monitoring
+flower==2.0.1  # Celery monitoring tool
+
+# Code analysis
+pylint==3.0.3  # Code analysis
+radon==6.0.1  # Code complexity metrics
+
+# Documentation
+sphinx==7.2.6  # Documentation generator
+sphinx-rtd-theme==2.0.0  # Read the Docs theme
+
+# Debugging
+ipython==8.20.0  # Enhanced Python shell
+ipdb==0.13.13  # IPython-enabled debugger
+
+# Hot reload for development
+watchfiles==0.21.0  # File change detection
+
+# Database migrations (if needed)
+alembic==1.13.1  # Database migration tool
+
+# ============================================================================
+# Pre-commit Hooks (optional but recommended)
+# ============================================================================
+
+pre-commit==3.6.0  # Git hooks framework
+
+# ============================================================================
+# Performance Profiling
+# ============================================================================
+
+py-spy==0.3.14  # Sampling profiler
+memory-profiler==0.61.0  # Memory usage profiler
+
+# ============================================================================
+# Environment Management
+# ============================================================================
+
+python-dotenv==1.0.0  # Already in base, but explicitly listed for dev
+
+# ============================================================================
+# Additional Development Utilities
+# ============================================================================
+
+# HTTP testing
+httpie==3.2.2  # Command-line HTTP client
+
+# JSON handling
+jq==1.6.0  # JSON processor (Python wrapper)
+
+# ============================================================================
+# Installation Notes
+# ============================================================================
+# To install all development dependencies:
+#   pip install -r requirements/dev.txt
+#
+# To set up pre-commit hooks (optional):
+#   pre-commit install
+#
+# To run tests with coverage:
+#   pytest --cov=app --cov-report=html
+#
+# To run code quality checks:
+#   black app/
+#   isort app/
+#   flake8 app/
+#   mypy app/
+#   bandit -r app/

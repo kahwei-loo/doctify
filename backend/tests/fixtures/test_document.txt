@@ -1,0 +1,45 @@
+DOCTIFY - AI-Powered Document Intelligence Platform
+
+What is Doctify?
+
+Doctify is an enterprise-grade AI-powered SaaS platform designed for intelligent document processing, OCR (Optical Character Recognition), and advanced document management. The platform leverages cutting-edge artificial intelligence to transform how organizations handle, process, and extract value from their document workflows.
+
+Core Features:
+
+1. Intelligent OCR Processing
+   - Multi-language support with high accuracy
+   - Automatic text extraction from scanned documents
+   - Handles PDFs, images, and various document formats
+   - L25 orchestration with multiple AI providers for reliability
+
+2. RAG (Retrieval Augmented Generation)
+   - Semantic search across document collections
+   - AI-powered question answering based on document content
+   - Contextual information retrieval with source citations
+   - Vector similarity search using pgvector
+
+3. Multi-AI Provider Architecture
+   - OpenAI GPT-4V integration
+   - Anthropic Claude support
+   - Google AI compatibility
+   - Automatic fallback chain for high availability
+
+4. Document Management
+   - Secure document storage and organization
+   - Project-based document categorization
+   - User access control and permissions
+   - Full audit trail and version history
+
+Technical Architecture:
+
+Backend: FastAPI (Python 3.11+) with AsyncIO, PostgreSQL 15 with pgvector, Redis 7, Celery
+Frontend: React 18 with TypeScript, Vite, TailwindCSS
+Deployment: Docker, GitHub Actions, production-ready monitoring
+
+Security: JWT authentication, rate limiting, CORS protection, audit logging
+
+Performance: API response < 500ms, 1000+ concurrent users, async processing
+
+Use Cases: Legal document analysis, medical records processing, financial compliance, research organization, contract management
+
+Project Status: Phase 11 (RAG Implementation) completed with comprehensive testing.

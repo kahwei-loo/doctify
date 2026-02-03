@@ -1,0 +1,279 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* shadcn/ui monochrome color palette */
+    --background: 0 0% 100%;
+    --foreground: 222.2 47.4% 11.2%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 47.4% 11.2%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 47.4% 11.2%;
+
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 215 20% 92%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 47.4% 11.2%;
+
+    --radius: 0.5rem;
+
+    /* Brand and surface colors */
+    --brand-primary: #0f172a;
+    --surface: 210 40% 98%;
+  }
+
+  .dark {
+    --background: 222.2 47.4% 11.2%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 47.4% 11.2%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 47.4% 11.2%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+:root {
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: light;
+  color: hsl(var(--foreground));
+  background-color: hsl(var(--background));
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+a:hover {
+  color: hsl(var(--foreground));
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  width: 100vw;
+  box-sizing: border-box;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  @apply overflow-x-hidden;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(-8px);}
+  to { opacity: 1; transform: translateY(0);}
+}
+.animate-fade-in {
+  animation: fade-in 0.2s ease;
+}
+
+/* Smooth scrolling */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Skip to main content link for accessibility */
+.skip-link {
+  @apply fixed top-0 left-0 z-50 bg-primary text-primary-foreground px-4 py-2 transform -translate-y-full focus:translate-y-0 transition-transform;
+}
+
+/* Typography utilities */
+@layer utilities {
+  /* Text sizes */
+  .text-h1 {
+    @apply text-4xl font-bold tracking-tight;
+  }
+  .text-h2 {
+    @apply text-3xl font-semibold tracking-tight;
+  }
+  .text-h3 {
+    @apply text-2xl font-semibold;
+  }
+  .text-h4 {
+    @apply text-xl font-semibold;
+  }
+  .text-h5 {
+    @apply text-lg font-medium;
+  }
+  .text-h6 {
+    @apply text-base font-medium;
+  }
+
+  /* Body text */
+  .text-body-lg {
+    @apply text-lg leading-relaxed;
+  }
+  .text-body {
+    @apply text-base leading-normal;
+  }
+  .text-body-sm {
+    @apply text-sm leading-normal;
+  }
+
+  /* Supporting text */
+  .text-caption {
+    @apply text-xs text-muted-foreground;
+  }
+  .text-overline {
+    @apply text-xs uppercase tracking-wider font-medium text-muted-foreground;
+  }
+
+  /* Consistent spacing */
+  .section-spacing {
+    @apply py-8 md:py-12;
+  }
+  .content-spacing {
+    @apply space-y-6;
+  }
+  .card-spacing {
+    @apply p-6;
+  }
+
+  /* Consistent borders */
+  .border-default {
+    @apply border border-border;
+  }
+  .border-subtle {
+    @apply border border-border/50;
+  }
+
+  /* Focus states */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background;
+  }
+
+  /* Hover states */
+  .hover-overlay {
+    @apply transition-colors hover:bg-accent hover:text-accent-foreground;
+  }
+
+  /* Disabled states */
+  .disabled-state {
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Enhanced focus visibility for keyboard navigation */
+  .focus-visible-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+  }
+
+  /* Interactive element focus (only shows on keyboard nav) */
+  .interactive-focus {
+    @apply outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+
+  /* Smooth transitions for state changes */
+  .transition-state {
+    @apply transition-all duration-200 ease-in-out;
+  }
+
+  /* Loading shimmer effect */
+  .shimmer {
+    @apply relative overflow-hidden;
+    background: linear-gradient(
+      90deg,
+      hsl(var(--muted)) 0%,
+      hsl(var(--muted-foreground) / 0.1) 50%,
+      hsl(var(--muted)) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  /* Container with responsive padding */
+  .container-padding {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Responsive text */
+  .responsive-text-lg {
+    @apply text-base sm:text-lg;
+  }
+
+  .responsive-text-xl {
+    @apply text-lg sm:text-xl;
+  }
+
+  /* Touch-friendly targets (44x44 minimum) */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
+  /* Visual feedback for clickable items */
+  .clickable {
+    @apply cursor-pointer select-none active:scale-[0.98] transition-transform;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}

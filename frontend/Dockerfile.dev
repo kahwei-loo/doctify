@@ -1,0 +1,31 @@
+# ===========================================
+# Doctify Frontend Dockerfile (Development)
+# ===========================================
+# Development image with hot-reload support
+
+FROM node:18-alpine
+
+LABEL maintainer="Kah Wei Loo <noreply@kahweiloo.com>"
+LABEL description="Doctify Frontend Development Environment"
+
+# Set working directory
+WORKDIR /app
+
+# Install dependencies for better dev experience
+RUN apk add --no-cache git
+
+# Copy package files
+COPY package*.json ./
+
+# Install all dependencies (including devDependencies)
+RUN npm install
+
+# Expose Vite dev server port
+EXPOSE 3003
+
+# Enable polling for file watching in Docker
+ENV CHOKIDAR_USEPOLLING=true \
+    NODE_ENV=development
+
+# Start Vite development server
+CMD ["npm", "run", "dev"]

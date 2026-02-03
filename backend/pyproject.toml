@@ -1,0 +1,209 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "doctify"
+version = "1.0.0"
+description = "AI-Powered Document Intelligence Platform"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "Kah Wei Loo", email = "noreply@kahweiloo.com"}
+]
+keywords = ["fastapi", "ai", "document-processing", "ocr", "saas"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Framework :: FastAPI",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+]
+
+[project.urls]
+Homepage = "https://github.com/kahwei-loo/doctify"
+Documentation = "https://github.com/kahwei-loo/doctify/docs"
+Repository = "https://github.com/kahwei-loo/doctify"
+Issues = "https://github.com/kahwei-loo/doctify/issues"
+
+# ============================================================================
+# Black - Code Formatter
+# ============================================================================
+[tool.black]
+line-length = 88
+target-version = ['py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # Directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+  | venv
+)/
+'''
+
+# ============================================================================
+# isort - Import Sorter
+# ============================================================================
+[tool.isort]
+profile = "black"
+line_length = 88
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+skip_gitignore = true
+
+# ============================================================================
+# mypy - Static Type Checker
+# ============================================================================
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+strict_equality = true
+strict_concatenate = true
+
+[[tool.mypy.overrides]]
+module = [
+    "celery.*",
+    "flower.*",
+    "pdf2image.*",
+    "reportlab.*",
+    "PyPDF2.*",
+    "duckdb.*",
+]
+ignore_missing_imports = true
+
+# ============================================================================
+# pytest - Testing Framework
+# ============================================================================
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+    "--showlocals",
+    "--tb=short",
+]
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests",
+    "e2e: End-to-end tests",
+    "slow: Slow running tests",
+    "asyncio: Async tests",
+]
+asyncio_mode = "auto"
+
+# ============================================================================
+# pytest-cov - Coverage Configuration
+# ============================================================================
+[tool.coverage.run]
+source = ["app"]
+omit = [
+    "*/tests/*",
+    "*/migrations/*",
+    "*/__init__.py",
+    "*/config.py",
+]
+branch = true
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if TYPE_CHECKING:",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if settings.DEBUG:",
+    "@abstract",
+]
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+# ============================================================================
+# bandit - Security Linter
+# ============================================================================
+[tool.bandit]
+targets = ["app"]
+exclude_dirs = ["/tests", "/migrations"]
+skips = ["B101", "B601"]  # Skip assert_used and paramiko_calls
+
+# ============================================================================
+# pylint - Code Analysis
+# ============================================================================
+[tool.pylint.main]
+fail-under = 8.0
+ignore = ["tests", "migrations"]
+jobs = 0  # Use all available CPUs
+
+[tool.pylint.messages_control]
+disable = [
+    "C0111",  # missing-docstring
+    "C0103",  # invalid-name
+    "R0903",  # too-few-public-methods
+    "R0913",  # too-many-arguments
+]
+
+[tool.pylint.format]
+max-line-length = 88
+
+[tool.pylint.basic]
+good-names = ["i", "j", "k", "ex", "db", "_", "id"]
+
+# ============================================================================
+# Ruff - Fast Python Linter (Alternative to Flake8)
+# ============================================================================
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # line too long (handled by black)
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
+]
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]  # imported but unused
+
+[tool.ruff.isort]
+known-third-party = ["fastapi", "pydantic", "sqlalchemy"]

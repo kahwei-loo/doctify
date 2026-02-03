@@ -1,0 +1,221 @@
+# ===========================================
+# Doctify Docker Compose (Development)
+# ===========================================
+# Development environment with hot-reload support
+#
+# WARNING: This file contains DEVELOPMENT-ONLY credentials.
+# These hardcoded values are intentional for local development convenience.
+# NEVER use these values in production!
+#
+# For production deployment, use docker-compose.prod.yml which:
+# - Uses Docker secrets for credentials
+# - Requires environment variables from .env.prod
+# - Does NOT expose database ports
+# - Implements proper security controls
+
+version: '3.8'
+
+services:
+  # ============================================================================
+  # PostgreSQL Database (with pgvector for RAG)
+  # ============================================================================
+  doctify-postgres:
+    image: pgvector/pgvector:pg16
+    container_name: doctify-postgres-dev
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=doctify
+      # DEV-ONLY: This password is for local development only
+      # Production uses Docker secrets (see docker-compose.prod.yml)
+      - POSTGRES_PASSWORD=doctify_dev_password
+      - POSTGRES_DB=doctify_development
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - doctify-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U doctify -d doctify_development"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================================
+  # Redis Cache and Message Queue
+  # ============================================================================
+  doctify-redis:
+    image: redis:7-alpine
+    container_name: doctify-redis-dev
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - doctify-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    command: redis-server --appendonly yes
+
+  # ============================================================================
+  # Backend API Service
+  # ============================================================================
+  doctify-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: doctify-backend-dev
+    restart: unless-stopped
+    ports:
+      - "50080:8000"
+    environment:
+      - ENVIRONMENT=development
+      - DEBUG=true
+      # PostgreSQL Configuration (DEV-ONLY credentials)
+      - POSTGRES_HOST=doctify-postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=doctify
+      - POSTGRES_PASSWORD=doctify_dev_password  # DEV-ONLY: Use Docker secrets in production
+      - POSTGRES_DB=doctify_development
+      # Redis Configuration
+      - REDIS_URL=redis://doctify-redis:6379/0
+      - CELERY_BROKER_URL=redis://doctify-redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://doctify-redis:6379/1
+      # Application Configuration
+      - LOG_LEVEL=DEBUG
+      # DEV-ONLY: This secret key is insecure and for local development only!
+      # Production MUST use a strong, randomly generated key via Docker secrets
+      - SECRET_KEY=dev-secret-key-change-in-production
+      - BACKEND_CORS_ORIGINS=["http://localhost:3003","http://localhost:3000"]
+      # AI Provider API Keys (loaded from .env file)
+      # Using OpenRouter for unified API access to multiple models
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-https://openrouter.ai/api/v1}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - GOOGLE_AI_API_KEY=${GOOGLE_AI_API_KEY}
+      # Default model: Qwen3 VL 8B (fast & cost-effective)
+      # Escalation chain: Qwen3 8B → Qwen3 32B → Gemini 3 Flash
+      - AI_MODEL=${AI_MODEL:-qwen/qwen3-vl-8b-instruct}
+    volumes:
+      - ./backend:/app
+      - backend_uploads:/app/uploads
+      - backend_temp:/app/temp_uploads
+      - backend_logs:/app/logs
+    depends_on:
+      doctify-postgres:
+        condition: service_healthy
+      doctify-redis:
+        condition: service_healthy
+    networks:
+      - doctify-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================================
+  # Celery Worker (Background Tasks)
+  # ============================================================================
+  doctify-celery:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: doctify-celery-dev
+    restart: unless-stopped
+    environment:
+      - ENVIRONMENT=development
+      - DEBUG=true
+      # PostgreSQL Configuration (DEV-ONLY credentials - same as backend)
+      - POSTGRES_HOST=doctify-postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=doctify
+      - POSTGRES_PASSWORD=doctify_dev_password  # DEV-ONLY
+      - POSTGRES_DB=doctify_development
+      # Redis Configuration
+      - REDIS_URL=redis://doctify-redis:6379/0
+      - CELERY_BROKER_URL=redis://doctify-redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://doctify-redis:6379/1
+      # Application Configuration
+      - LOG_LEVEL=DEBUG
+      - SECRET_KEY=dev-secret-key-change-in-production  # DEV-ONLY
+      # AI Provider API Keys (loaded from .env file)
+      # Using OpenRouter for unified API access to multiple models
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-https://openrouter.ai/api/v1}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - GOOGLE_AI_API_KEY=${GOOGLE_AI_API_KEY}
+      # Default model: Qwen3 VL 8B (fast & cost-effective)
+      # Escalation chain: Qwen3 8B → Qwen3 32B → Gemini 3 Flash
+      - AI_MODEL=${AI_MODEL:-qwen/qwen3-vl-8b-instruct}
+    volumes:
+      - ./backend:/app
+      - backend_uploads:/app/uploads
+      - backend_temp:/app/temp_uploads
+      - backend_logs:/app/logs
+    depends_on:
+      - doctify-postgres
+      - doctify-redis
+      - doctify-backend
+    networks:
+      - doctify-network
+    command: celery -A app.tasks.celery_app worker -l info --pool=solo -Q ocr_queue
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A app.tasks.celery_app inspect ping -d celery@$$HOSTNAME || exit 1"]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 3
+
+  # ============================================================================
+  # Frontend Application
+  # ============================================================================
+  doctify-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: doctify-frontend-dev
+    restart: unless-stopped
+    ports:
+      - "3003:3003"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - CHOKIDAR_INTERVAL=1000
+      - WATCHPACK_POLLING=true
+      - NODE_ENV=development
+      - VITE_API_BASE_URL=http://localhost:50080
+      - VITE_WS_BASE_URL=ws://localhost:50080
+    depends_on:
+      - doctify-backend
+    networks:
+      - doctify-network
+
+# ===========================================
+# Volumes for Data Persistence
+# ===========================================
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  backend_uploads:
+    driver: local
+  backend_temp:
+    driver: local
+  backend_logs:
+    driver: local
+
+# ===========================================
+# Network Configuration
+# ===========================================
+networks:
+  doctify-network:
+    driver: bridge
+    name: doctify-network

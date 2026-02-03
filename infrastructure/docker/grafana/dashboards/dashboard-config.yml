@@ -1,0 +1,17 @@
+# ===========================================
+# Grafana Dashboard Provisioning Configuration
+# ===========================================
+
+apiVersion: 1
+
+providers:
+  - name: 'Doctify Dashboards'
+    orgId: 1
+    folder: 'Doctify'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards
+      foldersFromFilesStructure: true

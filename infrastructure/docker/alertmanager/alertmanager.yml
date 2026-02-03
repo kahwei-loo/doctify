@@ -1,0 +1,155 @@
+# ===========================================
+# AlertManager Configuration for Doctify
+# ===========================================
+# Handles alert routing, grouping, and notifications
+
+global:
+  # How long to wait before sending a notification again if it has
+  # already been sent successfully for an alert
+  resolve_timeout: 5m
+
+  # SMTP configuration for email notifications
+  smtp_smarthost: 'smtp.example.com:587'
+  smtp_from: 'alertmanager@doctify.io'
+  smtp_auth_username: 'alertmanager@doctify.io'
+  smtp_auth_password: '${SMTP_PASSWORD}'
+  smtp_require_tls: true
+
+  # Slack configuration (optional)
+  slack_api_url: '${SLACK_WEBHOOK_URL}'
+
+# Templates for notifications
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+# Route tree for alert routing
+route:
+  # Default receiver
+  receiver: 'default-receiver'
+
+  # How long to wait before sending the first notification
+  group_wait: 30s
+
+  # How long to wait before sending a batch of new alerts for the same group
+  group_interval: 5m
+
+  # How long to wait before sending a notification about new alerts
+  # that are added to a group of alerts for which an initial notification
+  # has already been sent
+  repeat_interval: 4h
+
+  # Group alerts by these labels
+  group_by: ['alertname', 'service', 'severity']
+
+  # Child routes for specific alert routing
+  routes:
+    # Critical alerts - immediate notification
+    - receiver: 'critical-alerts'
+      match:
+        severity: critical
+      group_wait: 10s
+      repeat_interval: 1h
+      continue: true
+
+    # Warning alerts - less urgent
+    - receiver: 'warning-alerts'
+      match:
+        severity: warning
+      group_wait: 1m
+      repeat_interval: 4h
+
+    # Database alerts - specialized handling
+    - receiver: 'database-alerts'
+      match_re:
+        service: (mongodb|redis|postgres)
+      group_wait: 30s
+      repeat_interval: 2h
+
+    # Celery/worker alerts
+    - receiver: 'worker-alerts'
+      match:
+        service: celery
+      group_wait: 30s
+      repeat_interval: 2h
+
+# Inhibition rules - prevent duplicate alerts
+inhibit_rules:
+  # If critical alert is firing, suppress warning alerts for same service
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'service']
+
+  # If service is down, suppress other alerts for that service
+  - source_match:
+      alertname: 'ServiceDown'
+    target_match_re:
+      alertname: '.+'
+    equal: ['service']
+
+# Receivers define notification endpoints
+receivers:
+  # Default receiver - logs only in development
+  - name: 'default-receiver'
+    webhook_configs:
+      - url: 'http://localhost:5001/alerts'
+        send_resolved: true
+
+  # Critical alerts - multiple notification channels
+  - name: 'critical-alerts'
+    email_configs:
+      - to: 'oncall@doctify.io'
+        send_resolved: true
+        headers:
+          Subject: '[CRITICAL] Doctify Alert: {{ .GroupLabels.alertname }}'
+    slack_configs:
+      - channel: '#alerts-critical'
+        send_resolved: true
+        title: '{{ if eq .Status "firing" }}:fire:{{ else }}:white_check_mark:{{ end }} {{ .GroupLabels.alertname }}'
+        text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+        color: '{{ if eq .Status "firing" }}danger{{ else }}good{{ end }}'
+    # PagerDuty integration (optional)
+    # pagerduty_configs:
+    #   - service_key: '${PAGERDUTY_SERVICE_KEY}'
+    #     severity: critical
+
+  # Warning alerts - less urgent notifications
+  - name: 'warning-alerts'
+    email_configs:
+      - to: 'devops@doctify.io'
+        send_resolved: true
+        headers:
+          Subject: '[WARNING] Doctify Alert: {{ .GroupLabels.alertname }}'
+    slack_configs:
+      - channel: '#alerts-warning'
+        send_resolved: true
+        title: '{{ if eq .Status "firing" }}:warning:{{ else }}:white_check_mark:{{ end }} {{ .GroupLabels.alertname }}'
+        text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+        color: '{{ if eq .Status "firing" }}warning{{ else }}good{{ end }}'
+
+  # Database-specific alerts
+  - name: 'database-alerts'
+    email_configs:
+      - to: 'dba@doctify.io'
+        send_resolved: true
+        headers:
+          Subject: '[DATABASE] Doctify Alert: {{ .GroupLabels.alertname }}'
+    slack_configs:
+      - channel: '#alerts-database'
+        send_resolved: true
+        title: ':floppy_disk: {{ .GroupLabels.alertname }}'
+        text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+
+  # Worker/Celery alerts
+  - name: 'worker-alerts'
+    email_configs:
+      - to: 'devops@doctify.io'
+        send_resolved: true
+        headers:
+          Subject: '[WORKER] Doctify Alert: {{ .GroupLabels.alertname }}'
+    slack_configs:
+      - channel: '#alerts-workers'
+        send_resolved: true
+        title: ':gear: {{ .GroupLabels.alertname }}'
+        text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'

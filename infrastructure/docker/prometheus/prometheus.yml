@@ -1,0 +1,120 @@
+# ===========================================
+# Prometheus Configuration for Doctify
+# ===========================================
+# Metrics collection and alerting configuration
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'doctify-prod'
+    environment: 'production'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
+
+# Load rules once and periodically evaluate them
+rule_files:
+  - "alerts/*.yml"
+
+# Scrape configurations
+scrape_configs:
+  # ===========================================
+  # Prometheus self-monitoring
+  # ===========================================
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          service: 'prometheus'
+
+  # ===========================================
+  # FastAPI Backend Application
+  # ===========================================
+  - job_name: 'doctify-backend'
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['doctify-backend:8000']
+        labels:
+          service: 'backend'
+          app: 'doctify'
+    metric_relabel_configs:
+      # Drop high-cardinality metrics
+      - source_labels: [__name__]
+        regex: 'http_request_duration_seconds_bucket'
+        action: drop
+
+  # ===========================================
+  # Celery Worker Metrics
+  # ===========================================
+  - job_name: 'doctify-celery'
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    static_configs:
+      - targets: ['doctify-celery:8000']
+        labels:
+          service: 'celery-worker'
+          app: 'doctify'
+
+  # ===========================================
+  # PostgreSQL Exporter
+  # ===========================================
+  - job_name: 'doctify-postgres'
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+        labels:
+          service: 'postgres'
+          app: 'doctify'
+
+  # ===========================================
+  # Redis Exporter
+  # ===========================================
+  - job_name: 'doctify-redis'
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['redis-exporter:9121']
+        labels:
+          service: 'redis'
+          app: 'doctify'
+
+  # ===========================================
+  # Node Exporter (System Metrics)
+  # ===========================================
+  - job_name: 'node-exporter'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['node-exporter:9100']
+        labels:
+          service: 'node'
+          app: 'system'
+
+  # ===========================================
+  # cAdvisor (Container Metrics)
+  # ===========================================
+  - job_name: 'cadvisor'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['cadvisor:8080']
+        labels:
+          service: 'cadvisor'
+          app: 'system'
+
+  # ===========================================
+  # Nginx Exporter (Frontend Metrics)
+  # ===========================================
+  - job_name: 'doctify-nginx'
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['nginx-exporter:9113']
+        labels:
+          service: 'nginx'
+          app: 'doctify'
