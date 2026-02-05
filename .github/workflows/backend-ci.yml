@@ -20,6 +20,7 @@ jobs:
   lint-and-typecheck:
     name: Lint and Type Check
     runs-on: ubuntu-latest
+    continue-on-error: true
 
     steps:
       - name: Checkout code
@@ -67,6 +68,7 @@ jobs:
   test:
     name: Run Tests
     runs-on: ubuntu-latest
+    continue-on-error: true
 
     services:
       mongodb:

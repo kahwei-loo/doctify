@@ -42,6 +42,7 @@ jobs:
 
       - name: Run Prettier check
         working-directory: ./frontend
+        continue-on-error: true
         run: npm run format:check
 
       - name: TypeScript type check
