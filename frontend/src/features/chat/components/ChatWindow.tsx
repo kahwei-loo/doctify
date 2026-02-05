@@ -24,6 +24,12 @@ export function ChatWindow({ conversationId, initialMessages = [] }: ChatWindowP
   const [input, setInput] = useState('');
   const [streamingMessage, setStreamingMessage] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
+  const isDemoMode = localStorage.getItem('demo_mode') === 'true';
+
+  // Sync messages when initialMessages prop changes (e.g., switching conversations)
+  useEffect(() => {
+    setMessages(initialMessages);
+  }, [initialMessages]);
 
   const handleChunk = useCallback((chunk: StreamChunk) => {
     if (chunk.type === 'intent') {
@@ -84,8 +90,8 @@ export function ChatWindow({ conversationId, initialMessages = [] }: ChatWindowP
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span>Chat Assistant</span>
-          <span className={`text-xs ${isConnected ? 'text-green-500' : 'text-red-500'}`}>
-            {isConnected ? '● Connected' : '○ Disconnected'}
+          <span className={`text-xs ${isConnected || isDemoMode ? 'text-green-500' : 'text-red-500'}`}>
+            {isDemoMode ? '● Demo Mode' : isConnected ? '● Connected' : '○ Disconnected'}
           </span>
         </CardTitle>
       </CardHeader>
@@ -118,7 +124,7 @@ export function ChatWindow({ conversationId, initialMessages = [] }: ChatWindowP
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type your message..."
               className="min-h-[60px] max-h-[120px]"
-              disabled={isSending || !isConnected}
+              disabled={isSending || (!isConnected && !isDemoMode)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
@@ -129,7 +135,7 @@ export function ChatWindow({ conversationId, initialMessages = [] }: ChatWindowP
             <Button
               type="submit"
               size="icon"
-              disabled={isSending || !input.trim() || !isConnected}
+              disabled={isSending || !input.trim() || (!isConnected && !isDemoMode)}
             >
               {isSending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

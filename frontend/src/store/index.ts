@@ -11,6 +11,7 @@ import { setupListeners } from '@reduxjs/toolkit/query';
 import authReducer from './slices/authSlice';
 import documentsReducer from './slices/documentsSlice';
 import uiReducer from './slices/uiSlice';
+import demoReducer from './slices/demoSlice';
 import { api } from './api/apiSlice';
 import { publicChatApi } from './api/publicChatApi';
 
@@ -19,6 +20,7 @@ export const store = configureStore({
     auth: authReducer,
     documents: documentsReducer,
     ui: uiReducer,
+    demo: demoReducer,
     [api.reducerPath]: api.reducer,
     [publicChatApi.reducerPath]: publicChatApi.reducer,
   },

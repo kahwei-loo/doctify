@@ -9,6 +9,7 @@ import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
 import { Loading } from '../shared/components';
 import { useAppSelector } from '../store';
 import { selectIsAuthenticated, selectAuthLoading } from '../store/selectors/authSelectors';
+import { selectIsDemoMode } from '../store/slices/demoSlice';
 import { useGetCurrentUserQuery } from '../store/api/authApi';
 
 // Lazy load pages for code splitting
@@ -43,16 +44,23 @@ const PageLoader: React.FC = () => (
 /**
  * Protected route wrapper
  * Uses Redux auth state with backend verification for security
+ * Allows demo mode access without authentication
  */
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const authLoading = useAppSelector(selectAuthLoading);
+  const isDemoMode = useAppSelector(selectIsDemoMode);
   const hasToken = localStorage.getItem('access_token') !== null;
 
   // Verify token with backend when we have a token but not authenticated in Redux
   const { isLoading: isVerifying, isError } = useGetCurrentUserQuery(undefined, {
-    skip: isAuthenticated || !hasToken,
+    skip: isAuthenticated || !hasToken || isDemoMode,
   });
+
+  // Allow access if demo mode is active
+  if (isDemoMode) {
+    return <>{children}</>;
+  }
 
   // Show loading while verifying authentication
   if (authLoading || (hasToken && isVerifying && !isAuthenticated)) {

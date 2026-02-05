@@ -14,6 +14,7 @@ import toast from 'react-hot-toast';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { logout } from '@/store/slices/authSlice';
 import { selectUser } from '@/store/selectors/authSelectors';
+import { selectIsDemoMode } from '@/store/slices/demoSlice';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
@@ -34,12 +35,14 @@ import { cn } from '@/lib/utils';
 
 interface HeaderProps {
   sidebarWidth: number;
+  topOffset?: number;
 }
 
-const Header: React.FC<HeaderProps> = ({ sidebarWidth }) => {
+const Header: React.FC<HeaderProps> = ({ sidebarWidth, topOffset = 0 }) => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const user = useAppSelector(selectUser);
+  const isDemoMode = useAppSelector(selectIsDemoMode);
 
   const [darkMode, setDarkMode] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -90,12 +93,13 @@ const Header: React.FC<HeaderProps> = ({ sidebarWidth }) => {
       <header
         role="banner"
         className={cn(
-          'fixed top-0 right-0 z-30',
+          'fixed right-0 z-30',
           'h-16 flex items-center justify-between px-6',
           'bg-background border-b border-border',
           'transition-all duration-300 ease-in-out'
         )}
         style={{
+          top: topOffset,
           left: sidebarWidth,
           width: `calc(100% - ${sidebarWidth}px)`,
         }}
@@ -212,7 +216,12 @@ const Header: React.FC<HeaderProps> = ({ sidebarWidth }) => {
           {/* User menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="gap-2 px-2" aria-label={`User menu for ${user?.full_name || 'User'}`}>
+              <Button variant="ghost" className="gap-2 px-2 relative" aria-label={`User menu for ${user?.full_name || 'User'}`}>
+                {isDemoMode && (
+                  <span className="absolute -top-1 -right-1 px-1.5 py-0.5 text-[10px] font-bold bg-yellow-400 text-gray-900 rounded" aria-label="Demo mode active">
+                    DEMO
+                  </span>
+                )}
                 <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground" aria-hidden="true">
                   <User className="h-4 w-4" />
                 </div>

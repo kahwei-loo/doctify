@@ -362,7 +362,7 @@ function delay(ms: number): Promise<void> {
 // Environment-based export
 import { realKnowledgeBaseApi } from './api';
 
-const USE_MOCK = import.meta.env.VITE_USE_MOCK_KB === 'true';
+const USE_MOCK = import.meta.env.VITE_USE_MOCK_KB === 'true' || localStorage.getItem('demo_mode') === 'true';
 
 export const knowledgeBaseApi = USE_MOCK ? mockKnowledgeBaseApi : realKnowledgeBaseApi;
 export const isMockMode = USE_MOCK;

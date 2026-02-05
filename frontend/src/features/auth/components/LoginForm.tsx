@@ -4,6 +4,8 @@ import { z } from 'zod';
 import { Eye, EyeOff, Mail, Lock, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useLoginMutation } from '@/store/api/authApi';
+import { useAppDispatch } from '@/store';
+import { enterDemoMode } from '@/store/slices/demoSlice';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,6 +21,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 const LoginForm: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useAppDispatch();
   const [login, { isLoading }] = useLoginMutation();
 
   const [formData, setFormData] = useState<LoginFormData>({
@@ -71,6 +74,12 @@ const LoginForm: React.FC = () => {
         setErrors({ password: message });
       }
     }
+  };
+
+  const handleTryDemo = () => {
+    dispatch(enterDemoMode());
+    toast.success('🎭 Demo Mode Active - Exploring with sample data');
+    navigate('/dashboard');
   };
 
   return (
@@ -147,6 +156,31 @@ const LoginForm: React.FC = () => {
           'Sign in'
         )}
       </Button>
+
+      {/* Demo Mode Section */}
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-background px-2 text-muted-foreground">Or</span>
+        </div>
+      </div>
+
+      <Button
+        type="button"
+        variant="secondary"
+        className="w-full"
+        onClick={handleTryDemo}
+        disabled={isLoading}
+      >
+        <span className="mr-2">🎭</span>
+        Try Demo (No Signup Required)
+      </Button>
+
+      <p className="text-center text-xs text-muted-foreground">
+        Experience Doctify with sample data
+      </p>
 
       {/* Register Link */}
       <p className="text-center text-sm text-muted-foreground">

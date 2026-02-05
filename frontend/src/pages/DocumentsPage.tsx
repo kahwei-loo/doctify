@@ -44,6 +44,7 @@ import {
   useDocumentListWebSocket,
   type DocumentProgressEvent,
 } from '@/features/documents/hooks';
+import { useDemoMode } from '@/features/demo/hooks/useDemoMode';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -95,6 +96,9 @@ const DocumentsPage: React.FC = () => {
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const dragCounterRef = useRef(0);
   const dropZoneRef = useRef<HTMLDivElement>(null);
+
+  // Demo mode hook
+  const { isDemoMode, isRestricted, getRestrictionMessage } = useDemoMode();
 
   // Document upload hook
   const {
@@ -216,6 +220,11 @@ const DocumentsPage: React.FC = () => {
     setIsDraggingOver(false);
     dragCounterRef.current = 0;
 
+    if (isDemoMode) {
+      toast.error('⚠️ Upload disabled in demo mode. Sign up to upload documents.');
+      return;
+    }
+
     if (!selectedProjectId) {
       toast.error('Please select a project first');
       return;
@@ -305,9 +314,13 @@ const DocumentsPage: React.FC = () => {
 
   // Handle document delete - show confirmation dialog
   const handleDelete = useCallback((documentIds: string[]) => {
+    if (isDemoMode) {
+      toast.error('⚠️ Delete disabled in demo mode');
+      return;
+    }
     setDocumentsToDelete(documentIds);
     setDeleteDialogOpen(true);
-  }, []);
+  }, [isDemoMode]);
 
   // Confirm and execute document deletion
   const handleConfirmDelete = useCallback(async () => {
@@ -376,15 +389,28 @@ const DocumentsPage: React.FC = () => {
       {/* Full-Page Drag Overlay */}
       {isDraggingOver && (
         <div className="absolute inset-0 z-50 bg-primary/10 backdrop-blur-sm flex items-center justify-center pointer-events-none">
-          <div className="bg-background border-2 border-dashed border-primary rounded-lg p-8 shadow-lg">
+          <div className={cn(
+            "bg-background border-2 border-dashed rounded-lg p-8 shadow-lg",
+            isDemoMode ? "border-yellow-400" : "border-primary"
+          )}>
             <div className="flex flex-col items-center gap-4 text-center">
-              <div className="p-4 rounded-full bg-primary/10">
-                <Upload className="h-12 w-12 text-primary" />
+              <div className={cn(
+                "p-4 rounded-full",
+                isDemoMode ? "bg-yellow-100" : "bg-primary/10"
+              )}>
+                <Upload className={cn(
+                  "h-12 w-12",
+                  isDemoMode ? "text-yellow-600" : "text-primary"
+                )} />
               </div>
               <div>
-                <p className="text-xl font-semibold">Drop files to upload</p>
+                <p className="text-xl font-semibold">
+                  {isDemoMode ? 'Upload disabled in demo mode' : 'Drop files to upload'}
+                </p>
                 <p className="text-muted-foreground mt-1">
-                  {selectedProjectId
+                  {isDemoMode
+                    ? 'Sign up to upload your own documents'
+                    : selectedProjectId
                     ? 'Release to upload documents to this project'
                     : 'Select a project first to upload documents'}
                 </p>
@@ -476,12 +502,40 @@ const DocumentsPage: React.FC = () => {
 
           {/* Upload Zone */}
           {selectedProjectId ? (
-            <DocumentUploadZone
-              onFilesAccepted={handleFilesAccepted}
-              onFilesRejected={handleFilesRejected}
-              disabled={isUploading}
-              compact={documents.length > 0}
-            />
+            isDemoMode ? (
+              <Card className="border-dashed border-yellow-400 bg-yellow-50 dark:bg-yellow-900/10">
+                <CardContent className="py-6">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className="p-3 rounded-full bg-yellow-100 dark:bg-yellow-900/30">
+                        <Upload className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-lg text-yellow-900 dark:text-yellow-100">
+                          File uploads are disabled in demo mode
+                        </p>
+                        <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                          Sign up to upload and process your own documents
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      onClick={() => window.location.href = '/auth/register'}
+                      className="bg-yellow-600 hover:bg-yellow-700 text-white"
+                    >
+                      Sign Up to Upload
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <DocumentUploadZone
+                onFilesAccepted={handleFilesAccepted}
+                onFilesRejected={handleFilesRejected}
+                disabled={isUploading}
+                compact={documents.length > 0}
+              />
+            )
           ) : (
             <Card className="border-dashed border-primary/50 bg-primary/5">
               <CardContent className="py-6">
