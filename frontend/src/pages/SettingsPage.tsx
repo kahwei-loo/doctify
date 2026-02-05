@@ -17,6 +17,7 @@ import {
 import toast from 'react-hot-toast';
 import { useAppSelector } from '@/store';
 import { selectUser } from '@/store/selectors/authSelectors';
+import { useDemoMode } from '@/features/demo/hooks/useDemoMode';
 import {
   useUpdateProfileMutation,
   useChangePasswordMutation,
@@ -40,6 +41,7 @@ import { RevokeApiKeyDialog } from '@/features/settings';
 
 const SettingsPage: React.FC = () => {
   const user = useAppSelector(selectUser);
+  const { isDemoMode } = useDemoMode();
 
   // Profile state
   const [fullName, setFullName] = useState(user?.full_name || '');
@@ -160,6 +162,25 @@ const SettingsPage: React.FC = () => {
         </p>
       </div>
 
+      {/* Demo Mode Banner */}
+      {isDemoMode && (
+        <Card className="border-yellow-400 bg-yellow-50 dark:bg-yellow-900/10">
+          <CardContent className="py-4">
+            <div className="flex items-center gap-3">
+              <Lock className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+              <div className="flex-1">
+                <p className="font-medium text-yellow-900 dark:text-yellow-100">
+                  Settings are read-only in demo mode
+                </p>
+                <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-0.5">
+                  Sign up to modify your account settings
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Profile Settings */}
       <Card>
         <CardHeader>
@@ -192,9 +213,11 @@ const SettingsPage: React.FC = () => {
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               placeholder="Your full name"
+              disabled={isDemoMode}
+              className={cn(isDemoMode && "bg-muted")}
             />
           </div>
-          <Button onClick={handleUpdateProfile} disabled={isUpdatingProfile}>
+          <Button onClick={handleUpdateProfile} disabled={isUpdatingProfile || isDemoMode}>
             {isUpdatingProfile ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
@@ -224,6 +247,8 @@ const SettingsPage: React.FC = () => {
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 placeholder="Enter current password"
+                disabled={isDemoMode}
+                className={cn(isDemoMode && "bg-muted")}
               />
               <button
                 type="button"
@@ -247,6 +272,8 @@ const SettingsPage: React.FC = () => {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="Enter new password"
+                disabled={isDemoMode}
+                className={cn(isDemoMode && "bg-muted")}
               />
               <button
                 type="button"
@@ -269,9 +296,11 @@ const SettingsPage: React.FC = () => {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Confirm new password"
+              disabled={isDemoMode}
+              className={cn(isDemoMode && "bg-muted")}
             />
           </div>
-          <Button onClick={handleChangePassword} disabled={isChangingPassword}>
+          <Button onClick={handleChangePassword} disabled={isChangingPassword || isDemoMode}>
             {isChangingPassword ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
@@ -297,9 +326,10 @@ const SettingsPage: React.FC = () => {
               value={newKeyName}
               onChange={(e) => setNewKeyName(e.target.value)}
               placeholder="API key name"
-              className="flex-1"
+              className={cn("flex-1", isDemoMode && "bg-muted")}
+              disabled={isDemoMode}
             />
-            <Button onClick={handleCreateApiKey} disabled={isCreatingKey}>
+            <Button onClick={handleCreateApiKey} disabled={isCreatingKey || isDemoMode}>
               {isCreatingKey ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
@@ -340,6 +370,7 @@ const SettingsPage: React.FC = () => {
                       size="sm"
                       className="text-destructive"
                       onClick={() => handleRevokeApiKey(key.api_key_id, key.name)}
+                      disabled={isDemoMode}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -371,6 +402,7 @@ const SettingsPage: React.FC = () => {
             <Switch
               checked={emailNotifications}
               onCheckedChange={setEmailNotifications}
+              disabled={isDemoMode}
             />
           </div>
           <div className="flex items-center justify-between">
@@ -383,6 +415,7 @@ const SettingsPage: React.FC = () => {
             <Switch
               checked={documentProcessed}
               onCheckedChange={setDocumentProcessed}
+              disabled={isDemoMode}
             />
           </div>
           <div className="flex items-center justify-between">
@@ -395,6 +428,7 @@ const SettingsPage: React.FC = () => {
             <Switch
               checked={weeklyDigest}
               onCheckedChange={setWeeklyDigest}
+              disabled={isDemoMode}
             />
           </div>
         </CardContent>

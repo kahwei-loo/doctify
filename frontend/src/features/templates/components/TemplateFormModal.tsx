@@ -238,16 +238,16 @@ export const TemplateFormModal: React.FC<TemplateFormModalProps> = ({
             <div className="grid gap-2">
               <Label htmlFor="document_type">Document Type</Label>
               <Select
-                value={formData.document_type || ''}
+                value={formData.document_type || 'none'}
                 onValueChange={(value) =>
-                  setFormData((prev) => ({ ...prev, document_type: value }))
+                  setFormData((prev) => ({ ...prev, document_type: value === 'none' ? '' : value as TemplateFormData['document_type'] }))
                 }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select document type..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="none">None</SelectItem>
                   {VALID_DOCUMENT_TYPES.map((type) => (
                     <SelectItem key={type} value={type}>
                       {type.charAt(0).toUpperCase() + type.slice(1)}

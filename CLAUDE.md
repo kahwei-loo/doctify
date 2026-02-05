@@ -511,6 +511,69 @@ document = await document_repo.get_by_id(doc_id)
 - Database queries: PostgreSQL slow query log (pg_stat_statements)
 - Redis monitoring: `docker-compose exec redis redis-cli monitor`
 
+## Git Workflow
+
+**MANDATORY**: All code changes MUST follow this workflow. No exceptions.
+
+### Branch Strategy
+
+- **Never commit directly to `main`** — all work happens on feature branches
+- **Check branch before any code changes**: `git status && git branch`
+- **Create feature branch before writing code**, not after
+
+### Branch Naming Convention
+
+```
+feature/   — new functionality (feature/demo-mode-ux-fixes)
+fix/       — bug fixes (fix/chat-message-sync)
+chore/     — maintenance, config, dependencies (chore/update-deps)
+refactor/  — code restructuring (refactor/api-client)
+docs/      — documentation only (docs/deployment-guide)
+```
+
+### Development Flow
+
+```
+1. git status && git branch              ← verify current state
+2. git checkout -b feature/xxx           ← create branch BEFORE any changes
+3. (write code, make changes)
+4. npm run type-check (frontend)         ← quality gate before commit
+5. git diff                              ← review all changes
+6. git add <specific-files>              ← never use git add . or git add -A
+7. git commit -m "type: description"     ← conventional commit message
+8. (repeat 3-7 for incremental commits)
+9. git push -u origin feature/xxx
+10. open PR → code review → merge
+```
+
+### Commit Message Format (Conventional Commits)
+
+```
+type: short description of the change
+
+- detail 1
+- detail 2
+```
+
+Types: `feat`, `fix`, `chore`, `refactor`, `docs`, `test`, `perf`, `style`
+
+### Quality Gates (Run Before Committing)
+
+- **Frontend**: `cd frontend && npx tsc --noEmit --skipLibCheck`
+- **Backend**: `cd backend && ruff check app/` (when applicable)
+
+### Recovery: Already Changed Files on Main
+
+If changes were made on `main` by mistake (unstaged/uncommitted):
+
+```
+git checkout -b feature/xxx    ← moves uncommitted changes to new branch
+```
+
+### Tools
+
+Use `sc:git` or `/commit` skills for git operations — they enforce branch checks and commit conventions automatically.
+
 ## Troubleshooting
 
 ### Common Issues

@@ -6,6 +6,7 @@
 
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { RootState } from '../index';
+import { createDemoApiWrapper } from './demoApiWrapper';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
@@ -80,10 +81,14 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
  * - keepUnusedDataFor: Cache data for 5 minutes after component unmounts
  * - refetchOnMountOrArgChange: Only refetch if data is stale (30 seconds)
  * - refetchOnReconnect: Automatically refetch when reconnecting
+ *
+ * Demo mode integration:
+ * - Wraps baseQuery with demo API interceptor
+ * - Returns mock data when demo mode is active
  */
 export const api = createApi({
   reducerPath: 'api',
-  baseQuery: baseQueryWithReauth,
+  baseQuery: createDemoApiWrapper(baseQueryWithReauth),
   tagTypes: ['Documents', 'Projects', 'User', 'ApiKeys', 'Dashboard', 'Settings', 'Templates', 'EditHistory', 'Datasets', 'Conversations', 'Queries', 'RAGHistory', 'RAGStats', 'ChatConversations', 'ChatMessages', 'Assistants', 'AssistantStats', 'AssistantConversations', 'ConversationMessages', 'PublicMessages'],
   // Keep unused data in cache for 5 minutes (300 seconds)
   keepUnusedDataFor: 300,

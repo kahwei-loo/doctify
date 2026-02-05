@@ -549,6 +549,26 @@ const UnsupportedPreview: React.FC<{
 };
 
 /**
+ * Demo Preview Placeholder
+ */
+const DemoPreviewPlaceholder: React.FC<{
+  filename: string;
+  mimeType: string;
+}> = ({ filename, mimeType }) => {
+  return (
+    <div className="flex flex-col items-center justify-center h-full p-8 text-center bg-muted/20">
+      <FileText className="h-16 w-16 text-muted-foreground/40 mb-4" />
+      <p className="text-lg font-medium">Document Preview</p>
+      <p className="text-sm text-muted-foreground mt-2">{filename}</p>
+      <p className="text-xs text-muted-foreground mt-1">Format: {mimeType}</p>
+      <div className="mt-4 px-4 py-2 rounded-md bg-muted text-xs text-muted-foreground">
+        Preview not available in demo mode
+      </div>
+    </div>
+  );
+};
+
+/**
  * No Document Placeholder
  */
 const NoDocumentPlaceholder: React.FC = () => {
@@ -571,10 +591,20 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
   onDownload,
   showToolbar = true,
 }) => {
+  const isDemoMode = localStorage.getItem('demo_mode') === 'true';
+
   if (!url) {
     return (
       <div className={cn('h-full', className)}>
         <NoDocumentPlaceholder />
+      </div>
+    );
+  }
+
+  if (isDemoMode) {
+    return (
+      <div className={cn('h-full', className)}>
+        <DemoPreviewPlaceholder filename={filename} mimeType={mimeType} />
       </div>
     );
   }
