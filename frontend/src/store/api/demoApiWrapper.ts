@@ -3,7 +3,7 @@
  * Intercepts API calls when demo mode is active and returns mock data
  */
 
-import type { BaseQueryFn } from '@reduxjs/toolkit/query';
+import type { BaseQueryFn, BaseQueryApi } from '@reduxjs/toolkit/query';
 import type { RootState } from '../index';
 import { mockApiHandler } from '../../features/demo/utils/mockApiHandler';
 
@@ -12,8 +12,8 @@ import { mockApiHandler } from '../../features/demo/utils/mockApiHandler';
  */
 export const createDemoApiWrapper = <T extends BaseQueryFn>(
   baseQuery: T
-): BaseQueryFn => {
-  return async (args, api, extraOptions) => {
+): T => {
+  return (async (args: any, api: BaseQueryApi, extraOptions: any) => {
     // Check if demo mode is active
     const state = api.getState() as RootState;
     const isDemoMode = state.demo?.isActive || false;
@@ -58,5 +58,5 @@ export const createDemoApiWrapper = <T extends BaseQueryFn>(
 
     // Not in demo mode, use real base query
     return baseQuery(args, api, extraOptions);
-  };
+  }) as unknown as T;
 };

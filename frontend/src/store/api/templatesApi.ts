@@ -63,6 +63,7 @@ export interface TemplateListItem {
   visibility: 'private' | 'public' | 'organization';
   category: string | null;
   tags: string[] | null;
+  version: number;
   usage_count: number;
   average_rating: number;
   created_at: string;
