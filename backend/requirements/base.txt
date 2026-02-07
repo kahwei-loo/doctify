@@ -33,6 +33,7 @@ langchain==0.1.0  # LangChain framework for RAG orchestration
 langchain-openai==0.0.3  # OpenAI integration for LangChain
 langchain-community==0.0.13  # Community integrations
 tiktoken==0.5.2  # Token counting for embeddings
+cohere>=5.0  # Reranker API for improved retrieval relevance (P1.1)
 
 # Authentication and Security
 python-jose[cryptography]==3.3.0  # JWT token generation

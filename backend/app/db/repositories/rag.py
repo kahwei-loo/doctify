@@ -13,7 +13,7 @@ from sqlalchemy import select, text, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.repositories.base import BaseRepository
-from app.db.models.rag import DocumentEmbedding, RAGQuery
+from app.db.models.rag import DocumentEmbedding, RAGQuery, RAGConversation
 from app.core.exceptions import DatabaseError
 
 logger = logging.getLogger(__name__)
@@ -121,6 +121,154 @@ class DocumentEmbeddingRepository(BaseRepository[DocumentEmbedding]):
 
         except Exception as e:
             raise DatabaseError(f"Failed to search embeddings: {str(e)}")
+
+    async def search_by_keyword(
+        self,
+        query_text: str,
+        limit: int = 20,
+        document_ids: Optional[List[uuid.UUID]] = None,
+        data_source_ids: Optional[List[uuid.UUID]] = None,
+    ) -> List[Tuple[DocumentEmbedding, float]]:
+        """
+        Full-text keyword search using PostgreSQL tsvector.
+
+        Returns list of (embedding, text_rank_score) tuples.
+        """
+        try:
+            query_parts = ["""
+                SELECT *,
+                       ts_rank(search_vector, plainto_tsquery('english', :query_text)) AS text_score
+                FROM document_embeddings
+                WHERE search_vector @@ plainto_tsquery('english', :query_text)
+            """]
+            params: Dict[str, Any] = {"query_text": query_text, "limit": limit}
+
+            if document_ids:
+                query_parts.append("AND document_id = ANY(:document_ids)")
+                params["document_ids"] = [str(doc_id) for doc_id in document_ids]
+
+            if data_source_ids:
+                query_parts.append("AND data_source_id = ANY(:data_source_ids)")
+                params["data_source_ids"] = [str(ds_id) for ds_id in data_source_ids]
+
+            query_parts.append("""
+                ORDER BY ts_rank(search_vector, plainto_tsquery('english', :query_text)) DESC
+                LIMIT :limit
+            """)
+
+            full_query = " ".join(query_parts)
+            result = await self.session.execute(text(full_query), params)
+            rows = result.fetchall()
+
+            embeddings_with_scores = []
+            for row in rows:
+                embedding = await self.get_by_id(row.id)
+                if embedding:
+                    embeddings_with_scores.append((embedding, float(row.text_score)))
+
+            return embeddings_with_scores
+
+        except Exception as e:
+            raise DatabaseError(f"Failed to keyword search embeddings: {str(e)}")
+
+    async def hybrid_search(
+        self,
+        query_embedding: List[float],
+        query_text: str,
+        limit: int = 5,
+        similarity_threshold: float = 0.5,
+        document_ids: Optional[List[uuid.UUID]] = None,
+        data_source_ids: Optional[List[uuid.UUID]] = None,
+        vector_weight: float = 0.5,
+        rrf_k: int = 60,
+    ) -> List[Tuple[DocumentEmbedding, float, float, float]]:
+        """
+        Hybrid search combining vector similarity and BM25 text search.
+
+        Uses Reciprocal Rank Fusion (RRF) to merge results.
+
+        Returns list of (embedding, rrf_score, vector_score, text_score) tuples.
+        """
+        try:
+            embedding_str = "[" + ",".join(str(x) for x in query_embedding) + "]"
+
+            # Build filter clauses
+            filter_clause = ""
+            params: Dict[str, Any] = {
+                "query_embedding": embedding_str,
+                "query_text": query_text,
+                "vector_threshold": similarity_threshold,
+                "vector_limit": limit * 4,  # Fetch more for RRF merging
+                "text_limit": limit * 4,
+                "limit": limit,
+                "rrf_k": rrf_k,
+            }
+
+            if document_ids:
+                filter_clause += " AND document_id = ANY(:document_ids)"
+                params["document_ids"] = [str(doc_id) for doc_id in document_ids]
+
+            if data_source_ids:
+                filter_clause += " AND data_source_id = ANY(:data_source_ids)"
+                params["data_source_ids"] = [str(ds_id) for ds_id in data_source_ids]
+
+            full_query = f"""
+            WITH vector_results AS (
+                SELECT id, chunk_text, document_id, data_source_id, chunk_index,
+                       1 - (embedding <=> CAST(:query_embedding AS vector)) AS vector_score,
+                       ROW_NUMBER() OVER (ORDER BY embedding <=> CAST(:query_embedding AS vector)) AS vector_rank
+                FROM document_embeddings
+                WHERE 1 - (embedding <=> CAST(:query_embedding AS vector)) >= :vector_threshold
+                {filter_clause}
+                ORDER BY embedding <=> CAST(:query_embedding AS vector)
+                LIMIT :vector_limit
+            ),
+            text_results AS (
+                SELECT id, chunk_text, document_id, data_source_id, chunk_index,
+                       ts_rank(search_vector, plainto_tsquery('english', :query_text)) AS text_score,
+                       ROW_NUMBER() OVER (ORDER BY ts_rank(search_vector, plainto_tsquery('english', :query_text)) DESC) AS text_rank
+                FROM document_embeddings
+                WHERE search_vector @@ plainto_tsquery('english', :query_text)
+                {filter_clause}
+                LIMIT :text_limit
+            ),
+            combined AS (
+                SELECT COALESCE(v.id, t.id) AS id,
+                       COALESCE(v.vector_score, 0) AS vector_score,
+                       COALESCE(t.text_score, 0) AS text_score,
+                       COALESCE(1.0 / (:rrf_k + v.vector_rank), 0) + COALESCE(1.0 / (:rrf_k + t.text_rank), 0) AS rrf_score
+                FROM vector_results v
+                FULL OUTER JOIN text_results t ON v.id = t.id
+            )
+            SELECT * FROM combined ORDER BY rrf_score DESC LIMIT :limit;
+            """
+
+            result = await self.session.execute(text(full_query), params)
+            rows = result.fetchall()
+
+            logger.info(
+                "Hybrid search completed",
+                extra={
+                    "results_count": len(rows),
+                    "top_rrf_score": rows[0].rrf_score if rows else 0.0,
+                }
+            )
+
+            results = []
+            for row in rows:
+                embedding = await self.get_by_id(row.id)
+                if embedding:
+                    results.append((
+                        embedding,
+                        float(row.rrf_score),
+                        float(row.vector_score),
+                        float(row.text_score),
+                    ))
+
+            return results
+
+        except Exception as e:
+            raise DatabaseError(f"Failed to hybrid search embeddings: {str(e)}")
 
     async def delete_by_document_id(self, document_id: uuid.UUID | str) -> int:
         """Delete all embeddings for a document."""
@@ -317,3 +465,43 @@ class RAGQueryRepository(BaseRepository[RAGQuery]):
 
         except Exception as e:
             raise DatabaseError(f"Failed to get average rating: {str(e)}")
+
+
+class RAGConversationRepository(BaseRepository[RAGConversation]):
+    """Repository for RAG conversation sessions (P1.3)."""
+
+    def __init__(self, session: AsyncSession):
+        super().__init__(session, RAGConversation)
+
+    async def get_by_user_id(
+        self,
+        user_id: uuid.UUID | str,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> List[RAGConversation]:
+        """Get conversations for a user ordered by most recent."""
+        try:
+            if isinstance(user_id, str):
+                user_id = uuid.UUID(user_id)
+
+            return await self.list(
+                filters={"user_id": user_id},
+                skip=offset,
+                limit=limit,
+                sort_by="updated_at",
+                sort_order="desc",
+            )
+        except Exception as e:
+            raise DatabaseError(f"Failed to get conversations: {str(e)}")
+
+    async def get_with_queries(
+        self,
+        conversation_id: uuid.UUID | str,
+    ) -> Optional[RAGConversation]:
+        """Get conversation with its queries loaded."""
+        try:
+            if isinstance(conversation_id, str):
+                conversation_id = uuid.UUID(conversation_id)
+            return await self.get_by_id(conversation_id)
+        except Exception as e:
+            raise DatabaseError(f"Failed to get conversation: {str(e)}")

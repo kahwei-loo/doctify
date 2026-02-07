@@ -32,7 +32,7 @@ class RAGQueryRequest(BaseModel):
         description="Number of document chunks to retrieve",
     )
     similarity_threshold: Optional[float] = Field(
-        0.5,  # Changed from 0.7 - better default for text-embedding-3-small
+        0.5,
         ge=0.0,
         le=1.0,
         description="Minimum similarity score (0.5 recommended for text-embedding-3-small)",
@@ -41,9 +41,25 @@ class RAGQueryRequest(BaseModel):
         None,
         description="Optional list of document IDs to search within",
     )
+    data_source_ids: Optional[List[uuid.UUID]] = Field(
+        None,
+        description="Optional list of data source IDs to search within (for KB queries)",
+    )
     model: Optional[str] = Field(
         None,
         description="Optional AI model override (e.g., 'gpt-4', 'gpt-3.5-turbo')",
+    )
+    search_mode: Optional[str] = Field(
+        "hybrid",
+        description="Search mode: 'semantic' (vector), 'keyword' (BM25), 'hybrid' (combined, default)",
+    )
+    use_reranking: Optional[bool] = Field(
+        False,
+        description="Whether to apply reranking for improved relevance",
+    )
+    conversation_id: Optional[str] = Field(
+        None,
+        description="Optional conversation ID for multi-turn RAG",
     )
 
     model_config = ConfigDict(
@@ -52,6 +68,7 @@ class RAGQueryRequest(BaseModel):
                 "question": "What are the key financial metrics in the quarterly report?",
                 "top_k": 5,
                 "similarity_threshold": 0.5,
+                "search_mode": "hybrid",
             }
         }
     )
@@ -114,6 +131,10 @@ class RAGQueryResponse(BaseModel):
     confidence_score: float = Field(..., description="Answer confidence (0-1)")
     context_used: int = Field(..., description="Number of chunks used")
     created_at: datetime = Field(..., description="Query timestamp")
+    search_mode: Optional[str] = Field(None, description="Search mode used")
+    cached: Optional[bool] = Field(None, description="Whether response was served from cache")
+    groundedness_score: Optional[float] = Field(None, description="Groundedness score (0-1)")
+    unsupported_claims: Optional[List[str]] = Field(None, description="Claims not supported by context")
 
     model_config = ConfigDict(
         from_attributes=True,
@@ -214,6 +235,72 @@ class RAGStatsResponse(BaseModel):
             }
         }
     )
+
+
+# ===========================
+# Conversational RAG (P1.3)
+# ===========================
+
+class RAGConversationCreate(BaseModel):
+    """Request to create a RAG conversation."""
+    title: Optional[str] = Field(None, max_length=200, description="Optional title")
+
+class RAGConversationResponse(BaseModel):
+    """Response for a RAG conversation."""
+    id: uuid.UUID
+    title: str
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+class RAGConversationListResponse(BaseModel):
+    """Paginated list of conversations."""
+    items: List[RAGConversationResponse]
+    total: int
+
+class RAGConversationDetailResponse(RAGConversationResponse):
+    """Conversation with its queries."""
+    queries: List[RAGHistoryItem] = []
+
+
+# ===========================
+# Evaluation (P3.2)
+# ===========================
+
+class RAGEvaluationResponse(BaseModel):
+    """Response model for a single evaluation run."""
+
+    id: uuid.UUID = Field(..., description="Evaluation record ID")
+    faithfulness: float = Field(..., description="Faithfulness score (0-1)")
+    answer_relevancy: float = Field(..., description="Answer relevancy score (0-1)")
+    context_precision: float = Field(..., description="Context precision score (0-1)")
+    context_recall: float = Field(..., description="Context recall score (0-1)")
+    sample_size: int = Field(..., description="Number of queries evaluated")
+    queries_with_feedback: int = Field(..., description="Queries with user feedback")
+    average_groundedness: Optional[float] = Field(None, description="Average groundedness score")
+    created_at: datetime = Field(..., description="Evaluation timestamp")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class RAGEvaluationListResponse(BaseModel):
+    """Response model for evaluation history."""
+
+    items: List[RAGEvaluationResponse] = Field(..., description="Evaluation results")
+    total: int = Field(..., description="Total evaluations")
+
+
+class RAGEvaluationTriggerResponse(BaseModel):
+    """Response when triggering an evaluation."""
+
+    task_id: Optional[str] = Field(None, description="Celery task ID (if async)")
+    faithfulness: Optional[float] = None
+    answer_relevancy: Optional[float] = None
+    context_precision: Optional[float] = None
+    context_recall: Optional[float] = None
+    sample_size: Optional[int] = None
+    message: str = Field(..., description="Status message")
 
 
 # ===========================

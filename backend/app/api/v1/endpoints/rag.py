@@ -8,6 +8,7 @@ Phase 11 - RAG Implementation
 import uuid
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 
@@ -15,7 +16,7 @@ from app.api.v1.deps import get_current_user, get_db
 from app.db.models.user import User
 from app.db.models.rag import RAGQuery, DocumentEmbedding
 from app.services.rag.generation_service import GenerationService
-from app.db.repositories.rag import RAGQueryRepository
+from app.db.repositories.rag import RAGQueryRepository, RAGConversationRepository
 from app.schemas.rag import (
     RAGQueryRequest,
     RAGQueryResponse,
@@ -24,6 +25,13 @@ from app.schemas.rag import (
     RAGFeedbackRequest,
     RAGStatsResponse,
     RAGSource,
+    RAGConversationCreate,
+    RAGConversationResponse,
+    RAGConversationListResponse,
+    RAGConversationDetailResponse,
+    RAGEvaluationResponse,
+    RAGEvaluationListResponse,
+    RAGEvaluationTriggerResponse,
 )
 from app.core.exceptions import ValidationError, DatabaseError
 
@@ -80,10 +88,13 @@ async def query_documents(
         rag_response = await generation_service.generate_answer(
             question=request.question,
             top_k=request.top_k or 5,
-            similarity_threshold=request.similarity_threshold or 0.5,  # Changed from 0.7
+            similarity_threshold=request.similarity_threshold or 0.5,
             document_ids=request.document_ids,
+            data_source_ids=request.data_source_ids,
             user_id=current_user.id,
             model=request.model,
+            search_mode=request.search_mode or "hybrid",
+            use_reranking=request.use_reranking or False,
         )
 
         # Save to query history
@@ -95,7 +106,11 @@ async def query_documents(
             "model_used": rag_response.model_used,
             "tokens_used": rag_response.tokens_used,
             "confidence_score": rag_response.confidence_score,
+            "groundedness_score": rag_response.groundedness_score,
+            "unsupported_claims": rag_response.unsupported_claims,
         }
+        if request.conversation_id:
+            query_data["conversation_id"] = request.conversation_id
         query_record = await rag_query_repo.create(query_data)
         await db.commit()
 
@@ -108,7 +123,7 @@ async def query_documents(
                 document_title=source.get("document_title"),
                 chunk_index=source["chunk_index"],
                 similarity_score=source["similarity_score"],
-                metadata=source.get("metadata"),
+                metadata=source.get("chunk_metadata") or source.get("metadata"),
             )
             for source in rag_response.sources
         ]
@@ -123,6 +138,10 @@ async def query_documents(
             confidence_score=rag_response.confidence_score,
             context_used=rag_response.context_used,
             created_at=query_record.created_at,
+            search_mode=request.search_mode or "hybrid",
+            cached=rag_response.cached,
+            groundedness_score=rag_response.groundedness_score,
+            unsupported_claims=rag_response.unsupported_claims,
         )
 
     except ValidationError as e:
@@ -140,6 +159,44 @@ async def query_documents(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Unexpected error: {str(e)}",
         )
+
+
+@router.post(
+    "/query/stream",
+    summary="Stream a RAG answer (SSE)",
+    description="Query documents using RAG with Server-Sent Events streaming response.",
+)
+async def query_documents_stream(
+    request: RAGQueryRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> StreamingResponse:
+    """Stream RAG answer as Server-Sent Events."""
+    generation_service = GenerationService(db)
+
+    async def event_generator():
+        async for event in generation_service.generate_answer_stream(
+            question=request.question,
+            top_k=request.top_k or 5,
+            similarity_threshold=request.similarity_threshold or 0.5,
+            document_ids=request.document_ids,
+            data_source_ids=request.data_source_ids,
+            user_id=current_user.id,
+            model=request.model,
+            search_mode=request.search_mode or "hybrid",
+            use_reranking=request.use_reranking or False,
+        ):
+            yield event
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 @router.get(
@@ -433,4 +490,262 @@ async def delete_query(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to delete query: {str(e)}",
+        )
+
+
+# ===========================
+# Conversation Endpoints (P1.3)
+# ===========================
+
+
+@router.post(
+    "/conversations",
+    response_model=RAGConversationResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Create a RAG conversation",
+)
+async def create_conversation(
+    request: RAGConversationCreate,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> RAGConversationResponse:
+    """Create a new RAG conversation session."""
+    try:
+        conv_repo = RAGConversationRepository(db)
+        title = request.title or "New Conversation"
+        conv = await conv_repo.create({"user_id": current_user.id, "title": title})
+        await db.commit()
+        return RAGConversationResponse.model_validate(conv)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create conversation: {str(e)}",
+        )
+
+
+@router.get(
+    "/conversations",
+    response_model=RAGConversationListResponse,
+    summary="List RAG conversations",
+)
+async def list_conversations(
+    limit: int = 50,
+    offset: int = 0,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> RAGConversationListResponse:
+    """List conversations for the current user."""
+    try:
+        conv_repo = RAGConversationRepository(db)
+        convs = await conv_repo.get_by_user_id(current_user.id, limit=limit, offset=offset)
+        total = await conv_repo.count({"user_id": current_user.id})
+        return RAGConversationListResponse(
+            items=[RAGConversationResponse.model_validate(c) for c in convs],
+            total=total,
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to list conversations: {str(e)}",
+        )
+
+
+@router.get(
+    "/conversations/{conversation_id}",
+    response_model=RAGConversationDetailResponse,
+    summary="Get conversation with queries",
+)
+async def get_conversation(
+    conversation_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> RAGConversationDetailResponse:
+    """Get a conversation with its query history."""
+    try:
+        conv_repo = RAGConversationRepository(db)
+        conv = await conv_repo.get_by_id(conversation_id)
+        if not conv or conv.user_id != current_user.id:
+            raise HTTPException(status_code=404, detail="Conversation not found")
+
+        rag_query_repo = RAGQueryRepository(db)
+        queries_stmt = select(RAGQuery).where(
+            RAGQuery.conversation_id == conversation_id
+        ).order_by(RAGQuery.created_at)
+        result = await db.execute(queries_stmt)
+        queries = list(result.scalars().all())
+
+        query_items = []
+        for q in queries:
+            sources = None
+            if q.sources:
+                sources = [
+                    RAGSource(
+                        chunk_text=s["chunk_text"],
+                        document_id=s["document_id"],
+                        document_name=s["document_name"],
+                        document_title=s.get("document_title"),
+                        chunk_index=s["chunk_index"],
+                        similarity_score=s["similarity_score"],
+                        metadata=s.get("metadata"),
+                    )
+                    for s in q.sources
+                ]
+            query_items.append(
+                RAGHistoryItem(
+                    id=q.id,
+                    question=q.question,
+                    answer=q.answer,
+                    sources=sources,
+                    model_used=q.model_used,
+                    tokens_used=q.tokens_used,
+                    confidence_score=q.confidence_score,
+                    feedback_rating=q.feedback_rating,
+                    created_at=q.created_at,
+                )
+            )
+
+        return RAGConversationDetailResponse(
+            id=conv.id,
+            title=conv.title,
+            created_at=conv.created_at,
+            updated_at=conv.updated_at,
+            queries=query_items,
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get conversation: {str(e)}",
+        )
+
+
+@router.delete(
+    "/conversations/{conversation_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete a conversation",
+)
+async def delete_conversation(
+    conversation_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> None:
+    """Delete a conversation and its queries."""
+    try:
+        conv_repo = RAGConversationRepository(db)
+        conv = await conv_repo.get_by_id(conversation_id)
+        if not conv or conv.user_id != current_user.id:
+            raise HTTPException(status_code=404, detail="Conversation not found")
+        await conv_repo.delete(conversation_id)
+        await db.commit()
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete conversation: {str(e)}",
+        )
+
+
+# ===========================
+# Evaluation Endpoints (P3.2)
+# ===========================
+
+
+@router.get(
+    "/evaluations",
+    response_model=RAGEvaluationListResponse,
+    summary="Get RAG evaluation history",
+    description="Retrieve historical RAG quality evaluations for the current user.",
+)
+async def get_evaluations(
+    limit: int = 20,
+    offset: int = 0,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> RAGEvaluationListResponse:
+    """Get evaluation history with pagination."""
+    try:
+        from app.db.models.rag import RAGEvaluation
+
+        count_stmt = select(func.count()).select_from(RAGEvaluation).where(
+            RAGEvaluation.user_id == current_user.id
+        )
+        total_result = await db.execute(count_stmt)
+        total = total_result.scalar() or 0
+
+        stmt = (
+            select(RAGEvaluation)
+            .where(RAGEvaluation.user_id == current_user.id)
+            .order_by(RAGEvaluation.created_at.desc())
+            .limit(limit)
+            .offset(offset)
+        )
+        result = await db.execute(stmt)
+        evaluations = list(result.scalars().all())
+
+        items = [
+            RAGEvaluationResponse(
+                id=e.id,
+                faithfulness=e.faithfulness,
+                answer_relevancy=e.answer_relevancy,
+                context_precision=e.context_precision,
+                context_recall=e.context_recall,
+                sample_size=e.sample_size,
+                queries_with_feedback=e.queries_with_feedback,
+                average_groundedness=e.average_groundedness,
+                created_at=e.created_at,
+            )
+            for e in evaluations
+        ]
+
+        return RAGEvaluationListResponse(items=items, total=total)
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to retrieve evaluations: {str(e)}",
+        )
+
+
+@router.post(
+    "/evaluations/run",
+    response_model=RAGEvaluationTriggerResponse,
+    summary="Trigger a RAG evaluation",
+    description="Run a quality evaluation on recent RAG queries. Evaluates faithfulness, relevancy, precision, and recall.",
+)
+async def trigger_evaluation(
+    sample_size: int = 20,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> RAGEvaluationTriggerResponse:
+    """Trigger an evaluation run for the current user."""
+    try:
+        from app.services.rag.evaluation_service import EvaluationService
+
+        evaluation_service = EvaluationService()
+        result = await evaluation_service.run_evaluation(
+            session=db,
+            user_id=current_user.id,
+            sample_size=sample_size,
+        )
+
+        if result.sample_size == 0:
+            return RAGEvaluationTriggerResponse(
+                message="No queries available for evaluation. Ask some questions first.",
+            )
+
+        return RAGEvaluationTriggerResponse(
+            faithfulness=result.faithfulness,
+            answer_relevancy=result.answer_relevancy,
+            context_precision=result.context_precision,
+            context_recall=result.context_recall,
+            sample_size=result.sample_size,
+            message=f"Evaluation completed on {result.sample_size} queries.",
+        )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Evaluation failed: {str(e)}",
         )

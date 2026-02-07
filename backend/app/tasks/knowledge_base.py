@@ -133,6 +133,7 @@ async def _generate_embeddings_async(data_source_id: str, force_regenerate: bool
         chunk_size = kb.config.get("chunk_size", 1024)
         chunk_overlap = kb.config.get("chunk_overlap", 128)
         embedding_model = kb.config.get("embedding_model", "text-embedding-3-small")
+        chunk_strategy = kb.config.get("chunk_strategy", "semantic")
 
         # Delete existing embeddings if force regenerate
         if force_regenerate:
@@ -161,11 +162,12 @@ async def _generate_embeddings_async(data_source_id: str, force_regenerate: bool
         # Initialize embedding service for chunking and embedding
         embedding_service = EmbeddingService(db)
 
-        # Chunk text using the embedding service
+        # Chunk text using the embedding service with configured strategy
         chunks = embedding_service.chunk_text(
             text_content,
             chunk_size=chunk_size,
-            chunk_overlap=chunk_overlap
+            chunk_overlap=chunk_overlap,
+            strategy=chunk_strategy,
         )
 
         if not chunks:
@@ -207,6 +209,7 @@ async def _generate_embeddings_async(data_source_id: str, force_regenerate: bool
                             "model": embedding_model,
                             "chunk_size": chunk_size,
                             "chunk_overlap": chunk_overlap,
+                            "chunk_strategy": chunk_strategy,
                             "token_count": embedding_service.count_tokens(chunk_text),
                         }
                     )

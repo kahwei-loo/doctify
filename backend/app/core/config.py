@@ -272,6 +272,11 @@ class Settings(BaseSettings):
         description="OpenAI API key"
     )
 
+    COHERE_API_KEY: Optional[str] = Field(
+        default=None,
+        description="Cohere API key for reranking (P1.1)"
+    )
+
     AI_MODEL: Optional[str] = Field(
         default=None,
         description="AI model identifier (e.g., gpt-4, claude-3-opus)"
