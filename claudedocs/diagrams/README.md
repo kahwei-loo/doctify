@@ -18,6 +18,7 @@ This directory contains all architecture diagrams for the Doctify project, writt
 | 08 | [08-ai-assistant-chat-sequence-diagram.md](./08-ai-assistant-chat-sequence-diagram.md) | Sequence | AI Assistant chat sequence diagram | 🟡 Medium |
 | 09 | [09-state-diagrams.md](./09-state-diagrams.md) | State | State diagrams (Document, Conversation, DataSource) | 🟢 Low |
 | 10 | [10-deployment-diagram.md](./10-deployment-diagram.md) | Deployment | Docker deployment architecture diagram | 🟢 Low |
+| 11 | [11-ai-learning-roadmap.md](./11-ai-learning-roadmap.md) | Learning Path | Comprehensive AI development learning roadmap (6 stages, foundations to expert) | 🟡 Medium |
 
 ## Core Architecture Highlights
 
@@ -75,14 +76,17 @@ mmdc -i diagram.md -o diagram.png
 | Debugging issues | 06/07/08 Sequence Diagrams |
 | Understanding states | 09 State Diagrams |
 | Operations/Deployment | 10 Deployment Diagram |
+| AI learning path planning | 11 AI Learning Roadmap |
+| Team training & development | 11 AI Learning Roadmap |
 
 ## Changelog
 
 | Date | Version | Changes |
 |------|---------|---------|
 | 2026-01-28 | 1.0 | Initial creation of all 10 diagrams |
+| 2026-02-04 | 1.1 | Added AI Learning Roadmap (11) - comprehensive 6-stage learning path |
 
 ---
 
-*Generated: 2026-01-28*
+*Last Updated: 2026-02-04*
 *Tools: Claude Code + Mermaid*
