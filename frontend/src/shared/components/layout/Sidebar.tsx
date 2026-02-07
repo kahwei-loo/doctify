@@ -10,6 +10,7 @@ import {
   ChevronsRight,
   Database,
   Layout,
+  BarChart3,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -72,6 +73,12 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
       icon: <Layout className="h-5 w-5" />,
       label: 'Templates',
       path: '/templates',
+    },
+    {
+      key: 'insights',
+      icon: <BarChart3 className="h-5 w-5" />,
+      label: 'Insights',
+      path: '/insights',
     },
     {
       key: 'settings',

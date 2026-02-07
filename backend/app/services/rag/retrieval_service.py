@@ -3,10 +3,12 @@ Retrieval Service for RAG
 
 Handles semantic search and context retrieval for question answering.
 Phase 11 - RAG Implementation
+Enhanced: P0.2 Hybrid Search, P1.1 Reranking
 """
 
 import uuid
 import logging
+from enum import Enum
 from typing import List, Dict, Any, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -16,6 +18,13 @@ from app.db.repositories.document import DocumentRepository
 from app.core.exceptions import ValidationError, DatabaseError
 
 logger = logging.getLogger(__name__)
+
+
+class SearchMode(str, Enum):
+    """Search mode for retrieval."""
+    SEMANTIC = "semantic"   # Pure vector similarity (original)
+    KEYWORD = "keyword"     # Pure BM25 text search
+    HYBRID = "hybrid"       # Combined vector + BM25 with RRF
 
 
 class RetrievalService:
@@ -36,37 +45,33 @@ class RetrievalService:
         self,
         question: str,
         top_k: int = 5,
-        similarity_threshold: float = 0.5,  # Changed from 0.7 - better for text-embedding-3-small
+        similarity_threshold: float = 0.5,
         document_ids: Optional[List[uuid.UUID]] = None,
+        data_source_ids: Optional[List[uuid.UUID]] = None,
         user_id: Optional[uuid.UUID] = None,
+        search_mode: str = "hybrid",
+        use_reranking: bool = False,
     ) -> List[Dict[str, Any]]:
         """
         Retrieve most relevant document chunks for a question.
 
-        Workflow:
-        1. Generate embedding for question
-        2. Vector similarity search in embeddings table
-        3. Fetch associated document metadata
-        4. Filter by user_id if provided (RLS)
-        5. Return ranked context with sources
+        Supports multiple search modes:
+        - "semantic": Pure vector similarity search
+        - "keyword": Pure BM25 text search
+        - "hybrid": Combined vector + BM25 with RRF (default)
 
         Args:
             question: User question
             top_k: Number of chunks to retrieve
             similarity_threshold: Minimum similarity score (0-1)
             document_ids: Optional list of document IDs to search within
+            data_source_ids: Optional list of data source IDs to search within
             user_id: Optional user ID for access control filtering
+            search_mode: Search mode ("semantic", "keyword", "hybrid")
+            use_reranking: Whether to apply reranking (P1.1)
 
         Returns:
-            List of context dictionaries with format:
-            {
-                "chunk_text": str,
-                "document_id": str,
-                "document_name": str,
-                "chunk_index": int,
-                "similarity_score": float,
-                "metadata": dict
-            }
+            List of context dictionaries
 
         Raises:
             ValidationError: If question is empty or parameters invalid
@@ -82,64 +87,123 @@ class RetrievalService:
             raise ValidationError("similarity_threshold must be between 0.0 and 1.0")
 
         try:
-            # Generate query embedding
-            query_embedding = await self.embedding_service.generate_embedding(question)
+            search_results: List = []
 
-            # Perform vector search
-            search_results = await self.embedding_repo.search_by_embedding(
-                query_embedding=query_embedding,
-                limit=top_k,
-                similarity_threshold=similarity_threshold,
-                document_ids=document_ids
-            )
+            if search_mode == SearchMode.KEYWORD:
+                # Pure keyword search
+                search_results = await self.embedding_repo.search_by_keyword(
+                    query_text=question,
+                    limit=top_k,
+                    document_ids=document_ids,
+                    data_source_ids=data_source_ids,
+                )
+                # Normalize: (embedding, score) tuples
+                search_results = [(emb, score) for emb, score in search_results]
+
+            elif search_mode == SearchMode.HYBRID:
+                # Hybrid: vector + BM25 with RRF
+                query_embedding = await self.embedding_service.generate_embedding(question)
+                # Fetch more for reranking if enabled
+                fetch_k = top_k * 4 if use_reranking else top_k
+                hybrid_results = await self.embedding_repo.hybrid_search(
+                    query_embedding=query_embedding,
+                    query_text=question,
+                    limit=fetch_k,
+                    similarity_threshold=similarity_threshold,
+                    document_ids=document_ids,
+                    data_source_ids=data_source_ids,
+                )
+                # Use RRF score as the primary score
+                search_results = [(emb, rrf) for emb, rrf, _vs, _ts in hybrid_results]
+
+            else:
+                # Pure vector search (original)
+                query_embedding = await self.embedding_service.generate_embedding(question)
+                fetch_k = top_k * 4 if use_reranking else top_k
+                search_results = await self.embedding_repo.search_by_embedding(
+                    query_embedding=query_embedding,
+                    limit=fetch_k,
+                    similarity_threshold=similarity_threshold,
+                    document_ids=document_ids,
+                )
 
             if not search_results:
                 logger.warning(
-                    "No chunks retrieved - threshold may be too high",
-                    extra={"threshold": similarity_threshold}
+                    "No chunks retrieved",
+                    extra={"threshold": similarity_threshold, "search_mode": search_mode}
                 )
                 return []
 
             # Log result quality
-            similarity_scores = [score for _, score in search_results]
+            scores = [score for _, score in search_results]
             logger.info(
                 "Context retrieval completed",
                 extra={
                     "chunks_found": len(search_results),
-                    "avg_similarity": round(sum(similarity_scores) / len(similarity_scores), 3),
-                    "max_similarity": round(max(similarity_scores), 3),
-                    "min_similarity": round(min(similarity_scores), 3)
+                    "search_mode": search_mode,
+                    "avg_score": round(sum(scores) / len(scores), 4),
+                    "max_score": round(max(scores), 4),
                 }
             )
 
             # Enrich with document metadata and filter by user_id
             context_list = []
-            for embedding, similarity in search_results:
-                # Fetch document
-                document = await self.document_repo.get_by_id(embedding.document_id)
+            for embedding, score in search_results:
+                # Try document_id first, then data_source_id
+                doc_name = "Unknown"
+                doc_title = None
+                doc_id_str = None
 
-                # Skip if document not found or user doesn't have access
-                if not document:
-                    continue
+                if embedding.document_id:
+                    document = await self.document_repo.get_by_id(embedding.document_id)
+                    if not document:
+                        continue
+                    if user_id and document.user_id != user_id:
+                        continue
+                    doc_name = document.original_filename
+                    doc_title = document.title
+                    doc_id_str = str(embedding.document_id)
+                elif embedding.data_source_id:
+                    # For KB data sources, use metadata for naming
+                    meta = embedding.chunk_metadata or {}
+                    doc_name = meta.get("document_name", "Knowledge Base Source")
+                    doc_id_str = str(embedding.data_source_id)
 
-                if user_id and document.user_id != user_id:
-                    continue
-
-                # Build context entry
                 context_entry = {
                     "chunk_text": embedding.chunk_text,
-                    "document_id": str(embedding.document_id),
-                    "document_name": document.original_filename,
-                    "document_title": document.title,
+                    "document_id": doc_id_str or "",
+                    "data_source_id": str(embedding.data_source_id) if embedding.data_source_id else None,
+                    "document_name": doc_name,
+                    "document_title": doc_title,
                     "chunk_index": embedding.chunk_index,
-                    "similarity_score": round(similarity, 3),
-                    "metadata": embedding.chunk_metadata or {}
+                    "similarity_score": round(score, 4),
+                    "metadata": embedding.chunk_metadata or {},
+                    "search_mode": search_mode,
                 }
 
                 context_list.append(context_entry)
 
-            # Sort by similarity score (highest first)
+            # Sort by score (highest first)
             context_list.sort(key=lambda x: x["similarity_score"], reverse=True)
+
+            # Apply reranking if enabled (P1.1 - implemented separately)
+            if use_reranking and len(context_list) > top_k:
+                try:
+                    from app.services.rag.reranker_service import RerankerService
+                    reranker = RerankerService()
+                    context_list = await reranker.rerank(
+                        query=question,
+                        documents=context_list,
+                        top_n=top_k,
+                    )
+                except ImportError:
+                    # Reranker not yet available, just truncate
+                    context_list = context_list[:top_k]
+                except Exception as e:
+                    logger.warning(f"Reranking failed, falling back to original order: {e}")
+                    context_list = context_list[:top_k]
+            else:
+                context_list = context_list[:top_k]
 
             return context_list
 

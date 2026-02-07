@@ -11,12 +11,18 @@ import { api } from './apiSlice';
 // Types
 // ===========================
 
+export type SearchMode = 'semantic' | 'keyword' | 'hybrid';
+
 export interface RAGQueryRequest {
   question: string;
   top_k?: number;
   similarity_threshold?: number;
   document_ids?: string[];
+  data_source_ids?: string[];
   model?: string;
+  search_mode?: SearchMode;
+  use_reranking?: boolean;
+  conversation_id?: string;
 }
 
 export interface RAGSource {
@@ -39,6 +45,10 @@ export interface RAGQueryResponse {
   confidence_score: number;
   context_used: number;
   created_at: string;
+  search_mode?: SearchMode;
+  cached?: boolean;
+  groundedness_score?: number;
+  unsupported_claims?: string[];
 }
 
 export interface RAGHistoryItem {
@@ -65,6 +75,23 @@ export interface RAGFeedbackRequest {
   feedback_text?: string;
 }
 
+// Conversational RAG (P1.3)
+export interface RAGConversation {
+  id: string;
+  title: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RAGConversationDetail extends RAGConversation {
+  queries: RAGHistoryItem[];
+}
+
+export interface RAGConversationListResponse {
+  items: RAGConversation[];
+  total: number;
+}
+
 export interface RAGStatsResponse {
   total_queries: number;
   total_documents_indexed: number;
@@ -72,6 +99,34 @@ export interface RAGStatsResponse {
   average_confidence: number;
   average_rating?: number;
   queries_with_feedback: number;
+}
+
+// Evaluation (P3.2)
+export interface RAGEvaluation {
+  id: string;
+  faithfulness: number;
+  answer_relevancy: number;
+  context_precision: number;
+  context_recall: number;
+  sample_size: number;
+  queries_with_feedback: number;
+  average_groundedness?: number;
+  created_at: string;
+}
+
+export interface RAGEvaluationListResponse {
+  items: RAGEvaluation[];
+  total: number;
+}
+
+export interface RAGEvaluationTriggerResponse {
+  task_id?: string;
+  faithfulness?: number;
+  answer_relevancy?: number;
+  context_precision?: number;
+  context_recall?: number;
+  sample_size?: number;
+  message: string;
 }
 
 // ===========================
@@ -128,6 +183,54 @@ export const ragApi = api.injectEndpoints({
       }),
       invalidatesTags: ['RAGHistory', 'RAGStats'],
     }),
+
+    // Conversations (P1.3)
+    createConversation: builder.mutation<RAGConversation, { title?: string }>({
+      query: (body) => ({
+        url: '/rag/conversations',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['RAGConversations'],
+    }),
+
+    getConversations: builder.query<
+      RAGConversationListResponse,
+      { limit?: number; offset?: number }
+    >({
+      query: ({ limit = 50, offset = 0 }) => `/rag/conversations?limit=${limit}&offset=${offset}`,
+      providesTags: ['RAGConversations'],
+    }),
+
+    getConversation: builder.query<RAGConversationDetail, string>({
+      query: (id) => `/rag/conversations/${id}`,
+      providesTags: (_result, _err, id) => [{ type: 'RAGConversations', id }],
+    }),
+
+    deleteConversation: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `/rag/conversations/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['RAGConversations'],
+    }),
+
+    // Evaluations (P3.2)
+    getEvaluations: builder.query<
+      RAGEvaluationListResponse,
+      { limit?: number; offset?: number }
+    >({
+      query: ({ limit = 20, offset = 0 }) => `/rag/evaluations?limit=${limit}&offset=${offset}`,
+      providesTags: ['RAGEvaluations'],
+    }),
+
+    triggerEvaluation: builder.mutation<RAGEvaluationTriggerResponse, { sample_size?: number }>({
+      query: ({ sample_size = 20 }) => ({
+        url: `/rag/evaluations/run?sample_size=${sample_size}`,
+        method: 'POST',
+      }),
+      invalidatesTags: ['RAGEvaluations'],
+    }),
   }),
 });
 
@@ -138,6 +241,12 @@ export const {
   useSubmitRAGFeedbackMutation,
   useGetRAGStatsQuery,
   useDeleteQueryMutation,
+  useCreateConversationMutation,
+  useGetConversationsQuery,
+  useGetConversationQuery,
+  useDeleteConversationMutation,
+  useGetEvaluationsQuery,
+  useTriggerEvaluationMutation,
 } = ragApi;
 
 // ===========================
@@ -193,3 +302,76 @@ export const formatQueryDate = (dateString: string): string => {
 
   return date.toLocaleDateString();
 };
+
+// ===========================
+// Streaming RAG Query (P1.2)
+// ===========================
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+
+export interface StreamEvent {
+  type: 'sources' | 'token' | 'done' | 'error';
+  data: unknown;
+}
+
+export interface StreamDoneData {
+  model_used: string;
+  tokens_used: number;
+  confidence_score: number;
+  context_used: number;
+  answer: string;
+}
+
+/**
+ * Stream a RAG query response via SSE.
+ *
+ * @param request - The RAG query request body
+ * @param onEvent - Callback for each SSE event
+ * @param signal - Optional AbortSignal for cancellation
+ */
+export async function streamRAGQuery(
+  request: RAGQueryRequest,
+  onEvent: (event: StreamEvent) => void,
+  signal?: AbortSignal,
+): Promise<void> {
+  const token = localStorage.getItem('token');
+
+  const response = await fetch(`${API_BASE_URL}/api/v1/rag/query/stream`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify(request),
+    signal,
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text();
+    throw new Error(errorBody || `HTTP ${response.status}`);
+  }
+
+  const reader = response.body!.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+
+    for (const line of lines) {
+      if (line.startsWith('data: ')) {
+        try {
+          const parsed = JSON.parse(line.slice(6)) as StreamEvent;
+          onEvent(parsed);
+        } catch {
+          // skip malformed events
+        }
+      }
+    }
+  }
+}

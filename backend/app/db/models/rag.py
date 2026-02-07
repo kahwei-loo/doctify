@@ -13,7 +13,7 @@ from datetime import datetime
 
 from sqlalchemy import String, Integer, Float, Text, ForeignKey, CheckConstraint, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy.dialects.postgresql import UUID, JSONB, TSVECTOR
 from pgvector.sqlalchemy import Vector
 
 from app.db.models.base import BaseModel
@@ -66,6 +66,12 @@ class DocumentEmbedding(BaseModel):
         nullable=True,
     )
 
+    # Full-text search vector (auto-maintained by trigger)
+    search_vector = mapped_column(
+        TSVECTOR,
+        nullable=True,
+    )
+
     # Metadata (page number, token count, confidence, etc.)
     # Note: renamed from 'metadata' to 'chunk_metadata' as 'metadata' is reserved in SQLAlchemy
     chunk_metadata: Mapped[Optional[Dict[str, Any]]] = mapped_column(
@@ -100,6 +106,36 @@ class DocumentEmbedding(BaseModel):
         return f"<DocumentEmbedding(id={self.id}, document_id={self.document_id}, chunk={self.chunk_index})>"
 
 
+class RAGConversation(BaseModel):
+    """
+    Multi-turn RAG conversation session.
+
+    Groups related RAG queries into a conversation thread.
+    P1.3 - Conversational RAG
+    """
+
+    __tablename__ = "rag_conversations"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
+    title: Mapped[str] = mapped_column(
+        String(200),
+        nullable=False,
+    )
+
+    # Relationships
+    user = relationship("User")
+    queries = relationship("RAGQuery", back_populates="conversation", order_by="RAGQuery.created_at")
+
+    def __repr__(self) -> str:
+        return f"<RAGConversation(id={self.id}, title='{self.title[:30]}')>"
+
+
 class RAGQuery(BaseModel):
     """
     RAG query history for audit and analytics.
@@ -114,6 +150,14 @@ class RAGQuery(BaseModel):
         UUID(as_uuid=True),
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
+        index=True,
+    )
+
+    # Optional conversation link (P1.3)
+    conversation_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("rag_conversations.id", ondelete="SET NULL"),
+        nullable=True,
         index=True,
     )
 
@@ -147,6 +191,16 @@ class RAGQuery(BaseModel):
         nullable=True,
     )
 
+    # Groundedness / hallucination detection (P2.2)
+    groundedness_score: Mapped[Optional[float]] = mapped_column(
+        Float,
+        nullable=True,
+    )
+    unsupported_claims: Mapped[Optional[List[str]]] = mapped_column(
+        JSONB,
+        nullable=True,
+    )
+
     # User feedback
     feedback_rating: Mapped[Optional[int]] = mapped_column(
         Integer,
@@ -159,6 +213,7 @@ class RAGQuery(BaseModel):
 
     # Relationships
     user = relationship("User", back_populates="rag_queries")
+    conversation = relationship("RAGConversation", back_populates="queries")
 
     # Table constraints
     __table_args__ = (
@@ -166,9 +221,50 @@ class RAGQuery(BaseModel):
             'feedback_rating IS NULL OR (feedback_rating BETWEEN 1 AND 5)',
             name='check_feedback_rating'
         ),
-        # Note: ix_rag_queries_user_id is already created by index=True on user_id column (line 101)
         Index('ix_rag_queries_created_at', 'created_at'),
     )
 
     def __repr__(self) -> str:
         return f"<RAGQuery(id={self.id}, user_id={self.user_id}, question='{self.question[:30]}...')>"
+
+
+class RAGEvaluation(BaseModel):
+    """
+    RAG quality evaluation results.
+
+    Stores periodic evaluation metrics computed from sampled queries.
+    P3.2 - RAGAS Evaluation
+    """
+
+    __tablename__ = "rag_evaluations"
+
+    # Evaluation metrics (0.0 - 1.0)
+    faithfulness: Mapped[float] = mapped_column(Float, nullable=False)
+    answer_relevancy: Mapped[float] = mapped_column(Float, nullable=False)
+    context_precision: Mapped[float] = mapped_column(Float, nullable=False)
+    context_recall: Mapped[float] = mapped_column(Float, nullable=False)
+
+    # Evaluation metadata
+    sample_size: Mapped[int] = mapped_column(Integer, nullable=False)
+    queries_with_feedback: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    average_groundedness: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+
+    # Optional: user scope (None = system-wide)
+    user_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=True,
+        index=True,
+    )
+
+    # Evaluation run details
+    evaluation_metadata: Mapped[Optional[Dict[str, Any]]] = mapped_column(
+        JSONB,
+        nullable=True,
+    )
+
+    def __repr__(self) -> str:
+        return (
+            f"<RAGEvaluation(id={self.id}, faithfulness={self.faithfulness:.2f}, "
+            f"relevancy={self.answer_relevancy:.2f})>"
+        )
