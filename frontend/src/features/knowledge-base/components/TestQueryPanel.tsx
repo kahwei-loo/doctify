@@ -27,17 +27,20 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
 
+type SearchMode = 'semantic' | 'keyword' | 'hybrid';
+
 interface QueryResult {
   text: string;
   similarity: number;
   source_name?: string;
   chunk_index?: number;
+  search_mode?: string;
 }
 
 interface TestQueryPanelProps {
   knowledgeBaseId: string;
   embeddingCount: number;
-  onQuery?: (query: string, topK: number) => Promise<QueryResult[]>;
+  onQuery?: (query: string, topK: number, searchMode?: SearchMode) => Promise<QueryResult[]>;
   className?: string;
 }
 
@@ -49,6 +52,7 @@ export const TestQueryPanel: React.FC<TestQueryPanelProps> = ({
 }) => {
   const [query, setQuery] = useState('');
   const [topK, setTopK] = useState('5');
+  const [searchMode, setSearchMode] = useState<SearchMode>('hybrid');
   const [isSearching, setIsSearching] = useState(false);
   const [results, setResults] = useState<QueryResult[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -152,8 +156,8 @@ export const TestQueryPanel: React.FC<TestQueryPanelProps> = ({
           </p>
         </div>
 
-        <div className="flex items-end gap-4">
-          <div className="flex-1 max-w-xs space-y-2">
+        <div className="flex items-end gap-4 flex-wrap">
+          <div className="flex-1 max-w-[160px] space-y-2">
             <Label htmlFor="top-k">Number of Results</Label>
             <Select value={topK} onValueChange={setTopK} disabled={isSearching}>
               <SelectTrigger id="top-k">
@@ -163,6 +167,24 @@ export const TestQueryPanel: React.FC<TestQueryPanelProps> = ({
                 <SelectItem value="3">Top 3 results</SelectItem>
                 <SelectItem value="5">Top 5 results</SelectItem>
                 <SelectItem value="10">Top 10 results</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex-1 max-w-[180px] space-y-2">
+            <Label htmlFor="search-mode">Search Mode</Label>
+            <Select
+              value={searchMode}
+              onValueChange={(v) => setSearchMode(v as SearchMode)}
+              disabled={isSearching}
+            >
+              <SelectTrigger id="search-mode">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="hybrid">Hybrid</SelectItem>
+                <SelectItem value="semantic">Semantic</SelectItem>
+                <SelectItem value="keyword">Keyword</SelectItem>
               </SelectContent>
             </Select>
           </div>

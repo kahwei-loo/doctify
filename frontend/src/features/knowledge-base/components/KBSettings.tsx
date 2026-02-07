@@ -26,13 +26,31 @@ import {
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import type { KnowledgeBase } from '../types';
+import type { KnowledgeBase, ChunkStrategy } from '../types';
 
 interface KBSettingsProps {
   knowledgeBase: KnowledgeBase;
   onSave?: (config: KnowledgeBase['config']) => void;
   className?: string;
 }
+
+const CHUNK_STRATEGIES = [
+  {
+    value: 'semantic' as ChunkStrategy,
+    label: 'Semantic',
+    description: 'Sentence-boundary-aware chunking (recommended)',
+  },
+  {
+    value: 'recursive' as ChunkStrategy,
+    label: 'Recursive',
+    description: 'Hierarchical splitting by paragraph, sentence, then word',
+  },
+  {
+    value: 'fixed' as ChunkStrategy,
+    label: 'Fixed',
+    description: 'Fixed token window (legacy)',
+  },
+];
 
 const EMBEDDING_MODELS = [
   {
@@ -75,6 +93,9 @@ export const KBSettings: React.FC<KBSettingsProps> = ({
   const [overlap, setOverlap] = useState(
     knowledgeBase.config.chunk_overlap?.toString() || '128'
   );
+  const [chunkStrategy, setChunkStrategy] = useState<string>(
+    knowledgeBase.config.chunk_strategy || 'semantic'
+  );
   const [hasChanges, setHasChanges] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -84,9 +105,10 @@ export const KBSettings: React.FC<KBSettingsProps> = ({
     const changed =
       embeddingModel !== (knowledgeBase.config.embedding_model || 'text-embedding-3-small') ||
       parseInt(chunkSize) !== (knowledgeBase.config.chunk_size || 1024) ||
-      parseInt(overlap) !== (knowledgeBase.config.chunk_overlap || 128);
+      parseInt(overlap) !== (knowledgeBase.config.chunk_overlap || 128) ||
+      chunkStrategy !== (knowledgeBase.config.chunk_strategy || 'semantic');
     setHasChanges(changed);
-  }, [embeddingModel, chunkSize, overlap, knowledgeBase.config]);
+  }, [embeddingModel, chunkSize, overlap, chunkStrategy, knowledgeBase.config]);
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -100,6 +122,7 @@ export const KBSettings: React.FC<KBSettingsProps> = ({
       embedding_model: embeddingModel as KnowledgeBase['config']['embedding_model'],
       chunk_size: parseInt(chunkSize) as KnowledgeBase['config']['chunk_size'],
       chunk_overlap: parseInt(overlap) as KnowledgeBase['config']['chunk_overlap'],
+      chunk_strategy: chunkStrategy as ChunkStrategy,
     };
 
     localStorage.setItem(`kb_config_${knowledgeBase.id}`, JSON.stringify(newConfig));
@@ -195,6 +218,26 @@ export const KBSettings: React.FC<KBSettingsProps> = ({
         )}
       </div>
 
+      {/* Chunk Strategy */}
+      <div className="space-y-2">
+        <Label htmlFor="chunk-strategy">Chunking Strategy</Label>
+        <Select value={chunkStrategy} onValueChange={setChunkStrategy}>
+          <SelectTrigger id="chunk-strategy">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {CHUNK_STRATEGIES.map((strategy) => (
+              <SelectItem key={strategy.value} value={strategy.value}>
+                {strategy.label} - {strategy.description}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <p className="text-xs text-muted-foreground">
+          {CHUNK_STRATEGIES.find((s) => s.value === chunkStrategy)?.description}
+        </p>
+      </div>
+
       {/* Save Button */}
       <div className="flex items-center gap-3">
         <Button onClick={handleSave} disabled={!hasChanges || isSaving} className="gap-2">
@@ -244,6 +287,10 @@ export const KBSettings: React.FC<KBSettingsProps> = ({
               <div>
                 <span className="text-muted-foreground">Overlap:</span>
                 <span className="ml-2 font-medium">{overlap} tokens</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Strategy:</span>
+                <span className="ml-2 font-medium capitalize">{chunkStrategy}</span>
               </div>
             </div>
           </div>

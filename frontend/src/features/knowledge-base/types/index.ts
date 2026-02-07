@@ -9,6 +9,8 @@ export type KnowledgeBaseStatus = 'active' | 'inactive' | 'processing';
 export type DataSourceType = 'uploaded_docs' | 'website' | 'text' | 'qa_pairs';
 export type DataSourceStatus = 'active' | 'syncing' | 'error' | 'paused';
 export type EmbeddingStatus = 'pending' | 'processing' | 'completed' | 'failed';
+export type ChunkStrategy = 'fixed' | 'semantic' | 'recursive';
+export type SearchMode = 'semantic' | 'keyword' | 'hybrid';
 
 export interface KnowledgeBase {
   id: string;
@@ -28,6 +30,7 @@ export interface KnowledgeBaseConfig {
   embedding_model: 'text-embedding-3-small' | 'text-embedding-3-large';
   chunk_size: 512 | 1024 | 2048;
   chunk_overlap: 0 | 128 | 256;
+  chunk_strategy?: ChunkStrategy;
 }
 
 export interface DataSource {

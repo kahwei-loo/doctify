@@ -6,10 +6,11 @@
  */
 
 import React, { useState } from 'react';
-import { FileText, ThumbsUp, ThumbsDown, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react';
+import { FileText, ThumbsUp, ThumbsDown, ExternalLink, ChevronDown, ChevronUp, ShieldCheck, ShieldAlert, AlertTriangle, Zap } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useSubmitRAGFeedbackMutation } from '@/store/api/ragApi';
 import type { RAGQueryResponse, RAGSource } from '@/store/api/ragApi';
@@ -42,15 +43,37 @@ export function RAGResponseCard({ response }: RAGResponseCardProps) {
     return 'outline';
   };
 
+  const getGroundednessInfo = (score: number) => {
+    if (score >= 0.8) return { label: 'High Confidence', variant: 'default' as const, icon: ShieldCheck, className: 'text-green-600' };
+    if (score >= 0.5) return { label: 'Moderate', variant: 'secondary' as const, icon: ShieldAlert, className: 'text-yellow-600' };
+    return { label: 'Low Confidence', variant: 'destructive' as const, icon: AlertTriangle, className: 'text-red-600' };
+  };
+
   return (
     <Card className="mt-4">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="text-base">Answer</CardTitle>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <Badge variant={getConfidenceBadgeVariant(response.confidence_score)} className="text-xs">
               {formatConfidence(response.confidence_score)} confidence
             </Badge>
+            {response.cached && (
+              <Badge variant="secondary" className="text-xs">
+                <Zap className="mr-1 h-3 w-3 text-amber-500" />
+                Cached
+              </Badge>
+            )}
+            {response.groundedness_score != null && (() => {
+              const info = getGroundednessInfo(response.groundedness_score);
+              const Icon = info.icon;
+              return (
+                <Badge variant={info.variant} className="text-xs">
+                  <Icon className={`mr-1 h-3 w-3 ${info.className}`} />
+                  {info.label}
+                </Badge>
+              );
+            })()}
             <Badge variant="secondary" className="text-xs">
               {response.model_used}
             </Badge>
@@ -74,6 +97,21 @@ export function RAGResponseCard({ response }: RAGResponseCardProps) {
         <div className="prose prose-sm max-w-none dark:prose-invert">
           <p className="whitespace-pre-wrap">{response.answer}</p>
         </div>
+
+        {/* Unsupported Claims Warning (P2.2) */}
+        {response.unsupported_claims && response.unsupported_claims.length > 0 && (
+          <Alert variant="destructive" className="bg-destructive/5">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              <p className="font-medium text-sm mb-1">Claims not fully supported by sources:</p>
+              <ul className="text-xs space-y-0.5 list-disc list-inside">
+                {response.unsupported_claims.map((claim, i) => (
+                  <li key={i}>{claim}</li>
+                ))}
+              </ul>
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Sources */}
         {response.sources && response.sources.length > 0 && (
@@ -123,12 +161,20 @@ export function RAGResponseCard({ response }: RAGResponseCardProps) {
                       size="sm"
                       className="p-0 h-auto"
                       onClick={() => {
-                        // Navigate to document detail
-                        window.location.href = `/documents/${source.document_id}`;
+                        const params = new URLSearchParams({
+                          highlight: String(source.chunk_index),
+                        });
+                        if (source.metadata?.start_char != null) {
+                          params.set('start', String(source.metadata.start_char));
+                        }
+                        if (source.metadata?.end_char != null) {
+                          params.set('end', String(source.metadata.end_char));
+                        }
+                        window.location.href = `/documents/${source.document_id}?${params.toString()}`;
                       }}
                     >
                       <ExternalLink className="mr-1 h-3 w-3" />
-                      View Document
+                      View in Document
                     </Button>
                   </div>
                 </div>
