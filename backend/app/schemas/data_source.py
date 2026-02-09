@@ -39,7 +39,7 @@ class DataSourceCreate(BaseModel):
     @classmethod
     def validate_type(cls, v: str) -> str:
         """Validate data source type."""
-        allowed_types = ["uploaded_docs", "website", "text", "qa_pairs"]
+        allowed_types = ["uploaded_docs", "website", "text", "qa_pairs", "structured_data"]
         if v not in allowed_types:
             raise ValueError(f"Type must be one of: {', '.join(allowed_types)}")
         return v

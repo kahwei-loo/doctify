@@ -298,6 +298,30 @@ class Settings(BaseSettings):
     )
 
     # ============================================================================
+    # Intent Classifier Settings (Unified Knowledge)
+    # ============================================================================
+
+    INTENT_CLASSIFIER_MODEL: str = Field(
+        default="gpt-4o-mini",
+        description="Model for intent classification (fast, cheap model preferred)"
+    )
+
+    INTENT_CLASSIFIER_CACHE_TTL: int = Field(
+        default=300,
+        description="Cache TTL for intent classification results in seconds"
+    )
+
+    INTENT_CONFIDENCE_THRESHOLD: float = Field(
+        default=0.7,
+        description="Minimum confidence for intent classification (below = fallback to RAG)"
+    )
+
+    DATASET_CONFIDENCE_THRESHOLD: float = Field(
+        default=0.6,
+        description="Minimum confidence for dataset selection in multi-dataset KBs"
+    )
+
+    # ============================================================================
     # File Upload Settings
     # ============================================================================
 

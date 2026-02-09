@@ -6,7 +6,7 @@
  */
 
 export type KnowledgeBaseStatus = 'active' | 'inactive' | 'processing';
-export type DataSourceType = 'uploaded_docs' | 'website' | 'text' | 'qa_pairs';
+export type DataSourceType = 'uploaded_docs' | 'website' | 'text' | 'qa_pairs' | 'structured_data';
 export type DataSourceStatus = 'active' | 'syncing' | 'error' | 'paused';
 export type EmbeddingStatus = 'pending' | 'processing' | 'completed' | 'failed';
 export type ChunkStrategy = 'fixed' | 'semantic' | 'recursive';
@@ -65,12 +65,77 @@ export interface DataSourceConfig {
 
   // For qa_pairs
   qa_pairs?: QAPair[];
+
+  // For structured_data
+  file_info?: {
+    filename: string;
+    size: number;
+    row_count: number;
+    column_count: number;
+  };
+  schema_definition?: SchemaDefinition;
+  parquet_path?: string;
 }
 
 export interface QAPair {
   id: string;
   question: string;
   answer: string;
+}
+
+// Structured Data (Analytics) types
+export interface ColumnDefinition {
+  name: string;
+  dtype: string;
+  aliases?: string[];
+  description?: string;
+  is_metric?: boolean;
+  is_dimension?: boolean;
+  default_agg?: string;
+  sample_values?: string[];
+  unique_values?: number;
+}
+
+export interface SchemaDefinition {
+  columns: ColumnDefinition[];
+}
+
+export type UnifiedIntentType = 'rag' | 'analytics' | 'ambiguous';
+
+export interface UnifiedQueryRequest {
+  query: string;
+  kb_id: string;
+  conversation_id?: string;
+  search_mode?: SearchMode;
+  stream?: boolean;
+}
+
+export interface AnalyticsResponse {
+  sql: string;
+  data: Record<string, unknown>[];
+  chart_type?: string;
+  chart_config?: Record<string, unknown>;
+  insights_text?: string;
+  dataset_id?: string;
+  needs_conversation?: boolean;
+}
+
+export interface UnifiedQueryResponse {
+  id: string;
+  intent_type: UnifiedIntentType;
+  confidence: number;
+  rag_response?: {
+    answer: string;
+    sources: Array<{
+      chunk_text: string;
+      document_id: string;
+      document_name: string;
+      similarity_score: number;
+    }>;
+    groundedness_score?: number;
+  };
+  analytics_response?: AnalyticsResponse;
+  created_at: string;
 }
 
 export interface Embedding {

@@ -8,15 +8,16 @@
  * 1. Data Sources - Manage data sources
  * 2. Embeddings - View and generate embeddings
  * 3. Test - Test query interface
- * 4. Settings - KB configuration
+ * 4. Analytics - Unified query (RAG + Analytics)
+ * 5. Settings - KB configuration
  */
 
 import React from 'react';
-import { FileStack, Zap, TestTube2, Settings } from 'lucide-react';
+import { FileStack, Zap, TestTube2, Settings, BarChart3 } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 
-export type KBTab = 'sources' | 'embeddings' | 'test' | 'settings';
+export type KBTab = 'sources' | 'embeddings' | 'test' | 'analytics' | 'settings';
 
 interface KBDetailTabsProps {
   /** Current active tab */
@@ -31,6 +32,8 @@ interface KBDetailTabsProps {
   embeddingsContent?: React.ReactNode;
   /** Content for Test tab */
   testContent?: React.ReactNode;
+  /** Content for Analytics tab */
+  analyticsContent?: React.ReactNode;
   /** Content for Settings tab */
   settingsContent?: React.ReactNode;
 }
@@ -42,6 +45,7 @@ export const KBDetailTabs: React.FC<KBDetailTabsProps> = ({
   sourcesContent,
   embeddingsContent,
   testContent,
+  analyticsContent,
   settingsContent,
 }) => {
   return (
@@ -51,7 +55,7 @@ export const KBDetailTabs: React.FC<KBDetailTabsProps> = ({
       className={cn('flex flex-col h-full', className)}
     >
       <div className="border-b bg-card/50 px-6 pt-6">
-        <TabsList className="grid w-full max-w-2xl grid-cols-4">
+        <TabsList className="grid w-full max-w-3xl grid-cols-5">
           <TabsTrigger value="sources" className="gap-2">
             <FileStack className="h-4 w-4" />
             <span className="hidden sm:inline">Data Sources</span>
@@ -66,6 +70,11 @@ export const KBDetailTabs: React.FC<KBDetailTabsProps> = ({
             <TestTube2 className="h-4 w-4" />
             <span className="hidden sm:inline">Test Query</span>
             <span className="sm:hidden">Test</span>
+          </TabsTrigger>
+          <TabsTrigger value="analytics" className="gap-2">
+            <BarChart3 className="h-4 w-4" />
+            <span className="hidden sm:inline">Analytics</span>
+            <span className="sm:hidden">Data</span>
           </TabsTrigger>
           <TabsTrigger value="settings" className="gap-2">
             <Settings className="h-4 w-4" />
@@ -99,6 +108,15 @@ export const KBDetailTabs: React.FC<KBDetailTabsProps> = ({
             <div className="text-center py-12">
               <TestTube2 className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
               <p className="text-muted-foreground">Test query content will go here</p>
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="analytics" className="mt-0 p-6 h-[calc(100vh-280px)]">
+          {analyticsContent || (
+            <div className="text-center py-12">
+              <BarChart3 className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+              <p className="text-muted-foreground">Analytics content will go here</p>
             </div>
           )}
         </TabsContent>

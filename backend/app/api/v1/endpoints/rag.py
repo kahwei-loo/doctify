@@ -32,7 +32,13 @@ from app.schemas.rag import (
     RAGEvaluationResponse,
     RAGEvaluationListResponse,
     RAGEvaluationTriggerResponse,
+    UnifiedQueryRequest,
+    UnifiedQueryResponse,
+    AnalyticsResponseData,
+    UnifiedQueryFeedbackRequest,
 )
+from app.services.rag.pipeline_router import PipelineRouter
+from app.services.rag.intent_classifier import DataSourceInfo
 from app.core.exceptions import ValidationError, DatabaseError
 
 router = APIRouter(prefix="/rag", tags=["RAG"])
@@ -748,4 +754,188 @@ async def trigger_evaluation(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Evaluation failed: {str(e)}",
+        )
+
+
+# ===========================
+# Unified Knowledge Query (RAG + Analytics)
+# ===========================
+
+@router.post(
+    "/knowledge-bases/{kb_id}/unified-query",
+    response_model=UnifiedQueryResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Unified knowledge base query",
+    description="""
+    Query a knowledge base using natural language. The system automatically
+    classifies the query intent (document Q&A vs data analytics) and routes
+    to the appropriate pipeline.
+
+    - **RAG queries**: Search documents and generate answers with source citations
+    - **Analytics queries**: Generate SQL, execute against structured datasets, return charts
+
+    Supports conversation stickiness for multi-turn interactions.
+    """,
+)
+async def unified_query(
+    kb_id: uuid.UUID,
+    request: UnifiedQueryRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> UnifiedQueryResponse:
+    """
+    Execute a unified query against a knowledge base.
+
+    Routes to RAG or Analytics pipeline based on intent classification.
+    """
+    try:
+        # Build data source info for the classifier
+        from app.db.repositories.knowledge_base import DataSourceRepository
+        ds_repo = DataSourceRepository(db)
+        db_sources = await ds_repo.get_by_knowledge_base(kb_id)
+
+        data_sources = []
+        for ds in db_sources:
+            columns = []
+            if ds.type == "structured_data" and ds.config:
+                schema = ds.config.get("schema_definition", {})
+                columns = [c["name"] for c in schema.get("columns", [])]
+
+            data_sources.append(DataSourceInfo(
+                id=str(ds.id),
+                type=ds.type,
+                name=ds.name,
+                columns=columns,
+            ))
+
+        # Build conversation context for stickiness
+        conversation_context = None
+        if request.conversation_id:
+            query_repo = RAGQueryRepository(db)
+            last_query = await query_repo.get_last_by_conversation(
+                request.conversation_id
+            )
+            if last_query and last_query.intent_type:
+                conversation_context = {
+                    "last_intent": last_query.intent_type,
+                    "last_dataset_id": str(last_query.dataset_id) if last_query.dataset_id else None,
+                }
+
+        # Route query
+        pipeline = PipelineRouter(db)
+        result = await pipeline.route_query(
+            kb_id=kb_id,
+            query=request.query,
+            user_id=current_user.id,
+            data_sources=data_sources,
+            conversation_id=request.conversation_id,
+            search_mode=request.search_mode or "hybrid",
+            conversation_context=conversation_context,
+        )
+
+        # Build response
+        rag_resp = None
+        analytics_resp = None
+
+        if result.rag_response:
+            sources = [
+                RAGSource(
+                    chunk_text=s["chunk_text"],
+                    document_id=s["document_id"],
+                    document_name=s["document_name"],
+                    document_title=s.get("document_title"),
+                    chunk_index=s["chunk_index"],
+                    similarity_score=s["similarity_score"],
+                    metadata=s.get("metadata"),
+                )
+                for s in result.rag_response.sources
+            ]
+            rag_resp = RAGQueryResponse(
+                id=result.query_id,
+                question=request.query,
+                answer=result.rag_response.answer,
+                sources=sources,
+                model_used=result.rag_response.model_used,
+                tokens_used=result.rag_response.tokens_used,
+                confidence_score=result.rag_response.confidence_score,
+                context_used=result.rag_response.context_used,
+                created_at=result.created_at,
+                groundedness_score=result.rag_response.groundedness_score,
+                unsupported_claims=result.rag_response.unsupported_claims,
+            )
+
+        if result.analytics_response:
+            analytics_resp = AnalyticsResponseData(
+                sql=result.analytics_response.get("sql", ""),
+                data=result.analytics_response.get("data", []),
+                chart_type=result.analytics_response.get("chart_type"),
+                chart_config=result.analytics_response.get("chart_config"),
+                insights_text=result.analytics_response.get("insights_text"),
+            )
+
+        return UnifiedQueryResponse(
+            id=result.query_id,
+            intent_type=result.intent_type,
+            confidence=result.confidence,
+            rag_response=rag_resp,
+            analytics_response=analytics_resp,
+            created_at=result.created_at,
+        )
+
+    except ValidationError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Unified query failed: {str(e)}",
+        )
+
+
+@router.post(
+    "/queries/{query_id}/feedback",
+    status_code=status.HTTP_200_OK,
+    summary="Submit query feedback with intent correction",
+    description="Submit feedback for a unified query, including optional intent correction.",
+)
+async def submit_unified_feedback(
+    query_id: uuid.UUID,
+    request: UnifiedQueryFeedbackRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Submit feedback for a unified query."""
+    try:
+        query_repo = RAGQueryRepository(db)
+        query_record = await query_repo.get_by_id(query_id)
+
+        if not query_record:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Query not found",
+            )
+
+        if query_record.user_id != current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied",
+            )
+
+        update_data = {"feedback_rating": request.rating}
+        if request.correct_intent:
+            update_data["user_feedback_intent"] = request.correct_intent
+
+        await query_repo.update(query_id, update_data)
+        await db.commit()
+
+        return {"success": True, "message": "Feedback submitted"}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Feedback submission failed: {str(e)}",
         )

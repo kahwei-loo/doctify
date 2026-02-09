@@ -11,6 +11,7 @@ import {
   Globe,
   FileText,
   MessageSquare,
+  Database,
   Plus,
   Trash2,
   Loader2,
@@ -58,6 +59,11 @@ const TYPE_INFO: Record<DataSourceType, { label: string; icon: React.ReactNode; 
     label: 'Q&A Pairs',
     icon: <MessageSquare className="h-5 w-5" />,
     iconBg: 'bg-orange-500/10 text-orange-600',
+  },
+  structured_data: {
+    label: 'Structured Data',
+    icon: <Database className="h-5 w-5" />,
+    iconBg: 'bg-indigo-500/10 text-indigo-600',
   },
 };
 

@@ -14,6 +14,7 @@ import {
   Globe,
   FileText,
   MessageSquare,
+  Database,
   ArrowLeft,
   ArrowRight,
 } from 'lucide-react';
@@ -75,6 +76,13 @@ const TYPE_OPTIONS: TypeOption[] = [
     description: 'Create question and answer pairs for FAQ-style knowledge',
     icon: <MessageSquare className="h-6 w-6" />,
     iconBg: 'bg-orange-500/10 text-orange-600',
+  },
+  {
+    type: 'structured_data',
+    label: 'Structured Data',
+    description: 'Upload CSV or Excel datasets for natural language analytics queries',
+    icon: <Database className="h-6 w-6" />,
+    iconBg: 'bg-indigo-500/10 text-indigo-600',
   },
 ];
 
