@@ -8,6 +8,7 @@ Part of Unified Knowledge & Insights integration.
 """
 
 import logging
+import re
 import time
 from dataclasses import dataclass, field
 from enum import Enum
@@ -103,6 +104,15 @@ CLASSIFICATION RULES:
 CONTEXT about this knowledge base's data sources will be provided. Use it to inform your decision."""
 
 
+CJK_PATTERN = re.compile(r"[\u4e00-\u9fff\u3400-\u4dbf]")
+
+
+def _detect_query_lang(query: str) -> str:
+    """Detect if query is Chinese or English based on CJK character presence."""
+    cjk_count = len(CJK_PATTERN.findall(query))
+    return "zh" if cjk_count > len(query) * 0.1 else "en"
+
+
 class IntentClassifier:
     """
     Classifies KB queries as RAG or Analytics using LLM function calling.
@@ -148,6 +158,8 @@ class IntentClassifier:
         """
         start = time.monotonic()
 
+        query_lang = _detect_query_lang(query)
+
         # Fast-path: skip LLM if KB has only one type of data source
         fast_result = self._try_fast_path(query, data_sources, conversation_context)
         if fast_result is not None:
@@ -159,7 +171,10 @@ class IntentClassifier:
                     "intent": fast_result.intent.value,
                     "confidence": fast_result.confidence,
                     "latency_ms": fast_result.latency_ms,
+                    "dataset_id": fast_result.dataset_id or "",
+                    "query_lang": query_lang,
                     "method": "fast_path",
+                    "num_data_sources": len(data_sources),
                 },
             )
             return fast_result
@@ -195,7 +210,14 @@ class IntentClassifier:
             result = self._parse_response(response, data_sources)
 
         except Exception as e:
-            logger.error(f"Intent classification LLM error: {e}")
+            logger.error(
+                "Intent classification LLM error",
+                extra={
+                    "event": "intent_classification_error",
+                    "error": str(e)[:200],
+                    "query_lang": query_lang,
+                },
+            )
             # Fallback: default to RAG on error
             result = ClassificationResult(
                 intent=IntentType.RAG,
@@ -212,8 +234,11 @@ class IntentClassifier:
                 "intent": result.intent.value,
                 "confidence": result.confidence,
                 "latency_ms": result.latency_ms,
-                "dataset_id": result.dataset_id,
+                "dataset_id": result.dataset_id or "",
+                "query_lang": query_lang,
                 "method": "llm",
+                "num_data_sources": len(data_sources),
+                "has_stickiness": bool(sticky_dataset_id),
             },
         )
 

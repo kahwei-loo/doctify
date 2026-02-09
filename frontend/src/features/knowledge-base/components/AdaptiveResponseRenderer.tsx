@@ -22,6 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { ChartRenderer } from '@/features/insights/components/ChartRenderer';
+import { QueryFeedback } from './QueryFeedback';
 import type { UnifiedQueryResponse } from '../types';
 
 interface AdaptiveResponseRendererProps {
@@ -238,7 +239,7 @@ export const AdaptiveResponseRenderer: React.FC<AdaptiveResponseRendererProps> =
           </span>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
         {response.intent_type === 'rag' && response.rag_response ? (
           <RAGResponseSection response={response.rag_response} />
         ) : response.intent_type === 'analytics' && response.analytics_response ? (
@@ -246,6 +247,14 @@ export const AdaptiveResponseRenderer: React.FC<AdaptiveResponseRendererProps> =
         ) : (
           <p className="text-sm text-muted-foreground">No response data available.</p>
         )}
+
+        {/* Feedback */}
+        <div className="border-t pt-3">
+          <QueryFeedback
+            queryId={response.id}
+            intentType={response.intent_type === 'analytics' ? 'analytics' : 'rag'}
+          />
+        </div>
       </CardContent>
     </Card>
   );

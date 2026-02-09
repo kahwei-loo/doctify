@@ -20,7 +20,6 @@ const DocumentsPage = lazy(() => import('../pages/DocumentsPage'));
 const DocumentDetailPage = lazy(() => import('../pages/DocumentDetailPage'));
 const ProjectsPage = lazy(() => import('../pages/ProjectsPage'));
 const ProjectDetailPage = lazy(() => import('../pages/ProjectDetailPage'));
-const InsightsPage = lazy(() => import('../pages/InsightsPage'));
 const KnowledgeBasePage = lazy(() => import('../pages/KnowledgeBasePage'));
 const RAGPage = lazy(() => import('../pages/RAGPage'));
 const ChatPage = lazy(() => import('../pages/ChatPage'));
@@ -135,11 +134,7 @@ const router = createBrowserRouter([
       },
       {
         path: 'insights',
-        element: (
-          <Suspense fallback={<PageLoader />}>
-            <InsightsPage />
-          </Suspense>
-        ),
+        element: <Navigate to="/knowledge-base" replace />,
       },
       {
         path: 'knowledge-base',
