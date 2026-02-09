@@ -441,7 +441,7 @@ export async function streamRAGQuery(
 // ===========================
 
 export interface UnifiedStreamEvent {
-  type: 'classification' | 'sources' | 'token' | 'done' | 'analytics' | 'error';
+  type: 'intent' | 'chunk' | 'sources' | 'analytics_result' | 'done' | 'error';
   data: unknown;
 }
 
@@ -459,14 +459,14 @@ export async function streamUnifiedQuery(
   const token = localStorage.getItem('access_token') || localStorage.getItem('token');
 
   const response = await fetch(
-    `${API_BASE_URL}/api/v1/rag/knowledge-bases/${kbId}/unified-query`,
+    `${API_BASE_URL}/api/v1/rag/knowledge-bases/${kbId}/unified-query/stream`,
     {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
-      body: JSON.stringify({ ...request, stream: true }),
+      body: JSON.stringify(request),
       signal,
     },
   );
@@ -476,16 +476,6 @@ export async function streamUnifiedQuery(
     throw new Error(errorBody || `HTTP ${response.status}`);
   }
 
-  // Check if the response is SSE (streaming) or JSON (non-streaming analytics)
-  const contentType = response.headers.get('content-type') || '';
-  if (contentType.includes('application/json')) {
-    // Non-streaming response (analytics or fallback)
-    const data = await response.json();
-    onEvent({ type: 'done', data });
-    return;
-  }
-
-  // SSE streaming
   const reader = response.body!.getReader();
   const decoder = new TextDecoder();
   let buffer = '';
@@ -501,8 +491,14 @@ export async function streamUnifiedQuery(
     for (const line of lines) {
       if (line.startsWith('data: ')) {
         try {
-          const parsed = JSON.parse(line.slice(6)) as UnifiedStreamEvent;
-          onEvent(parsed);
+          const parsed = JSON.parse(line.slice(6));
+          // Map BE event format to FE UnifiedStreamEvent
+          const eventType = parsed.event as UnifiedStreamEvent['type'];
+          const eventData = eventType === 'chunk' ? parsed.text
+            : eventType === 'sources' ? parsed.sources
+            : eventType === 'analytics_result' ? parsed.data
+            : parsed;
+          onEvent({ type: eventType, data: eventData });
         } catch {
           // skip malformed events
         }

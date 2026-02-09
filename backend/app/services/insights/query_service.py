@@ -769,17 +769,24 @@ class QueryService:
         limit: int = 20
     ) -> ConversationListResponse:
         """List user's conversations"""
+        user_id_str = str(user_id)
+
         if dataset_id:
             conversations = await self.conversation_repo.get_by_dataset(
                 dataset_id=dataset_id,
-                user_id=user_id
+                user_id=user_id,
+                skip=skip,
+                limit=limit,
             )
+            total = await self.conversation_repo.count({
+                "dataset_id": dataset_id,
+                "user_id": user_id,
+            })
         else:
-            conversations = await self.conversation_repo.get_by_user(user_id)
-
-        # Apply pagination manually (could be optimized with repo method)
-        total = len(conversations)
-        conversations = conversations[skip:skip + limit]
+            conversations = await self.conversation_repo.get_by_user(
+                user_id_str, skip=skip, limit=limit
+            )
+            total = await self.conversation_repo.count({"user_id": user_id})
 
         conversation_responses = [
             ConversationResponse(
@@ -958,10 +965,11 @@ class QueryService:
         if not conversation:
             raise ValueError("Conversation not found")
 
-        queries = await self.query_repo.get_by_conversation(conversation_id, limit=limit + skip)
+        total = await self.query_repo.count_by_conversation(str(conversation_id))
 
-        # Apply pagination (skip) manually and reverse for chronological order
-        queries = list(reversed(queries))[skip:skip + limit]
+        queries = await self.query_repo.get_by_conversation(
+            str(conversation_id), skip=skip, limit=limit
+        )
 
         query_items = []
         for q in queries:
@@ -978,7 +986,6 @@ class QueryService:
                 created_at=q.created_at
             ))
 
-        total = len(query_items)
         return QueryHistoryResponse(queries=query_items, total=total)
 
     async def delete_conversation(

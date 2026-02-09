@@ -895,6 +895,80 @@ async def unified_query(
 
 
 @router.post(
+    "/knowledge-bases/{kb_id}/unified-query/stream",
+    summary="Stream a unified knowledge base query (SSE)",
+    description="""
+    Stream a unified query response as Server-Sent Events. Classifies intent
+    and streams RAG answer chunks or returns analytics results in a single event.
+
+    SSE event types: intent, chunk, sources, analytics_result, done, error.
+    """,
+)
+async def unified_query_stream(
+    kb_id: uuid.UUID,
+    request: UnifiedQueryRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> StreamingResponse:
+    """Stream unified query response as Server-Sent Events."""
+    # Build data source info for the classifier
+    from app.db.repositories.knowledge_base import DataSourceRepository
+    ds_repo = DataSourceRepository(db)
+    db_sources = await ds_repo.get_by_knowledge_base(kb_id)
+
+    data_sources = []
+    for ds in db_sources:
+        columns = []
+        if ds.type == "structured_data" and ds.config:
+            schema = ds.config.get("schema_definition", {})
+            columns = [c["name"] for c in schema.get("columns", [])]
+
+        data_sources.append(DataSourceInfo(
+            id=str(ds.id),
+            type=ds.type,
+            name=ds.name,
+            columns=columns,
+        ))
+
+    # Build conversation context for stickiness
+    conversation_context = None
+    if request.conversation_id:
+        query_repo = RAGQueryRepository(db)
+        last_query = await query_repo.get_last_by_conversation(
+            request.conversation_id
+        )
+        if last_query and last_query.intent_type:
+            conversation_context = {
+                "last_intent": last_query.intent_type,
+                "last_dataset_id": str(last_query.dataset_id) if last_query.dataset_id else None,
+            }
+
+    pipeline = PipelineRouter(db)
+
+    async def event_generator():
+        async for event in pipeline.route_query_stream(
+            kb_id=kb_id,
+            query=request.query,
+            user_id=current_user.id,
+            data_sources=data_sources,
+            conversation_id=request.conversation_id,
+            search_mode=request.search_mode or "hybrid",
+            conversation_context=conversation_context,
+        ):
+            yield event
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
+
+
+@router.post(
     "/queries/{query_id}/feedback",
     status_code=status.HTTP_200_OK,
     summary="Submit query feedback with intent correction",

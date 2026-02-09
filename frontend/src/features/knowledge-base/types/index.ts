@@ -154,12 +154,14 @@ export interface KnowledgeBaseStats {
   total_data_sources: number;
   total_documents: number;
   total_embeddings: number;
+  total_structured_datasets?: number;
 }
 
 export interface SingleKBStats {
   data_source_count: number;
   document_count: number;
   embedding_count: number;
+  structured_data_count?: number;
 }
 
 export interface TestQueryRequest {

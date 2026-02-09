@@ -17,6 +17,7 @@ import {
   MessageSquare,
   Trash2,
   RotateCcw,
+  SearchX,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -30,6 +31,8 @@ import {
 } from '@/store/api/ragApi';
 import type { UnifiedQueryResponse } from '../types';
 
+const QUERY_TIMEOUT_MS = 30_000;
+
 interface UnifiedQueryPanelProps {
   knowledgeBaseId: string;
   className?: string;
@@ -42,6 +45,43 @@ interface QueryHistoryItem {
   isStreaming: boolean;
   streamedAnswer: string;
   error?: string;
+}
+
+/**
+ * Classify an error into a user-friendly message.
+ */
+function getErrorMessage(err: unknown): string {
+  if (err instanceof DOMException && err.name === 'TimeoutError') {
+    return 'Query timed out. Try a simpler question.';
+  }
+  if (err instanceof TypeError && err.message === 'Failed to fetch') {
+    return 'Unable to connect. Check your internet connection.';
+  }
+  if (err instanceof Error) {
+    // Server error patterns from streamUnifiedQuery (throws "HTTP 5xx")
+    const httpMatch = err.message.match(/HTTP\s+(\d+)/);
+    if (httpMatch) {
+      const status = parseInt(httpMatch[1], 10);
+      if (status >= 500) return 'Server error. Please try again later.';
+      if (status === 429) return 'Too many requests. Please wait a moment.';
+      if (status >= 400) return 'Request error. Please try rephrasing your question.';
+    }
+    if (err.message) return err.message;
+  }
+  return 'Something went wrong. Please try again.';
+}
+
+/**
+ * Check if a completed response has no meaningful content.
+ */
+function isEmptyResult(item: QueryHistoryItem): boolean {
+  if (item.streamedAnswer) return false;
+  if (!item.response) return true;
+  const r = item.response;
+  if (r.rag_response?.answer) return false;
+  if (r.analytics_response?.data && r.analytics_response.data.length > 0) return false;
+  if (r.analytics_response?.insights_text) return false;
+  return true;
 }
 
 export const UnifiedQueryPanel: React.FC<UnifiedQueryPanelProps> = ({
@@ -81,9 +121,12 @@ export const UnifiedQueryPanel: React.FC<UnifiedQueryPanelProps> = ({
     setQuery('');
     scrollToBottom();
 
-    // Try streaming first
+    // Try streaming first, with a 30s timeout
     const controller = new AbortController();
     abortControllerRef.current = controller;
+    const timeoutId = setTimeout(() => {
+      controller.abort(new DOMException('Query timed out', 'TimeoutError'));
+    }, QUERY_TIMEOUT_MS);
 
     try {
       let finalResponse: UnifiedQueryResponse | null = null;
@@ -94,11 +137,10 @@ export const UnifiedQueryPanel: React.FC<UnifiedQueryPanelProps> = ({
         {
           query: trimmedQuery,
           conversation_id: conversationId,
-          stream: true,
         },
         (event) => {
           switch (event.type) {
-            case 'classification': {
+            case 'intent': {
               // Intent classification received
               break;
             }
@@ -106,9 +148,9 @@ export const UnifiedQueryPanel: React.FC<UnifiedQueryPanelProps> = ({
               // Sources received during RAG streaming
               break;
             }
-            case 'token': {
-              const token = event.data as string;
-              streamedText += token;
+            case 'chunk': {
+              const text = event.data as string;
+              streamedText += text;
               setHistory((prev) =>
                 prev.map((item) =>
                   item.id === itemId
@@ -119,7 +161,7 @@ export const UnifiedQueryPanel: React.FC<UnifiedQueryPanelProps> = ({
               scrollToBottom();
               break;
             }
-            case 'analytics': {
+            case 'analytics_result': {
               // Analytics result (non-streaming)
               finalResponse = event.data as UnifiedQueryResponse;
               break;
@@ -167,7 +209,22 @@ export const UnifiedQueryPanel: React.FC<UnifiedQueryPanelProps> = ({
         );
       }
     } catch (err: any) {
-      if (err.name === 'AbortError') return;
+      // User-initiated abort — silently ignore
+      if (err.name === 'AbortError' && !(err instanceof DOMException && err.message === 'Query timed out')) {
+        return;
+      }
+
+      // Timeout or network error — show differentiated message, skip non-streaming fallback
+      if (err instanceof DOMException && err.name === 'TimeoutError') {
+        setHistory((prev) =>
+          prev.map((item) =>
+            item.id === itemId
+              ? { ...item, isStreaming: false, error: getErrorMessage(err) }
+              : item
+          )
+        );
+        return;
+      }
 
       // Fallback to non-streaming mutation
       try {
@@ -194,13 +251,14 @@ export const UnifiedQueryPanel: React.FC<UnifiedQueryPanelProps> = ({
               ? {
                   ...item,
                   isStreaming: false,
-                  error: fallbackErr?.data?.detail || fallbackErr?.message || 'Query failed',
+                  error: getErrorMessage(fallbackErr),
                 }
               : item
           )
         );
       }
     } finally {
+      clearTimeout(timeoutId);
       abortControllerRef.current = null;
       scrollToBottom();
     }
@@ -317,6 +375,13 @@ export const UnifiedQueryPanel: React.FC<UnifiedQueryPanelProps> = ({
                             Analyzing your query...
                           </div>
                         )}
+                      </div>
+                    ) : !item.isStreaming && isEmptyResult(item) ? (
+                      <div className="flex flex-col items-center gap-2 rounded-lg border bg-card p-6 text-center">
+                        <SearchX className="h-8 w-8 text-muted-foreground/50" />
+                        <p className="text-sm text-muted-foreground">
+                          No relevant results found. Try rephrasing your question.
+                        </p>
                       </div>
                     ) : item.response ? (
                       <AdaptiveResponseRenderer response={item.response} />

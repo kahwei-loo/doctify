@@ -87,19 +87,25 @@ Your task: classify user queries into one of three categories:
 1. **rag** — The user is asking a question about document CONTENT. They want to search, understand, or extract information from uploaded documents (PDFs, text, web pages, Q&A pairs).
    Examples (EN): "What does the contract say about payment terms?", "Summarize the key findings", "What is mentioned about risk factors?"
    Examples (ZH): "合同中关于付款条件怎么写的?", "总结一下主要发现", "关于风险因素提到了什么?"
+   More ZH examples: "什么是退货政策？", "如何申请退款？", "这份文件的主要内容是什么？", "关于保修条款有什么规定？", "公司的请假流程是怎样的？"
 
 2. **analytics** — The user wants to query, analyze, aggregate, or visualize STRUCTURED DATA from CSV/Excel datasets. They're asking for statistics, trends, comparisons, counts, sums, averages, charts.
    Examples (EN): "What's the total revenue by month?", "Show me the top 10 customers by sales", "How many orders were placed in Q4?", "Plot monthly sales trend"
    Examples (ZH): "每月的总收入是多少?", "按销售额显示前10名客户", "第四季度有多少订单?", "画出月度销售趋势"
+   More ZH examples: "显示上个月的销售数据", "按产品类别统计总收入", "哪个部门的员工人数最多？", "计算每个季度的平均订单金额", "对比去年和今年的利润"
+   Mixed EN/ZH: "Show me the sales trend 从去年开始", "对比 revenue by region"
 
 3. **ambiguous** — Cannot determine intent with high confidence. Could be either RAG or analytics.
 
 CLASSIFICATION RULES:
 - If the query mentions specific metrics (revenue, count, total, average, sum) and the KB has structured data → analytics
+- Chinese metric keywords include: 总计, 平均, 统计, 数量, 趋势, 对比, 排名, 总收入, 销售额, 增长率
 - If the query asks about document content, policies, procedures, or specific text → rag
+- Chinese document keywords include: 政策, 规定, 流程, 条款, 内容, 说明, 解释, 文件, 合同
 - If the query could apply to both, lean toward RAG (safer fallback)
 - If confidence < 0.7, classify as ambiguous
 - For multi-dataset KBs, identify the most relevant dataset_id based on column names matching query terms
+- Queries mixing English and Chinese should be classified by their semantic intent, not language
 
 CONTEXT about this knowledge base's data sources will be provided. Use it to inform your decision."""
 

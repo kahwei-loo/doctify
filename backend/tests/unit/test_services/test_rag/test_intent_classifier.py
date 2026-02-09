@@ -215,6 +215,72 @@ class TestIntentClassifier:
             )
             assert result.intent == IntentType.RAG
 
+    # ── Additional Chinese / Mixed-Language Tests ────────────────────
+
+    async def test_classify_chinese_analytics_with_metrics(self, classifier):
+        """Chinese query with metric keywords should classify as analytics."""
+        data_sources = [DOC_SOURCE, STRUCTURED_SOURCE]
+        mock_resp = _make_function_call_response(
+            intent="analytics",
+            confidence=0.94,
+            dataset_id="ds-3",
+            reasoning="Chinese analytics query with metric keywords",
+        )
+
+        with patch.object(
+            classifier.client.chat.completions,
+            "create",
+            new_callable=AsyncMock,
+            return_value=mock_resp,
+        ):
+            result = await classifier.classify(
+                "按产品类别统计总收入", data_sources
+            )
+            assert result.intent == IntentType.ANALYTICS
+            assert result.confidence >= 0.9
+
+    async def test_classify_chinese_rag_policy_query(self, classifier):
+        """Chinese query about document policies should classify as RAG."""
+        data_sources = [DOC_SOURCE, STRUCTURED_SOURCE]
+        mock_resp = _make_function_call_response(
+            intent="rag",
+            confidence=0.93,
+            reasoning="Chinese query about document policy content",
+        )
+
+        with patch.object(
+            classifier.client.chat.completions,
+            "create",
+            new_callable=AsyncMock,
+            return_value=mock_resp,
+        ):
+            result = await classifier.classify(
+                "什么是退货政策？", data_sources
+            )
+            assert result.intent == IntentType.RAG
+
+    async def test_classify_mixed_language_query(self, classifier):
+        """Mixed English/Chinese query should be classified by semantic intent."""
+        data_sources = [DOC_SOURCE, STRUCTURED_SOURCE]
+        mock_resp = _make_function_call_response(
+            intent="analytics",
+            confidence=0.89,
+            dataset_id="ds-3",
+            reasoning="Mixed language query requesting sales trend data",
+        )
+
+        with patch.object(
+            classifier.client.chat.completions,
+            "create",
+            new_callable=AsyncMock,
+            return_value=mock_resp,
+        ):
+            result = await classifier.classify(
+                "Show me the sales trend 从去年开始", data_sources
+            )
+            assert result.intent == IntentType.ANALYTICS
+            assert result.dataset_id == "ds-3"
+
     # ── Conversation Stickiness Tests ─────────────────────────────────
 
     async def test_conversation_stickiness_hint(self, classifier):

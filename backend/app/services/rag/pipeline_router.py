@@ -7,11 +7,12 @@ intent classification. Manages conversation stickiness and query logging.
 Part of Unified Knowledge & Insights integration.
 """
 
+import json
 import logging
 import uuid
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional, Any
+from typing import AsyncGenerator, Optional, Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -135,6 +136,111 @@ class PipelineRouter:
         await self.session.commit()
 
         return response
+
+    async def route_query_stream(
+        self,
+        kb_id: uuid.UUID,
+        query: str,
+        user_id: uuid.UUID,
+        data_sources: list[DataSourceInfo],
+        conversation_id: Optional[str] = None,
+        search_mode: str = "hybrid",
+        conversation_context: Optional[dict] = None,
+    ) -> AsyncGenerator[str, None]:
+        """
+        Stream a unified query response as Server-Sent Events.
+
+        SSE event format: data: {"event": "<type>", ...}
+
+        Event types:
+        - intent: Classification result
+        - chunk: RAG answer text chunk (RAG path)
+        - sources: RAG source documents (RAG path)
+        - analytics_result: Full analytics response (Analytics path)
+        - done: Query completed with metadata
+        - error: Error information
+        """
+        response = UnifiedResponse(
+            query_id=uuid.uuid4(),
+            intent_type="rag",
+            confidence=0.0,
+        )
+
+        try:
+            # Step 1: Classify intent
+            classification = await self.classifier.classify(
+                query=query,
+                data_sources=data_sources,
+                conversation_context=conversation_context,
+            )
+
+            response.confidence = classification.confidence
+
+            # Emit intent event
+            yield f"data: {json.dumps({'event': 'intent', 'intent_type': classification.intent.value, 'confidence': classification.confidence})}\n\n"
+
+            if classification.intent == IntentType.ANALYTICS and classification.dataset_id:
+                # Analytics path: run synchronously and yield single result
+                try:
+                    response = await self._handle_analytics(
+                        query=query,
+                        user_id=user_id,
+                        classification=classification,
+                        conversation_id=conversation_id,
+                    )
+                    yield f"data: {json.dumps({'event': 'analytics_result', 'data': response.analytics_response or {}})}\n\n"
+                except Exception as e:
+                    yield f"data: {json.dumps({'event': 'error', 'message': str(e)})}\n\n"
+                    return
+
+            else:
+                # RAG path: stream answer chunks
+                response.intent_type = "rag"
+                try:
+                    async for sse_event in self.generation_service.generate_answer_stream(
+                        question=query,
+                        data_source_ids=None,
+                        user_id=user_id,
+                        search_mode=search_mode,
+                        use_reranking=True,
+                    ):
+                        # Re-emit generation_service SSE events in unified format
+                        if sse_event.startswith("data: "):
+                            raw = sse_event[len("data: "):].strip()
+                            try:
+                                parsed = json.loads(raw)
+                                event_type = parsed.get("type", "")
+                                if event_type == "token":
+                                    yield f"data: {json.dumps({'event': 'chunk', 'text': parsed.get('data', '')})}\n\n"
+                                elif event_type == "sources":
+                                    yield f"data: {json.dumps({'event': 'sources', 'sources': parsed.get('data', [])})}\n\n"
+                                elif event_type == "done":
+                                    pass  # We emit our own done after logging
+                                elif event_type == "error":
+                                    yield f"data: {json.dumps({'event': 'error', 'message': parsed.get('data', '')})}\n\n"
+                                    return
+                            except json.JSONDecodeError:
+                                continue
+                except Exception as e:
+                    yield f"data: {json.dumps({'event': 'error', 'message': str(e)})}\n\n"
+                    return
+
+            # Log the query
+            query_record = await self._log_query(
+                user_id=user_id,
+                query=query,
+                classification=classification,
+                response=response,
+                conversation_id=conversation_id,
+            )
+            await self.session.commit()
+
+            # Emit done event
+            yield f"data: {json.dumps({'event': 'done', 'query_id': str(query_record.id), 'created_at': query_record.created_at.isoformat() if query_record.created_at else None})}\n\n"
+
+        except Exception as e:
+            logger.error(f"Streaming query error: {e}")
+            yield f"data: {json.dumps({'event': 'error', 'message': str(e)})}\n\n"
 
     async def _handle_rag(
         self,
