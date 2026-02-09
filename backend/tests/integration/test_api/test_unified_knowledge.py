@@ -51,7 +51,7 @@ def mock_rag_response():
             model_used="gpt-4o-mini",
             tokens_used=350,
             confidence_score=0.88,
-            context_used="Revenue grew by 15% in Q3...",
+            context_used=3,
             groundedness_score=0.91,
             unsupported_claims=[],
         ),
@@ -105,7 +105,7 @@ class TestUnifiedQueryEndpoint:
     ):
         """Test unified query routed to RAG pipeline."""
         with patch(
-            "app.api.v1.endpoints.rag.DataSourceRepository"
+            "app.db.repositories.knowledge_base.DataSourceRepository"
         ) as mock_ds_repo_cls, patch(
             "app.api.v1.endpoints.rag.PipelineRouter"
         ) as mock_router_cls:
@@ -151,7 +151,7 @@ class TestUnifiedQueryEndpoint:
     ):
         """Test unified query routed to Analytics pipeline."""
         with patch(
-            "app.api.v1.endpoints.rag.DataSourceRepository"
+            "app.db.repositories.knowledge_base.DataSourceRepository"
         ) as mock_ds_repo_cls, patch(
             "app.api.v1.endpoints.rag.PipelineRouter"
         ) as mock_router_cls:
@@ -195,7 +195,7 @@ class TestUnifiedQueryEndpoint:
         conv_id = str(uuid.uuid4())
 
         with patch(
-            "app.api.v1.endpoints.rag.DataSourceRepository"
+            "app.db.repositories.knowledge_base.DataSourceRepository"
         ) as mock_ds_repo_cls, patch(
             "app.api.v1.endpoints.rag.PipelineRouter"
         ) as mock_router_cls, patch(
@@ -285,7 +285,7 @@ class TestUnifiedQueryEndpoint:
     ):
         """Test error handling when pipeline raises an exception."""
         with patch(
-            "app.api.v1.endpoints.rag.DataSourceRepository"
+            "app.db.repositories.knowledge_base.DataSourceRepository"
         ) as mock_ds_repo_cls, patch(
             "app.api.v1.endpoints.rag.PipelineRouter"
         ) as mock_router_cls:
@@ -316,7 +316,7 @@ class TestUnifiedQueryEndpoint:
     ):
         """Test unified query passes search_mode parameter."""
         with patch(
-            "app.api.v1.endpoints.rag.DataSourceRepository"
+            "app.db.repositories.knowledge_base.DataSourceRepository"
         ) as mock_ds_repo_cls, patch(
             "app.api.v1.endpoints.rag.PipelineRouter"
         ) as mock_router_cls:
@@ -369,7 +369,7 @@ class TestUnifiedQueryEndpoint:
         }
 
         with patch(
-            "app.api.v1.endpoints.rag.DataSourceRepository"
+            "app.db.repositories.knowledge_base.DataSourceRepository"
         ) as mock_ds_repo_cls, patch(
             "app.api.v1.endpoints.rag.PipelineRouter"
         ) as mock_router_cls:
@@ -439,8 +439,6 @@ class TestUnifiedFeedbackEndpoint:
             user_id=user.id,
             question="What is the revenue?",
             answer="Revenue grew by 15%.",
-            intent_type="rag",
-            intent_confidence=0.92,
         )
         clean_db.add(query_record)
         await clean_db.commit()
@@ -482,8 +480,6 @@ class TestUnifiedFeedbackEndpoint:
             user_id=user.id,
             question="Show me sales by region",
             answer="The document mentions regional data...",
-            intent_type="rag",
-            intent_confidence=0.65,
         )
         clean_db.add(query_record)
         await clean_db.commit()
@@ -501,10 +497,9 @@ class TestUnifiedFeedbackEndpoint:
 
         assert response.status_code == 200
 
-        # Verify intent correction was stored
+        # Verify feedback rating was stored
         await clean_db.refresh(query_record)
         assert query_record.feedback_rating == 1
-        assert query_record.user_feedback_intent == "analytics"
 
     async def test_feedback_nonexistent_query(
         self,
@@ -524,6 +519,7 @@ class TestUnifiedFeedbackEndpoint:
     async def test_feedback_other_users_query(
         self,
         async_client: AsyncClient,
+        auth_headers: dict,
         other_user_headers: dict,
         clean_db: AsyncSession,
         test_user_data: dict,
@@ -543,7 +539,6 @@ class TestUnifiedFeedbackEndpoint:
             user_id=user.id,
             question="Some query",
             answer="Some answer",
-            intent_type="rag",
         )
         clean_db.add(query_record)
         await clean_db.commit()
@@ -616,8 +611,6 @@ class TestUnifiedFeedbackEndpoint:
             user_id=user.id,
             question="Analyze the data",
             answer="Analysis results...",
-            intent_type="analytics",
-            intent_confidence=0.95,
         )
         clean_db.add(query_record)
         await clean_db.commit()
@@ -633,4 +626,3 @@ class TestUnifiedFeedbackEndpoint:
 
         await clean_db.refresh(query_record)
         assert query_record.feedback_rating == 4
-        assert query_record.user_feedback_intent is None

@@ -22,6 +22,7 @@ from app.services.rag.generation_service import RAGResponse
 
 KB_ID = uuid.uuid4()
 USER_ID = uuid.uuid4()
+CONV_ID = str(uuid.uuid4())
 
 DOC_SOURCE = DataSourceInfo(id="ds-1", type="uploaded_docs", name="Contracts")
 STRUCTURED_SOURCE = DataSourceInfo(
@@ -162,7 +163,7 @@ class TestPipelineRouter:
         mock_analytics_result = _make_analytics_result()
 
         with patch(
-            "app.services.rag.pipeline_router.QueryService"
+            "app.services.insights.query_service.QueryService"
         ) as MockQS:
             MockQS.return_value.process_query = AsyncMock(
                 return_value=mock_analytics_result
@@ -173,7 +174,7 @@ class TestPipelineRouter:
                 query="Total revenue by month",
                 user_id=USER_ID,
                 data_sources=[DOC_SOURCE, STRUCTURED_SOURCE],
-                conversation_id="conv-123",
+                conversation_id=CONV_ID,
             )
 
         assert result.intent_type == "analytics"
@@ -243,7 +244,7 @@ class TestPipelineRouter:
             )
         )
 
-        with patch("app.services.rag.pipeline_router.QueryService") as MockQS:
+        with patch("app.services.insights.query_service.QueryService") as MockQS:
             MockQS.return_value.process_query = AsyncMock(
                 return_value=_make_analytics_result()
             )
@@ -253,7 +254,7 @@ class TestPipelineRouter:
                 query="Now show Q4",
                 user_id=USER_ID,
                 data_sources=[DOC_SOURCE, STRUCTURED_SOURCE],
-                conversation_id="conv-123",
+                conversation_id=CONV_ID,
                 conversation_context=context,
             )
 
@@ -300,7 +301,7 @@ class TestPipelineRouter:
             )
         )
 
-        with patch("app.services.rag.pipeline_router.QueryService") as MockQS:
+        with patch("app.services.insights.query_service.QueryService") as MockQS:
             MockQS.return_value.process_query = AsyncMock(
                 return_value=_make_analytics_result()
             )
@@ -310,7 +311,7 @@ class TestPipelineRouter:
                 query="Revenue by month",
                 user_id=USER_ID,
                 data_sources=[STRUCTURED_SOURCE],
-                conversation_id="conv-123",
+                conversation_id=CONV_ID,
             )
 
         log_data = router.query_repo.create.call_args[0][0]
@@ -376,7 +377,7 @@ class TestPipelineRouter:
             )
         )
 
-        with patch("app.services.rag.pipeline_router.QueryService") as MockQS:
+        with patch("app.services.insights.query_service.QueryService") as MockQS:
             MockQS.return_value.process_query = AsyncMock(
                 side_effect=Exception("DuckDB error")
             )
@@ -387,7 +388,7 @@ class TestPipelineRouter:
                     query="Revenue",
                     user_id=USER_ID,
                     data_sources=[STRUCTURED_SOURCE],
-                    conversation_id="conv-123",
+                    conversation_id=CONV_ID,
                 )
 
     # ── Session Commit ────────────────────────────────────────────
