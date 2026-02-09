@@ -111,7 +111,7 @@ class TestUnifiedQueryEndpoint:
         ) as mock_router_cls:
             # Mock data source repository
             mock_ds_repo = AsyncMock()
-            mock_ds_repo.get_by_knowledge_base.return_value = []
+            mock_ds_repo.list_by_kb.return_value = []
             mock_ds_repo_cls.return_value = mock_ds_repo
 
             # Mock pipeline router
@@ -156,7 +156,7 @@ class TestUnifiedQueryEndpoint:
             "app.api.v1.endpoints.rag.PipelineRouter"
         ) as mock_router_cls:
             mock_ds_repo = AsyncMock()
-            mock_ds_repo.get_by_knowledge_base.return_value = []
+            mock_ds_repo.list_by_kb.return_value = []
             mock_ds_repo_cls.return_value = mock_ds_repo
 
             mock_router = AsyncMock()
@@ -202,7 +202,7 @@ class TestUnifiedQueryEndpoint:
             "app.api.v1.endpoints.rag.RAGQueryRepository"
         ) as mock_query_repo_cls:
             mock_ds_repo = AsyncMock()
-            mock_ds_repo.get_by_knowledge_base.return_value = []
+            mock_ds_repo.list_by_kb.return_value = []
             mock_ds_repo_cls.return_value = mock_ds_repo
 
             # Mock conversation lookup returning a prior analytics query
@@ -290,7 +290,7 @@ class TestUnifiedQueryEndpoint:
             "app.api.v1.endpoints.rag.PipelineRouter"
         ) as mock_router_cls:
             mock_ds_repo = AsyncMock()
-            mock_ds_repo.get_by_knowledge_base.return_value = []
+            mock_ds_repo.list_by_kb.return_value = []
             mock_ds_repo_cls.return_value = mock_ds_repo
 
             mock_router = AsyncMock()
@@ -321,7 +321,7 @@ class TestUnifiedQueryEndpoint:
             "app.api.v1.endpoints.rag.PipelineRouter"
         ) as mock_router_cls:
             mock_ds_repo = AsyncMock()
-            mock_ds_repo.get_by_knowledge_base.return_value = []
+            mock_ds_repo.list_by_kb.return_value = []
             mock_ds_repo_cls.return_value = mock_ds_repo
 
             mock_router = AsyncMock()
@@ -374,7 +374,7 @@ class TestUnifiedQueryEndpoint:
             "app.api.v1.endpoints.rag.PipelineRouter"
         ) as mock_router_cls:
             mock_ds_repo = AsyncMock()
-            mock_ds_repo.get_by_knowledge_base.return_value = [
+            mock_ds_repo.list_by_kb.return_value = [
                 mock_doc_source,
                 mock_structured_source,
             ]

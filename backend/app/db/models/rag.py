@@ -201,6 +201,32 @@ class RAGQuery(BaseModel):
         nullable=True,
     )
 
+    # Intent classification metadata (Migration 016)
+    intent_type: Mapped[Optional[str]] = mapped_column(
+        String(20),
+        nullable=True,
+    )
+    intent_confidence: Mapped[Optional[float]] = mapped_column(
+        Float,
+        nullable=True,
+    )
+    classification_latency_ms: Mapped[Optional[int]] = mapped_column(
+        Integer,
+        nullable=True,
+    )
+    dataset_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True),
+        nullable=True,
+    )
+    generated_sql: Mapped[Optional[str]] = mapped_column(
+        Text,
+        nullable=True,
+    )
+    chart_type: Mapped[Optional[str]] = mapped_column(
+        String(30),
+        nullable=True,
+    )
+
     # User feedback
     feedback_rating: Mapped[Optional[int]] = mapped_column(
         Integer,
@@ -208,6 +234,19 @@ class RAGQuery(BaseModel):
     )
     feedback_text: Mapped[Optional[str]] = mapped_column(
         Text,
+        nullable=True,
+    )
+
+    # User feedback on intent classification (Migration 017)
+    user_feedback_intent: Mapped[Optional[str]] = mapped_column(
+        String(20),
+        nullable=True,
+    )
+    user_feedback_rating: Mapped[Optional[int]] = mapped_column(
+        Integer,
+        nullable=True,
+    )
+    user_feedback_at: Mapped[Optional[datetime]] = mapped_column(
         nullable=True,
     )
 

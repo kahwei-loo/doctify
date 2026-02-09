@@ -792,7 +792,7 @@ async def unified_query(
         # Build data source info for the classifier
         from app.db.repositories.knowledge_base import DataSourceRepository
         ds_repo = DataSourceRepository(db)
-        db_sources = await ds_repo.get_by_knowledge_base(kb_id)
+        db_sources = await ds_repo.list_by_kb(kb_id)
 
         data_sources = []
         for ds in db_sources:
@@ -914,7 +914,7 @@ async def unified_query_stream(
     # Build data source info for the classifier
     from app.db.repositories.knowledge_base import DataSourceRepository
     ds_repo = DataSourceRepository(db)
-    db_sources = await ds_repo.get_by_knowledge_base(kb_id)
+    db_sources = await ds_repo.list_by_kb(kb_id)
 
     data_sources = []
     for ds in db_sources:
