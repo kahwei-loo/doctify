@@ -382,7 +382,7 @@ export const KBListPanel: React.FC<KBListPanelProps> = ({
                 kb={kb}
                 isSelected={selectedKbId === kb.id}
                 onSelect={() => {
-                  navigate(`/knowledge-base/${kb.id}?tab=sources`);
+                  navigate(`/knowledge-base/${kb.id}?tab=overview`);
                   onSelectKb(kb.id);
                 }}
               />

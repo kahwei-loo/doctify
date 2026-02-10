@@ -23,6 +23,7 @@ import {
   Rows3,
   Columns3,
   Eye,
+  Pencil,
   RefreshCw,
   Zap,
 } from 'lucide-react';
@@ -44,6 +45,7 @@ interface DataSourceListProps {
   dataSources: DataSource[];
   onDelete?: (dataSource: DataSource) => void;
   onView?: (dataSource: DataSource) => void;
+  onEdit?: (dataSource: DataSource) => void;
   onRegenerate?: (dataSource: DataSource) => void;
   isLoading?: boolean;
   className?: string;
@@ -249,10 +251,15 @@ interface DataSourceCardProps {
   dataSource: DataSource;
   onDelete?: (dataSource: DataSource) => void;
   onView?: (dataSource: DataSource) => void;
+  onEdit?: (dataSource: DataSource) => void;
   onRegenerate?: (dataSource: DataSource) => void;
 }
 
-const DataSourceCard: React.FC<DataSourceCardProps> = ({ dataSource, onDelete, onView, onRegenerate }) => {
+const isEditableType = (type: DataSourceType): boolean => {
+  return type !== 'uploaded_docs' && type !== 'structured_data';
+};
+
+const DataSourceCard: React.FC<DataSourceCardProps> = ({ dataSource, onDelete, onView, onEdit, onRegenerate }) => {
   return (
     <Card className="hover:shadow-md transition-all hover:border-primary/30">
       <CardHeader className="pb-3">
@@ -281,6 +288,12 @@ const DataSourceCard: React.FC<DataSourceCardProps> = ({ dataSource, onDelete, o
                   <Eye className="mr-2 h-4 w-4" />
                   View Details
                 </DropdownMenuItem>
+                {isEditableType(dataSource.type) && (
+                  <DropdownMenuItem onClick={() => onEdit?.(dataSource)}>
+                    <Pencil className="mr-2 h-4 w-4" />
+                    Edit
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem onClick={() => onRegenerate?.(dataSource)}>
                   <RefreshCw className="mr-2 h-4 w-4" />
                   Re-generate Embeddings
@@ -384,6 +397,7 @@ export const DataSourceList: React.FC<DataSourceListProps> = ({
   dataSources,
   onDelete,
   onView,
+  onEdit,
   onRegenerate,
   isLoading = false,
   className,
@@ -404,6 +418,7 @@ export const DataSourceList: React.FC<DataSourceListProps> = ({
           dataSource={dataSource}
           onDelete={onDelete}
           onView={onView}
+          onEdit={onEdit}
           onRegenerate={onRegenerate}
         />
       ))}

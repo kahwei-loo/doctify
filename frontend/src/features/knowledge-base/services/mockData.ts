@@ -295,6 +295,21 @@ export const mockKnowledgeBaseApi = {
     return { data: newDs };
   },
 
+  async updateDataSource(
+    id: string,
+    updates: Partial<DataSource>
+  ): Promise<{ data: DataSource }> {
+    await delay(400);
+    const ds = mockDataSources.find((d) => d.id === id);
+    if (!ds) throw new Error('Data Source not found');
+
+    if (updates.name) ds.name = updates.name;
+    if (updates.config) ds.config = { ...ds.config, ...updates.config };
+    ds.updated_at = new Date().toISOString();
+
+    return { data: { ...ds } };
+  },
+
   async deleteDataSource(id: string): Promise<{ success: boolean }> {
     await delay(400);
     const index = mockDataSources.findIndex((ds) => ds.id === id);

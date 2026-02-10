@@ -36,8 +36,9 @@ export {
 // Week 7: Confirmation Dialogs
 export { RegenerateEmbeddingsDialog } from './RegenerateEmbeddingsDialog';
 
-// Content Viewing
+// Content Viewing & Editing
 export { ViewContentDialog } from './ViewContentDialog';
+export { EditDataSourceDialog } from './EditDataSourceDialog';
 
 // Data Source Type Components
 export {

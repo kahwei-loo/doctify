@@ -142,6 +142,17 @@ export const realKnowledgeBaseApi = {
   },
 
   /**
+   * Update an existing Data Source
+   */
+  async updateDataSource(
+    id: string,
+    updates: Partial<DataSource>
+  ): Promise<{ data: DataSource }> {
+    const response = await apiClient.patch(`/data-sources/${id}`, updates);
+    return { data: response.data };
+  },
+
+  /**
    * Delete a Data Source
    */
   async deleteDataSource(id: string): Promise<{ success: boolean }> {

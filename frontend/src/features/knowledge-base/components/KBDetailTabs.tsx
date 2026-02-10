@@ -4,20 +4,18 @@
  * Tab navigation for knowledge base detail view.
  * Pattern: Uses ShadcnUI Tabs component
  *
- * Tabs:
- * 1. Data Sources - Manage data sources
- * 2. Embeddings - View and generate embeddings
- * 3. Test - Test query interface
- * 4. Analytics - Unified query (RAG + Analytics)
- * 5. Settings - KB configuration
+ * Tabs (consolidated 3-tab layout):
+ * 1. Overview - KB statistics, source summary, quick actions
+ * 2. Sources - Manage data sources
+ * 3. Query & Test - Test queries and unified analytics
  */
 
 import React from 'react';
-import { FileStack, Zap, TestTube2, Settings, BarChart3 } from 'lucide-react';
+import { LayoutDashboard, Database, Search } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 
-export type KBTab = 'sources' | 'embeddings' | 'test' | 'analytics' | 'settings';
+export type KBTab = 'overview' | 'sources' | 'query-test';
 
 interface KBDetailTabsProps {
   /** Current active tab */
@@ -26,27 +24,21 @@ interface KBDetailTabsProps {
   onTabChange: (tab: KBTab) => void;
   /** Custom class name */
   className?: string;
-  /** Content for Data Sources tab */
+  /** Content for Overview tab */
+  overviewContent?: React.ReactNode;
+  /** Content for Sources tab */
   sourcesContent?: React.ReactNode;
-  /** Content for Embeddings tab */
-  embeddingsContent?: React.ReactNode;
-  /** Content for Test tab */
-  testContent?: React.ReactNode;
-  /** Content for Analytics tab */
-  analyticsContent?: React.ReactNode;
-  /** Content for Settings tab */
-  settingsContent?: React.ReactNode;
+  /** Content for Query & Test tab */
+  queryTestContent?: React.ReactNode;
 }
 
 export const KBDetailTabs: React.FC<KBDetailTabsProps> = ({
   activeTab,
   onTabChange,
   className,
+  overviewContent,
   sourcesContent,
-  embeddingsContent,
-  testContent,
-  analyticsContent,
-  settingsContent,
+  queryTestContent,
 }) => {
   return (
     <Tabs
@@ -54,78 +46,48 @@ export const KBDetailTabs: React.FC<KBDetailTabsProps> = ({
       onValueChange={(value) => onTabChange(value as KBTab)}
       className={cn('flex flex-col h-full', className)}
     >
-      <div className="border-b bg-card/50 px-6 pt-6">
-        <TabsList className="grid w-full max-w-3xl grid-cols-5">
-          <TabsTrigger value="sources" className="gap-2">
-            <FileStack className="h-4 w-4" />
-            <span className="hidden sm:inline">Data Sources</span>
-            <span className="sm:hidden">Sources</span>
+      <div className="border-b bg-muted/30 px-6 py-3">
+        <TabsList className="grid w-full max-w-md grid-cols-3 h-9">
+          <TabsTrigger value="overview" className="gap-1.5 text-xs">
+            <LayoutDashboard className="h-3.5 w-3.5" />
+            <span>Overview</span>
           </TabsTrigger>
-          <TabsTrigger value="embeddings" className="gap-2">
-            <Zap className="h-4 w-4" />
-            <span className="hidden sm:inline">Embeddings</span>
-            <span className="sm:hidden">Vectors</span>
+          <TabsTrigger value="sources" className="gap-1.5 text-xs">
+            <Database className="h-3.5 w-3.5" />
+            <span>Sources</span>
           </TabsTrigger>
-          <TabsTrigger value="test" className="gap-2">
-            <TestTube2 className="h-4 w-4" />
-            <span className="hidden sm:inline">Test Query</span>
-            <span className="sm:hidden">Test</span>
-          </TabsTrigger>
-          <TabsTrigger value="analytics" className="gap-2">
-            <BarChart3 className="h-4 w-4" />
-            <span className="hidden sm:inline">Analytics</span>
-            <span className="sm:hidden">Data</span>
-          </TabsTrigger>
-          <TabsTrigger value="settings" className="gap-2">
-            <Settings className="h-4 w-4" />
-            <span className="hidden sm:inline">Settings</span>
-            <span className="sm:hidden">Config</span>
+          <TabsTrigger value="query-test" className="gap-1.5 text-xs">
+            <Search className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Query & Test</span>
+            <span className="sm:hidden">Query</span>
           </TabsTrigger>
         </TabsList>
       </div>
 
       <div className="flex-1 overflow-y-auto">
+        <TabsContent value="overview" className="mt-0 p-6">
+          {overviewContent || (
+            <div className="text-center py-12">
+              <LayoutDashboard className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+              <p className="text-muted-foreground">Overview content will go here</p>
+            </div>
+          )}
+        </TabsContent>
+
         <TabsContent value="sources" className="mt-0 p-6">
           {sourcesContent || (
             <div className="text-center py-12">
-              <FileStack className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+              <Database className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
               <p className="text-muted-foreground">Data sources content will go here</p>
             </div>
           )}
         </TabsContent>
 
-        <TabsContent value="embeddings" className="mt-0 p-6">
-          {embeddingsContent || (
+        <TabsContent value="query-test" className="mt-0 p-6 h-[calc(100vh-280px)]">
+          {queryTestContent || (
             <div className="text-center py-12">
-              <Zap className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-              <p className="text-muted-foreground">Embeddings content will go here</p>
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="test" className="mt-0 p-6">
-          {testContent || (
-            <div className="text-center py-12">
-              <TestTube2 className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-              <p className="text-muted-foreground">Test query content will go here</p>
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="analytics" className="mt-0 p-6 h-[calc(100vh-280px)]">
-          {analyticsContent || (
-            <div className="text-center py-12">
-              <BarChart3 className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-              <p className="text-muted-foreground">Analytics content will go here</p>
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="settings" className="mt-0 p-6">
-          {settingsContent || (
-            <div className="text-center py-12">
-              <Settings className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-              <p className="text-muted-foreground">Settings content will go here</p>
+              <Search className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+              <p className="text-muted-foreground">Query & test content will go here</p>
             </div>
           )}
         </TabsContent>

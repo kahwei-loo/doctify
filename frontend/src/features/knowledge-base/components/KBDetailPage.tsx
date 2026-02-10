@@ -1,26 +1,42 @@
 /**
  * KB Detail Page Component
  *
- * Single knowledge base detail view with tabs for managing sources, embeddings, testing, and settings.
- * Displayed when navigating to /knowledge-base/{id}?tab=sources (with kbId).
+ * Single knowledge base detail view with consolidated 3-tab layout.
+ * Displayed when navigating to /knowledge-base/{id}?tab=overview (with kbId).
  *
  * Features:
- * - KB-specific statistics
- * - KB header with name and description
- * - 4 tabs: Data Sources, Embeddings, Test, Settings
+ * - KB header with name, description, and settings access
+ * - 3 tabs: Overview, Sources, Query & Test
+ * - Settings accessible via Sheet panel in header
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Database, Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import {
-  KBOverallStats,
+  Database,
+  Plus,
+  Settings,
+  FileStack,
+  Zap,
+  Search,
+  HardDrive,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from '@/components/ui/sheet';
+import { Separator } from '@/components/ui/separator';
+import {
   KBDetailTabs,
   DataSourceList,
   AddDataSourceDialog,
   DataSourceConfigDialog,
-  EmbeddingsList,
+  EditDataSourceDialog,
   GenerateEmbeddingsButton,
   TestQueryPanel,
   KBSettings,
@@ -30,8 +46,8 @@ import {
   type KBTab,
 } from '.';
 import { knowledgeBaseApi } from '../services/mockData';
-import type { KnowledgeBase, DataSource, Embedding, DataSourceType } from '../types';
-import { cn } from '@/lib/utils';
+import toast from 'react-hot-toast';
+import type { KnowledgeBase, DataSource, DataSourceConfig, Embedding, DataSourceType } from '../types';
 import { UnifiedQueryPanel } from './UnifiedQueryPanel';
 
 interface KBDetailPageProps {
@@ -43,8 +59,9 @@ export const KBDetailPage: React.FC<KBDetailPageProps> = ({ kbId }) => {
 
   // UI State
   const [activeTab, setActiveTab] = useState<KBTab>(
-    (searchParams.get('tab') as KBTab) || 'sources'
+    (searchParams.get('tab') as KBTab) || 'overview'
   );
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   // Data State
   const [selectedKB, setSelectedKB] = useState<KnowledgeBase | null>(null);
@@ -62,6 +79,8 @@ export const KBDetailPage: React.FC<KBDetailPageProps> = ({ kbId }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [dataSourceToView, setDataSourceToView] = useState<DataSource | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [dataSourceToEdit, setDataSourceToEdit] = useState<DataSource | null>(null);
 
   // Load KB details
   const loadKB = useCallback(async () => {
@@ -150,6 +169,30 @@ export const KBDetailPage: React.FC<KBDetailPageProps> = ({ kbId }) => {
     setViewDialogOpen(true);
   }, []);
 
+  const handleEditDataSource = useCallback((dataSource: DataSource) => {
+    setDataSourceToEdit(dataSource);
+    setEditDialogOpen(true);
+  }, []);
+
+  const handleSaveDataSource = useCallback(
+    async (
+      dataSource: DataSource,
+      updates: { name?: string; config?: Partial<DataSourceConfig> }
+    ) => {
+      try {
+        await knowledgeBaseApi.updateDataSource(dataSource.id, updates);
+        // Reload data sources to reflect changes
+        await loadDataSources();
+        toast.success('Data source updated successfully');
+      } catch (err) {
+        console.error('Failed to update data source:', err);
+        toast.error('Failed to update data source');
+        throw err;
+      }
+    },
+    [loadDataSources]
+  );
+
   const handleRegenerateEmbeddings = useCallback(async (dataSource: DataSource) => {
     try {
       await knowledgeBaseApi.generateEmbeddings(dataSource.id, true);
@@ -224,19 +267,232 @@ export const KBDetailPage: React.FC<KBDetailPageProps> = ({ kbId }) => {
     [selectedKB]
   );
 
+  // Render overview content
+  const renderOverviewContent = () => {
+    if (!selectedKB) return null;
+
+    // Group data sources by type
+    const sourcesByType = dataSources.reduce(
+      (acc, ds) => {
+        acc[ds.type] = (acc[ds.type] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+
+    // Calculate vector DB size estimate
+    const embeddingCount = selectedKB.embedding_count || 0;
+    const vectorSizeBytes = embeddingCount * 1536 * 4;
+    const vectorSizeMB = vectorSizeBytes / (1024 * 1024);
+    const vectorSizeDisplay =
+      vectorSizeMB < 1
+        ? `${(vectorSizeMB * 1024).toFixed(0)} KB`
+        : `${vectorSizeMB.toFixed(1)} MB`;
+
+    // Count embeddings by status
+    const completedEmbeddings = embeddings.filter((e) => e.status === 'completed').length;
+    const processingEmbeddings = embeddings.filter((e) => e.status === 'processing').length;
+    const failedEmbeddings = embeddings.filter((e) => e.status === 'failed').length;
+
+    return (
+      <div className="space-y-6">
+        {/* Key Metrics */}
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+          <Card className="hover:shadow-md transition-all border-l-4 border-l-blue-500">
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Data Sources</p>
+                  <p className="text-2xl font-bold tracking-tight">{dataSources.length}</p>
+                  <p className="text-xs text-muted-foreground">Connected sources</p>
+                </div>
+                <div className="rounded-xl p-2.5 bg-blue-500/10">
+                  <FileStack className="h-4 w-4 text-blue-500" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-md transition-all border-l-4 border-l-emerald-500">
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Documents</p>
+                  <p className="text-2xl font-bold tracking-tight">
+                    {(selectedKB.document_count || 0).toLocaleString()}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Indexed documents</p>
+                </div>
+                <div className="rounded-xl p-2.5 bg-emerald-500/10">
+                  <Database className="h-4 w-4 text-emerald-500" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-md transition-all border-l-4 border-l-amber-500">
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Embeddings</p>
+                  <p className="text-2xl font-bold tracking-tight">{embeddingCount.toLocaleString()}</p>
+                  <p className="text-xs text-muted-foreground">Vector embeddings</p>
+                </div>
+                <div className="rounded-xl p-2.5 bg-amber-500/10">
+                  <Zap className="h-4 w-4 text-amber-500" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-md transition-all border-l-4 border-l-violet-500">
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Vector DB Size</p>
+                  <p className="text-2xl font-bold tracking-tight">{vectorSizeDisplay}</p>
+                  <p className="text-xs text-muted-foreground">Estimated storage</p>
+                </div>
+                <div className="rounded-xl p-2.5 bg-violet-500/10">
+                  <HardDrive className="h-4 w-4 text-violet-500" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Data Source Summary & Embeddings Status */}
+        <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
+          {/* Data Source Breakdown */}
+          <Card className="hover:shadow-sm transition-shadow">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-semibold">Source Breakdown</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {dataSources.length === 0 ? (
+                <p className="text-sm text-muted-foreground py-4 text-center">
+                  No data sources added yet
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {Object.entries(sourcesByType).map(([type, count]) => (
+                    <div key={type} className="flex items-center justify-between">
+                      <span className="text-sm capitalize text-muted-foreground">
+                        {type.replace(/_/g, ' ')}
+                      </span>
+                      <span className="text-sm font-medium">{count}</span>
+                    </div>
+                  ))}
+                  <Separator className="my-2" />
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Total</span>
+                    <span className="text-sm font-bold">{dataSources.length}</span>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Embeddings Status */}
+          <Card className="hover:shadow-sm transition-shadow">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-semibold">Embeddings Status</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {embeddings.length === 0 ? (
+                <p className="text-sm text-muted-foreground py-4 text-center">
+                  No embeddings generated yet
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {completedEmbeddings > 0 && (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="h-2 w-2 rounded-full bg-green-500" />
+                        <span className="text-sm text-muted-foreground">Completed</span>
+                      </div>
+                      <span className="text-sm font-medium">{completedEmbeddings}</span>
+                    </div>
+                  )}
+                  {processingEmbeddings > 0 && (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="h-2 w-2 rounded-full bg-yellow-500 animate-pulse" />
+                        <span className="text-sm text-muted-foreground">Processing</span>
+                      </div>
+                      <span className="text-sm font-medium">{processingEmbeddings}</span>
+                    </div>
+                  )}
+                  {failedEmbeddings > 0 && (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="h-2 w-2 rounded-full bg-red-500" />
+                        <span className="text-sm text-muted-foreground">Failed</span>
+                      </div>
+                      <span className="text-sm font-medium">{failedEmbeddings}</span>
+                    </div>
+                  )}
+                  <Separator className="my-2" />
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Total</span>
+                    <span className="text-sm font-bold">{embeddings.length}</span>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Quick Actions */}
+        <Card className="hover:shadow-sm transition-shadow">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-semibold">Quick Actions</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowAddSourceDialog(true)}
+                className="gap-1.5"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Add Source
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setActiveTab('query-test')}
+                className="gap-1.5"
+              >
+                <Search className="h-3.5 w-3.5" />
+                Test Query
+              </Button>
+              <GenerateEmbeddingsButton
+                knowledgeBaseId={kbId}
+                dataSourceCount={dataSources.length}
+                onComplete={handleEmbeddingsGenerated}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  };
+
   // Render data sources content
   const renderSourcesContent = () => {
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-medium">Data Sources</h3>
-            <p className="text-sm text-muted-foreground">
+            <h3 className="text-base font-semibold tracking-tight">Data Sources</h3>
+            <p className="text-sm text-muted-foreground mt-0.5">
               Manage data sources for this knowledge base
             </p>
           </div>
-          <Button onClick={() => setShowAddSourceDialog(true)}>
-            <Plus className="mr-2 h-4 w-4" />
+          <Button size="sm" onClick={() => setShowAddSourceDialog(true)} className="gap-1.5">
+            <Plus className="h-3.5 w-3.5" />
             Add Source
           </Button>
         </div>
@@ -245,6 +501,7 @@ export const KBDetailPage: React.FC<KBDetailPageProps> = ({ kbId }) => {
           dataSources={dataSources}
           onDelete={handleDeleteDataSource}
           onView={handleViewDataSource}
+          onEdit={handleEditDataSource}
           onRegenerate={handleRegenerateEmbeddings}
           isLoading={isLoadingSources}
         />
@@ -259,49 +516,28 @@ export const KBDetailPage: React.FC<KBDetailPageProps> = ({ kbId }) => {
     );
   };
 
-  // Render embeddings content
-  const renderEmbeddingsContent = () => {
+  // Render query & test content (merged test + analytics)
+  const renderQueryTestContent = () => {
+    if (!selectedKB) return null;
+
     return (
-      <div className="space-y-6">
-        <GenerateEmbeddingsButton
-          knowledgeBaseId={kbId}
-          dataSourceCount={dataSources.length}
-          onComplete={handleEmbeddingsGenerated}
-        />
+      <div className="space-y-6 h-full flex flex-col">
+        {/* Test Query Section */}
+        <div>
+          <TestQueryPanel
+            knowledgeBaseId={kbId}
+            embeddingCount={selectedKB.embedding_count || 0}
+          />
+        </div>
 
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-medium">Embeddings</h3>
-              <p className="text-sm text-muted-foreground">
-                Vector embeddings generated from your data sources
-              </p>
-            </div>
-          </div>
+        <Separator />
 
-          <EmbeddingsList embeddings={embeddings} isLoading={isLoadingEmbeddings} />
+        {/* Unified Query / Analytics Section */}
+        <div className="flex-1 min-h-0">
+          <UnifiedQueryPanel knowledgeBaseId={kbId} />
         </div>
       </div>
     );
-  };
-
-  // Render test query content
-  const renderTestContent = () => {
-    if (!selectedKB) return null;
-
-    return (
-      <TestQueryPanel
-        knowledgeBaseId={kbId}
-        embeddingCount={selectedKB.embedding_count || 0}
-      />
-    );
-  };
-
-  // Render settings content
-  const renderSettingsContent = () => {
-    if (!selectedKB) return null;
-
-    return <KBSettings knowledgeBase={selectedKB} onSave={handleSettingsSaved} />;
   };
 
   // Error state
@@ -343,32 +579,49 @@ export const KBDetailPage: React.FC<KBDetailPageProps> = ({ kbId }) => {
   // TypeScript now knows selectedKB is not null
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      {/* KB-Specific Statistics */}
-      <div className="border-b bg-background p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
-              <Database className="h-6 w-6 text-primary" />
-              {selectedKB.name}
-            </h1>
-            {selectedKB.description && (
-              <p className="text-sm text-muted-foreground mt-1">
-                {selectedKB.description}
-              </p>
-            )}
+      {/* KB Header */}
+      <div className="border-b bg-gradient-to-b from-background to-muted/30 px-6 py-5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-primary/10 shrink-0">
+              <Database className="h-5 w-5 text-primary" />
+            </div>
+            <div className="min-w-0">
+              <h1 className="text-xl font-semibold tracking-tight truncate">
+                {selectedKB.name}
+              </h1>
+              {selectedKB.description && (
+                <p className="text-sm text-muted-foreground truncate mt-0.5">
+                  {selectedKB.description}
+                </p>
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Context-aware stats for single KB */}
-        <KBOverallStats
-          context="single"
-          data={{
-            data_source_count: selectedKB.data_source_count || 0,
-            document_count: selectedKB.document_count || 0,
-            embedding_count: selectedKB.embedding_count || 0,
-          }}
-          isLoading={isLoadingKB}
-        />
+          {/* Settings Button */}
+          <Sheet open={settingsOpen} onOpenChange={setSettingsOpen}>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setSettingsOpen(true)}
+              className="h-9 w-9 shrink-0"
+            >
+              <Settings className="h-4 w-4" />
+              <span className="sr-only">Settings</span>
+            </Button>
+            <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
+              <SheetHeader>
+                <SheetTitle>Knowledge Base Settings</SheetTitle>
+                <SheetDescription>
+                  Configure settings for {selectedKB.name}
+                </SheetDescription>
+              </SheetHeader>
+              <div className="mt-6">
+                <KBSettings knowledgeBase={selectedKB} onSave={handleSettingsSaved} />
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
 
       {/* Detail Tabs */}
@@ -376,11 +629,9 @@ export const KBDetailPage: React.FC<KBDetailPageProps> = ({ kbId }) => {
         <KBDetailTabs
           activeTab={activeTab}
           onTabChange={handleTabChange}
+          overviewContent={renderOverviewContent()}
           sourcesContent={renderSourcesContent()}
-          embeddingsContent={renderEmbeddingsContent()}
-          testContent={renderTestContent()}
-          analyticsContent={<UnifiedQueryPanel knowledgeBaseId={kbId} />}
-          settingsContent={renderSettingsContent()}
+          queryTestContent={renderQueryTestContent()}
         />
       </div>
 
@@ -422,6 +673,14 @@ export const KBDetailPage: React.FC<KBDetailPageProps> = ({ kbId }) => {
         onOpenChange={setViewDialogOpen}
         dataSource={dataSourceToView}
         onRegenerate={handleRegenerateEmbeddings}
+      />
+
+      {/* Edit Data Source Dialog */}
+      <EditDataSourceDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        dataSource={dataSourceToEdit}
+        onSave={handleSaveDataSource}
       />
     </div>
   );
