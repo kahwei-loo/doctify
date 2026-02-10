@@ -196,6 +196,15 @@ async def create_data_source(
         await db.commit()
         await db.refresh(ds)
 
+        # Auto-trigger embedding generation for types with immediate content
+        if data.type in ("text", "qa_pairs"):
+            try:
+                from app.tasks.knowledge_base import generate_embeddings_task
+                generate_embeddings_task.delay(str(ds.id))
+                logger.info(f"Auto-triggered embedding generation for {data.type} data source {ds.id}")
+            except Exception as e:
+                logger.warning(f"Failed to auto-trigger embeddings for data source {ds.id}: {e}")
+
         # Set counts to 0 for new data source
         ds.document_count = 0
         ds.embedding_count = 0
@@ -228,6 +237,168 @@ async def create_data_source(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Unexpected error: {str(e)}",
+        )
+
+
+@router.post(
+    "/knowledge-bases/{kb_id}/data-sources/{ds_id}/upload",
+    status_code=status.HTTP_200_OK,
+    summary="Upload documents to data source",
+    description="Upload document files to an uploaded_docs data source.",
+)
+async def upload_documents_to_data_source(
+    kb_id: uuid.UUID,
+    ds_id: uuid.UUID,
+    files: list[UploadFile] = File(..., description="Document files to upload"),
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """
+    Upload documents to an uploaded_docs data source.
+
+    Args:
+        kb_id: Knowledge base UUID
+        ds_id: Data source UUID
+        files: List of files to upload
+        current_user: Authenticated user
+        db: Database session
+
+    Returns:
+        Dictionary with document_ids array
+
+    Raises:
+        HTTPException 404: Knowledge base or data source not found
+        HTTPException 403: User does not own this knowledge base
+        HTTPException 400: Invalid file type or data source type
+        HTTPException 500: Upload or processing error
+    """
+    try:
+        from app.services.storage.factory import get_storage_service
+        from app.db.models.document import Document
+        from app.tasks.knowledge_base import generate_embeddings_task
+        import hashlib
+        from pathlib import Path
+
+        kb_repo = KnowledgeBaseRepository(db)
+        ds_repo = DataSourceRepository(db)
+
+        # Verify KB exists and user owns it
+        kb = await kb_repo.get_by_id(kb_id)
+        if not kb:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Knowledge base not found",
+            )
+
+        if kb.user_id != current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to modify this knowledge base",
+            )
+
+        # Verify data source exists and is uploaded_docs type
+        ds = await ds_repo.get_by_id(ds_id)
+        if not ds or ds.knowledge_base_id != kb_id:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Data source not found",
+            )
+
+        if ds.type != "uploaded_docs":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="This endpoint only supports uploaded_docs data sources",
+            )
+
+        # Get storage service
+        storage_service = get_storage_service()
+
+        # Process each file
+        document_ids = []
+        for file in files:
+            # Read file content
+            content = await file.read()
+
+            # Calculate file hash
+            file_hash = hashlib.sha256(content).hexdigest()
+
+            # Determine file path
+            file_extension = Path(file.filename).suffix
+            file_path = f"knowledge_bases/{kb_id}/data_sources/{ds_id}/{uuid.uuid4()}{file_extension}"
+
+            # Save file to storage
+            saved_path = await storage_service.save_file(content, file_path)
+
+            # Extract text content from uploaded file
+            extracted_text = None
+            file_extension = Path(file.filename).suffix.lower()
+
+            try:
+                if file_extension == ".pdf":
+                    import io
+                    from PyPDF2 import PdfReader
+                    pdf_reader = PdfReader(io.BytesIO(content))
+                    text_parts = []
+                    for page in pdf_reader.pages:
+                        page_text = page.extract_text()
+                        if page_text:
+                            text_parts.append(page_text)
+                    extracted_text = "\n\n".join(text_parts) if text_parts else None
+                elif file_extension in (".txt", ".md", ".csv", ".json", ".xml", ".html"):
+                    extracted_text = content.decode("utf-8", errors="replace")
+            except Exception as text_err:
+                logger.warning(f"Failed to extract text from {file.filename}: {text_err}")
+
+            # Create document record
+            document = Document(
+                id=uuid.uuid4(),
+                user_id=current_user.id,
+                project_id=None,  # KB documents don't belong to projects
+                title=file.filename,
+                description=f"Uploaded to knowledge base data source",
+                original_filename=file.filename,
+                file_path=saved_path,
+                file_type=file.content_type or "application/octet-stream",
+                file_size=len(content),
+                file_hash=file_hash,
+                extracted_text=extracted_text,
+                status="completed",  # KB docs don't need OCR processing
+            )
+
+            db.add(document)
+            await db.flush()  # Flush to get document ID
+
+            document_ids.append(str(document.id))
+
+        # Update data source config with document IDs
+        current_config = ds.config or {}
+        existing_doc_ids = current_config.get("document_ids", [])
+        updated_doc_ids = existing_doc_ids + document_ids
+
+        ds.config = {**current_config, "document_ids": updated_doc_ids}
+
+        await db.commit()
+
+        # Trigger KB embedding generation AFTER commit (avoids race condition)
+        try:
+            generate_embeddings_task.delay(str(ds.id))
+            logger.info(f"Triggered embedding generation for data source {ds.id}")
+        except Exception as e:
+            logger.warning(f"Failed to trigger embedding generation for data source {ds.id}: {e}")
+
+        return {
+            "document_ids": document_ids,
+            "message": f"Successfully uploaded {len(document_ids)} documents",
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Failed to upload documents: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to upload documents: {str(e)}",
         )
 
 
@@ -800,6 +971,14 @@ async def upload_structured_data(
             f"Created structured_data source {ds.id} for KB {kb_id} "
             f"(dataset={dataset_id}, columns={len(schema_def.columns)})"
         )
+
+        # Auto-trigger embedding generation for structured data
+        try:
+            from app.tasks.knowledge_base import generate_embeddings_task
+            generate_embeddings_task.delay(str(ds.id))
+            logger.info(f"Auto-triggered embedding generation for structured_data source {ds.id}")
+        except Exception as e:
+            logger.warning(f"Failed to auto-trigger embeddings for structured_data source {ds.id}: {e}")
 
         return DataSourceResponse(
             id=ds.id,

@@ -394,6 +394,9 @@ def task_retry_handler(
 # This ensures tasks are discovered when Celery starts
 celery_app.autodiscover_tasks(["app.tasks.document", "app.tasks.rag"])
 
+# Explicitly import standalone task modules (not subpackages)
+import app.tasks.knowledge_base  # noqa: F401 - KB embedding & crawl tasks
+
 
 # =============================================================================
 # Utility Functions

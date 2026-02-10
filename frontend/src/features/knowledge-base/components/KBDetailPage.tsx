@@ -144,9 +144,9 @@ export const KBDetailPage: React.FC<KBDetailPageProps> = ({ kbId }) => {
 
   const handleCreateDataSource = useCallback(
     async (name: string, config: DataSource['config']) => {
-      if (!kbId || !selectedSourceType) return;
+      if (!kbId || !selectedSourceType) return null;
 
-      await knowledgeBaseApi.createDataSource({
+      const createResponse = await knowledgeBaseApi.createDataSource({
         knowledge_base_id: kbId,
         type: selectedSourceType,
         name,
@@ -157,6 +157,8 @@ export const KBDetailPage: React.FC<KBDetailPageProps> = ({ kbId }) => {
       const response = await knowledgeBaseApi.listDataSources(kbId);
       setDataSources(response.data);
       setSelectedSourceType(null);
+
+      return createResponse.data;
     },
     [kbId, selectedSourceType]
   );

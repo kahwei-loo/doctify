@@ -114,6 +114,34 @@ export const realKnowledgeBaseApi = {
   },
 
   /**
+   * Upload documents to a Data Source
+   */
+  async uploadDocuments(
+    knowledgeBaseId: string,
+    dataSourceId: string,
+    files: File[]
+  ): Promise<{ data: { document_ids: string[] } }> {
+    const formData = new FormData();
+    files.forEach(file => formData.append('files', file));
+
+    const response = await apiClient.post(
+      `/knowledge-bases/${knowledgeBaseId}/data-sources/${dataSourceId}/upload`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+
+    return {
+      data: {
+        document_ids: response.data.document_ids || [],
+      },
+    };
+  },
+
+  /**
    * Delete a Data Source
    */
   async deleteDataSource(id: string): Promise<{ success: boolean }> {

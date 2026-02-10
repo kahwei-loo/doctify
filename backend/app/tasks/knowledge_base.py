@@ -19,7 +19,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from app.tasks.celery_app import celery_app
-from app.db.database import get_async_session
+from app.db.database import get_db_session, close_db, init_db
 from app.db.repositories.knowledge_base import KnowledgeBaseRepository, DataSourceRepository
 from app.db.repositories.rag import DocumentEmbeddingRepository
 from app.db.models.rag import DocumentEmbedding
@@ -28,6 +28,58 @@ from app.core.config import get_settings
 
 logger = logging.getLogger(__name__)
 config = get_settings()
+
+
+async def _read_file_content(file_path: str, file_type: str = "") -> str:
+    """
+    Read text content from a stored file.
+
+    Supports PDF (via PyPDF2) and plain text files.
+
+    Args:
+        file_path: Path to the file in storage
+        file_type: MIME type of the file
+
+    Returns:
+        Extracted text content or empty string
+    """
+    import os
+    from pathlib import Path
+
+    try:
+        # Resolve the actual file path
+        # file_path may be relative to /app/uploads/ or absolute
+        actual_path = file_path
+        if not os.path.isabs(file_path):
+            actual_path = os.path.join("/app/uploads", file_path)
+
+        if not os.path.exists(actual_path):
+            logger.warning(f"File not found: {actual_path}")
+            return ""
+
+        extension = Path(actual_path).suffix.lower()
+
+        if extension == ".pdf":
+            from PyPDF2 import PdfReader
+            reader = PdfReader(actual_path)
+            text_parts = []
+            for page in reader.pages:
+                page_text = page.extract_text()
+                if page_text:
+                    text_parts.append(page_text)
+            return "\n\n".join(text_parts) if text_parts else ""
+
+        elif extension in (".txt", ".md", ".csv", ".json", ".xml", ".html"):
+            with open(actual_path, "r", encoding="utf-8", errors="replace") as f:
+                return f.read()
+
+        else:
+            logger.warning(f"Unsupported file type for text extraction: {extension}")
+            return ""
+
+    except Exception as e:
+        logger.warning(f"Failed to read file content from {file_path}: {e}")
+        return ""
 
 
 async def _extract_text_from_data_source(ds, db) -> str:
@@ -49,7 +101,7 @@ async def _extract_text_from_data_source(ds, db) -> str:
 
     elif ds_type == "qa_pairs":
         # Q&A pairs formatted as conversational text
-        qa_pairs = ds.config.get("pairs", [])
+        qa_pairs = ds.config.get("qa_pairs", []) or ds.config.get("pairs", [])
         if not qa_pairs:
             return ""
         text_parts = []
@@ -72,8 +124,18 @@ async def _extract_text_from_data_source(ds, db) -> str:
         for doc_id in document_ids:
             try:
                 doc = await doc_repo.get_by_id(doc_id)
-                if doc and doc.extracted_text:
+                if not doc:
+                    continue
+
+                if doc.extracted_text:
                     text_parts.append(doc.extracted_text)
+                elif doc.file_path:
+                    # Fallback: read file content directly
+                    extracted = await _read_file_content(doc.file_path, doc.file_type)
+                    if extracted:
+                        # Cache extracted text on the document for future use
+                        doc.extracted_text = extracted
+                        text_parts.append(extracted)
             except Exception as e:
                 logger.warning(f"Failed to extract text from document {doc_id}: {e}")
                 continue
@@ -111,7 +173,11 @@ async def _generate_embeddings_async(data_source_id: str, force_regenerate: bool
     ds_id = uuid.UUID(data_source_id)
     logger.info(f"Starting embedding generation for data source {ds_id}")
 
-    async with get_async_session() as db:
+    # Reset DB connection to bind to current event loop (Celery + asyncio fix)
+    await close_db()
+    await init_db()
+
+    async with get_db_session() as db:
         ds_repo = DataSourceRepository(db)
         kb_repo = KnowledgeBaseRepository(db)
         embedding_repo = DocumentEmbeddingRepository(db)
@@ -272,7 +338,11 @@ async def _crawl_website_async(data_source_id: str, task_instance):
     ds_id = uuid.UUID(data_source_id)
     logger.info(f"Starting website crawl for data source {ds_id}")
 
-    async with get_async_session() as db:
+    # Reset DB connection to bind to current event loop (Celery + asyncio fix)
+    await close_db()
+    await init_db()
+
+    async with get_db_session() as db:
         ds_repo = DataSourceRepository(db)
 
         # Get data source
@@ -472,7 +542,7 @@ def generate_embeddings_task(self, data_source_id: str, force_regenerate: bool =
         # Update data source status to error
         try:
             async def update_error_status():
-                async with get_async_session() as db:
+                async with get_db_session() as db:
                     ds_repo = DataSourceRepository(db)
                     await ds_repo.update_status(uuid.UUID(data_source_id), "error", str(e))
                     await db.commit()
@@ -527,7 +597,7 @@ def crawl_website_task(self, data_source_id: str):
         # Update data source status to error
         try:
             async def update_error_status():
-                async with get_async_session() as db:
+                async with get_db_session() as db:
                     ds_repo = DataSourceRepository(db)
                     await ds_repo.update_status(uuid.UUID(data_source_id), "error", str(e))
                     await db.commit()

@@ -12,6 +12,7 @@
 
 import React, { useState } from 'react';
 import { Search, Loader2, Sparkles, AlertCircle } from 'lucide-react';
+import { knowledgeBaseApi } from '../services/mockData';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -72,46 +73,29 @@ export const TestQueryPanel: React.FC<TestQueryPanelProps> = ({
     setError(null);
 
     try {
-      // Mock search results (Week 2)
-      await new Promise((resolve) => setTimeout(resolve, 800)); // Simulate API delay
-
-      const mockResults: QueryResult[] = [
-        {
-          text: 'This is a sample text chunk that matches your query. It contains relevant information about the topic you searched for.',
-          similarity: 0.92,
-          source_name: 'User Guide.pdf',
-          chunk_index: 5,
-        },
-        {
-          text: 'Another relevant chunk with slightly lower similarity score. This also contains information related to your search.',
-          similarity: 0.87,
-          source_name: 'Technical Documentation',
-          chunk_index: 12,
-        },
-        {
-          text: 'Third result with moderate similarity. The content is somewhat related to your query but not as strongly matched.',
-          similarity: 0.78,
-          source_name: 'FAQ Document',
-          chunk_index: 3,
-        },
-        {
-          text: 'Fourth result with lower similarity score. This might be tangentially related to your search query.',
-          similarity: 0.65,
-          source_name: 'User Guide.pdf',
-          chunk_index: 18,
-        },
-        {
-          text: 'Fifth result with the lowest similarity among top results. Still potentially relevant but weaker match.',
-          similarity: 0.58,
-          source_name: 'Getting Started',
-          chunk_index: 7,
-        },
-      ];
-
-      const limitedResults = mockResults.slice(0, parseInt(topK));
-      setResults(limitedResults);
-    } catch (err) {
-      setError('Search failed. Please try again.');
+      if (onQuery) {
+        const queryResults = await onQuery(query, parseInt(topK), searchMode);
+        setResults(queryResults);
+      } else {
+        const response = await knowledgeBaseApi.testQuery(knowledgeBaseId, {
+          query: query.trim(),
+          top_k: parseInt(topK),
+          similarity_threshold: 0.3,
+        });
+        const apiResults = (response.data?.results || response.results || []).map(
+          (r: { text?: string; chunk_text?: string; similarity?: number; score?: number; source_name?: string; source_type?: string; chunk_index?: number; metadata?: Record<string, unknown> }) => ({
+            text: r.text || r.chunk_text || '',
+            similarity: r.similarity || r.score || 0,
+            source_name: r.source_name || r.source_type || 'Unknown',
+            chunk_index: r.chunk_index ?? 0,
+            search_mode: searchMode,
+          })
+        );
+        setResults(apiResults);
+      }
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Search failed. Please try again.';
+      setError(errorMessage);
     } finally {
       setIsSearching(false);
     }

@@ -29,14 +29,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
-import type { DataSourceType, DataSourceConfig, QAPair } from '../types';
+import type { DataSourceType, DataSourceConfig, QAPair, DataSource } from '../types';
+import { UploadedDocsSource } from './sources/UploadedDocsSource';
+import { realKnowledgeBaseApi } from '../services/api';
 
 interface DataSourceConfigDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   knowledgeBaseId: string;
   sourceType: DataSourceType;
-  onSubmit: (name: string, config: DataSourceConfig) => Promise<void>;
+  onSubmit: (name: string, config: DataSourceConfig) => Promise<DataSource | null>;
 }
 
 const TYPE_INFO: Record<DataSourceType, { label: string; icon: React.ReactNode; iconBg: string }> = {
@@ -91,6 +93,9 @@ export const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
     { id: `qa-${Date.now()}`, question: '', answer: '' },
   ]);
 
+  // Uploaded documents state
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+
   const typeInfo = TYPE_INFO[sourceType];
 
   const resetForm = useCallback(() => {
@@ -128,6 +133,10 @@ export const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
     []
   );
 
+  const handleUploadedFiles = useCallback((files: File[]) => {
+    setSelectedFiles(files);
+  }, []);
+
   const buildConfig = useCallback((): DataSourceConfig => {
     switch (sourceType) {
       case 'website':
@@ -152,12 +161,17 @@ export const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
           qa_pairs: qaPairs.filter((p) => p.question.trim() && p.answer.trim()),
         };
       case 'uploaded_docs':
+        // Files will be uploaded after data source creation
+        // document_ids will be populated via API
+        return {
+          document_ids: [],  // Will be populated after upload
+        };
       default:
         return {
           document_ids: [],
         };
     }
-  }, [sourceType, url, maxDepth, includePatterns, excludePatterns, textContent, qaPairs]);
+  }, [sourceType, url, maxDepth, includePatterns, excludePatterns, textContent, qaPairs, selectedFiles]);
 
   const isValid = useCallback((): boolean => {
     if (!name.trim()) return false;
@@ -182,14 +196,24 @@ export const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
     setIsSubmitting(true);
     try {
       const config = buildConfig();
-      await onSubmit(name.trim(), config);
+      const createdDataSource = await onSubmit(name.trim(), config);
+
+      // If uploaded_docs and files selected, upload them
+      if (sourceType === 'uploaded_docs' && selectedFiles.length > 0 && createdDataSource) {
+        await realKnowledgeBaseApi.uploadDocuments(
+          knowledgeBaseId,
+          createdDataSource.id,
+          selectedFiles
+        );
+      }
+
       handleClose();
     } catch (error) {
       console.error('Failed to create data source:', error);
     } finally {
       setIsSubmitting(false);
     }
-  }, [isValid, buildConfig, name, onSubmit, handleClose]);
+  }, [isValid, buildConfig, name, onSubmit, handleClose, sourceType, selectedFiles, knowledgeBaseId]);
 
   const renderWebsiteForm = () => (
     <div className="space-y-4">
@@ -325,16 +349,10 @@ export const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
   );
 
   const renderUploadedDocsForm = () => (
-    <div className="space-y-4">
-      <div className="border-2 border-dashed rounded-lg p-8 text-center">
-        <FileStack className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-        <p className="text-sm text-muted-foreground">
-          Document upload will be available after creating the data source.
-          <br />
-          You can upload PDF, images, and document files.
-        </p>
-      </div>
-    </div>
+    <UploadedDocsSource
+      onFilesSelected={handleUploadedFiles}
+      className="space-y-4"
+    />
   );
 
   const renderConfigForm = () => {
