@@ -3,11 +3,13 @@ Data Source API Endpoints
 
 REST API endpoints for data source management within knowledge bases.
 Phase 1 - Knowledge Base Feature (Week 2-3)
+Unified Knowledge: structured_data upload support
 """
 
+import logging
 import uuid
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, File, HTTPException, status, Query, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.v1.deps import get_current_user, get_db
@@ -21,6 +23,8 @@ from app.schemas.data_source import (
     CrawlStatusResponse,
 )
 from app.core.exceptions import DatabaseError
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -678,4 +682,145 @@ async def get_crawl_status(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Unexpected error: {str(e)}",
+        )
+
+
+# ===========================
+# Structured Data Upload
+# ===========================
+
+
+@router.post(
+    "/knowledge-bases/{kb_id}/data-sources/upload-structured",
+    response_model=DataSourceResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Upload structured data file as a data source",
+    description="Upload a CSV or XLSX file to create a structured_data data source for analytics queries.",
+)
+async def upload_structured_data(
+    kb_id: uuid.UUID,
+    file: UploadFile = File(..., description="CSV or XLSX file"),
+    name: Optional[str] = Query(None, description="Data source name (defaults to filename)"),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Upload a structured data file (CSV/XLSX) as a knowledge base data source."""
+    try:
+        # Verify knowledge base exists and belongs to user
+        kb_repo = KnowledgeBaseRepository(db)
+        kb = await kb_repo.get_by_id(kb_id)
+        if not kb:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Knowledge base {kb_id} not found",
+            )
+        if str(kb.user_id) != str(current_user.id):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Not authorized to access this knowledge base",
+            )
+
+        # Validate file type
+        if not file.filename:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="File must have a filename",
+            )
+        ext = file.filename.rsplit(".", 1)[-1].lower() if "." in file.filename else ""
+        if ext not in ("csv", "xlsx", "xls"):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Only CSV and XLSX files are supported",
+            )
+
+        # Read file content
+        file_content = await file.read()
+        max_size = 50 * 1024 * 1024  # 50MB limit
+        if len(file_content) > max_size:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="File size exceeds 50MB limit",
+            )
+
+        # Use DatasetService to process the file
+        from app.services.insights.dataset_service import DatasetService
+
+        dataset_service = DatasetService(db)
+        ds_name = name or file.filename.rsplit(".", 1)[0]
+
+        dataset_id, schema_def = await dataset_service.upload_dataset(
+            user_id=current_user.id,
+            file_content=file_content,
+            filename=file.filename,
+            name=ds_name,
+        )
+
+        # Get the created dataset for file info
+        dataset = await dataset_service.dataset_repo.get_by_id(dataset_id)
+
+        # Build data source config with schema and file info
+        config = {
+            "dataset_id": str(dataset_id),
+            "schema_definition": {
+                "columns": [
+                    {
+                        "name": col.name,
+                        "dtype": col.dtype if isinstance(col.dtype, str) else col.dtype.value,
+                        "aliases": col.aliases or [],
+                        "description": col.description or "",
+                        "is_metric": col.is_metric or False,
+                        "is_dimension": col.is_dimension or False,
+                        "default_agg": col.default_agg.value if col.default_agg else None,
+                        "sample_values": col.sample_values or [],
+                    }
+                    for col in schema_def.columns
+                ]
+            },
+            "file_info": {
+                "filename": file.filename,
+                "size": len(file_content),
+                "row_count": dataset.row_count if dataset else 0,
+                "column_count": len(schema_def.columns),
+            },
+        }
+        if dataset and dataset.parquet_path:
+            config["parquet_path"] = dataset.parquet_path
+
+        # Create the data source record
+        ds_repo = DataSourceRepository(db)
+        ds = await ds_repo.create(
+            knowledge_base_id=kb_id,
+            type="structured_data",
+            name=ds_name,
+            config=config,
+            status="active",
+        )
+
+        logger.info(
+            f"Created structured_data source {ds.id} for KB {kb_id} "
+            f"(dataset={dataset_id}, columns={len(schema_def.columns)})"
+        )
+
+        return DataSourceResponse(
+            id=ds.id,
+            knowledge_base_id=ds.knowledge_base_id,
+            type=ds.type,
+            name=ds.name,
+            config=ds.config or {},
+            status=ds.status,
+            error_message=ds.error_message,
+            document_count=ds.document_count or 0,
+            embedding_count=ds.embedding_count or 0,
+            last_synced_at=str(ds.last_synced_at) if ds.last_synced_at else None,
+            created_at=ds.created_at,
+            updated_at=ds.updated_at,
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to upload structured data: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to upload structured data: {str(e)}",
         )

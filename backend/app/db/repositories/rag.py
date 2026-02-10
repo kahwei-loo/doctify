@@ -449,6 +449,24 @@ class RAGQueryRepository(BaseRepository[RAGQuery]):
         except Exception as e:
             raise DatabaseError(f"Failed to update feedback: {str(e)}")
 
+    async def get_last_by_conversation(
+        self,
+        conversation_id: str,
+    ) -> Optional[RAGQuery]:
+        """Get the most recent query in a conversation."""
+        try:
+            conv_uuid = uuid.UUID(conversation_id) if isinstance(conversation_id, str) else conversation_id
+            stmt = (
+                select(RAGQuery)
+                .where(RAGQuery.conversation_id == conv_uuid)
+                .order_by(RAGQuery.created_at.desc())
+                .limit(1)
+            )
+            result = await self.session.execute(stmt)
+            return result.scalar_one_or_none()
+        except Exception as e:
+            raise DatabaseError(f"Failed to get last query by conversation: {str(e)}")
+
     async def get_average_rating(self, user_id: Optional[uuid.UUID] = None) -> Optional[float]:
         """Get average feedback rating, optionally filtered by user."""
         try:

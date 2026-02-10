@@ -16,12 +16,15 @@ import {
   Globe,
   FileText,
   MessageSquare,
+  Database,
   Loader2,
   AlertCircle,
   CheckCircle2,
   Trash2,
   MoreVertical,
   Calendar,
+  Rows3,
+  Columns3,
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -57,6 +60,8 @@ const getTypeIcon = (type: DataSourceType) => {
       return <FileText className="h-4 w-4" />;
     case 'qa_pairs':
       return <MessageSquare className="h-4 w-4" />;
+    case 'structured_data':
+      return <Database className="h-4 w-4" />;
   }
 };
 
@@ -73,6 +78,8 @@ const getTypeLabel = (type: DataSourceType) => {
       return 'Text Input';
     case 'qa_pairs':
       return 'Q&A Pairs';
+    case 'structured_data':
+      return 'Structured Data';
   }
 };
 
@@ -179,17 +186,36 @@ const DataSourceCard: React.FC<DataSourceCardProps> = ({ dataSource, onDelete })
       </CardHeader>
 
       <CardContent className="pb-4">
-        {/* Stats */}
-        <div className="grid grid-cols-2 gap-3 mb-3">
-          <div className="text-center p-2 bg-muted/50 rounded-lg">
-            <div className="text-lg font-bold">{dataSource.document_count || 0}</div>
-            <div className="text-xs text-muted-foreground">Documents</div>
+        {/* Stats - different layout for structured_data */}
+        {dataSource.type === 'structured_data' && dataSource.config.file_info ? (
+          <div className="grid grid-cols-2 gap-3 mb-3">
+            <div className="text-center p-2 bg-muted/50 rounded-lg">
+              <div className="text-lg font-bold flex items-center justify-center gap-1">
+                <Rows3 className="h-4 w-4 text-muted-foreground" />
+                {dataSource.config.file_info.row_count?.toLocaleString() || 0}
+              </div>
+              <div className="text-xs text-muted-foreground">Rows</div>
+            </div>
+            <div className="text-center p-2 bg-muted/50 rounded-lg">
+              <div className="text-lg font-bold flex items-center justify-center gap-1">
+                <Columns3 className="h-4 w-4 text-muted-foreground" />
+                {dataSource.config.file_info.column_count || 0}
+              </div>
+              <div className="text-xs text-muted-foreground">Columns</div>
+            </div>
           </div>
-          <div className="text-center p-2 bg-muted/50 rounded-lg">
-            <div className="text-lg font-bold">{dataSource.embedding_count || 0}</div>
-            <div className="text-xs text-muted-foreground">Embeddings</div>
+        ) : (
+          <div className="grid grid-cols-2 gap-3 mb-3">
+            <div className="text-center p-2 bg-muted/50 rounded-lg">
+              <div className="text-lg font-bold">{dataSource.document_count || 0}</div>
+              <div className="text-xs text-muted-foreground">Documents</div>
+            </div>
+            <div className="text-center p-2 bg-muted/50 rounded-lg">
+              <div className="text-lg font-bold">{dataSource.embedding_count || 0}</div>
+              <div className="text-xs text-muted-foreground">Embeddings</div>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Additional Info */}
         <div className="space-y-1 text-xs text-muted-foreground">
@@ -209,6 +235,12 @@ const DataSourceCard: React.FC<DataSourceCardProps> = ({ dataSource, onDelete })
             <div className="flex items-center gap-1 truncate">
               <Globe className="h-3 w-3 shrink-0" />
               <span className="truncate">{dataSource.config.url}</span>
+            </div>
+          )}
+          {dataSource.type === 'structured_data' && dataSource.config.file_info && (
+            <div className="flex items-center gap-1 truncate">
+              <Database className="h-3 w-3 shrink-0" />
+              <span className="truncate">{dataSource.config.file_info.filename}</span>
             </div>
           )}
         </div>

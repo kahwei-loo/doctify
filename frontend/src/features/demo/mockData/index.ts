@@ -12,3 +12,4 @@ export * from './chat';
 export * from './assistants';
 export * from './templates';
 export * from './settings';
+export * from './unifiedQuery';

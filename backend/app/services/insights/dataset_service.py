@@ -331,15 +331,21 @@ class DatasetService:
         status: Optional[str] = None
     ) -> DatasetListResponse:
         """List user's datasets with pagination."""
-        datasets = await self.dataset_repo.get_by_user(user_id, status=status)
+        user_id_str = str(user_id)
 
-        # Manual pagination (repository returns all, we slice here)
-        total = len(datasets)
-        paginated = datasets[skip:skip + limit]
+        datasets = await self.dataset_repo.get_by_user(
+            user_id_str, skip=skip, limit=limit, status=status
+        )
+
+        # Count total matching records for pagination metadata
+        count_filters = {"user_id": user_id}
+        if status:
+            count_filters["status"] = status
+        total = await self.dataset_repo.count(count_filters)
 
         # Convert to response models
         dataset_responses = []
-        for ds in paginated:
+        for ds in datasets:
             file_info = DatasetFileInfo(**ds.file_info)
             schema_def = SchemaDefinition(**ds.schema_definition)
 

@@ -10,11 +10,9 @@ import logging
 import os
 import re
 import time
-from collections import defaultdict
 from datetime import datetime, timedelta
-from threading import Lock
 from typing import Optional, List, Dict, Any, Tuple
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import duckdb
 import httpx
@@ -22,6 +20,7 @@ import pandas as pd
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
+from app.db.redis import get_redis
 from app.db.repositories.insights import (
     InsightsDatasetRepository,
     InsightsConversationRepository,
@@ -61,63 +60,87 @@ RATE_LIMIT_WINDOW_MINUTE = 60        # Window size in seconds for minute limit
 RATE_LIMIT_WINDOW_HOUR = 3600        # Window size in seconds for hour limit
 
 
-class RateLimiter:
+class RedisRateLimiter:
     """
-    Simple in-memory rate limiter for LLM API calls.
+    Redis-based rate limiter for LLM API calls using sorted set sliding window.
 
     Security: Prevents abuse and excessive API costs by limiting requests per user.
-    Note: For production, consider using Redis for distributed rate limiting.
+    Works in distributed/multi-worker environments.
     """
 
-    def __init__(self):
-        self._requests: Dict[str, List[float]] = defaultdict(list)
-        self._lock = Lock()
+    KEY_PREFIX = "insights_rate_limit"
 
-    def _cleanup_old_requests(self, user_id: str, window_seconds: int) -> None:
-        """Remove requests older than the window."""
-        current_time = time.time()
-        cutoff = current_time - window_seconds
-        self._requests[user_id] = [
-            t for t in self._requests[user_id] if t > cutoff
-        ]
+    async def _get_redis(self):
+        """Get Redis client, returns None if unavailable."""
+        try:
+            return await get_redis()
+        except Exception:
+            logger.warning("Redis unavailable for rate limiting, allowing request")
+            return None
 
-    def check_rate_limit(self, user_id: str) -> Tuple[bool, Optional[str]]:
+    async def check_rate_limit(self, user_id: str) -> Tuple[bool, Optional[str]]:
         """
         Check if user is within rate limits.
 
         Returns: (allowed, error_message)
         """
-        with self._lock:
+        redis_client = await self._get_redis()
+        if redis_client is None:
+            return True, None  # Graceful degradation
+
+        try:
             current_time = time.time()
+            minute_key = f"{self.KEY_PREFIX}:{user_id}:minute"
+            hour_key = f"{self.KEY_PREFIX}:{user_id}:hour"
 
-            # Cleanup requests older than 1 hour
-            self._cleanup_old_requests(user_id, RATE_LIMIT_WINDOW_HOUR)
-
-            requests = self._requests[user_id]
-
-            # Check minute limit
+            # Clean old entries and count current requests atomically
             minute_cutoff = current_time - RATE_LIMIT_WINDOW_MINUTE
-            minute_requests = sum(1 for t in requests if t > minute_cutoff)
-            if minute_requests >= RATE_LIMIT_REQUESTS_PER_MINUTE:
-                wait_time = int(RATE_LIMIT_WINDOW_MINUTE - (current_time - min(
-                    t for t in requests if t > minute_cutoff
-                )))
-                return False, f"Rate limit exceeded. Please wait {wait_time} seconds."
+            await redis_client.client.zremrangebyscore(minute_key, 0, minute_cutoff)
+            minute_count = await redis_client.client.zcard(minute_key)
 
-            # Check hour limit
-            if len(requests) >= RATE_LIMIT_REQUESTS_PER_HOUR:
+            if minute_count >= RATE_LIMIT_REQUESTS_PER_MINUTE:
+                # Get oldest request in window to calculate wait time
+                oldest = await redis_client.client.zrange(minute_key, 0, 0, withscores=True)
+                wait_time = int(RATE_LIMIT_WINDOW_MINUTE - (current_time - oldest[0][1])) if oldest else 60
+                return False, f"Rate limit exceeded. Please wait {max(1, wait_time)} seconds."
+
+            hour_cutoff = current_time - RATE_LIMIT_WINDOW_HOUR
+            await redis_client.client.zremrangebyscore(hour_key, 0, hour_cutoff)
+            hour_count = await redis_client.client.zcard(hour_key)
+
+            if hour_count >= RATE_LIMIT_REQUESTS_PER_HOUR:
                 return False, "Hourly rate limit exceeded. Please try again later."
 
             return True, None
 
-    def record_request(self, user_id: str) -> None:
+        except Exception as e:
+            logger.warning(f"Rate limit check error: {e}, allowing request")
+            return True, None
+
+    async def record_request(self, user_id: str) -> None:
         """Record a new request for rate limiting."""
-        with self._lock:
-            self._requests[user_id].append(time.time())
+        redis_client = await self._get_redis()
+        if redis_client is None:
+            return
+
+        try:
+            current_time = time.time()
+            member = f"{current_time}:{uuid4().hex[:8]}"
+            minute_key = f"{self.KEY_PREFIX}:{user_id}:minute"
+            hour_key = f"{self.KEY_PREFIX}:{user_id}:hour"
+
+            await redis_client.client.zadd(minute_key, {member: current_time})
+            await redis_client.client.expire(minute_key, RATE_LIMIT_WINDOW_MINUTE + 10)
+
+            await redis_client.client.zadd(hour_key, {member: current_time})
+            await redis_client.client.expire(hour_key, RATE_LIMIT_WINDOW_HOUR + 60)
+
+        except Exception as e:
+            logger.warning(f"Rate limit record error: {e}")
 
 
 # Global rate limiter instance
-_rate_limiter = RateLimiter()
+_rate_limiter = RedisRateLimiter()
 
 
 # GPT Function definition for query analysis
@@ -343,7 +366,7 @@ class QueryService:
         Security: Rate limited to prevent abuse and excessive API costs.
         """
         # Check rate limit before making the call
-        allowed, error_msg = _rate_limiter.check_rate_limit(user_id)
+        allowed, error_msg = await _rate_limiter.check_rate_limit(user_id)
         if not allowed:
             logger.warning(f"Rate limit exceeded for user {user_id}")
             raise ValueError(error_msg)
@@ -371,7 +394,7 @@ class QueryService:
                 result = response.json()
 
                 # Record successful request for rate limiting
-                _rate_limiter.record_request(user_id)
+                await _rate_limiter.record_request(user_id)
 
                 # Extract function call result
                 message = result["choices"][0]["message"]
@@ -746,17 +769,24 @@ class QueryService:
         limit: int = 20
     ) -> ConversationListResponse:
         """List user's conversations"""
+        user_id_str = str(user_id)
+
         if dataset_id:
             conversations = await self.conversation_repo.get_by_dataset(
                 dataset_id=dataset_id,
-                user_id=user_id
+                user_id=user_id,
+                skip=skip,
+                limit=limit,
             )
+            total = await self.conversation_repo.count({
+                "dataset_id": dataset_id,
+                "user_id": user_id,
+            })
         else:
-            conversations = await self.conversation_repo.get_by_user(user_id)
-
-        # Apply pagination manually (could be optimized with repo method)
-        total = len(conversations)
-        conversations = conversations[skip:skip + limit]
+            conversations = await self.conversation_repo.get_by_user(
+                user_id_str, skip=skip, limit=limit
+            )
+            total = await self.conversation_repo.count({"user_id": user_id})
 
         conversation_responses = [
             ConversationResponse(
@@ -935,10 +965,11 @@ class QueryService:
         if not conversation:
             raise ValueError("Conversation not found")
 
-        queries = await self.query_repo.get_by_conversation(conversation_id, limit=limit + skip)
+        total = await self.query_repo.count_by_conversation(str(conversation_id))
 
-        # Apply pagination (skip) manually and reverse for chronological order
-        queries = list(reversed(queries))[skip:skip + limit]
+        queries = await self.query_repo.get_by_conversation(
+            str(conversation_id), skip=skip, limit=limit
+        )
 
         query_items = []
         for q in queries:
@@ -955,7 +986,6 @@ class QueryService:
                 created_at=q.created_at
             ))
 
-        total = len(query_items)
         return QueryHistoryResponse(queries=query_items, total=total)
 
     async def delete_conversation(

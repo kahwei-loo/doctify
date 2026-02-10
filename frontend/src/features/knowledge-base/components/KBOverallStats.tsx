@@ -12,7 +12,7 @@
  */
 
 import React from 'react';
-import { Database, FileStack, FileText, Zap, AlertCircle, HardDrive } from 'lucide-react';
+import { Database, FileStack, FileText, Zap, AlertCircle, HardDrive, Table2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import type { KnowledgeBaseStats, SingleKBStats } from '../types';
@@ -144,14 +144,16 @@ export const KBOverallStats: React.FC<KBOverallStatsProps> = ({
 }) => {
   // Loading state
   if (isLoading) {
+    const skeletonCount = context === 'global' ? 5 : 4;
     return (
       <div
         className={cn(
-          'grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4',
+          'grid gap-4 grid-cols-1 sm:grid-cols-2',
+          context === 'global' ? 'lg:grid-cols-5' : 'lg:grid-cols-4',
           className
         )}
       >
-        {[1, 2, 3, 4].map((i) => (
+        {Array.from({ length: skeletonCount }, (_, i) => (
           <StatCardSkeleton key={i} />
         ))}
       </div>
@@ -182,7 +184,7 @@ export const KBOverallStats: React.FC<KBOverallStatsProps> = ({
     return (
       <div
         className={cn(
-          'grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4',
+          'grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5',
           className
         )}
       >
@@ -219,6 +221,15 @@ export const KBOverallStats: React.FC<KBOverallStatsProps> = ({
           subtitle="Vector embeddings across all KBs"
           icon={<Zap className="h-5 w-5 text-yellow-500" />}
           iconClassName="bg-yellow-500/10"
+        />
+
+        {/* Structured Datasets */}
+        <StatCard
+          title="Structured Datasets"
+          value={formatNumber(globalData.total_structured_datasets)}
+          subtitle="Datasets for analytics queries"
+          icon={<Table2 className="h-5 w-5 text-purple-500" />}
+          iconClassName="bg-purple-500/10"
         />
       </div>
     );

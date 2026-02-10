@@ -304,6 +304,89 @@ class RAGEvaluationTriggerResponse(BaseModel):
 
 
 # ===========================
+# Unified Knowledge Query (RAG + Analytics)
+# ===========================
+
+class UnifiedQueryRequest(BaseModel):
+    """Request model for unified knowledge base query."""
+
+    query: str = Field(
+        ...,
+        min_length=1,
+        max_length=2000,
+        description="Natural language query (RAG or Analytics)",
+    )
+    conversation_id: Optional[str] = Field(
+        None,
+        description="Optional conversation ID for multi-turn context",
+    )
+    search_mode: Optional[str] = Field(
+        "hybrid",
+        description="Search mode for RAG queries: 'semantic', 'keyword', 'hybrid'",
+    )
+    stream: Optional[bool] = Field(
+        False,
+        description="Whether to stream RAG responses via SSE",
+    )
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "query": "What is the total revenue by month?",
+                "stream": False,
+            }
+        }
+    )
+
+
+class AnalyticsResponseData(BaseModel):
+    """Analytics query result data."""
+
+    sql: str = Field(..., description="Generated SQL query")
+    data: List[Dict[str, Any]] = Field(default_factory=list, description="Query result rows")
+    chart_type: Optional[str] = Field(None, description="Suggested chart type (bar, line, pie, etc.)")
+    chart_config: Optional[Dict[str, Any]] = Field(None, description="Chart configuration")
+    insights_text: Optional[str] = Field(None, description="Natural language insights summary")
+
+
+class UnifiedQueryResponse(BaseModel):
+    """Response model for unified knowledge base query."""
+
+    id: uuid.UUID = Field(..., description="Query record ID")
+    intent_type: str = Field(..., description="Classified intent: 'rag' or 'analytics'")
+    confidence: float = Field(..., description="Intent classification confidence (0-1)")
+
+    # RAG response (populated when intent_type='rag')
+    rag_response: Optional[RAGQueryResponse] = Field(
+        None, description="RAG query response (when intent_type='rag')"
+    )
+
+    # Analytics response (populated when intent_type='analytics')
+    analytics_response: Optional[AnalyticsResponseData] = Field(
+        None, description="Analytics query response (when intent_type='analytics')"
+    )
+
+    created_at: datetime = Field(..., description="Query timestamp")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class UnifiedQueryFeedbackRequest(BaseModel):
+    """Request model for unified query feedback."""
+
+    correct_intent: Optional[str] = Field(
+        None,
+        description="User correction of intent: 'rag' or 'analytics'",
+    )
+    rating: int = Field(
+        ...,
+        ge=1,
+        le=5,
+        description="Rating from 1 (poor) to 5 (excellent)",
+    )
+
+
+# ===========================
 # Knowledge Base Embedding Response (Phase 1)
 # ===========================
 

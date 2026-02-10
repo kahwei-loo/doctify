@@ -129,6 +129,38 @@ export interface RAGEvaluationTriggerResponse {
   message: string;
 }
 
+// Unified Knowledge Query (RAG + Analytics)
+export interface UnifiedQueryRequest {
+  query: string;
+  conversation_id?: string;
+  search_mode?: SearchMode;
+  stream?: boolean;
+}
+
+export interface AnalyticsResponseData {
+  sql: string;
+  data: Record<string, unknown>[];
+  chart_type?: string;
+  chart_config?: Record<string, unknown>;
+  insights_text?: string;
+  dataset_id?: string;
+  needs_conversation?: boolean;
+}
+
+export interface UnifiedQueryResponse {
+  id: string;
+  intent_type: 'rag' | 'analytics';
+  confidence: number;
+  rag_response?: RAGQueryResponse;
+  analytics_response?: AnalyticsResponseData;
+  created_at: string;
+}
+
+export interface UnifiedQueryFeedbackRequest {
+  correct_intent?: 'rag' | 'analytics';
+  rating: number;
+}
+
 // ===========================
 // API Endpoints
 // ===========================
@@ -231,6 +263,32 @@ export const ragApi = api.injectEndpoints({
       }),
       invalidatesTags: ['RAGEvaluations'],
     }),
+
+    // Unified Knowledge Query (RAG + Analytics)
+    unifiedQuery: builder.mutation<
+      UnifiedQueryResponse,
+      { kbId: string; request: UnifiedQueryRequest }
+    >({
+      query: ({ kbId, request }) => ({
+        url: `/rag/knowledge-bases/${kbId}/unified-query`,
+        method: 'POST',
+        body: request,
+      }),
+      invalidatesTags: ['UnifiedQuery', 'RAGHistory', 'RAGStats'],
+    }),
+
+    // Submit feedback for a unified query
+    submitUnifiedFeedback: builder.mutation<
+      void,
+      { queryId: string; feedback: UnifiedQueryFeedbackRequest }
+    >({
+      query: ({ queryId, feedback }) => ({
+        url: `/rag/queries/${queryId}/feedback`,
+        method: 'POST',
+        body: feedback,
+      }),
+      invalidatesTags: ['UnifiedQuery', 'RAGHistory'],
+    }),
   }),
 });
 
@@ -247,6 +305,8 @@ export const {
   useDeleteConversationMutation,
   useGetEvaluationsQuery,
   useTriggerEvaluationMutation,
+  useUnifiedQueryMutation,
+  useSubmitUnifiedFeedbackMutation,
 } = ragApi;
 
 // ===========================
@@ -368,6 +428,77 @@ export async function streamRAGQuery(
         try {
           const parsed = JSON.parse(line.slice(6)) as StreamEvent;
           onEvent(parsed);
+        } catch {
+          // skip malformed events
+        }
+      }
+    }
+  }
+}
+
+// ===========================
+// Unified Query Streaming (SSE)
+// ===========================
+
+export interface UnifiedStreamEvent {
+  type: 'intent' | 'chunk' | 'sources' | 'analytics_result' | 'done' | 'error';
+  data: unknown;
+}
+
+/**
+ * Stream a unified knowledge base query via SSE.
+ * For RAG queries: streams tokens progressively.
+ * For Analytics queries: returns a single 'analytics' event with full results.
+ */
+export async function streamUnifiedQuery(
+  kbId: string,
+  request: UnifiedQueryRequest,
+  onEvent: (event: UnifiedStreamEvent) => void,
+  signal?: AbortSignal,
+): Promise<void> {
+  const token = localStorage.getItem('access_token') || localStorage.getItem('token');
+
+  const response = await fetch(
+    `${API_BASE_URL}/api/v1/rag/knowledge-bases/${kbId}/unified-query/stream`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify(request),
+      signal,
+    },
+  );
+
+  if (!response.ok) {
+    const errorBody = await response.text();
+    throw new Error(errorBody || `HTTP ${response.status}`);
+  }
+
+  const reader = response.body!.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+
+    for (const line of lines) {
+      if (line.startsWith('data: ')) {
+        try {
+          const parsed = JSON.parse(line.slice(6));
+          // Map BE event format to FE UnifiedStreamEvent
+          const eventType = parsed.event as UnifiedStreamEvent['type'];
+          const eventData = eventType === 'chunk' ? parsed.text
+            : eventType === 'sources' ? parsed.sources
+            : eventType === 'analytics_result' ? parsed.data
+            : parsed;
+          onEvent({ type: eventType, data: eventData });
         } catch {
           // skip malformed events
         }

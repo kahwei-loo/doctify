@@ -31,6 +31,7 @@ import {
 import { knowledgeBaseApi } from '../services/mockData';
 import type { KnowledgeBase, DataSource, Embedding, DataSourceType } from '../types';
 import { cn } from '@/lib/utils';
+import { UnifiedQueryPanel } from './UnifiedQueryPanel';
 
 interface KBDetailPageProps {
   kbId: string;
@@ -356,6 +357,7 @@ export const KBDetailPage: React.FC<KBDetailPageProps> = ({ kbId }) => {
           sourcesContent={renderSourcesContent()}
           embeddingsContent={renderEmbeddingsContent()}
           testContent={renderTestContent()}
+          analyticsContent={<UnifiedQueryPanel knowledgeBaseId={kbId} />}
           settingsContent={renderSettingsContent()}
         />
       </div>

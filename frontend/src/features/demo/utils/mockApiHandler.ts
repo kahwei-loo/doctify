@@ -35,6 +35,8 @@ import {
   DEMO_BILLING_INFO,
   DEMO_SECURITY_SETTINGS,
   DEMO_ALL_SETTINGS,
+  // Unified Query
+  matchUnifiedQueryMock,
 } from '../mockData';
 
 // Simulate network delay for realism
@@ -417,6 +419,19 @@ export const mockApiHandler = async (
         },
       },
     };
+  }
+
+  // Unified query endpoint (RAG + Analytics)
+  if (path.includes('/unified-query')) {
+    const body = args?.body;
+    const queryText = body?.query || 'What are the payment terms?';
+    const mockResponse = matchUnifiedQueryMock(queryText);
+    return { data: mockResponse };
+  }
+
+  // Unified query feedback
+  if (path.match(/\/rag\/queries\/[\w-]+\/feedback$/)) {
+    return { data: { success: true } };
   }
 
   // Knowledge bases endpoint

@@ -148,4 +148,31 @@ export const DEMO_DATA_SOURCES = [
     chunk_count: 145,
     uploaded_at: '2024-01-12T00:00:00Z',
   },
+  {
+    source_id: 'source-005',
+    kb_id: 'kb-001',
+    name: 'Sales Data 2024',
+    type: 'structured_data',
+    status: 'indexed',
+    chunk_count: 0,
+    uploaded_at: '2024-02-01T00:00:00Z',
+    config: {
+      file_info: {
+        filename: 'sales_data_2024.csv',
+        size: 2457600,
+        row_count: 15230,
+        column_count: 6,
+      },
+      schema_definition: {
+        columns: [
+          { name: 'date', dtype: 'datetime', is_dimension: true, description: 'Transaction date' },
+          { name: 'product_name', dtype: 'string', is_dimension: true, description: 'Product name' },
+          { name: 'revenue', dtype: 'float64', is_metric: true, default_agg: 'sum', description: 'Revenue in USD' },
+          { name: 'quantity', dtype: 'int64', is_metric: true, default_agg: 'sum', description: 'Units sold' },
+          { name: 'region', dtype: 'string', is_dimension: true, description: 'Sales region' },
+          { name: 'category', dtype: 'string', is_dimension: true, description: 'Product category' },
+        ],
+      },
+    },
+  },
 ];

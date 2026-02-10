@@ -38,7 +38,7 @@ const mockKnowledgeBases: KnowledgeBase[] = [
     created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
     updated_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
     user_id: 'user-1',
-    data_source_count: 3,
+    data_source_count: 4,
     document_count: 24,
     embedding_count: 156,
   },
@@ -141,6 +141,36 @@ const mockDataSources: DataSource[] = [
     document_count: 2,
     embedding_count: 4,
   },
+  {
+    id: 'ds-4',
+    knowledge_base_id: 'kb-1',
+    type: 'structured_data',
+    name: 'Sales Data 2024',
+    status: 'active',
+    config: {
+      file_info: {
+        filename: 'sales_data_2024.csv',
+        size: 2457600,
+        row_count: 15230,
+        column_count: 6,
+      },
+      schema_definition: {
+        columns: [
+          { name: 'date', dtype: 'datetime', is_dimension: true, description: 'Transaction date' },
+          { name: 'product_name', dtype: 'string', is_dimension: true, description: 'Product name' },
+          { name: 'revenue', dtype: 'float64', is_metric: true, default_agg: 'sum', description: 'Revenue in USD' },
+          { name: 'quantity', dtype: 'int64', is_metric: true, default_agg: 'sum', description: 'Units sold' },
+          { name: 'region', dtype: 'string', is_dimension: true, description: 'Sales region' },
+          { name: 'category', dtype: 'string', is_dimension: true, description: 'Product category' },
+        ],
+      },
+    },
+    created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+    updated_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    last_synced_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    document_count: 0,
+    embedding_count: 0,
+  },
 ];
 
 // Mock Embeddings
@@ -159,9 +189,10 @@ const mockEmbeddings: Embedding[] = Array.from({ length: 20 }, (_, i) => ({
 // Mock Stats
 const mockStats: KnowledgeBaseStats = {
   total_knowledge_bases: 3,
-  total_data_sources: 6,
+  total_data_sources: 7,
   total_documents: 84,
   total_embeddings: 468,
+  total_structured_datasets: 1,
 };
 
 // API-compatible mock functions
