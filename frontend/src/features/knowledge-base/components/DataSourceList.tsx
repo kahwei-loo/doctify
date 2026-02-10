@@ -1,13 +1,10 @@
 /**
  * DataSourceList Component
  *
- * Displays list of data sources for a knowledge base.
- *
- * Features:
- * - Grid layout with source cards
- * - Status indicators (Active, Syncing, Error)
- * - Type badges
- * - Delete action
+ * Displays list of data sources with enhanced cards showing:
+ * - Type-specific content previews
+ * - Inline embeddings status
+ * - Functional action menu (View, Re-generate, Delete)
  */
 
 import React from 'react';
@@ -25,6 +22,9 @@ import {
   Calendar,
   Rows3,
   Columns3,
+  Eye,
+  RefreshCw,
+  Zap,
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -43,13 +43,12 @@ import { DataSourceSkeleton } from './DataSourceSkeleton';
 interface DataSourceListProps {
   dataSources: DataSource[];
   onDelete?: (dataSource: DataSource) => void;
+  onView?: (dataSource: DataSource) => void;
+  onRegenerate?: (dataSource: DataSource) => void;
   isLoading?: boolean;
   className?: string;
 }
 
-/**
- * Get icon for data source type
- */
 const getTypeIcon = (type: DataSourceType) => {
   switch (type) {
     case 'uploaded_docs':
@@ -65,9 +64,6 @@ const getTypeIcon = (type: DataSourceType) => {
   }
 };
 
-/**
- * Get label for data source type
- */
 const getTypeLabel = (type: DataSourceType) => {
   switch (type) {
     case 'uploaded_docs':
@@ -83,9 +79,6 @@ const getTypeLabel = (type: DataSourceType) => {
   }
 };
 
-/**
- * Get status badge
- */
 const StatusBadge: React.FC<{ status: DataSourceStatus }> = ({ status }) => {
   switch (status) {
     case 'active':
@@ -119,8 +112,124 @@ const StatusBadge: React.FC<{ status: DataSourceStatus }> = ({ status }) => {
 };
 
 /**
- * Format date
+ * Embeddings status indicator shown inline on cards
  */
+const EmbeddingsIndicator: React.FC<{ count: number; status: DataSourceStatus }> = ({ count, status }) => {
+  if (status === 'syncing') {
+    return (
+      <div className="flex items-center gap-1.5 text-xs text-blue-600">
+        <Loader2 className="h-3 w-3 animate-spin" />
+        <span>Processing...</span>
+      </div>
+    );
+  }
+
+  if (count > 0) {
+    return (
+      <div className="flex items-center gap-1.5 text-xs text-green-600">
+        <Zap className="h-3 w-3" />
+        <span>{count} vector{count !== 1 ? 's' : ''} ready</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-1.5 text-xs text-amber-600">
+      <AlertCircle className="h-3 w-3" />
+      <span>No embeddings</span>
+    </div>
+  );
+};
+
+/**
+ * Type-specific content preview
+ */
+const ContentPreview: React.FC<{ dataSource: DataSource }> = ({ dataSource }) => {
+  const { type, config } = dataSource;
+
+  switch (type) {
+    case 'qa_pairs': {
+      const pairs = config.qa_pairs || [];
+      if (pairs.length === 0) return null;
+      return (
+        <div className="space-y-1.5">
+          {pairs.slice(0, 2).map((pair, i) => (
+            <div key={pair.id || i} className="border-l-2 border-blue-400/60 pl-2.5">
+              <p className="text-xs font-medium text-foreground/80 line-clamp-1">Q: {pair.question}</p>
+              <p className="text-xs text-muted-foreground line-clamp-1">A: {pair.answer}</p>
+            </div>
+          ))}
+          {pairs.length > 2 && (
+            <p className="text-[11px] text-muted-foreground pl-2.5">+{pairs.length - 2} more pair{pairs.length - 2 !== 1 ? 's' : ''}</p>
+          )}
+        </div>
+      );
+    }
+
+    case 'text': {
+      const content = config.content || '';
+      if (!content) return null;
+      return (
+        <p className="text-xs text-muted-foreground line-clamp-3 leading-relaxed">
+          {content.slice(0, 200)}{content.length > 200 ? '...' : ''}
+        </p>
+      );
+    }
+
+    case 'website': {
+      const url = config.url || '';
+      if (!url) return null;
+      return (
+        <div className="space-y-1">
+          <div className="flex items-center gap-1.5 text-xs">
+            <Globe className="h-3 w-3 text-muted-foreground shrink-0" />
+            <span className="text-muted-foreground truncate">{url}</span>
+          </div>
+          {(config.pages_crawled !== undefined || config.total_pages !== undefined) && (
+            <p className="text-[11px] text-muted-foreground">
+              {config.pages_crawled || 0} / {config.total_pages || '?'} pages crawled
+            </p>
+          )}
+        </div>
+      );
+    }
+
+    case 'uploaded_docs': {
+      const docIds = config.document_ids || [];
+      const count = dataSource.document_count || docIds.length;
+      return (
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <FileStack className="h-3 w-3 shrink-0" />
+          <span>{count} document{count !== 1 ? 's' : ''} uploaded</span>
+        </div>
+      );
+    }
+
+    case 'structured_data': {
+      const fileInfo = config.file_info;
+      if (!fileInfo) return null;
+      const schema = config.schema_definition;
+      return (
+        <div className="space-y-1">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Database className="h-3 w-3 shrink-0" />
+            <span className="truncate">{fileInfo.filename}</span>
+          </div>
+          {schema?.columns && schema.columns.length > 0 && (
+            <p className="text-[11px] text-muted-foreground">
+              Columns: {schema.columns.slice(0, 4).map(c => c.name).join(', ')}
+              {schema.columns.length > 4 ? ` +${schema.columns.length - 4}` : ''}
+            </p>
+          )}
+        </div>
+      );
+    }
+
+    default:
+      return null;
+  }
+};
+
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   const now = new Date();
@@ -136,17 +245,16 @@ const formatDate = (dateString: string) => {
   return date.toLocaleDateString();
 };
 
-/**
- * Data Source Card
- */
 interface DataSourceCardProps {
   dataSource: DataSource;
   onDelete?: (dataSource: DataSource) => void;
+  onView?: (dataSource: DataSource) => void;
+  onRegenerate?: (dataSource: DataSource) => void;
 }
 
-const DataSourceCard: React.FC<DataSourceCardProps> = ({ dataSource, onDelete }) => {
+const DataSourceCard: React.FC<DataSourceCardProps> = ({ dataSource, onDelete, onView, onRegenerate }) => {
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="hover:shadow-md transition-all hover:border-primary/30">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -169,8 +277,14 @@ const DataSourceCard: React.FC<DataSourceCardProps> = ({ dataSource, onDelete })
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem disabled>View Details</DropdownMenuItem>
-                <DropdownMenuItem disabled>Sync Now</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onView?.(dataSource)}>
+                  <Eye className="mr-2 h-4 w-4" />
+                  View Details
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onRegenerate?.(dataSource)}>
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Re-generate Embeddings
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   className="text-destructive"
@@ -185,10 +299,10 @@ const DataSourceCard: React.FC<DataSourceCardProps> = ({ dataSource, onDelete })
         </div>
       </CardHeader>
 
-      <CardContent className="pb-4">
-        {/* Stats - different layout for structured_data */}
+      <CardContent className="pb-4 space-y-3">
+        {/* Stats */}
         {dataSource.type === 'structured_data' && dataSource.config.file_info ? (
-          <div className="grid grid-cols-2 gap-3 mb-3">
+          <div className="grid grid-cols-2 gap-3">
             <div className="text-center p-2 bg-muted/50 rounded-lg">
               <div className="text-lg font-bold flex items-center justify-center gap-1">
                 <Rows3 className="h-4 w-4 text-muted-foreground" />
@@ -205,7 +319,7 @@ const DataSourceCard: React.FC<DataSourceCardProps> = ({ dataSource, onDelete })
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3 mb-3">
+          <div className="grid grid-cols-2 gap-3">
             <div className="text-center p-2 bg-muted/50 rounded-lg">
               <div className="text-lg font-bold">{dataSource.document_count || 0}</div>
               <div className="text-xs text-muted-foreground">Documents</div>
@@ -217,12 +331,24 @@ const DataSourceCard: React.FC<DataSourceCardProps> = ({ dataSource, onDelete })
           </div>
         )}
 
-        {/* Additional Info */}
-        <div className="space-y-1 text-xs text-muted-foreground">
+        {/* Embeddings Status Indicator */}
+        <EmbeddingsIndicator count={dataSource.embedding_count || 0} status={dataSource.status} />
+
+        {/* Content Preview */}
+        <ContentPreview dataSource={dataSource} />
+
+        {/* Footer Info */}
+        <div className="space-y-1 text-xs text-muted-foreground pt-1 border-t">
           {dataSource.last_synced_at && (
             <div className="flex items-center gap-1">
               <Calendar className="h-3 w-3" />
               Last synced {formatDate(dataSource.last_synced_at)}
+            </div>
+          )}
+          {!dataSource.last_synced_at && dataSource.created_at && (
+            <div className="flex items-center gap-1">
+              <Calendar className="h-3 w-3" />
+              Created {formatDate(dataSource.created_at)}
             </div>
           )}
           {dataSource.error_message && (
@@ -231,27 +357,12 @@ const DataSourceCard: React.FC<DataSourceCardProps> = ({ dataSource, onDelete })
               <span className="line-clamp-2">{dataSource.error_message}</span>
             </div>
           )}
-          {dataSource.type === 'website' && dataSource.config.url && (
-            <div className="flex items-center gap-1 truncate">
-              <Globe className="h-3 w-3 shrink-0" />
-              <span className="truncate">{dataSource.config.url}</span>
-            </div>
-          )}
-          {dataSource.type === 'structured_data' && dataSource.config.file_info && (
-            <div className="flex items-center gap-1 truncate">
-              <Database className="h-3 w-3 shrink-0" />
-              <span className="truncate">{dataSource.config.file_info.filename}</span>
-            </div>
-          )}
         </div>
       </CardContent>
     </Card>
   );
 };
 
-/**
- * Empty State
- */
 const EmptyState: React.FC<{ onAddSource?: () => void }> = ({ onAddSource }) => {
   return (
     <Card>
@@ -269,12 +380,11 @@ const EmptyState: React.FC<{ onAddSource?: () => void }> = ({ onAddSource }) => 
   );
 };
 
-/**
- * Main Component
- */
 export const DataSourceList: React.FC<DataSourceListProps> = ({
   dataSources,
   onDelete,
+  onView,
+  onRegenerate,
   isLoading = false,
   className,
 }) => {
@@ -293,6 +403,8 @@ export const DataSourceList: React.FC<DataSourceListProps> = ({
           key={dataSource.id}
           dataSource={dataSource}
           onDelete={onDelete}
+          onView={onView}
+          onRegenerate={onRegenerate}
         />
       ))}
     </div>

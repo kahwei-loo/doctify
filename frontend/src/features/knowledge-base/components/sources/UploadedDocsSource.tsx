@@ -81,8 +81,9 @@ export const UploadedDocsSource: React.FC<UploadedDocsSourceProps> = ({
             <div className="flex-1 space-y-1">
               <h4 className="text-sm font-medium">Supported File Types</h4>
               <ul className="text-xs text-muted-foreground space-y-1">
+                <li>• Text files (TXT, MD, CSV, JSON) - best for text extraction</li>
                 <li>• PDF documents (text will be extracted automatically)</li>
-                <li>• Images (PNG, JPG) with OCR for text recognition</li>
+                <li>• Images (PNG, JPG) - limited text extraction</li>
                 <li>• Maximum file size: 10MB per file</li>
                 <li>• Upload up to 20 files at once</li>
               </ul>

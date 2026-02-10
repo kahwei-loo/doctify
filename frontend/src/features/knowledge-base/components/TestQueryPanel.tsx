@@ -80,9 +80,8 @@ export const TestQueryPanel: React.FC<TestQueryPanelProps> = ({
         const response = await knowledgeBaseApi.testQuery(knowledgeBaseId, {
           query: query.trim(),
           top_k: parseInt(topK),
-          similarity_threshold: 0.3,
         });
-        const apiResults = (response.data?.results || response.results || []).map(
+        const apiResults = (response.data?.results || []).map(
           (r: { text?: string; chunk_text?: string; similarity?: number; score?: number; source_name?: string; source_type?: string; chunk_index?: number; metadata?: Record<string, unknown> }) => ({
             text: r.text || r.chunk_text || '',
             similarity: r.similarity || r.score || 0,

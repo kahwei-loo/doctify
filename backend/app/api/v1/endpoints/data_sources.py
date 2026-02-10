@@ -376,6 +376,7 @@ async def upload_documents_to_data_source(
         updated_doc_ids = existing_doc_ids + document_ids
 
         ds.config = {**current_config, "document_ids": updated_doc_ids}
+        ds.document_count = len(updated_doc_ids)
 
         await db.commit()
 

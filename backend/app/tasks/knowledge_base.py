@@ -119,27 +119,46 @@ async def _extract_text_from_data_source(ds, db) -> str:
         doc_repo = DocumentRepository(db)
 
         document_ids = ds.config.get("document_ids", [])
+        logger.info(f"Processing uploaded_docs: {len(document_ids)} document IDs found")
         text_parts = []
 
         for doc_id in document_ids:
             try:
                 doc = await doc_repo.get_by_id(doc_id)
                 if not doc:
+                    logger.warning(f"Document {doc_id} not found in database")
                     continue
+
+                logger.info(
+                    f"Document {doc_id}: title={doc.title}, "
+                    f"file_type={doc.file_type}, "
+                    f"has_extracted_text={bool(doc.extracted_text)}, "
+                    f"file_path={doc.file_path}"
+                )
 
                 if doc.extracted_text:
                     text_parts.append(doc.extracted_text)
                 elif doc.file_path:
                     # Fallback: read file content directly
+                    logger.info(f"Document {doc_id}: no extracted_text, trying file at {doc.file_path}")
                     extracted = await _read_file_content(doc.file_path, doc.file_type)
                     if extracted:
                         # Cache extracted text on the document for future use
                         doc.extracted_text = extracted
                         text_parts.append(extracted)
+                        logger.info(f"Document {doc_id}: extracted {len(extracted)} chars from file")
+                    else:
+                        logger.warning(
+                            f"Document {doc_id}: file read returned empty. "
+                            f"file_path={doc.file_path}, file_type={doc.file_type}"
+                        )
+                else:
+                    logger.warning(f"Document {doc_id}: no extracted_text and no file_path")
             except Exception as e:
-                logger.warning(f"Failed to extract text from document {doc_id}: {e}")
+                logger.warning(f"Failed to extract text from document {doc_id}: {e}", exc_info=True)
                 continue
 
+        logger.info(f"uploaded_docs extraction complete: {len(text_parts)} text parts from {len(document_ids)} docs")
         return "\n\n".join(text_parts)
 
     elif ds_type == "website":
@@ -308,11 +327,14 @@ async def _generate_embeddings_async(data_source_id: str, force_regenerate: bool
         await ds_repo.update_status(ds_id, "active")
         await ds_repo.update_sync_timestamp(ds_id)
 
-        # Update embedding count in data source config
+        # Update embedding count in both config and column
         current_config = ds.config or {}
         current_config["embedding_count"] = processed_count
         current_config["last_embedding_at"] = datetime.utcnow().isoformat()
-        await ds_repo.update(ds_id, {"config": current_config})
+        await ds_repo.update(ds_id, {
+            "config": current_config,
+            "embedding_count": processed_count,
+        })
 
         await db.commit()
 

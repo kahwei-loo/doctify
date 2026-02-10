@@ -25,6 +25,7 @@ import {
   TestQueryPanel,
   KBSettings,
   ConfirmDeleteDialog,
+  ViewContentDialog,
   ErrorState,
   type KBTab,
 } from '.';
@@ -59,6 +60,8 @@ export const KBDetailPage: React.FC<KBDetailPageProps> = ({ kbId }) => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [dataSourceToDelete, setDataSourceToDelete] = useState<DataSource | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [dataSourceToView, setDataSourceToView] = useState<DataSource | null>(null);
 
   // Load KB details
   const loadKB = useCallback(async () => {
@@ -141,6 +144,21 @@ export const KBDetailPage: React.FC<KBDetailPageProps> = ({ kbId }) => {
     setDataSourceToDelete(dataSource);
     setDeleteDialogOpen(true);
   }, []);
+
+  const handleViewDataSource = useCallback((dataSource: DataSource) => {
+    setDataSourceToView(dataSource);
+    setViewDialogOpen(true);
+  }, []);
+
+  const handleRegenerateEmbeddings = useCallback(async (dataSource: DataSource) => {
+    try {
+      await knowledgeBaseApi.generateEmbeddings(dataSource.id, true);
+      // Reload data after triggering regeneration
+      await Promise.all([loadDataSources(), loadEmbeddings(), loadKB()]);
+    } catch (err) {
+      console.error('Failed to regenerate embeddings:', err);
+    }
+  }, [loadDataSources, loadEmbeddings, loadKB]);
 
   const handleCreateDataSource = useCallback(
     async (name: string, config: DataSource['config']) => {
@@ -226,6 +244,8 @@ export const KBDetailPage: React.FC<KBDetailPageProps> = ({ kbId }) => {
         <DataSourceList
           dataSources={dataSources}
           onDelete={handleDeleteDataSource}
+          onView={handleViewDataSource}
+          onRegenerate={handleRegenerateEmbeddings}
           isLoading={isLoadingSources}
         />
 
@@ -394,6 +414,14 @@ export const KBDetailPage: React.FC<KBDetailPageProps> = ({ kbId }) => {
             : []
         }
         isDeleting={isDeleting}
+      />
+
+      {/* View Content Dialog */}
+      <ViewContentDialog
+        open={viewDialogOpen}
+        onOpenChange={setViewDialogOpen}
+        dataSource={dataSourceToView}
+        onRegenerate={handleRegenerateEmbeddings}
       />
     </div>
   );

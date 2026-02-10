@@ -106,6 +106,7 @@ export const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
     setExcludePatterns('');
     setTextContent('');
     setQaPairs([{ id: `qa-${Date.now()}`, question: '', answer: '' }]);
+    setSelectedFiles([]);
   }, []);
 
   const handleClose = useCallback(() => {
@@ -184,11 +185,11 @@ export const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
       case 'qa_pairs':
         return qaPairs.some((p) => p.question.trim() && p.answer.trim());
       case 'uploaded_docs':
-        return true; // Documents will be uploaded separately
+        return selectedFiles.length > 0;
       default:
         return false;
     }
-  }, [name, sourceType, url, textContent, qaPairs]);
+  }, [name, sourceType, url, textContent, qaPairs, selectedFiles]);
 
   const handleSubmit = useCallback(async () => {
     if (!isValid()) return;
