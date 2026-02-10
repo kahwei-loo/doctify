@@ -144,12 +144,11 @@ export const KBOverallStats: React.FC<KBOverallStatsProps> = ({
 }) => {
   // Loading state
   if (isLoading) {
-    const skeletonCount = context === 'global' ? 5 : 4;
+    const skeletonCount = 4;
     return (
       <div
         className={cn(
-          'grid gap-4 grid-cols-1 sm:grid-cols-2',
-          context === 'global' ? 'lg:grid-cols-5' : 'lg:grid-cols-4',
+          'grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4',
           className
         )}
       >
@@ -184,13 +183,13 @@ export const KBOverallStats: React.FC<KBOverallStatsProps> = ({
     return (
       <div
         className={cn(
-          'grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5',
+          'grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4',
           className
         )}
       >
         {/* Total Knowledge Bases */}
         <StatCard
-          title="Total Knowledge Bases"
+          title="Knowledge Bases"
           value={formatNumber(globalData.total_knowledge_bases)}
           subtitle="Active knowledge bases"
           icon={<Database className="h-5 w-5 text-primary" />}
@@ -198,38 +197,29 @@ export const KBOverallStats: React.FC<KBOverallStatsProps> = ({
 
         {/* Total Data Sources */}
         <StatCard
-          title="Total Data Sources"
+          title="Data Sources"
           value={formatNumber(globalData.total_data_sources)}
           subtitle="Connected sources across all KBs"
           icon={<FileStack className="h-5 w-5 text-blue-500" />}
           iconClassName="bg-blue-500/10"
         />
 
-        {/* Total Documents */}
-        <StatCard
-          title="Total Documents"
-          value={formatNumber(globalData.total_documents)}
-          subtitle="Indexed documents across all KBs"
-          icon={<FileText className="h-5 w-5 text-green-500" />}
-          iconClassName="bg-green-500/10"
-        />
-
         {/* Total Embeddings */}
         <StatCard
-          title="Total Embeddings"
+          title="Embeddings"
           value={formatNumber(globalData.total_embeddings)}
           subtitle="Vector embeddings across all KBs"
           icon={<Zap className="h-5 w-5 text-yellow-500" />}
           iconClassName="bg-yellow-500/10"
         />
 
-        {/* Structured Datasets */}
+        {/* Total Files */}
         <StatCard
-          title="Structured Datasets"
-          value={formatNumber(globalData.total_structured_datasets)}
-          subtitle="Datasets for analytics queries"
-          icon={<Table2 className="h-5 w-5 text-purple-500" />}
-          iconClassName="bg-purple-500/10"
+          title="Uploaded Files"
+          value={formatNumber(globalData.total_documents)}
+          subtitle="Files uploaded across all KBs"
+          icon={<FileText className="h-5 w-5 text-green-500" />}
+          iconClassName="bg-green-500/10"
         />
       </div>
     );
@@ -263,11 +253,11 @@ export const KBOverallStats: React.FC<KBOverallStatsProps> = ({
         iconClassName="bg-blue-500/10"
       />
 
-      {/* Documents */}
+      {/* Uploaded Files */}
       <StatCard
-        title="Documents"
+        title="Uploaded Files"
         value={formatNumber(singleData.document_count)}
-        subtitle="Indexed documents"
+        subtitle="Files uploaded"
         icon={<FileText className="h-5 w-5 text-green-500" />}
         iconClassName="bg-green-500/10"
       />

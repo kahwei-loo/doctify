@@ -255,6 +255,36 @@ interface DataSourceCardProps {
   onRegenerate?: (dataSource: DataSource) => void;
 }
 
+const getContentCount = (dataSource: DataSource): number => {
+  switch (dataSource.type) {
+    case 'uploaded_docs':
+      return dataSource.document_count || dataSource.config.document_ids?.length || 0;
+    case 'qa_pairs':
+      return dataSource.config.qa_pairs?.length || 0;
+    case 'text':
+      return dataSource.config.content ? 1 : 0;
+    case 'website':
+      return dataSource.config.pages_crawled || 0;
+    default:
+      return dataSource.document_count || 0;
+  }
+};
+
+const getContentLabel = (dataSource: DataSource): string => {
+  switch (dataSource.type) {
+    case 'uploaded_docs':
+      return getContentCount(dataSource) === 1 ? 'File' : 'Files';
+    case 'qa_pairs':
+      return getContentCount(dataSource) === 1 ? 'Pair' : 'Pairs';
+    case 'text':
+      return getContentCount(dataSource) === 1 ? 'Entry' : 'Entries';
+    case 'website':
+      return getContentCount(dataSource) === 1 ? 'Page' : 'Pages';
+    default:
+      return 'Items';
+  }
+};
+
 const isEditableType = (type: DataSourceType): boolean => {
   return type !== 'uploaded_docs' && type !== 'structured_data';
 };
@@ -334,12 +364,12 @@ const DataSourceCard: React.FC<DataSourceCardProps> = ({ dataSource, onDelete, o
         ) : (
           <div className="grid grid-cols-2 gap-3">
             <div className="text-center p-2 bg-muted/50 rounded-lg">
-              <div className="text-lg font-bold">{dataSource.document_count || 0}</div>
-              <div className="text-xs text-muted-foreground">Documents</div>
+              <div className="text-lg font-bold">{getContentCount(dataSource)}</div>
+              <div className="text-xs text-muted-foreground truncate">{getContentLabel(dataSource)}</div>
             </div>
             <div className="text-center p-2 bg-muted/50 rounded-lg">
               <div className="text-lg font-bold">{dataSource.embedding_count || 0}</div>
-              <div className="text-xs text-muted-foreground">Embeddings</div>
+              <div className="text-xs text-muted-foreground">Vectors</div>
             </div>
           </div>
         )}
@@ -411,7 +441,7 @@ export const DataSourceList: React.FC<DataSourceListProps> = ({
   }
 
   return (
-    <div className={cn('grid gap-4 md:grid-cols-2 lg:grid-cols-3', className)}>
+    <div className={cn('grid gap-4 md:grid-cols-2', className)}>
       {dataSources.map((dataSource) => (
         <DataSourceCard
           key={dataSource.id}

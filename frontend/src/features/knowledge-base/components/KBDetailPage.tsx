@@ -317,11 +317,11 @@ export const KBDetailPage: React.FC<KBDetailPageProps> = ({ kbId }) => {
             <CardContent className="p-5">
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
-                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Documents</p>
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Uploaded Files</p>
                   <p className="text-2xl font-bold tracking-tight">
                     {(selectedKB.document_count || 0).toLocaleString()}
                   </p>
-                  <p className="text-xs text-muted-foreground">Indexed documents</p>
+                  <p className="text-xs text-muted-foreground">Files uploaded</p>
                 </div>
                 <div className="rounded-xl p-2.5 bg-emerald-500/10">
                   <Database className="h-4 w-4 text-emerald-500" />
@@ -375,14 +375,23 @@ export const KBDetailPage: React.FC<KBDetailPageProps> = ({ kbId }) => {
                 </p>
               ) : (
                 <div className="space-y-3">
-                  {Object.entries(sourcesByType).map(([type, count]) => (
-                    <div key={type} className="flex items-center justify-between">
-                      <span className="text-sm capitalize text-muted-foreground">
-                        {type.replace(/_/g, ' ')}
-                      </span>
-                      <span className="text-sm font-medium">{count}</span>
-                    </div>
-                  ))}
+                  {Object.entries(sourcesByType).map(([type, count]) => {
+                    const typeLabels: Record<string, string> = {
+                      uploaded_docs: 'Uploaded Documents',
+                      website: 'Website Crawler',
+                      text: 'Text Input',
+                      qa_pairs: 'Q&A Pairs',
+                      structured_data: 'Structured Data',
+                    };
+                    return (
+                      <div key={type} className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">
+                          {typeLabels[type] || type.replace(/_/g, ' ')}
+                        </span>
+                        <span className="text-sm font-medium">{count}</span>
+                      </div>
+                    );
+                  })}
                   <Separator className="my-2" />
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Total</span>
