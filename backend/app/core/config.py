@@ -322,6 +322,45 @@ class Settings(BaseSettings):
     )
 
     # ============================================================================
+    # AI Gateway Settings (LiteLLM)
+    # ============================================================================
+
+    AI_GATEWAY_CHAT_MODEL: str = Field(
+        default="openrouter/openai/gpt-4",
+        description="Default chat/generation model (LiteLLM format)"
+    )
+
+    AI_GATEWAY_CHAT_FAST_MODEL: str = Field(
+        default="openrouter/openai/gpt-4o-mini",
+        description="Fast/cheap model for judges, classifiers, evaluation"
+    )
+
+    AI_GATEWAY_EMBEDDING_MODEL: str = Field(
+        default="openrouter/openai/text-embedding-3-small",
+        description="Embedding model (LiteLLM format)"
+    )
+
+    AI_GATEWAY_VISION_MODEL: str = Field(
+        default="openrouter/qwen/qwen3-vl-8b-instruct",
+        description="Primary vision model for OCR/document processing"
+    )
+
+    AI_GATEWAY_VISION_ESCALATION: str = Field(
+        default="openrouter/qwen/qwen3-vl-8b-instruct,openrouter/qwen/qwen3-vl-32b-instruct,openrouter/google/gemini-3-flash-preview",
+        description="Comma-separated vision model escalation chain"
+    )
+
+    AI_GATEWAY_CLASSIFIER_MODEL: str = Field(
+        default="openrouter/openai/gpt-4o-mini",
+        description="Intent classification model"
+    )
+
+    AI_GATEWAY_RERANKER_MODEL: str = Field(
+        default="cohere/rerank-v3.5",
+        description="Reranker model (LiteLLM format)"
+    )
+
+    # ============================================================================
     # File Upload Settings
     # ============================================================================
 
