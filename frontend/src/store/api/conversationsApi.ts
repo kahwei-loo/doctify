@@ -81,6 +81,7 @@ const transformConversation = (backend: BackendConversationResponse): Conversati
   created_at: backend.created_at,
   resolved_at: backend.resolved_at || undefined,
   message_count: backend.message_count || 0,
+  context: backend.context || undefined,
 });
 
 /**

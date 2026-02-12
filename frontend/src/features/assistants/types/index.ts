@@ -91,6 +91,12 @@ export interface AssistantFilters {
 export type ConversationStatus = 'unresolved' | 'in_progress' | 'resolved';
 export type MessageRole = 'user' | 'assistant' | 'system';
 
+export interface ConversationContext {
+  source?: 'test_dialog' | 'widget' | 'api';
+  page_url?: string;
+  [key: string]: any;
+}
+
 export interface Conversation {
   conversation_id: string;
   assistant_id: string;
@@ -101,6 +107,7 @@ export interface Conversation {
   created_at: string;
   resolved_at?: string;
   message_count: number;
+  context?: ConversationContext;
 }
 
 export interface ConversationListResponse {

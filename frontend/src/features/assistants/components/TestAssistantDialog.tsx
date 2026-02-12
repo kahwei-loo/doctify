@@ -22,12 +22,14 @@ interface TestAssistantDialogProps {
   open: boolean;
   onClose: () => void;
   assistant: Assistant;
+  onMessageSent?: () => void;
 }
 
 export const TestAssistantDialog: React.FC<TestAssistantDialogProps> = ({
   open,
   onClose,
   assistant,
+  onMessageSent,
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -70,10 +72,14 @@ export const TestAssistantDialog: React.FC<TestAssistantDialogProps> = ({
         assistant_id: assistant.assistant_id,
         session_id: sessionId,
         content,
+        context: { source: 'test_dialog' },
       }).unwrap();
 
       // Add assistant response
       setMessages((prev) => [...prev, result.data.assistant_message]);
+
+      // Notify parent to refresh conversation list
+      onMessageSent?.();
     } catch {
       // Show error as assistant message
       const errorMsg: Message = {

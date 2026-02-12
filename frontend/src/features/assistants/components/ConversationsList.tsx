@@ -14,6 +14,9 @@ import {
   AlertCircle,
   Loader2,
   Inbox,
+  FlaskConical,
+  Globe,
+  Code,
 } from 'lucide-react';
 import { useGetConversationsQuery } from '@/store/api/conversationsApi';
 import type { Conversation, ConversationStatus } from '../types';
@@ -172,6 +175,37 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
   );
 };
 
+// Source Badge Component
+const sourceConfig: Record<string, { icon: React.ElementType; label: string; className: string }> = {
+  test_dialog: {
+    icon: FlaskConical,
+    label: 'Test',
+    className: 'text-purple-600 dark:text-purple-400',
+  },
+  widget: {
+    icon: Globe,
+    label: 'Widget',
+    className: 'text-blue-600 dark:text-blue-400',
+  },
+  api: {
+    icon: Code,
+    label: 'API',
+    className: 'text-green-600 dark:text-green-400',
+  },
+};
+
+const SourceBadge: React.FC<{ source: string }> = ({ source }) => {
+  const config = sourceConfig[source];
+  if (!config) return null;
+  const Icon = config.icon;
+  return (
+    <div className={cn('flex items-center gap-1', config.className)}>
+      <Icon className="h-3 w-3" />
+      <span>{config.label}</span>
+    </div>
+  );
+};
+
 // Conversation Item Component
 interface ConversationItemProps {
   conversation: Conversation;
@@ -230,8 +264,11 @@ const ConversationItem: React.FC<ConversationItemProps> = ({
       {/* Message Preview */}
       <p className="text-sm line-clamp-2 mb-2">{conversation.last_message_preview}</p>
 
-      {/* Message Count */}
+      {/* Source & Message Count */}
       <div className="flex items-center gap-3 text-xs text-muted-foreground">
+        {conversation.context?.source && (
+          <SourceBadge source={conversation.context.source} />
+        )}
         <div className="flex items-center gap-1">
           <MessageSquare className="h-3 w-3" />
           <span>{conversation.message_count} messages</span>

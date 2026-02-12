@@ -20,6 +20,8 @@ import {
   Code,
   BarChart3,
   Circle,
+  Loader2,
+  RefreshCw,
 } from 'lucide-react';
 import {
   ResizablePanelGroup,
@@ -150,10 +152,11 @@ export const ConversationsInbox: React.FC<ConversationsInboxProps> = ({
   const [testDialogOpen, setTestDialogOpen] = useState(false);
   const [analyticsDialogOpen, setAnalyticsDialogOpen] = useState(false);
 
-  // Fetch conversations for the selected assistant
-  const { data: response, refetch } = useGetConversationsQuery({
-    filters: { assistant_id: assistant.assistant_id },
-  });
+  // Fetch conversations for the selected assistant (poll every 10s for real-time updates)
+  const { data: response, refetch, isLoading, isError } = useGetConversationsQuery(
+    { filters: { assistant_id: assistant.assistant_id } },
+    { pollingInterval: 10000 },
+  );
   const conversations = response?.data || [];
 
   // WebSocket event handler - refetch conversations on updates
@@ -231,8 +234,69 @@ export const ConversationsInbox: React.FC<ConversationsInboxProps> = ({
     setAnalyticsDialogOpen(true);
   };
 
-  // Empty state: No conversations at all
-  if (conversations.length === 0) {
+  // Loading state
+  if (isLoading && conversations.length === 0) {
+    return (
+      <div className={cn('flex-1 flex flex-col h-full', className)}>
+        <AssistantHeader
+          assistant={assistant}
+          conversationsCount={0}
+          onTest={handleTest}
+          onEdit={handleEdit}
+          onGetWidget={handleGetWidget}
+          onViewAnalytics={handleViewAnalytics}
+        />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mx-auto mb-3" />
+            <p className="text-sm text-muted-foreground">Loading conversations...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (isError && conversations.length === 0) {
+    return (
+      <div className={cn('flex-1 flex flex-col h-full', className)}>
+        <AssistantHeader
+          assistant={assistant}
+          conversationsCount={0}
+          onTest={handleTest}
+          onEdit={handleEdit}
+          onGetWidget={handleGetWidget}
+          onViewAnalytics={handleViewAnalytics}
+        />
+        <div className="flex-1 flex items-center justify-center p-6">
+          <div className="max-w-md text-center">
+            <div className="rounded-full bg-destructive/10 p-4 mx-auto w-fit mb-4">
+              <RefreshCw className="h-8 w-8 text-destructive" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">Failed to Load Conversations</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Could not fetch conversations. Please check your connection and try again.
+            </p>
+            <Button variant="outline" onClick={() => refetch()}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Retry
+            </Button>
+          </div>
+        </div>
+
+        {/* Dialogs still available in error state */}
+        <TestAssistantDialog
+          open={testDialogOpen}
+          onClose={() => setTestDialogOpen(false)}
+          assistant={assistant}
+          onMessageSent={refetch}
+        />
+      </div>
+    );
+  }
+
+  // Empty state: No conversations at all (only when query succeeded)
+  if (!isLoading && !isError && conversations.length === 0) {
     return (
       <div className={cn('flex-1 flex flex-col h-full', className)}>
         {/* Assistant Header */}
@@ -308,6 +372,7 @@ export const ConversationsInbox: React.FC<ConversationsInboxProps> = ({
           open={testDialogOpen}
           onClose={() => setTestDialogOpen(false)}
           assistant={assistant}
+          onMessageSent={refetch}
         />
 
         {/* Analytics Dialog */}
@@ -374,6 +439,7 @@ export const ConversationsInbox: React.FC<ConversationsInboxProps> = ({
           open={testDialogOpen}
           onClose={() => setTestDialogOpen(false)}
           assistant={assistant}
+          onMessageSent={refetch}
         />
 
         {/* Analytics Dialog */}
@@ -435,6 +501,21 @@ export const ConversationsInbox: React.FC<ConversationsInboxProps> = ({
       <WidgetEmbedDialog
         open={widgetDialogOpen}
         onClose={() => setWidgetDialogOpen(false)}
+        assistant={assistant}
+      />
+
+      {/* Test Assistant Dialog */}
+      <TestAssistantDialog
+        open={testDialogOpen}
+        onClose={() => setTestDialogOpen(false)}
+        assistant={assistant}
+        onMessageSent={refetch}
+      />
+
+      {/* Analytics Dialog */}
+      <AssistantAnalyticsDialog
+        open={analyticsDialogOpen}
+        onClose={() => setAnalyticsDialogOpen(false)}
         assistant={assistant}
       />
     </div>
