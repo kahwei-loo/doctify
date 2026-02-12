@@ -30,11 +30,8 @@ litellm>=1.55.0  # Unified AI gateway — library mode
 httpx==0.27.0  # Modern HTTP client for API calls
 
 # RAG (Retrieval Augmented Generation) - Phase 11
-langchain==0.1.0  # LangChain framework for RAG orchestration
-langchain-openai==0.0.3  # OpenAI integration for LangChain
-langchain-community==0.0.13  # Community integrations
 tiktoken==0.5.2  # Token counting for embeddings
-cohere>=5.0  # Reranker API for improved retrieval relevance (P1.1)
+cohere>=5.0  # Reranker API (used by litellm for arerank)
 
 # Authentication and Security
 python-jose[cryptography]==3.3.0  # JWT token generation

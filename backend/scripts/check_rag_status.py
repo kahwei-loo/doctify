@@ -19,8 +19,7 @@ def check_dependencies():
     print("="*70)
 
     dependencies = {
-        "langchain": "RAG orchestration",
-        "langchain_openai": "OpenAI integration",
+        "litellm": "Unified AI gateway",
         "tiktoken": "Token counting",
         "pgvector": "Vector database support",
         "openai": "OpenAI API client",
