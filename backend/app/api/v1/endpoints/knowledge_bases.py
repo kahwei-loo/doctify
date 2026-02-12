@@ -621,7 +621,7 @@ async def test_query(
                         text=embedding.chunk_text or "",
                         similarity=round(similarity, 4),
                         source_name=ds.name,
-                        source_type=ds.source_type,
+                        source_type=ds.type,
                         chunk_index=embedding.chunk_index or 0,
                         metadata=embedding.chunk_metadata,
                     )

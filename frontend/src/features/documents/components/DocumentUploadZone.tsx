@@ -23,6 +23,10 @@ const ACCEPTED_FILE_TYPES = {
   'application/pdf': ['.pdf'],
   'image/png': ['.png'],
   'image/jpeg': ['.jpg', '.jpeg'],
+  'text/plain': ['.txt'],
+  'text/markdown': ['.md'],
+  'text/csv': ['.csv'],
+  'application/json': ['.json'],
 };
 
 // Max file size: 10MB
@@ -126,7 +130,7 @@ export const DocumentUploadZone: React.FC<DocumentUploadZoneProps> = ({
               : 'Drag & drop files'}
           </p>
           <p className="text-xs text-muted-foreground">
-            PDF, PNG, JPG up to 10MB
+            PDF, TXT, MD, CSV, PNG, JPG up to 10MB
           </p>
         </div>
         <Button
@@ -192,10 +196,22 @@ export const DocumentUploadZone: React.FC<DocumentUploadZoneProps> = ({
       </p>
 
       {/* File Type Icons */}
-      <div className="flex items-center gap-4 mb-4">
+      <div className="flex items-center gap-4 mb-4 flex-wrap">
         <div className="flex items-center gap-1.5 text-muted-foreground">
           <FileText className="h-4 w-4" />
           <span className="text-xs">PDF</span>
+        </div>
+        <div className="flex items-center gap-1.5 text-muted-foreground">
+          <FileText className="h-4 w-4" />
+          <span className="text-xs">TXT</span>
+        </div>
+        <div className="flex items-center gap-1.5 text-muted-foreground">
+          <FileText className="h-4 w-4" />
+          <span className="text-xs">MD</span>
+        </div>
+        <div className="flex items-center gap-1.5 text-muted-foreground">
+          <FileText className="h-4 w-4" />
+          <span className="text-xs">CSV</span>
         </div>
         <div className="flex items-center gap-1.5 text-muted-foreground">
           <Image className="h-4 w-4" />

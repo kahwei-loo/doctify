@@ -117,7 +117,7 @@ export const KBListPanel: React.FC<KBListPanelProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [totalDocCount, setTotalDocCount] = useState<number>(0);
+  const [totalEmbeddingCount, setTotalEmbeddingCount] = useState<number>(0);
 
   // Reusable function to load KBs
   const loadKBs = React.useCallback(async () => {
@@ -126,12 +126,12 @@ export const KBListPanel: React.FC<KBListPanelProps> = ({
     try {
       const response = await knowledgeBaseApi.listKnowledgeBases();
       setKnowledgeBases(response.data);
-      // Calculate total document count across all KBs
-      const totalDocs = response.data.reduce(
-        (sum, kb) => sum + (kb.document_count || 0),
+      // Calculate total embedding count across all KBs
+      const totalEmbeddings = response.data.reduce(
+        (sum, kb) => sum + (kb.embedding_count || 0),
         0
       );
-      setTotalDocCount(totalDocs);
+      setTotalEmbeddingCount(totalEmbeddings);
     } catch (err) {
       setError('Failed to load knowledge bases');
     } finally {
@@ -361,12 +361,12 @@ export const KBListPanel: React.FC<KBListPanelProps> = ({
                 </div>
               </div>
 
-              {/* Total Document Count */}
+              {/* Total Embeddings Count */}
               <div className="flex items-center gap-2 text-xs text-muted-foreground pl-8">
                 <span className="font-medium text-foreground">
-                  {totalDocCount.toLocaleString()}
+                  {totalEmbeddingCount.toLocaleString()}
                 </span>
-                <span>total documents</span>
+                <span>total embeddings</span>
               </div>
             </div>
           </div>
@@ -382,7 +382,7 @@ export const KBListPanel: React.FC<KBListPanelProps> = ({
                 kb={kb}
                 isSelected={selectedKbId === kb.id}
                 onSelect={() => {
-                  navigate(`/knowledge-base/${kb.id}?tab=sources`);
+                  navigate(`/knowledge-base/${kb.id}`);
                   onSelectKb(kb.id);
                 }}
               />

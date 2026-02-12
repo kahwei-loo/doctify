@@ -36,6 +36,7 @@ const QUERY_TIMEOUT_MS = 30_000;
 interface UnifiedQueryPanelProps {
   knowledgeBaseId: string;
   className?: string;
+  variant?: 'default' | 'panel';
 }
 
 interface QueryHistoryItem {
@@ -87,7 +88,9 @@ function isEmptyResult(item: QueryHistoryItem): boolean {
 export const UnifiedQueryPanel: React.FC<UnifiedQueryPanelProps> = ({
   knowledgeBaseId,
   className,
+  variant = 'default',
 }) => {
+  const isPanel = variant === 'panel';
   const [query, setQuery] = useState('');
   const [history, setHistory] = useState<QueryHistoryItem[]>([]);
   const [conversationId, setConversationId] = useState<string | undefined>();
@@ -129,8 +132,18 @@ export const UnifiedQueryPanel: React.FC<UnifiedQueryPanelProps> = ({
     }, QUERY_TIMEOUT_MS);
 
     try {
-      let finalResponse: UnifiedQueryResponse | null = null;
       let streamedText = '';
+      // Accumulators for building a proper UnifiedQueryResponse after streaming
+      let intentType: 'rag' | 'analytics' = 'rag';
+      let intentConfidence = 0;
+      let streamedSources: Array<{
+        chunk_text: string;
+        document_id: string;
+        document_name: string;
+        similarity_score: number;
+      }> = [];
+      let analyticsData: any = null;
+      let doneMetadata: { query_id?: string; created_at?: string; conversation_id?: string } = {};
 
       await streamUnifiedQuery(
         knowledgeBaseId,
@@ -141,11 +154,16 @@ export const UnifiedQueryPanel: React.FC<UnifiedQueryPanelProps> = ({
         (event) => {
           switch (event.type) {
             case 'intent': {
-              // Intent classification received
+              const intentData = event.data as any;
+              if (intentData?.intent_type) intentType = intentData.intent_type;
+              if (intentData?.confidence) intentConfidence = intentData.confidence;
               break;
             }
             case 'sources': {
-              // Sources received during RAG streaming
+              const sources = event.data as any[];
+              if (Array.isArray(sources)) {
+                streamedSources = sources;
+              }
               break;
             }
             case 'chunk': {
@@ -162,14 +180,17 @@ export const UnifiedQueryPanel: React.FC<UnifiedQueryPanelProps> = ({
               break;
             }
             case 'analytics_result': {
-              // Analytics result (non-streaming)
-              finalResponse = event.data as UnifiedQueryResponse;
+              analyticsData = event.data;
               break;
             }
             case 'done': {
-              const doneData = event.data as UnifiedQueryResponse;
-              if (doneData) {
-                finalResponse = doneData;
+              const data = event.data as any;
+              if (data) {
+                doneMetadata = {
+                  query_id: data.query_id,
+                  created_at: data.created_at,
+                  conversation_id: data.conversation_id,
+                };
               }
               break;
             }
@@ -189,19 +210,41 @@ export const UnifiedQueryPanel: React.FC<UnifiedQueryPanelProps> = ({
         controller.signal
       );
 
-      if (finalResponse) {
-        if (!conversationId && (finalResponse as any).conversation_id) {
-          setConversationId((finalResponse as any).conversation_id);
-        }
+      // Track conversation ID from done metadata
+      if (!conversationId && doneMetadata.conversation_id) {
+        setConversationId(doneMetadata.conversation_id);
+      }
+
+      // Build a proper UnifiedQueryResponse from accumulated streaming data
+      const hasRagContent = streamedText.length > 0;
+      const hasAnalyticsContent = analyticsData != null;
+
+      if (hasRagContent || hasAnalyticsContent) {
+        const builtResponse: UnifiedQueryResponse = {
+          id: doneMetadata.query_id || itemId,
+          intent_type: hasAnalyticsContent ? 'analytics' : 'rag',
+          confidence: intentConfidence || 0.8,
+          created_at: doneMetadata.created_at || new Date().toISOString(),
+          ...(hasRagContent && {
+            rag_response: {
+              answer: streamedText,
+              sources: streamedSources,
+            },
+          }),
+          ...(hasAnalyticsContent && {
+            analytics_response: analyticsData,
+          }),
+        };
+
         setHistory((prev) =>
           prev.map((item) =>
             item.id === itemId
-              ? { ...item, response: finalResponse, isStreaming: false }
+              ? { ...item, response: builtResponse, isStreaming: false }
               : item
           )
         );
       } else {
-        // Streaming completed without a final response object — build one from streamed text
+        // No meaningful content received
         setHistory((prev) =>
           prev.map((item) =>
             item.id === itemId ? { ...item, isStreaming: false } : item
@@ -283,58 +326,71 @@ export const UnifiedQueryPanel: React.FC<UnifiedQueryPanelProps> = ({
 
   return (
     <div className={cn('flex flex-col h-full', className)}>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h3 className="text-lg font-medium">Unified Query</h3>
-          <p className="text-sm text-muted-foreground">
-            Ask questions about your documents or analyze your data
-          </p>
-        </div>
-        {history.length > 0 && (
+      {/* Clear button — floats top-right when history exists */}
+      {history.length > 0 && (
+        <div className="flex items-center justify-end shrink-0">
           <Button
             variant="ghost"
             size="sm"
             onClick={handleClearHistory}
-            className="gap-2 text-muted-foreground"
+            className="gap-1.5 text-muted-foreground h-7 text-xs"
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className="h-3 w-3" />
             Clear
           </Button>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Chat History */}
-      <div className="flex-1 min-h-0 mb-4" ref={scrollRef}>
+      <div className="flex-1 min-h-0 mb-3" ref={scrollRef}>
         <ScrollArea className="h-full">
+          <div className="pr-3">
           {history.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <MessageSquare className="h-12 w-12 text-muted-foreground/50 mb-4" />
-              <h4 className="text-lg font-medium mb-2">Ask Anything</h4>
-              <p className="text-sm text-muted-foreground max-w-md">
-                Ask questions about your documents (RAG) or analyze structured
-                datasets. The system automatically routes your query to the right
-                pipeline.
+            <div className={cn(
+              "flex flex-col items-center justify-center text-center h-full",
+              isPanel ? "py-8" : "py-16"
+            )}>
+              <MessageSquare className={cn(
+                "text-muted-foreground/30 mb-3",
+                isPanel ? "h-10 w-10" : "h-12 w-12"
+              )} />
+              <h4 className={cn("font-medium mb-1", isPanel ? "text-base" : "text-lg")}>Ask Anything</h4>
+              <p className={cn("text-muted-foreground mb-4", isPanel ? "text-xs max-w-[220px]" : "text-sm max-w-md")}>
+                Ask questions about your documents or analyze datasets.
               </p>
-              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
-                <div className="rounded-lg border border-dashed p-3 text-left">
-                  <span className="font-medium text-blue-600">Document Q&A:</span>{' '}
+              <div className={cn(
+                "grid gap-2 text-xs text-muted-foreground w-full",
+                isPanel ? "grid-cols-1 max-w-[260px]" : "grid-cols-1 sm:grid-cols-2 max-w-md"
+              )}>
+                <button
+                  type="button"
+                  className="rounded-lg border border-dashed p-2.5 text-left hover:border-primary/40 hover:bg-muted/50 transition-colors"
+                  onClick={() => setQuery('What is the refund policy?')}
+                >
+                  <span className="font-medium text-blue-600">Q&A:</span>{' '}
                   &ldquo;What is the refund policy?&rdquo;
-                </div>
-                <div className="rounded-lg border border-dashed p-3 text-left">
-                  <span className="font-medium text-indigo-600">Analytics:</span>{' '}
-                  &ldquo;Show monthly revenue trend&rdquo;
-                </div>
+                </button>
+                <button
+                  type="button"
+                  className="rounded-lg border border-dashed p-2.5 text-left hover:border-primary/40 hover:bg-muted/50 transition-colors"
+                  onClick={() => setQuery('Summarize the key findings')}
+                >
+                  <span className="font-medium text-blue-600">Q&A:</span>{' '}
+                  &ldquo;Summarize the key findings&rdquo;
+                </button>
               </div>
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className={cn(isPanel ? "space-y-4" : "space-y-6")}>
               {history.map((item) => (
-                <div key={item.id} className="space-y-3">
+                <div key={item.id} className={cn(isPanel ? "space-y-2" : "space-y-3")}>
                   {/* User Query */}
                   <div className="flex justify-end">
-                    <div className="bg-primary text-primary-foreground rounded-lg px-4 py-2 max-w-[80%]">
-                      <p className="text-sm">{item.query}</p>
+                    <div className={cn(
+                      "bg-primary text-primary-foreground rounded-lg max-w-[85%]",
+                      isPanel ? "px-3 py-1.5" : "px-4 py-2"
+                    )}>
+                      <p className={cn(isPanel ? "text-xs" : "text-sm")}>{item.query}</p>
                     </div>
                   </div>
 
@@ -384,7 +440,7 @@ export const UnifiedQueryPanel: React.FC<UnifiedQueryPanelProps> = ({
                         </p>
                       </div>
                     ) : item.response ? (
-                      <AdaptiveResponseRenderer response={item.response} />
+                      <AdaptiveResponseRenderer response={item.response} compact={isPanel} />
                     ) : item.streamedAnswer ? (
                       // Streamed RAG answer without structured response
                       <div className="rounded-lg border bg-card p-4">
@@ -398,26 +454,27 @@ export const UnifiedQueryPanel: React.FC<UnifiedQueryPanelProps> = ({
               ))}
             </div>
           )}
+          </div>
         </ScrollArea>
       </div>
 
       {/* Query Input */}
-      <div className="border-t pt-4">
+      <div className={cn("border-t shrink-0", isPanel ? "pt-3" : "pt-4")}>
         <div className="flex gap-2">
           <Textarea
-            placeholder="Ask about your documents or data..."
+            placeholder={isPanel ? "Ask a question..." : "Ask about your documents or data..."}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
-            rows={2}
+            rows={isPanel ? 1 : 2}
             disabled={isLoading}
-            className="resize-none"
+            className={cn("resize-none", isPanel && "text-sm min-h-[36px]")}
           />
           <Button
             onClick={handleSubmit}
             disabled={isLoading || !query.trim()}
             size="icon"
-            className="h-auto min-h-[60px]"
+            className={cn("h-auto", isPanel ? "min-h-[36px]" : "min-h-[60px]")}
           >
             {isLoading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -426,8 +483,8 @@ export const UnifiedQueryPanel: React.FC<UnifiedQueryPanelProps> = ({
             )}
           </Button>
         </div>
-        <p className="text-xs text-muted-foreground mt-1">
-          Press Enter to send, Shift+Enter for new line
+        <p className={cn("text-muted-foreground mt-1", isPanel ? "text-[10px]" : "text-xs")}>
+          Enter to send, Shift+Enter for new line
         </p>
       </div>
     </div>

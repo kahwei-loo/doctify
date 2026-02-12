@@ -4,37 +4,32 @@
  * Export all knowledge base components
  */
 
-// Stage 8: Two-View Architecture
+// Overall View (KB list page, no kbId selected)
 export { OverallViewPage } from './OverallViewPage';
-export { KBDetailPage } from './KBDetailPage';
 
+// NotebookLM-inspired Split Layout
+export { KBSplitLayout } from './KBSplitLayout';
+export { SourcesPanel } from './SourcesPanel';
+export { ChatPanel } from './ChatPanel';
+export { SourceCard } from './SourceCard';
+export { SourceExpandedView } from './SourceExpandedView';
+
+// Sidebar & Navigation
 export { KBListPanel } from './KBListPanel';
-export { KBOverallStats } from './KBOverallStats';
-export { KBDetailTabs, type KBTab } from './KBDetailTabs';
-export { DataSourceList } from './DataSourceList';
+
+// Dialogs
 export { AddDataSourceDialog } from './AddDataSourceDialog';
 export { DataSourceConfigDialog } from './DataSourceConfigDialog';
-export { EmbeddingsList } from './EmbeddingsList';
-export { GenerateEmbeddingsButton } from './GenerateEmbeddingsButton';
-export { TestQueryPanel } from './TestQueryPanel';
+export { EditDataSourceDialog } from './EditDataSourceDialog';
+export { ConfirmDeleteDialog } from './ConfirmDeleteDialog';
+
+// Settings
 export { KBSettings } from './KBSettings';
 
-// Stage 5: Critical States & Polish
-export { ConfirmDeleteDialog } from './ConfirmDeleteDialog';
+// Critical States
 export { KBListSkeleton } from './KBListSkeleton';
-export { DataSourceSkeleton } from './DataSourceSkeleton';
 export { EmptyKBState } from './EmptyKBState';
 export { ErrorState } from './ErrorState';
-
-// Week 7: Vectorization Progress
-export {
-  VectorizationProgress,
-  VectorizationProgressCompact,
-  type VectorizationStatus,
-} from './VectorizationProgress';
-
-// Week 7: Confirmation Dialogs
-export { RegenerateEmbeddingsDialog } from './RegenerateEmbeddingsDialog';
 
 // Data Source Type Components
 export {

@@ -3,9 +3,7 @@
  *
  * Routes between Overall View and Detail View based on URL parameters.
  * - /knowledge-base (no kbId) → OverallViewPage
- * - /knowledge-base/{id} (with kbId) → KBDetailPage
- *
- * Pattern: Two-view architecture with context-aware routing
+ * - /knowledge-base/{id} (with kbId) → KBSplitLayout (Sources + Chat side-by-side)
  */
 
 import React, { useState, useCallback } from 'react';
@@ -13,11 +11,17 @@ import { useParams } from 'react-router-dom';
 import {
   KBListPanel,
   OverallViewPage,
-  KBDetailPage,
+  KBSplitLayout,
 } from '@/features/knowledge-base/components';
+import { useAppSelector } from '@/store';
+import { selectIsDemoMode } from '@/store/slices/demoSlice';
+
+const HEADER_HEIGHT = 64;
+const DEMO_BANNER_HEIGHT = 48;
 
 const KnowledgeBasePage: React.FC = () => {
   const { kbId } = useParams<{ kbId?: string }>();
+  const isDemoMode = useAppSelector(selectIsDemoMode);
 
   // UI State
   const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
@@ -37,11 +41,14 @@ const KnowledgeBasePage: React.FC = () => {
     }
 
     // kbId in URL → Show Detail View
-    return <KBDetailPage kbId={kbId} />;
+    return <KBSplitLayout kbId={kbId} />;
   };
 
   return (
-    <div className="flex h-full">
+    <div
+      className="flex -m-6 overflow-hidden"
+      style={{ height: `calc(100vh - ${isDemoMode ? HEADER_HEIGHT + DEMO_BANNER_HEIGHT : HEADER_HEIGHT}px)` }}
+    >
       {/* L2 Panel: Knowledge Base List (always visible) */}
       <KBListPanel
         selectedKbId={kbId || null}

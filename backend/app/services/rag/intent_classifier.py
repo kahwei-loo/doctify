@@ -207,8 +207,8 @@ class IntentClassifier:
                     {"role": "system", "content": SYSTEM_PROMPT},
                     {"role": "user", "content": user_message},
                 ],
-                functions=[CLASSIFY_FUNCTION],
-                function_call={"name": "classify_query_intent"},
+                tools=[{"type": "function", "function": CLASSIFY_FUNCTION}],
+                tool_choice={"type": "function", "function": {"name": "classify_query_intent"}},
                 temperature=0.0,
                 max_tokens=200,
             )
@@ -312,15 +312,16 @@ class IntentClassifier:
         import json
 
         choice = response.choices[0]
-        if not choice.message.function_call:
+        tool_calls = choice.message.tool_calls
+        if not tool_calls:
             return ClassificationResult(
                 intent=IntentType.RAG,
                 confidence=0.5,
-                reasoning="No function call in response, defaulting to RAG",
+                reasoning="No tool call in response, defaulting to RAG",
             )
 
         try:
-            args = json.loads(choice.message.function_call.arguments)
+            args = json.loads(tool_calls[0].function.arguments)
         except json.JSONDecodeError:
             return ClassificationResult(
                 intent=IntentType.RAG,

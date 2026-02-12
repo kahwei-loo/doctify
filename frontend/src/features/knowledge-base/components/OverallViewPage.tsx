@@ -14,14 +14,13 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Database, Grid3x3, List, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { KBOverallStats } from './KBOverallStats';
 import { EmptyKBState } from './EmptyKBState';
 import { ErrorState } from './ErrorState';
 import { KBListSkeleton } from './KBListSkeleton';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { knowledgeBaseApi, isMockMode } from '../services/mockData';
-import type { KnowledgeBase, KnowledgeBaseStats } from '../types';
+import type { KnowledgeBase } from '../types';
 
 type ViewMode = 'grid' | 'list';
 
@@ -32,26 +31,9 @@ export const OverallViewPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
 
   // Data State
-  const [stats, setStats] = useState<KnowledgeBaseStats | null>(null);
   const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBase[]>([]);
-  const [isLoadingStats, setIsLoadingStats] = useState(false);
   const [isLoadingKBs, setIsLoadingKBs] = useState(false);
-  const [statsError, setStatsError] = useState<string | null>(null);
   const [kbsError, setKBsError] = useState<string | null>(null);
-
-  // Load global stats
-  const loadStats = useCallback(async () => {
-    setIsLoadingStats(true);
-    setStatsError(null);
-    try {
-      const response = await knowledgeBaseApi.getStats();
-      setStats(response.data);
-    } catch (err) {
-      setStatsError('Failed to load statistics');
-    } finally {
-      setIsLoadingStats(false);
-    }
-  }, []);
 
   // Load all knowledge bases
   const loadKBs = useCallback(async () => {
@@ -69,33 +51,31 @@ export const OverallViewPage: React.FC = () => {
 
   // Load data on mount
   useEffect(() => {
-    loadStats();
     loadKBs();
-  }, [loadStats, loadKBs]);
+  }, [loadKBs]);
 
   // Handle KB card click
   const handleSelectKB = useCallback(
     (kbId: string) => {
-      navigate(`/knowledge-base/${kbId}?tab=sources`);
+      navigate(`/knowledge-base/${kbId}`);
     },
     [navigate]
   );
 
   // Handle refresh
   const handleRefresh = useCallback(() => {
-    loadStats();
     loadKBs();
-  }, [loadStats, loadKBs]);
+  }, [loadKBs]);
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      {/* Header with Overall Statistics */}
-      <div className="border-b bg-background p-6">
-        <div className="flex items-center justify-between mb-4">
+      {/* Header */}
+      <div className="border-b bg-gradient-to-b from-background to-muted/30 px-6 py-5">
+        <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Knowledge Bases - Overall View</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Global overview of all your knowledge bases
+            <h1 className="text-xl font-semibold tracking-tight">Knowledge Bases</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Manage your knowledge bases and data sources
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -108,28 +88,17 @@ export const OverallViewPage: React.FC = () => {
               variant="outline"
               size="icon"
               onClick={handleRefresh}
-              disabled={isLoadingStats || isLoadingKBs}
+              disabled={isLoadingKBs}
             >
               <RefreshCw
                 className={cn(
                   'h-4 w-4',
-                  (isLoadingStats || isLoadingKBs) && 'animate-spin'
+                  isLoadingKBs && 'animate-spin'
                 )}
               />
             </Button>
           </div>
         </div>
-
-        {statsError ? (
-          <ErrorState
-            type="server"
-            message={statsError}
-            onRetry={loadStats}
-            variant="inline"
-          />
-        ) : (
-          <KBOverallStats context="global" data={stats} isLoading={isLoadingStats} />
-        )}
       </div>
 
       {/* Knowledge Bases Grid/List */}
@@ -182,20 +151,20 @@ export const OverallViewPage: React.FC = () => {
           !kbsError &&
           knowledgeBases.length > 0 &&
           viewMode === 'grid' && (
-            <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               {knowledgeBases.map((kb) => (
                 <div
                   key={kb.id}
                   onClick={() => handleSelectKB(kb.id)}
-                  className="group p-6 border rounded-lg cursor-pointer hover:shadow-md hover:border-primary/50 transition-all"
+                  className="group p-5 border rounded-xl cursor-pointer hover:shadow-md hover:border-primary/40 transition-all"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-start gap-3 flex-1 min-w-0">
-                      <div className="p-2 rounded-lg bg-primary/10">
-                        <Database className="h-5 w-5 text-primary" />
+                      <div className="flex items-center justify-center h-9 w-9 rounded-xl bg-primary/10 shrink-0">
+                        <Database className="h-4 w-4 text-primary" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-lg truncate group-hover:text-primary transition-colors">
+                        <h3 className="font-semibold truncate group-hover:text-primary transition-colors">
                           {kb.name}
                         </h3>
                         {kb.description && (
@@ -248,11 +217,11 @@ export const OverallViewPage: React.FC = () => {
                 <div
                   key={kb.id}
                   onClick={() => handleSelectKB(kb.id)}
-                  className="group flex items-center justify-between p-4 border rounded-lg cursor-pointer hover:shadow-md hover:border-primary/50 transition-all"
+                  className="group flex items-center justify-between p-4 border rounded-xl cursor-pointer hover:shadow-md hover:border-primary/40 transition-all"
                 >
-                  <div className="flex items-center gap-4 flex-1 min-w-0">
-                    <div className="p-2 rounded-lg bg-primary/10">
-                      <Database className="h-5 w-5 text-primary" />
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="flex items-center justify-center h-9 w-9 rounded-xl bg-primary/10 shrink-0">
+                      <Database className="h-4 w-4 text-primary" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold truncate group-hover:text-primary transition-colors">
