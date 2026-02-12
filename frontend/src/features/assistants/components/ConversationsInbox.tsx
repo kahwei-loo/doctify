@@ -34,6 +34,8 @@ import { ConversationChat } from './ConversationChat';
 import { NoConversationsState, NoMessagesState } from './EmptyStates';
 import { useAssistantWebSocket, type WebSocketEventUnion } from '../hooks';
 import { WidgetEmbedDialog } from './WidgetEmbedDialog';
+import { TestAssistantDialog } from './TestAssistantDialog';
+import { AssistantAnalyticsDialog } from './AssistantAnalyticsDialog';
 import type { Assistant, Conversation } from '../types';
 import { cn } from '@/lib/utils';
 
@@ -145,6 +147,8 @@ export const ConversationsInbox: React.FC<ConversationsInboxProps> = ({
   const [isMobileView, setIsMobileView] = useState(false);
   const [showChatOnMobile, setShowChatOnMobile] = useState(false);
   const [widgetDialogOpen, setWidgetDialogOpen] = useState(false);
+  const [testDialogOpen, setTestDialogOpen] = useState(false);
+  const [analyticsDialogOpen, setAnalyticsDialogOpen] = useState(false);
 
   // Fetch conversations for the selected assistant
   const { data: response, refetch } = useGetConversationsQuery({
@@ -208,10 +212,9 @@ export const ConversationsInbox: React.FC<ConversationsInboxProps> = ({
     }
   }, [conversations, selectedConversationId]);
 
-  // Placeholder handlers for header actions
+  // Header action handlers
   const handleTest = () => {
-    // TODO: Implement test conversation creation
-    console.log('Test assistant');
+    setTestDialogOpen(true);
   };
 
   const handleEdit = () => {
@@ -225,8 +228,7 @@ export const ConversationsInbox: React.FC<ConversationsInboxProps> = ({
   };
 
   const handleViewAnalytics = () => {
-    // TODO: Implement view analytics
-    console.log('View analytics');
+    setAnalyticsDialogOpen(true);
   };
 
   // Empty state: No conversations at all
@@ -300,6 +302,20 @@ export const ConversationsInbox: React.FC<ConversationsInboxProps> = ({
           onClose={() => setWidgetDialogOpen(false)}
           assistant={assistant}
         />
+
+        {/* Test Assistant Dialog */}
+        <TestAssistantDialog
+          open={testDialogOpen}
+          onClose={() => setTestDialogOpen(false)}
+          assistant={assistant}
+        />
+
+        {/* Analytics Dialog */}
+        <AssistantAnalyticsDialog
+          open={analyticsDialogOpen}
+          onClose={() => setAnalyticsDialogOpen(false)}
+          assistant={assistant}
+        />
       </div>
     );
   }
@@ -350,6 +366,20 @@ export const ConversationsInbox: React.FC<ConversationsInboxProps> = ({
         <WidgetEmbedDialog
           open={widgetDialogOpen}
           onClose={() => setWidgetDialogOpen(false)}
+          assistant={assistant}
+        />
+
+        {/* Test Assistant Dialog */}
+        <TestAssistantDialog
+          open={testDialogOpen}
+          onClose={() => setTestDialogOpen(false)}
+          assistant={assistant}
+        />
+
+        {/* Analytics Dialog */}
+        <AssistantAnalyticsDialog
+          open={analyticsDialogOpen}
+          onClose={() => setAnalyticsDialogOpen(false)}
           assistant={assistant}
         />
       </div>
