@@ -5,7 +5,7 @@
  * Supports: uploaded_docs, website, text, qa_pairs
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import {
   FileStack,
   Globe,
@@ -15,6 +15,9 @@ import {
   Plus,
   Trash2,
   Loader2,
+  Upload,
+  X,
+  Table2,
 } from 'lucide-react';
 import {
   Dialog,
@@ -96,6 +99,10 @@ export const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
   // Uploaded documents state
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
+  // Structured data state
+  const [structuredFile, setStructuredFile] = useState<File | null>(null);
+  const structuredFileInputRef = useRef<HTMLInputElement>(null);
+
   const typeInfo = TYPE_INFO[sourceType];
 
   const resetForm = useCallback(() => {
@@ -107,6 +114,7 @@ export const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
     setTextContent('');
     setQaPairs([{ id: `qa-${Date.now()}`, question: '', answer: '' }]);
     setSelectedFiles([]);
+    setStructuredFile(null);
   }, []);
 
   const handleClose = useCallback(() => {
@@ -167,10 +175,11 @@ export const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
         return {
           document_ids: [],  // Will be populated after upload
         };
+      case 'structured_data':
+        // File will be uploaded via the dedicated endpoint
+        return {};
       default:
-        return {
-          document_ids: [],
-        };
+        return {};
     }
   }, [sourceType, url, maxDepth, includePatterns, excludePatterns, textContent, qaPairs, selectedFiles]);
 
@@ -186,16 +195,31 @@ export const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
         return qaPairs.some((p) => p.question.trim() && p.answer.trim());
       case 'uploaded_docs':
         return selectedFiles.length > 0;
+      case 'structured_data':
+        return structuredFile !== null;
       default:
         return false;
     }
-  }, [name, sourceType, url, textContent, qaPairs, selectedFiles]);
+  }, [name, sourceType, url, textContent, qaPairs, selectedFiles, structuredFile]);
 
   const handleSubmit = useCallback(async () => {
     if (!isValid()) return;
 
     setIsSubmitting(true);
     try {
+      // Structured data: single-call upload endpoint (creates DS + processes file)
+      if (sourceType === 'structured_data' && structuredFile) {
+        await realKnowledgeBaseApi.uploadStructuredData(
+          knowledgeBaseId,
+          structuredFile,
+          name.trim() || undefined
+        );
+        // Signal parent to refresh (parent skips creation for structured_data)
+        await onSubmit(name.trim(), {});
+        handleClose();
+        return;
+      }
+
       const config = buildConfig();
       const createdDataSource = await onSubmit(name.trim(), config);
 
@@ -214,7 +238,7 @@ export const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
     } finally {
       setIsSubmitting(false);
     }
-  }, [isValid, buildConfig, name, onSubmit, handleClose, sourceType, selectedFiles, knowledgeBaseId]);
+  }, [isValid, buildConfig, name, onSubmit, handleClose, sourceType, selectedFiles, structuredFile, knowledgeBaseId]);
 
   const renderWebsiteForm = () => (
     <div className="space-y-4">
@@ -351,9 +375,101 @@ export const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
 
   const renderUploadedDocsForm = () => (
     <UploadedDocsSource
+      selectedFiles={selectedFiles}
       onFilesSelected={handleUploadedFiles}
       className="space-y-4"
     />
+  );
+
+  const handleStructuredFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setStructuredFile(file);
+  }, []);
+
+  const handleStructuredFileDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      const ext = file.name.split('.').pop()?.toLowerCase();
+      if (['csv', 'xlsx', 'xls'].includes(ext || '')) {
+        setStructuredFile(file);
+      }
+    }
+  }, []);
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  const renderStructuredDataForm = () => (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label>Upload File (CSV or Excel) *</Label>
+        {!structuredFile ? (
+          <div
+            className={cn(
+              'border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors',
+              'hover:border-primary/50 hover:bg-primary/5'
+            )}
+            onClick={() => structuredFileInputRef.current?.click()}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={handleStructuredFileDrop}
+          >
+            <Table2 className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
+            <p className="text-sm font-medium">
+              Drop your CSV or Excel file here
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              or click to browse
+            </p>
+            <p className="text-xs text-muted-foreground mt-3">
+              Supports .csv, .xlsx, .xls (max 50MB)
+            </p>
+          </div>
+        ) : (
+          <div className="border rounded-lg p-4 flex items-center justify-between bg-muted/30">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg p-2 bg-indigo-500/10">
+                <Table2 className="h-5 w-5 text-indigo-600" />
+              </div>
+              <div>
+                <p className="text-sm font-medium truncate max-w-[300px]">
+                  {structuredFile.name}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {formatFileSize(structuredFile.size)}
+                </p>
+              </div>
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setStructuredFile(null);
+                if (structuredFileInputRef.current) {
+                  structuredFileInputRef.current.value = '';
+                }
+              }}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+        <input
+          ref={structuredFileInputRef}
+          type="file"
+          accept=".csv,.xlsx,.xls"
+          className="hidden"
+          onChange={handleStructuredFileSelect}
+        />
+        <p className="text-xs text-muted-foreground">
+          The file schema will be extracted and data embedded for RAG queries
+        </p>
+      </div>
+    </div>
   );
 
   const renderConfigForm = () => {
@@ -366,6 +482,8 @@ export const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
         return renderQAPairsForm();
       case 'uploaded_docs':
         return renderUploadedDocsForm();
+      case 'structured_data':
+        return renderStructuredDataForm();
       default:
         return null;
     }

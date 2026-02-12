@@ -112,6 +112,11 @@ class PipelineRouter:
                 conversation_id=conversation_id,
             )
         else:
+            # Scope to document sources in this KB
+            doc_source_ids = [
+                uuid.UUID(ds.id) for ds in data_sources
+                if ds.type != "structured_data"
+            ]
             response = await self._handle_rag(
                 query=query,
                 user_id=user_id,
@@ -119,6 +124,7 @@ class PipelineRouter:
                 classification=classification,
                 search_mode=search_mode,
                 conversation_id=conversation_id,
+                data_source_ids=doc_source_ids or None,
             )
 
         # Step 3: Log to rag_queries with classification metadata
@@ -196,10 +202,15 @@ class PipelineRouter:
             else:
                 # RAG path: stream answer chunks
                 response.intent_type = "rag"
+                # Scope to document sources in this KB
+                doc_source_ids = [
+                    uuid.UUID(ds.id) for ds in data_sources
+                    if ds.type != "structured_data"
+                ]
                 try:
                     async for sse_event in self.generation_service.generate_answer_stream(
                         question=query,
-                        data_source_ids=None,
+                        data_source_ids=doc_source_ids or None,
                         user_id=user_id,
                         search_mode=search_mode,
                         use_reranking=True,
@@ -235,8 +246,8 @@ class PipelineRouter:
             )
             await self.session.commit()
 
-            # Emit done event
-            yield f"data: {json.dumps({'event': 'done', 'query_id': str(query_record.id), 'created_at': query_record.created_at.isoformat() if query_record.created_at else None})}\n\n"
+            # Emit done event with metadata for frontend response construction
+            yield f"data: {json.dumps({'event': 'done', 'query_id': str(query_record.id), 'created_at': query_record.created_at.isoformat() if query_record.created_at else None, 'intent_type': classification.intent.value, 'confidence': classification.confidence})}\n\n"
 
         except Exception as e:
             logger.error(f"Streaming query error: {e}")
@@ -250,13 +261,14 @@ class PipelineRouter:
         classification: ClassificationResult,
         search_mode: str,
         conversation_id: Optional[str],
+        data_source_ids: Optional[list[uuid.UUID]] = None,
     ) -> UnifiedResponse:
         """Handle RAG pipeline execution."""
         try:
             rag_response = await self.generation_service.generate_answer(
                 question=query,
                 user_id=user_id,
-                data_source_ids=None,  # Search all doc sources in KB
+                data_source_ids=data_source_ids,
                 search_mode=search_mode,
                 use_reranking=True,
             )
@@ -355,7 +367,7 @@ class PipelineRouter:
         if conversation_id:
             query_data["conversation_id"] = conversation_id
 
-        if classification.dataset_id:
+        if classification.dataset_id and classification.intent == IntentType.ANALYTICS:
             query_data["dataset_id"] = classification.dataset_id
 
         if response.rag_response:

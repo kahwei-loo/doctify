@@ -126,12 +126,7 @@ export const realKnowledgeBaseApi = {
 
     const response = await apiClient.post(
       `/knowledge-bases/${knowledgeBaseId}/data-sources/${dataSourceId}/upload`,
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }
+      formData
     );
 
     return {
@@ -139,6 +134,30 @@ export const realKnowledgeBaseApi = {
         document_ids: response.data.document_ids || [],
       },
     };
+  },
+
+  /**
+   * Upload structured data file (CSV/XLSX) as a new data source
+   * This is a single-call endpoint that creates the data source + processes the file.
+   */
+  async uploadStructuredData(
+    kbId: string,
+    file: File,
+    name?: string
+  ): Promise<{ data: DataSource }> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const params: Record<string, string> = {};
+    if (name) params.name = name;
+
+    const response = await apiClient.post(
+      `/knowledge-bases/${kbId}/data-sources/upload-structured`,
+      formData,
+      { params }
+    );
+
+    return { data: response.data };
   },
 
   /**
@@ -271,5 +290,75 @@ export const realKnowledgeBaseApi = {
   async deleteEmbedding(embeddingId: string): Promise<{ success: boolean }> {
     await apiClient.delete(`/embeddings/${embeddingId}`);
     return { success: true };
+  },
+
+  /**
+   * Fetch document text content for inline preview.
+   * Uses the document preview API and reads response as text.
+   */
+  async getDocumentTextContent(documentId: string): Promise<string> {
+    const response = await apiClient.get(`/documents/${documentId}/file/preview`, {
+      responseType: 'text',
+      // Override the default JSON transform so we get raw text
+      transformResponse: [(data: string) => data],
+    });
+    return response.data;
+  },
+
+  /**
+   * Fetch document file as a blob (for PDF/image rendering in dialog).
+   * Returns an object URL that can be used as iframe/img src.
+   */
+  async getDocumentBlobUrl(documentId: string): Promise<string> {
+    const response = await apiClient.get(`/documents/${documentId}/file/preview`, {
+      responseType: 'blob',
+    });
+    return URL.createObjectURL(response.data);
+  },
+
+  /**
+   * Download a document file via the browser.
+   */
+  async downloadDocument(documentId: string, filename: string): Promise<void> {
+    const response = await apiClient.get(`/documents/${documentId}/file/download`, {
+      responseType: 'blob',
+    });
+    const url = URL.createObjectURL(response.data);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  },
+
+  /**
+   * Get the preview URL for a document (for reference only — needs auth header).
+   */
+  getDocumentPreviewUrl(documentId: string): string {
+    const baseUrl = apiClient.defaults.baseURL || '';
+    return `${baseUrl}/documents/${documentId}/file/preview`;
+  },
+
+  /**
+   * Get the download URL for a document (for reference only — needs auth header).
+   */
+  getDocumentDownloadUrl(documentId: string): string {
+    const baseUrl = apiClient.defaults.baseURL || '';
+    return `${baseUrl}/documents/${documentId}/file/download`;
+  },
+
+  /**
+   * Get a preview of a structured dataset's rows.
+   * Calls the Insights preview endpoint using the dataset_id from the data source config.
+   */
+  async getDatasetPreview(
+    datasetId: string,
+    limit: number = 100,
+    offset: number = 0
+  ): Promise<{ columns: string[]; rows: any[][]; total_rows: number }> {
+    const response = await apiClient.get(`/insights/datasets/${datasetId}/preview`, {
+      params: { limit, offset },
+    });
+    return response.data;
   },
 };

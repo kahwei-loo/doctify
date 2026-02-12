@@ -48,9 +48,17 @@ export interface DataSource {
   embedding_count?: number;
 }
 
+export interface DocumentMeta {
+  id: string;
+  filename: string;
+  size: number;
+  type: string;
+}
+
 export interface DataSourceConfig {
   // For uploaded_docs
   document_ids?: string[];
+  documents?: DocumentMeta[];
 
   // For website
   url?: string;
@@ -67,6 +75,7 @@ export interface DataSourceConfig {
   qa_pairs?: QAPair[];
 
   // For structured_data
+  dataset_id?: string;
   file_info?: {
     filename: string;
     size: number;
@@ -140,13 +149,12 @@ export interface UnifiedQueryResponse {
 
 export interface Embedding {
   id: string;
+  document_id?: string;
   data_source_id: string;
-  text: string;
-  embedding_vector?: number[]; // Usually not returned in list views
-  status: EmbeddingStatus;
+  chunk_index: number;
+  text_content: string; // Backend returns text_content (mapped from chunk_text)
   metadata?: Record<string, any>;
   created_at: string;
-  error_message?: string;
 }
 
 export interface KnowledgeBaseStats {

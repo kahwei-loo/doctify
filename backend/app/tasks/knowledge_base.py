@@ -296,6 +296,7 @@ async def _generate_embeddings_async(data_source_id: str, force_regenerate: bool
                             "chunk_overlap": chunk_overlap,
                             "chunk_strategy": chunk_strategy,
                             "token_count": embedding_service.count_tokens(chunk_text),
+                            "document_name": ds.name,
                         }
                     )
                     db.add(embedding_data)
@@ -611,6 +612,21 @@ def crawl_website_task(self, data_source_id: str):
     try:
         # Run async function in event loop
         result = asyncio.run(_crawl_website_async(data_source_id, self))
+
+        # Auto-chain: crawl → embed
+        # After successful crawl with content, automatically generate embeddings
+        if result.get("status") == "completed" and result.get("pages_crawled", 0) > 0:
+            try:
+                generate_embeddings_task.delay(data_source_id)
+                logger.info(
+                    f"Auto-chained embedding generation after crawl for data source {data_source_id} "
+                    f"({result['pages_crawled']} pages crawled)"
+                )
+            except Exception as chain_error:
+                logger.warning(
+                    f"Failed to auto-chain embeddings after crawl for {data_source_id}: {chain_error}"
+                )
+
         return result
 
     except Exception as e:

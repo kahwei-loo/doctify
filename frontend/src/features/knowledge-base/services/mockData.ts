@@ -177,8 +177,8 @@ const mockDataSources: DataSource[] = [
 const mockEmbeddings: Embedding[] = Array.from({ length: 20 }, (_, i) => ({
   id: `emb-${i + 1}`,
   data_source_id: i < 10 ? 'ds-1' : 'ds-2',
-  text: `This is sample embedded text chunk ${i + 1}. It contains information that would be searchable via vector similarity...`,
-  status: 'completed',
+  chunk_index: i,
+  text_content: `This is sample embedded text chunk ${i + 1}. It contains information that would be searchable via vector similarity...`,
   metadata: {
     page: Math.floor(i / 5) + 1,
     chunk_index: i % 5,
@@ -382,7 +382,7 @@ export const mockKnowledgeBaseApi = {
 
     // Mock results
     const results = mockEmbeddings.slice(0, topK).map((emb, i) => ({
-      text: emb.text,
+      text: emb.text_content,
       similarity: 0.95 - i * 0.1,
       source_name: mockDataSources[0].name,
       source_type: mockDataSources[0].type,
@@ -397,6 +397,47 @@ export const mockKnowledgeBaseApi = {
       },
       timestamp: new Date().toISOString(),
     };
+  },
+
+  async getDocumentTextContent(_documentId: string): Promise<string> {
+    await delay(300);
+    return 'This is a sample document content preview.\n\nIt demonstrates how text files appear when viewed in the expanded source view.';
+  },
+
+  async getDocumentBlobUrl(_documentId: string): Promise<string> {
+    await delay(300);
+    return ''; // Demo mode placeholder
+  },
+
+  async downloadDocument(_documentId: string, _filename: string): Promise<void> {
+    await delay(300);
+  },
+
+  getDocumentPreviewUrl(documentId: string): string {
+    return `/api/v1/documents/${documentId}/file/preview`;
+  },
+
+  getDocumentDownloadUrl(documentId: string): string {
+    return `/api/v1/documents/${documentId}/file/download`;
+  },
+
+  async getDatasetPreview(
+    _datasetId: string,
+    limit: number = 5,
+    _offset: number = 0
+  ): Promise<{ columns: string[]; rows: any[][]; total_rows: number }> {
+    await delay(400);
+    const columns = ['id', 'name', 'category', 'value', 'date'];
+    const allRows = [
+      [1, 'Product A', 'Electronics', 299.99, '2024-01-15'],
+      [2, 'Product B', 'Clothing', 49.99, '2024-02-20'],
+      [3, 'Product C', 'Electronics', 149.50, '2024-03-10'],
+      [4, 'Product D', 'Home', 89.00, '2024-04-05'],
+      [5, 'Product E', 'Clothing', 34.99, '2024-05-12'],
+      [6, 'Product F', 'Home', 199.00, '2024-06-18'],
+      [7, 'Product G', 'Electronics', 599.99, '2024-07-22'],
+    ];
+    return { columns, rows: allRows.slice(0, limit), total_rows: allRows.length };
   },
 };
 

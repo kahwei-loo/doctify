@@ -113,8 +113,8 @@ class RetrievalService:
                     document_ids=document_ids,
                     data_source_ids=data_source_ids,
                 )
-                # Use RRF score as the primary score
-                search_results = [(emb, rrf) for emb, rrf, _vs, _ts in hybrid_results]
+                # Use RRF for ranking, vector cosine for display
+                search_results = [(emb, rrf, vs) for emb, rrf, vs, _ts in hybrid_results]
 
             else:
                 # Pure vector search (original)
@@ -134,21 +134,33 @@ class RetrievalService:
                 )
                 return []
 
+            # Normalize results: (embedding, ranking_score, display_score)
+            # For hybrid search, display_score is vector cosine similarity
+            # For other modes, display_score equals ranking_score
+            normalized = []
+            for item in search_results:
+                if len(item) == 3:
+                    emb, rank_score, display_score = item
+                    normalized.append((emb, rank_score, display_score))
+                else:
+                    emb, score = item
+                    normalized.append((emb, score, score))
+
             # Log result quality
-            scores = [score for _, score in search_results]
+            rank_scores = [rs for _, rs, _ in normalized]
             logger.info(
                 "Context retrieval completed",
                 extra={
-                    "chunks_found": len(search_results),
+                    "chunks_found": len(normalized),
                     "search_mode": search_mode,
-                    "avg_score": round(sum(scores) / len(scores), 4),
-                    "max_score": round(max(scores), 4),
+                    "avg_score": round(sum(rank_scores) / len(rank_scores), 4),
+                    "max_score": round(max(rank_scores), 4),
                 }
             )
 
             # Enrich with document metadata and filter by user_id
             context_list = []
-            for embedding, score in search_results:
+            for embedding, rank_score, display_score in normalized:
                 # Try document_id first, then data_source_id
                 doc_name = "Unknown"
                 doc_title = None
@@ -176,15 +188,16 @@ class RetrievalService:
                     "document_name": doc_name,
                     "document_title": doc_title,
                     "chunk_index": embedding.chunk_index,
-                    "similarity_score": round(score, 4),
+                    "similarity_score": round(display_score, 4),
+                    "rank_score": round(rank_score, 4),
                     "metadata": embedding.chunk_metadata or {},
                     "search_mode": search_mode,
                 }
 
                 context_list.append(context_entry)
 
-            # Sort by score (highest first)
-            context_list.sort(key=lambda x: x["similarity_score"], reverse=True)
+            # Sort by rank score (RRF for hybrid, cosine for others)
+            context_list.sort(key=lambda x: x["rank_score"], reverse=True)
 
             # Apply reranking if enabled (P1.1 - implemented separately)
             if use_reranking and len(context_list) > top_k:

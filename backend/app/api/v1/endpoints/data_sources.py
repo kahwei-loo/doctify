@@ -184,19 +184,23 @@ async def create_data_source(
             )
 
         # Create data source
+        # Website sources start as 'syncing' since crawl begins immediately
+        initial_status = "syncing" if data.type == "website" else "active"
         ds_data = {
             "knowledge_base_id": data.knowledge_base_id,
             "type": data.type,
             "name": data.name,
             "config": data.config or {},
-            "status": "active",
+            "status": initial_status,
         }
 
         ds = await ds_repo.create(ds_data)
         await db.commit()
         await db.refresh(ds)
 
-        # Auto-trigger embedding generation for types with immediate content
+        # Auto-trigger pipeline based on data source type:
+        # - text/qa_pairs: content is immediate → generate embeddings directly
+        # - website: needs crawl first → crawl task auto-chains to embed on completion
         if data.type in ("text", "qa_pairs"):
             try:
                 from app.tasks.knowledge_base import generate_embeddings_task
@@ -204,6 +208,13 @@ async def create_data_source(
                 logger.info(f"Auto-triggered embedding generation for {data.type} data source {ds.id}")
             except Exception as e:
                 logger.warning(f"Failed to auto-trigger embeddings for data source {ds.id}: {e}")
+        elif data.type == "website":
+            try:
+                from app.tasks.knowledge_base import crawl_website_task
+                crawl_website_task.delay(str(ds.id))
+                logger.info(f"Auto-triggered crawl for website data source {ds.id}")
+            except Exception as e:
+                logger.warning(f"Failed to auto-trigger crawl for data source {ds.id}: {e}")
 
         # Set counts to 0 for new data source
         ds.document_count = 0
@@ -315,9 +326,11 @@ async def upload_documents_to_data_source(
 
         # Process each file
         document_ids = []
+        documents_meta = []
         for file in files:
             # Read file content
             content = await file.read()
+            file_size = len(content)
 
             # Calculate file hash
             file_hash = hashlib.sha256(content).hexdigest()
@@ -359,7 +372,7 @@ async def upload_documents_to_data_source(
                 original_filename=file.filename,
                 file_path=saved_path,
                 file_type=file.content_type or "application/octet-stream",
-                file_size=len(content),
+                file_size=file_size,
                 file_hash=file_hash,
                 extracted_text=extracted_text,
                 status="completed",  # KB docs don't need OCR processing
@@ -368,14 +381,28 @@ async def upload_documents_to_data_source(
             db.add(document)
             await db.flush()  # Flush to get document ID
 
-            document_ids.append(str(document.id))
+            doc_id_str = str(document.id)
+            document_ids.append(doc_id_str)
+            documents_meta.append({
+                "id": doc_id_str,
+                "filename": file.filename or "unknown",
+                "size": file_size,
+                "type": file.content_type or "application/octet-stream",
+            })
 
-        # Update data source config with document IDs
+        # Update data source config with document IDs and metadata
         current_config = ds.config or {}
         existing_doc_ids = current_config.get("document_ids", [])
         updated_doc_ids = existing_doc_ids + document_ids
 
-        ds.config = {**current_config, "document_ids": updated_doc_ids}
+        existing_doc_meta = current_config.get("documents", [])
+        updated_doc_meta = existing_doc_meta + documents_meta
+
+        ds.config = {
+            **current_config,
+            "document_ids": updated_doc_ids,
+            "documents": updated_doc_meta,
+        }
         ds.document_count = len(updated_doc_ids)
 
         await db.commit()
@@ -955,31 +982,26 @@ async def upload_structured_data(
                 "column_count": len(schema_def.columns),
             },
         }
-        if dataset and dataset.parquet_path:
-            config["parquet_path"] = dataset.parquet_path
+        if dataset and dataset.file_info and dataset.file_info.get("storage_path"):
+            config["parquet_path"] = dataset.file_info["storage_path"]
 
         # Create the data source record
         ds_repo = DataSourceRepository(db)
-        ds = await ds_repo.create(
-            knowledge_base_id=kb_id,
-            type="structured_data",
-            name=ds_name,
-            config=config,
-            status="active",
-        )
+        ds = await ds_repo.create({
+            "knowledge_base_id": kb_id,
+            "type": "structured_data",
+            "name": ds_name,
+            "config": config,
+            "status": "active",
+        })
 
         logger.info(
             f"Created structured_data source {ds.id} for KB {kb_id} "
             f"(dataset={dataset_id}, columns={len(schema_def.columns)})"
         )
 
-        # Auto-trigger embedding generation for structured data
-        try:
-            from app.tasks.knowledge_base import generate_embeddings_task
-            generate_embeddings_task.delay(str(ds.id))
-            logger.info(f"Auto-triggered embedding generation for structured_data source {ds.id}")
-        except Exception as e:
-            logger.warning(f"Failed to auto-trigger embeddings for structured_data source {ds.id}: {e}")
+        # Note: structured_data uses NL-to-SQL analytics (Insights module),
+        # NOT RAG vector embeddings. No embedding task is triggered here.
 
         return DataSourceResponse(
             id=ds.id,

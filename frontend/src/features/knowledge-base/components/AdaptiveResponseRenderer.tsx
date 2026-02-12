@@ -28,6 +28,63 @@ import type { UnifiedQueryResponse } from '../types';
 interface AdaptiveResponseRendererProps {
   response: UnifiedQueryResponse;
   className?: string;
+  compact?: boolean;
+}
+
+/**
+ * Parse answer text and render source citation references as clickable links.
+ * Handles patterns like: (Sources 1, 2, 3), [Source 1, Source 2], (Source 1), etc.
+ */
+function renderAnswerWithSourceLinks(
+  text: string,
+  onSourceClick: (index: number) => void
+): React.ReactNode {
+  // Match (Sources 1, 2, 3), [Source 1, Source 2, Source 3], etc.
+  const pattern = /[(\[]Sources?\s+([^)\]]+)[)\]]/gi;
+  const parts: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match;
+
+  while ((match = pattern.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(text.slice(lastIndex, match.index));
+    }
+
+    const open = match[0][0];
+    const close = open === '(' ? ')' : ']';
+    const numbers = match[1].match(/\d+/g)?.map(Number) || [];
+    if (numbers.length > 0) {
+      parts.push(
+        <span key={`src-${match.index}`}>
+          {open}
+          {numbers.length > 1 ? 'Sources ' : 'Source '}
+          {numbers.map((num, i) => (
+            <React.Fragment key={num}>
+              {i > 0 && ', '}
+              <button
+                type="button"
+                className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                onClick={(e) => { e.stopPropagation(); onSourceClick(num - 1); }}
+              >
+                {num}
+              </button>
+            </React.Fragment>
+          ))}
+          {close}
+        </span>
+      );
+    } else {
+      parts.push(match[0]);
+    }
+
+    lastIndex = match.index + match[0].length;
+  }
+
+  if (parts.length === 0) return text;
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex));
+  }
+  return <>{parts}</>;
 }
 
 /**
@@ -72,12 +129,27 @@ const RAGResponseSection: React.FC<{
   response: NonNullable<UnifiedQueryResponse['rag_response']>;
 }> = ({ response }) => {
   const [showSources, setShowSources] = React.useState(false);
+  const [highlightedIndex, setHighlightedIndex] = React.useState<number | null>(null);
+  const sourceCardRefs = React.useRef<(HTMLDivElement | null)[]>([]);
+
+  const handleSourceCitationClick = React.useCallback((sourceIndex: number) => {
+    setShowSources(true);
+    setHighlightedIndex(sourceIndex);
+    setTimeout(() => {
+      sourceCardRefs.current[sourceIndex]?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      setTimeout(() => setHighlightedIndex(null), 2000);
+    }, 150);
+  }, []);
 
   return (
     <div className="space-y-4">
       {/* Answer */}
       <div className="prose prose-sm max-w-none dark:prose-invert">
-        <p className="whitespace-pre-wrap leading-relaxed">{response.answer}</p>
+        <p className="whitespace-pre-wrap leading-relaxed">
+          {response.sources && response.sources.length > 0
+            ? renderAnswerWithSourceLinks(response.answer, handleSourceCitationClick)
+            : response.answer}
+        </p>
       </div>
 
       {/* Groundedness Score */}
@@ -119,7 +191,14 @@ const RAGResponseSection: React.FC<{
           {showSources && (
             <div className="mt-2 space-y-2">
               {response.sources.map((source, index) => (
-                <Card key={index} className="border-dashed">
+                <Card
+                  key={index}
+                  ref={(el: HTMLDivElement | null) => { sourceCardRefs.current[index] = el; }}
+                  className={cn(
+                    "border-dashed transition-all duration-300",
+                    highlightedIndex === index && "ring-2 ring-blue-400 border-blue-300"
+                  )}
+                >
                   <CardContent className="py-3 px-4">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
@@ -225,7 +304,47 @@ const AnalyticsResponseSection: React.FC<{
 export const AdaptiveResponseRenderer: React.FC<AdaptiveResponseRendererProps> = ({
   response,
   className,
+  compact = false,
 }) => {
+  const content = (
+    <>
+      {response.intent_type === 'rag' && response.rag_response ? (
+        <RAGResponseSection response={response.rag_response} />
+      ) : response.intent_type === 'analytics' && response.analytics_response ? (
+        <AnalyticsResponseSection response={response.analytics_response} />
+      ) : (
+        <p className="text-sm text-muted-foreground">No response data available.</p>
+      )}
+
+      {/* Feedback */}
+      <div className="border-t pt-2 mt-3">
+        <QueryFeedback
+          queryId={response.id}
+          intentType={response.intent_type === 'analytics' ? 'analytics' : 'rag'}
+        />
+      </div>
+    </>
+  );
+
+  if (compact) {
+    return (
+      <div className={cn('rounded-lg border bg-card', className)}>
+        <div className="flex items-center justify-between px-3 py-2 border-b bg-muted/20">
+          <IntentBadge
+            intentType={response.intent_type}
+            confidence={response.confidence}
+          />
+          <span className="text-[10px] text-muted-foreground">
+            {new Date(response.created_at).toLocaleTimeString()}
+          </span>
+        </div>
+        <div className="px-3 py-2.5 space-y-3">
+          {content}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Card className={cn('overflow-hidden', className)}>
       <CardHeader className="pb-3">
@@ -240,21 +359,7 @@ export const AdaptiveResponseRenderer: React.FC<AdaptiveResponseRendererProps> =
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {response.intent_type === 'rag' && response.rag_response ? (
-          <RAGResponseSection response={response.rag_response} />
-        ) : response.intent_type === 'analytics' && response.analytics_response ? (
-          <AnalyticsResponseSection response={response.analytics_response} />
-        ) : (
-          <p className="text-sm text-muted-foreground">No response data available.</p>
-        )}
-
-        {/* Feedback */}
-        <div className="border-t pt-3">
-          <QueryFeedback
-            queryId={response.id}
-            intentType={response.intent_type === 'analytics' ? 'analytics' : 'rag'}
-          />
-        </div>
+        {content}
       </CardContent>
     </Card>
   );
