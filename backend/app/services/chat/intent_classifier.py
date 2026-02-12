@@ -6,9 +6,8 @@ Phase 13 - Chatbot Implementation
 """
 
 from typing import Literal, List
-from openai import AsyncOpenAI
 
-from app.core.config import settings
+from app.services.ai import get_ai_gateway, ModelPurpose
 
 
 IntentType = Literal["rag_query", "document_search", "document_operation", "insights_query", "clarification", "greeting", "unknown"]
@@ -18,7 +17,7 @@ class IntentClassifier:
     """Classify user intent for routing to appropriate tools."""
 
     def __init__(self):
-        self.client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+        self.gateway = get_ai_gateway()
 
     async def classify_intent(self, user_message: str, conversation_context: dict = None) -> IntentType:
         """
@@ -55,14 +54,14 @@ Classify the user's message into ONE of these categories:
 Respond with ONLY the intent category, no explanation."""
 
         try:
-            response = await self.client.chat.completions.create(
-                model="gpt-4",
+            response = await self.gateway.acompletion(
+                purpose=ModelPurpose.CLASSIFIER,
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": f"User message: {user_message}"}
                 ],
                 temperature=0.0,
-                max_tokens=20
+                max_tokens=20,
             )
 
             intent = response.choices[0].message.content.strip().lower()

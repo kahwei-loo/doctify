@@ -18,6 +18,7 @@ from app.db.repositories.assistant_conversation_repository import (
     AssistantMessageRepository,
 )
 from app.db.repositories.knowledge_base import KnowledgeBaseRepository, DataSourceRepository
+from app.services.ai import get_ai_gateway
 from app.services.rag.generation_service import GenerationService
 from app.core.exceptions import NotFoundError, ValidationError
 
@@ -45,6 +46,7 @@ class PublicChatService:
         self.kb_repo = KnowledgeBaseRepository(session)
         self.datasource_repo = DataSourceRepository(session)
         self.generation_service = GenerationService(session)
+        self.gateway = get_ai_gateway()
 
     async def get_or_create_conversation(
         self,
@@ -136,7 +138,7 @@ class PublicChatService:
             })
         messages.append({"role": "user", "content": content})
 
-        response = await self.generation_service.openai_client.chat.completions.create(
+        response = await self.gateway.acompletion(
             model=model_name,
             messages=messages,
             temperature=temperature,

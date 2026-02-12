@@ -8,12 +8,7 @@ Phase P1.1 - Reranking
 import logging
 from typing import List, Dict, Any
 
-try:
-    import cohere
-except ImportError:
-    cohere = None  # type: ignore[assignment]
-
-from app.core.config import settings
+from app.services.ai import get_ai_gateway, ModelPurpose
 
 logger = logging.getLogger(__name__)
 
@@ -26,14 +21,8 @@ class RerankerService:
     using a cross-encoder model for higher precision.
     """
 
-    DEFAULT_MODEL = "rerank-v3.5"
-
     def __init__(self):
-        if cohere is None:
-            raise ImportError("cohere package not installed. Install with: pip install cohere>=5.0")
-        if not settings.COHERE_API_KEY:
-            raise ValueError("COHERE_API_KEY not configured")
-        self.client = cohere.AsyncClientV2(api_key=settings.COHERE_API_KEY)
+        self.gateway = get_ai_gateway()
 
     async def rerank(
         self,
@@ -57,16 +46,14 @@ class RerankerService:
         if not documents:
             return []
 
-        model_to_use = model or self.DEFAULT_MODEL
-
         # Extract text for reranking
         texts = [doc["chunk_text"] for doc in documents]
 
         try:
-            response = await self.client.rerank(
-                model=model_to_use,
+            response = await self.gateway.arerank(
                 query=query,
                 documents=texts,
+                model=model,
                 top_n=min(top_n, len(documents)),
             )
 

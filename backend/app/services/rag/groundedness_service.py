@@ -9,10 +9,7 @@ import json
 from typing import List, Optional
 from dataclasses import dataclass
 
-from openai import AsyncOpenAI
-
-from app.core.config import settings
-from app.core.exceptions import DatabaseError
+from app.services.ai import get_ai_gateway, ModelPurpose
 
 
 @dataclass
@@ -50,12 +47,8 @@ class GroundednessService:
     the generated answer is faithfully based on the retrieved context.
     """
 
-    JUDGE_MODEL = "gpt-3.5-turbo"
-
     def __init__(self):
-        if not settings.OPENAI_API_KEY:
-            raise DatabaseError("OPENAI_API_KEY not configured")
-        self.openai_client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+        self.gateway = get_ai_gateway()
 
     async def check(
         self,
@@ -93,11 +86,10 @@ class GroundednessService:
             answer=answer,
         )
 
-        judge_model = model or self.JUDGE_MODEL
-
         try:
-            response = await self.openai_client.chat.completions.create(
-                model=judge_model,
+            response = await self.gateway.acompletion(
+                purpose=ModelPurpose.CHAT_FAST,
+                model=model,
                 messages=[
                     {
                         "role": "system",
