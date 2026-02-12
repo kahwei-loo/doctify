@@ -41,6 +41,7 @@ class ModelConfig(BaseModel):
     model: str = Field(default="gpt-4", description="Model identifier")
     temperature: float = Field(default=0.7, ge=0, le=2, description="Temperature for generation")
     max_tokens: int = Field(default=2048, gt=0, le=8192, description="Maximum tokens in response")
+    system_prompt: Optional[str] = Field(default=None, max_length=10000, description="System prompt defining assistant behavior")
 
 
 class WidgetConfig(BaseModel):
