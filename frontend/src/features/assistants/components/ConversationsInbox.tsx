@@ -33,6 +33,7 @@ import { ConversationsList } from './ConversationsList';
 import { ConversationChat } from './ConversationChat';
 import { NoConversationsState, NoMessagesState } from './EmptyStates';
 import { useAssistantWebSocket, type WebSocketEventUnion } from '../hooks';
+import { WidgetEmbedDialog } from './WidgetEmbedDialog';
 import type { Assistant, Conversation } from '../types';
 import { cn } from '@/lib/utils';
 
@@ -143,6 +144,7 @@ export const ConversationsInbox: React.FC<ConversationsInboxProps> = ({
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [isMobileView, setIsMobileView] = useState(false);
   const [showChatOnMobile, setShowChatOnMobile] = useState(false);
+  const [widgetDialogOpen, setWidgetDialogOpen] = useState(false);
 
   // Fetch conversations for the selected assistant
   const { data: response, refetch } = useGetConversationsQuery({
@@ -219,8 +221,7 @@ export const ConversationsInbox: React.FC<ConversationsInboxProps> = ({
   };
 
   const handleGetWidget = () => {
-    // TODO: Implement get widget code
-    console.log('Get widget code');
+    setWidgetDialogOpen(true);
   };
 
   const handleViewAnalytics = () => {
@@ -292,6 +293,13 @@ export const ConversationsInbox: React.FC<ConversationsInboxProps> = ({
             </div>
           </div>
         </div>
+
+        {/* Widget Embed Code Dialog */}
+        <WidgetEmbedDialog
+          open={widgetDialogOpen}
+          onClose={() => setWidgetDialogOpen(false)}
+          assistant={assistant}
+        />
       </div>
     );
   }
@@ -337,6 +345,13 @@ export const ConversationsInbox: React.FC<ConversationsInboxProps> = ({
             className="flex-1"
           />
         )}
+
+        {/* Widget Embed Code Dialog */}
+        <WidgetEmbedDialog
+          open={widgetDialogOpen}
+          onClose={() => setWidgetDialogOpen(false)}
+          assistant={assistant}
+        />
       </div>
     );
   }
@@ -385,6 +400,13 @@ export const ConversationsInbox: React.FC<ConversationsInboxProps> = ({
           )}
         </ResizablePanel>
       </ResizablePanelGroup>
+
+      {/* Widget Embed Code Dialog */}
+      <WidgetEmbedDialog
+        open={widgetDialogOpen}
+        onClose={() => setWidgetDialogOpen(false)}
+        assistant={assistant}
+      />
     </div>
   );
 };
