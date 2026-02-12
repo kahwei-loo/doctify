@@ -3,25 +3,74 @@
  *
  * Test page for the embeddable public chat widget.
  * This page simulates how the widget would appear on an external website.
+ * Supports ?assistantId= query param to pre-select an assistant.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { PublicChatWidget } from '@/features/assistants';
+import { useGetAssistantsQuery } from '@/store/api/assistantsApi';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AlertCircle, Bot } from 'lucide-react';
 
 const PublicChatDemo: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const queryAssistantId = searchParams.get('assistantId');
+
+  // Fetch real assistants
+  const { data: assistantsResponse, isLoading } = useGetAssistantsQuery({ status: 'active' });
+  const assistants = useMemo(() => assistantsResponse?.data || [], [assistantsResponse]);
+
   // Widget configuration state
   const [config, setConfig] = useState({
-    assistantId: 'ast-demo-1',
+    assistantId: '',
     assistantName: 'Doctify Support',
     position: 'bottom-right' as 'bottom-right' | 'bottom-left',
     primaryColor: '#3b82f6',
     welcomeMessage: "Hi! I'm the Doctify assistant. How can I help you today?",
   });
+
+  // Auto-select assistant from query param or first available
+  useEffect(() => {
+    if (assistants.length === 0) return;
+
+    if (queryAssistantId) {
+      const match = assistants.find((a) => a.assistant_id === queryAssistantId);
+      if (match) {
+        setConfig((prev) => ({
+          ...prev,
+          assistantId: match.assistant_id,
+          assistantName: match.name,
+        }));
+        return;
+      }
+    }
+
+    // Default to first active assistant
+    if (!config.assistantId) {
+      setConfig((prev) => ({
+        ...prev,
+        assistantId: assistants[0].assistant_id,
+        assistantName: assistants[0].name,
+      }));
+    }
+  }, [assistants, queryAssistantId, config.assistantId]);
+
+  // Handle assistant selection change
+  const handleAssistantChange = (assistantId: string) => {
+    const selected = assistants.find((a) => a.assistant_id === assistantId);
+    if (selected) {
+      setConfig((prev) => ({
+        ...prev,
+        assistantId: selected.assistant_id,
+        assistantName: selected.name,
+      }));
+    }
+  };
 
   // Embed code
   const embedCode = `<!-- Doctify Chat Widget -->
@@ -34,6 +83,25 @@ const PublicChatDemo: React.FC = () => {
   };
 </script>
 <script src="https://cdn.doctify.ai/widget.js" async></script>`;
+
+  // Empty state: no assistants
+  if (!isLoading && assistants.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+        <Card className="max-w-md">
+          <CardContent className="flex flex-col items-center gap-4 p-8">
+            <div className="rounded-full bg-muted p-3">
+              <AlertCircle className="h-8 w-8 text-muted-foreground" />
+            </div>
+            <h2 className="text-lg font-semibold">No Assistants Available</h2>
+            <p className="text-sm text-muted-foreground text-center">
+              Create an assistant first to test the public chat widget.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
@@ -60,8 +128,33 @@ const PublicChatDemo: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Assistant Selector */}
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="assistant">
+                    <span className="flex items-center gap-1.5">
+                      <Bot className="h-3.5 w-3.5" />
+                      Assistant
+                    </span>
+                  </Label>
+                  <Select
+                    value={config.assistantId}
+                    onValueChange={handleAssistantChange}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={isLoading ? 'Loading assistants...' : 'Select an assistant'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {assistants.map((a) => (
+                        <SelectItem key={a.assistant_id} value={a.assistant_id}>
+                          {a.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="assistantName">Assistant Name</Label>
+                  <Label htmlFor="assistantName">Display Name</Label>
                   <Input
                     id="assistantName"
                     value={config.assistantName}
@@ -155,11 +248,11 @@ const PublicChatDemo: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <ol className="list-decimal list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                <li>Select an assistant from the dropdown above</li>
                 <li>Click the chat bubble in the {config.position} corner to open the widget</li>
                 <li>Type a message and press Enter or click Send</li>
-                <li>The AI will respond with a simulated message (mock data)</li>
+                <li>The AI assistant will respond using its configured model</li>
                 <li>Test rate limiting by sending many messages quickly (limit: 20/minute)</li>
-                <li>You'll see a warning when approaching the limit</li>
                 <li>Try minimizing and closing the chat window</li>
                 <li>Refresh the page - your session should persist</li>
               </ol>
@@ -198,14 +291,16 @@ const PublicChatDemo: React.FC = () => {
         </div>
       </div>
 
-      {/* The Actual Widget */}
-      <PublicChatWidget
-        assistantId={config.assistantId}
-        assistantName={config.assistantName}
-        position={config.position}
-        primaryColor={config.primaryColor}
-        welcomeMessage={config.welcomeMessage}
-      />
+      {/* The Actual Widget — only render when we have a selected assistant */}
+      {config.assistantId && (
+        <PublicChatWidget
+          assistantId={config.assistantId}
+          assistantName={config.assistantName}
+          position={config.position}
+          primaryColor={config.primaryColor}
+          welcomeMessage={config.welcomeMessage}
+        />
+      )}
     </div>
   );
 };

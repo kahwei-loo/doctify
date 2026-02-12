@@ -91,6 +91,7 @@ const transformModelConfig = (config: Record<string, any> | null | undefined): M
     model: config.model || 'gpt-4',
     temperature: config.temperature ?? 0.7,
     max_tokens: config.max_tokens ?? 2048,
+    system_prompt: config.system_prompt || undefined,
   } as ModelConfig;
 };
 
@@ -107,6 +108,8 @@ const transformAssistant = (backend: BackendAssistantResponse): Assistant => ({
   updated_at: backend.updated_at,
   total_conversations: 0,
   unresolved_count: 0,
+  knowledge_base_id: backend.knowledge_base_id,
+  widget_config: backend.widget_config as any,
 });
 
 /**
@@ -122,6 +125,8 @@ const transformAssistantWithStats = (backend: BackendAssistantWithStats): Assist
   updated_at: backend.updated_at,
   total_conversations: backend.total_conversations || 0,
   unresolved_count: backend.unresolved_count || 0,
+  knowledge_base_id: backend.knowledge_base_id,
+  widget_config: backend.widget_config as any,
 });
 
 /**
@@ -236,6 +241,7 @@ export const assistantsApi = api.injectEndpoints({
           name: request.name,
           description: request.description,
           model_config: request.model_config,
+          knowledge_base_id: request.knowledge_base_id,
         },
       }),
       transformResponse: (response: BackendSuccessResponse<BackendAssistantResponse>) => transformAssistant(response.data),
@@ -255,6 +261,7 @@ export const assistantsApi = api.injectEndpoints({
           description: updates.description,
           model_config: updates.model_config,
           is_active: updates.is_active,
+          knowledge_base_id: updates.knowledge_base_id,
         },
       }),
       transformResponse: (response: BackendSuccessResponse<BackendAssistantResponse>) => transformAssistant(response.data),

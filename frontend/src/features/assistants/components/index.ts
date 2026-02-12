@@ -41,3 +41,8 @@ export {
 
 // Week 7: Confirmation Dialogs
 export { DeleteConversationDialog } from './DeleteConversationDialog';
+
+// P1: Action Dialogs
+export { WidgetEmbedDialog } from './WidgetEmbedDialog';
+export { TestAssistantDialog } from './TestAssistantDialog';
+export { AssistantAnalyticsDialog } from './AssistantAnalyticsDialog';

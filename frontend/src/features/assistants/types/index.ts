@@ -14,6 +14,14 @@ export interface ModelConfig {
   model: AIModel;
   temperature?: number;
   max_tokens?: number;
+  system_prompt?: string;
+}
+
+export interface WidgetConfig {
+  primary_color: string;
+  position: string;
+  welcome_message?: string;
+  placeholder_text?: string;
 }
 
 export interface Assistant {
@@ -28,6 +36,8 @@ export interface Assistant {
   unresolved_count: number;
   avg_response_time?: number;
   resolution_rate?: number;
+  knowledge_base_id?: string | null;
+  widget_config?: WidgetConfig;
 }
 
 export interface AssistantListResponse {
@@ -41,6 +51,7 @@ export interface CreateAssistantRequest {
   description: string;
   model_config: ModelConfig;
   is_active?: boolean;
+  knowledge_base_id?: string | null;
 }
 
 export interface UpdateAssistantRequest {
@@ -49,6 +60,7 @@ export interface UpdateAssistantRequest {
   description?: string;
   model_config?: ModelConfig;
   is_active?: boolean;
+  knowledge_base_id?: string | null;
 }
 
 export interface AssistantStats {
@@ -79,6 +91,12 @@ export interface AssistantFilters {
 export type ConversationStatus = 'unresolved' | 'in_progress' | 'resolved';
 export type MessageRole = 'user' | 'assistant' | 'system';
 
+export interface ConversationContext {
+  source?: 'test_dialog' | 'widget' | 'api';
+  page_url?: string;
+  [key: string]: any;
+}
+
 export interface Conversation {
   conversation_id: string;
   assistant_id: string;
@@ -89,6 +107,7 @@ export interface Conversation {
   created_at: string;
   resolved_at?: string;
   message_count: number;
+  context?: ConversationContext;
 }
 
 export interface ConversationListResponse {

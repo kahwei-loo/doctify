@@ -152,14 +152,11 @@ export const PublicChatWidget: React.FC<PublicChatWidgetProps> = ({
         assistant_id: assistantId,
         session_id: sessionId,
         content,
+        context: { source: 'widget', page_url: window.location.href },
       }).unwrap();
 
-      // Update with actual messages from API
-      setLocalMessages((prev) => {
-        // Remove optimistic message and add real ones
-        const filtered = prev.filter((m) => m.message_id !== optimisticUserMessage.message_id);
-        return [...filtered, result.data.user_message, result.data.assistant_message];
-      });
+      // Keep optimistic user message (has correct content) and add assistant response
+      setLocalMessages((prev) => [...prev, result.data.assistant_message]);
     } catch (error) {
       // Remove optimistic message on error
       setLocalMessages((prev) =>

@@ -34,6 +34,8 @@ class PublicChatService:
     - Streaming response generation
     """
 
+    DEFAULT_CHAT_MODEL = "google/gemini-2.5-flash-lite"
+
     def __init__(self, session: AsyncSession):
         """Initialize with database session."""
         self.session = session
@@ -110,6 +112,42 @@ class PublicChatService:
 
         return document_ids
 
+    async def _direct_llm_chat(
+        self,
+        content: str,
+        model_name: str,
+        system_prompt: Optional[str] = None,
+        temperature: float = 0.7,
+        max_tokens: int = 2048,
+    ) -> tuple:
+        """
+        Generate a response via direct LLM chat (no RAG).
+
+        Returns:
+            Tuple of (response_content, model_used, tokens_used)
+        """
+        messages = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        else:
+            messages.append({
+                "role": "system",
+                "content": "You are a helpful AI assistant.",
+            })
+        messages.append({"role": "user", "content": content})
+
+        response = await self.generation_service.openai_client.chat.completions.create(
+            model=model_name,
+            messages=messages,
+            temperature=temperature,
+            max_tokens=max_tokens,
+        )
+
+        response_content = response.choices[0].message.content or ""
+        model_used = model_name
+        tokens_used = response.usage.total_tokens if response.usage else 0
+        return response_content, model_used, tokens_used
+
     async def process_message(
         self,
         assistant_id: uuid.UUID,
@@ -151,32 +189,51 @@ class PublicChatService:
             tokens_used=None,
         )
 
-        # Generate AI response using RAG
+        # Generate AI response
         try:
-            # Get document IDs from assistant's knowledge base
-            document_ids = None
+            model_config = assistant.model_config or {}
+            model_name = model_config.get("model", self.DEFAULT_CHAT_MODEL)
+            system_prompt = model_config.get("system_prompt")
+            temperature = model_config.get("temperature", 0.7)
+            max_tokens = model_config.get("max_tokens", 2048)
+
             if assistant.knowledge_base_id:
+                # RAG mode: retrieve from knowledge base and generate
                 document_ids = await self._get_knowledge_base_document_ids(
                     assistant.knowledge_base_id
                 )
 
-            # Get model config
-            model_config = assistant.model_config or {}
-            model_name = model_config.get("model", "gpt-4")
+                rag_response = await self.generation_service.generate_answer(
+                    question=content,
+                    document_ids=document_ids,
+                    model=model_name,
+                )
 
-            # Generate response using RAG
-            rag_response = await self.generation_service.generate_answer(
-                question=content,
-                document_ids=document_ids,
-                model=model_name,
-            )
-
-            response_content = rag_response.answer
-            model_used = rag_response.model_used
-            tokens_used = rag_response.tokens_used
+                # If RAG found no relevant docs, fall back to direct LLM
+                if rag_response.confidence_score == 0.0 or rag_response.model_used == "none":
+                    response_content, model_used, tokens_used = await self._direct_llm_chat(
+                        content=content,
+                        model_name=model_name,
+                        system_prompt=system_prompt,
+                        temperature=temperature,
+                        max_tokens=max_tokens,
+                    )
+                else:
+                    response_content = rag_response.answer
+                    model_used = rag_response.model_used
+                    tokens_used = rag_response.tokens_used
+            else:
+                # Direct LLM chat: no KB connected
+                response_content, model_used, tokens_used = await self._direct_llm_chat(
+                    content=content,
+                    model_name=model_name,
+                    system_prompt=system_prompt,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                )
 
         except Exception as e:
-            logger.error(f"RAG generation failed: {e}")
+            logger.error(f"AI generation failed: {e}")
             response_content = "I'm sorry, I couldn't process your request. Please try again."
             model_used = None
             tokens_used = None
@@ -249,29 +306,48 @@ class PublicChatService:
 
         yield {"type": "message_saved", "data": str(user_message.id)}
 
-        # Generate AI response using RAG
+        # Generate AI response
         try:
-            # Get document IDs from assistant's knowledge base
-            document_ids = None
+            model_config = assistant.model_config or {}
+            model_name = model_config.get("model", self.DEFAULT_CHAT_MODEL)
+            system_prompt = model_config.get("system_prompt")
+            temperature = model_config.get("temperature", 0.7)
+            max_tokens = model_config.get("max_tokens", 2048)
+
             if assistant.knowledge_base_id:
+                # RAG mode: retrieve from knowledge base and generate
                 document_ids = await self._get_knowledge_base_document_ids(
                     assistant.knowledge_base_id
                 )
 
-            # Get model config
-            model_config = assistant.model_config or {}
-            model_name = model_config.get("model", "gpt-4")
+                rag_response = await self.generation_service.generate_answer(
+                    question=content,
+                    document_ids=document_ids,
+                    model=model_name,
+                )
 
-            # Generate response using RAG (non-streaming for now)
-            rag_response = await self.generation_service.generate_answer(
-                question=content,
-                document_ids=document_ids,
-                model=model_name,
-            )
-
-            response_content = rag_response.answer
-            model_used = rag_response.model_used
-            tokens_used = rag_response.tokens_used
+                # If RAG found no relevant docs, fall back to direct LLM
+                if rag_response.confidence_score == 0.0 or rag_response.model_used == "none":
+                    response_content, model_used, tokens_used = await self._direct_llm_chat(
+                        content=content,
+                        model_name=model_name,
+                        system_prompt=system_prompt,
+                        temperature=temperature,
+                        max_tokens=max_tokens,
+                    )
+                else:
+                    response_content = rag_response.answer
+                    model_used = rag_response.model_used
+                    tokens_used = rag_response.tokens_used
+            else:
+                # Direct LLM chat: no KB connected
+                response_content, model_used, tokens_used = await self._direct_llm_chat(
+                    content=content,
+                    model_name=model_name,
+                    system_prompt=system_prompt,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                )
 
             # Simulate streaming by yielding word by word
             words = response_content.split()
@@ -280,7 +356,7 @@ class PublicChatService:
                 yield {"type": "chunk", "data": chunk}
 
         except Exception as e:
-            logger.error(f"RAG generation failed: {e}")
+            logger.error(f"AI generation failed: {e}")
             response_content = "I'm sorry, I couldn't process your request. Please try again."
             model_used = None
             tokens_used = None

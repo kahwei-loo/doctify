@@ -142,7 +142,8 @@ export const publicChatApi = createApi({
           },
         };
       },
-      invalidatesTags: ['PublicMessages'],
+      // Note: Do NOT invalidate PublicMessages here — getPublicMessages is a client-side stub
+      // that always returns []. Invalidating would wipe localMessages via the sync useEffect.
     }),
 
     // Get public chat messages (for session recovery - not implemented in backend yet)
