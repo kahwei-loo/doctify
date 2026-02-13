@@ -9,6 +9,7 @@ Wraps litellm in library mode to provide:
 
 import logging
 import os
+import threading
 from enum import Enum
 from typing import Any, List, Optional, Union
 
@@ -181,11 +182,14 @@ class AIGateway:
 # ---------------------------------------------------------------------------
 
 _gateway_instance: Optional[AIGateway] = None
+_gateway_lock = threading.Lock()
 
 
 def get_ai_gateway() -> AIGateway:
-    """Get or create the singleton AIGateway instance."""
+    """Get or create the singleton AIGateway instance (thread-safe)."""
     global _gateway_instance
     if _gateway_instance is None:
-        _gateway_instance = AIGateway()
+        with _gateway_lock:
+            if _gateway_instance is None:
+                _gateway_instance = AIGateway()
     return _gateway_instance
