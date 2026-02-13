@@ -35,7 +35,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-from openai import AsyncOpenAI
+from app.services.ai import get_ai_gateway
 from pdf2image import convert_from_path
 from PIL import Image
 
@@ -758,26 +758,11 @@ class L25Orchestrator:
             MalaysiaValidator() if self.config.localization_region == "MY" else None
         )
 
-        # Initialize async OpenAI client
-        self.client = AsyncOpenAI(
-            api_key=settings.OPENAI_API_KEY,
-            base_url=settings.OPENAI_BASE_URL or "https://api.openai.com/v1",
-        )
+        # Initialize AI gateway (centralized LiteLLM wrapper)
+        self.gateway = get_ai_gateway()
 
-        # Model escalation: cost-effective models with fallback chain
-        # Using OpenRouter model IDs (format: vendor/model-name)
-        # Updated to use Qwen3 and Gemini 3 models for optimal cost/performance
-        base_model = settings.AI_MODEL or "qwen/qwen3-vl-8b-instruct"
-        self.model_escalation_chain = [
-            base_model,  # Retry 0: Qwen3 VL 8B (fast & cost-effective)
-            "qwen/qwen3-vl-32b-instruct",  # Retry 1: Qwen3 VL 32B (higher accuracy)
-            "google/gemini-3-flash-preview",  # Retry 2: Gemini 3 Flash Preview (latest)
-        ]
-        # Remove duplicates while preserving order
-        seen = set()
-        self.model_escalation_chain = [
-            m for m in self.model_escalation_chain if not (m in seen or seen.add(m))
-        ]
+        # Model escalation chain from config (comma-separated)
+        self.model_escalation_chain = self.gateway.get_vision_escalation_chain()
         self.model = self.model_escalation_chain[0]
 
     async def process(
@@ -1308,7 +1293,7 @@ class L25Orchestrator:
 
             # Try with tool use first
             try:
-                completion = await self.client.chat.completions.create(
+                completion = await self.gateway.acompletion(
                     model=self.model,
                     messages=messages,
                     tools=tools,
@@ -1340,7 +1325,7 @@ class L25Orchestrator:
                         "\n\nReturn ONLY the JSON object, no additional text."
                     })
 
-                    completion = await self.client.chat.completions.create(
+                    completion = await self.gateway.acompletion(
                         model=self.model,
                         messages=fallback_messages,
                         timeout=120,

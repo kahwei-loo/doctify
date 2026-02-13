@@ -15,12 +15,12 @@ from typing import Optional, List, Dict, Any, Tuple
 from uuid import UUID, uuid4
 
 import duckdb
-import httpx
 import pandas as pd
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.db.redis import get_redis
+from app.services.ai import get_ai_gateway
 from app.db.repositories.insights import (
     InsightsDatasetRepository,
     InsightsConversationRepository,
@@ -234,6 +234,7 @@ class QueryService:
         self.dataset_repo = InsightsDatasetRepository(session)
         self.conversation_repo = InsightsConversationRepository(session)
         self.query_repo = InsightsQueryRepository(session)
+        self.gateway = get_ai_gateway()
 
     @staticmethod
     def _resolve_time_range(time_range: Dict[str, Any]) -> Tuple[str, str, str]:
@@ -372,44 +373,38 @@ class QueryService:
             raise ValueError(error_msg)
 
         try:
-            async with httpx.AsyncClient(timeout=60.0) as client:
-                response = await client.post(
-                    f"{settings.OPENAI_BASE_URL}/chat/completions",
-                    headers={
-                        "Authorization": f"Bearer {settings.OPENAI_API_KEY}",
-                        "Content-Type": "application/json"
-                    },
-                    json={
-                        "model": settings.AI_MODEL,
-                        "messages": [
-                            {"role": "system", "content": "You are a data analysis assistant."},
-                            {"role": "user", "content": prompt}
-                        ],
-                        "functions": [QUERY_ANALYSIS_FUNCTION],
-                        "function_call": {"name": "analyze_query"},
-                        "temperature": 0.1
-                    }
-                )
-                response.raise_for_status()
-                result = response.json()
+            response = await self.gateway.acompletion(
+                model=settings.AI_MODEL,
+                messages=[
+                    {"role": "system", "content": "You are a data analysis assistant."},
+                    {"role": "user", "content": prompt},
+                ],
+                tools=[{"type": "function", "function": QUERY_ANALYSIS_FUNCTION}],
+                tool_choice={"type": "function", "function": {"name": "analyze_query"}},
+                temperature=0.1,
+                timeout=60,
+            )
 
-                # Record successful request for rate limiting
-                await _rate_limiter.record_request(user_id)
+            # Record successful request for rate limiting
+            await _rate_limiter.record_request(user_id)
 
-                # Extract function call result
-                message = result["choices"][0]["message"]
-                function_call = message.get("function_call", {})
-                arguments = json.loads(function_call.get("arguments", "{}"))
+            # Extract tool call result
+            message = response.choices[0].message
+            tool_calls = message.tool_calls
+            if tool_calls:
+                arguments = json.loads(tool_calls[0].function.arguments)
+            else:
+                arguments = {}
 
-                # Token usage
-                usage = result.get("usage", {})
-                token_usage = TokenUsage(
-                    prompt_tokens=usage.get("prompt_tokens", 0),
-                    completion_tokens=usage.get("completion_tokens", 0),
-                    total_tokens=usage.get("total_tokens", 0)
-                )
+            # Token usage
+            usage = response.usage
+            token_usage = TokenUsage(
+                prompt_tokens=usage.prompt_tokens if usage else 0,
+                completion_tokens=usage.completion_tokens if usage else 0,
+                total_tokens=usage.total_tokens if usage else 0,
+            )
 
-                return arguments, token_usage
+            return arguments, token_usage
 
         except ValueError:
             # Re-raise rate limit errors

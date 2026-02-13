@@ -11,9 +11,8 @@ from typing import List, Dict, Any, Optional, AsyncGenerator
 from dataclasses import dataclass
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from openai import AsyncOpenAI
-
 from app.core.config import settings
+from app.services.ai import get_ai_gateway, ModelPurpose
 from app.services.rag.retrieval_service import RetrievalService
 from app.services.rag.embedding_service import EmbeddingService
 from app.services.rag.security import RAGSecurityValidator
@@ -43,8 +42,6 @@ class GenerationService:
     Combines retrieval with LLM generation for accurate, source-cited responses.
     """
 
-    DEFAULT_MODEL = "gpt-4"
-    FALLBACK_MODEL = "gpt-3.5-turbo"
     MAX_CONTEXT_LENGTH = 8000  # tokens
 
     def __init__(self, session: AsyncSession):
@@ -56,11 +53,8 @@ class GenerationService:
         self.groundedness_service = GroundednessService()
         self.cache_service = SemanticCacheService()
 
-        # Initialize OpenAI client
-        if not settings.OPENAI_API_KEY:
-            raise ValidationError("OPENAI_API_KEY not configured")
-
-        self.openai_client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+        # Initialize AI gateway
+        self.gateway = get_ai_gateway()
 
     def _build_rag_prompt(
         self,
@@ -155,7 +149,7 @@ ANSWER:"""
         # Security validation: check for prompt injection
         self.security_validator.validate_query_safety(question)
 
-        model_to_use = model or self.DEFAULT_MODEL
+        model_to_use = model or self.gateway.get_model(ModelPurpose.CHAT)
 
         try:
             # Step 0: Check semantic cache (P3.1)
@@ -209,9 +203,9 @@ ANSWER:"""
             # Step 2: Build prompt
             prompt = self._build_rag_prompt(question, context_chunks)
 
-            # Step 3: Generate answer via OpenAI
+            # Step 3: Generate answer via AI Gateway
             try:
-                response = await self.openai_client.chat.completions.create(
+                response = await self.gateway.acompletion(
                     model=model_to_use,
                     messages=[
                         {
@@ -235,10 +229,11 @@ ANSWER:"""
 
             except Exception as llm_error:
                 # Fallback to simpler model if primary fails
-                if model_to_use == self.DEFAULT_MODEL:
+                fallback_model = self.gateway.get_model(ModelPurpose.CHAT_FAST)
+                if model_to_use != fallback_model:
                     try:
-                        response = await self.openai_client.chat.completions.create(
-                            model=self.FALLBACK_MODEL,
+                        response = await self.gateway.acompletion(
+                            model=fallback_model,
                             messages=[
                                 {"role": "system", "content": "You are a helpful document assistant."},
                                 {"role": "user", "content": prompt}
@@ -248,7 +243,7 @@ ANSWER:"""
                         )
                         answer_text = response.choices[0].message.content or ""
                         tokens_used = response.usage.total_tokens if response.usage else 0
-                        model_to_use = self.FALLBACK_MODEL
+                        model_to_use = fallback_model
                     except Exception:
                         raise DatabaseError(f"LLM generation failed: {str(llm_error)}")
                 else:
@@ -344,7 +339,7 @@ ANSWER:"""
             return
 
         self.security_validator.validate_query_safety(question)
-        model_to_use = model or self.DEFAULT_MODEL
+        model_to_use = model or self.gateway.get_model(ModelPurpose.CHAT)
 
         try:
             # Step 1: Retrieve context (non-streaming)
@@ -372,9 +367,9 @@ ANSWER:"""
             # Step 2: Build prompt
             prompt = self._build_rag_prompt(question, context_chunks)
 
-            # Step 3: Stream answer via OpenAI
+            # Step 3: Stream answer via AI Gateway
             full_answer = ""
-            stream = await self.openai_client.chat.completions.create(
+            stream = await self.gateway.acompletion(
                 model=model_to_use,
                 messages=[
                     {
@@ -439,8 +434,8 @@ FOLLOW-UP QUESTION: {question}
 Rewrite the follow-up as a standalone question (output ONLY the rewritten question, nothing else):"""
 
         try:
-            response = await self.openai_client.chat.completions.create(
-                model=self.FALLBACK_MODEL,
+            response = await self.gateway.acompletion(
+                purpose=ModelPurpose.CHAT_FAST,
                 messages=[
                     {"role": "system", "content": "You rewrite follow-up questions into standalone questions."},
                     {"role": "user", "content": rewrite_prompt},

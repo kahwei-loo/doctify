@@ -13,9 +13,9 @@ from typing import List, Dict, Any, Optional, Tuple
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import tiktoken
-from openai import AsyncOpenAI
 
 from app.core.config import settings
+from app.services.ai import get_ai_gateway, ModelPurpose
 from app.db.repositories.document import DocumentRepository
 from app.db.repositories.rag import DocumentEmbeddingRepository
 from app.db.models.rag import DocumentEmbedding
@@ -42,7 +42,6 @@ class EmbeddingService:
     Uses OpenAI's text-embedding-3-small model (1536 dimensions).
     """
 
-    EMBEDDING_MODEL = "text-embedding-3-small"
     EMBEDDING_DIMENSION = 1536
     DEFAULT_CHUNK_SIZE = 1000  # tokens
     DEFAULT_CHUNK_OVERLAP = 200  # tokens
@@ -53,11 +52,8 @@ class EmbeddingService:
         self.document_repo = DocumentRepository(session)
         self.embedding_repo = DocumentEmbeddingRepository(session)
 
-        # Initialize OpenAI client
-        if not settings.OPENAI_API_KEY:
-            raise ValidationError("OPENAI_API_KEY not configured")
-
-        self.openai_client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+        # Initialize AI gateway
+        self.gateway = get_ai_gateway()
 
         # Initialize tokenizer for text chunking
         self.encoding = tiktoken.get_encoding("cl100k_base")
@@ -339,11 +335,7 @@ class EmbeddingService:
             raise ValidationError("Cannot generate embedding for empty text")
 
         try:
-            response = await self.openai_client.embeddings.create(
-                model=self.EMBEDDING_MODEL,
-                input=text,
-                encoding_format="float"
-            )
+            response = await self.gateway.aembedding(input_text=text)
 
             embedding = response.data[0].embedding
 

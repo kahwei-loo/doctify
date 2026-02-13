@@ -12,12 +12,12 @@ import uuid
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
 
-from openai import AsyncOpenAI
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 
 from app.core.config import settings
 from app.db.models.rag import RAGQuery, RAGEvaluation
+from app.services.ai import get_ai_gateway, ModelPurpose
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +54,6 @@ class EvaluationService:
     - Context Recall: Did the retrieval find all necessary information?
     """
 
-    JUDGE_MODEL = "gpt-3.5-turbo"
     MAX_SAMPLE_SIZE = 50
 
     FAITHFULNESS_PROMPT = """Evaluate how faithful the answer is to the given context.
@@ -122,21 +121,13 @@ Score from 0.0 to 1.0 where:
 Return ONLY a JSON object: {{"score": <float>}}"""
 
     def __init__(self):
-        self.openai_client: Optional[AsyncOpenAI] = None
-
-    def _get_client(self) -> AsyncOpenAI:
-        if self.openai_client is None:
-            if not settings.OPENAI_API_KEY:
-                raise ValueError("OPENAI_API_KEY not configured")
-            self.openai_client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
-        return self.openai_client
+        self.gateway = get_ai_gateway()
 
     async def _judge(self, prompt: str) -> float:
         """Call LLM judge and extract score."""
         try:
-            client = self._get_client()
-            response = await client.chat.completions.create(
-                model=self.JUDGE_MODEL,
+            response = await self.gateway.acompletion(
+                purpose=ModelPurpose.CHAT_FAST,
                 messages=[
                     {"role": "system", "content": "You are an evaluation judge. Return only valid JSON."},
                     {"role": "user", "content": prompt},
@@ -317,7 +308,7 @@ Return ONLY a JSON object: {{"score": <float>}}"""
             average_groundedness=aggregated.average_groundedness,
             user_id=user_id,
             evaluation_metadata={
-                "judge_model": self.JUDGE_MODEL,
+                "judge_model": self.gateway.get_model(ModelPurpose.CHAT_FAST),
                 "query_ids": [str(q.id) for q in all_queries[:n]],
             },
         )

@@ -14,10 +14,10 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Optional
 
-from openai import AsyncOpenAI
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
+from app.services.ai import get_ai_gateway, ModelPurpose
 
 logger = logging.getLogger(__name__)
 
@@ -133,11 +133,8 @@ class IntentClassifier:
 
     def __init__(self, session: Optional[AsyncSession] = None):
         self.session = session
-        self.client = AsyncOpenAI(
-            api_key=settings.OPENAI_API_KEY,
-            base_url=settings.OPENAI_BASE_URL,
-        )
-        self.model = getattr(settings, "INTENT_CLASSIFIER_MODEL", "gpt-4o-mini")
+        self.gateway = get_ai_gateway()
+        self.model = getattr(settings, "INTENT_CLASSIFIER_MODEL", None) or self.gateway.get_model(ModelPurpose.CLASSIFIER)
         self.confidence_threshold = getattr(
             settings, "INTENT_CONFIDENCE_THRESHOLD", 0.7
         )
@@ -201,7 +198,7 @@ class IntentClassifier:
             user_message += f"\n\nNote: The previous query in this conversation used dataset '{sticky_dataset_id}'. Consider this for context continuity."
 
         try:
-            response = await self.client.chat.completions.create(
+            response = await self.gateway.acompletion(
                 model=self.model,
                 messages=[
                     {"role": "system", "content": SYSTEM_PROMPT},
