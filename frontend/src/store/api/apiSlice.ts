@@ -89,7 +89,7 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
 export const api = createApi({
   reducerPath: 'api',
   baseQuery: createDemoApiWrapper(baseQueryWithReauth),
-  tagTypes: ['Documents', 'Projects', 'User', 'ApiKeys', 'Dashboard', 'Settings', 'Templates', 'EditHistory', 'Datasets', 'Conversations', 'Queries', 'RAGHistory', 'RAGStats', 'RAGConversations', 'RAGEvaluations', 'UnifiedQuery', 'ChatConversations', 'ChatMessages', 'Assistants', 'AssistantStats', 'AssistantConversations', 'ConversationMessages', 'PublicMessages'],
+  tagTypes: ['Documents', 'Projects', 'User', 'ApiKeys', 'Dashboard', 'Settings', 'Templates', 'EditHistory', 'Datasets', 'Conversations', 'Queries', 'RAGHistory', 'RAGStats', 'RAGConversations', 'RAGEvaluations', 'UnifiedQuery', 'ChatConversations', 'ChatMessages', 'Assistants', 'AssistantStats', 'AssistantConversations', 'ConversationMessages', 'PublicMessages', 'AIModelSettings'],
   // Keep unused data in cache for 5 minutes (300 seconds)
   keepUnusedDataFor: 300,
   // Refetch data if stale for more than 30 seconds on mount
