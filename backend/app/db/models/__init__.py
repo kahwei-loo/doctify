@@ -16,6 +16,7 @@ from .insights import InsightsDataset, InsightsConversation, InsightsQuery
 from .rag import DocumentEmbedding, RAGQuery
 from .assistant import Assistant
 from .assistant_conversation import AssistantConversation, AssistantMessage
+from .ai_model_setting import AIModelSetting
 
 __all__ = [
     # Base classes
@@ -41,4 +42,6 @@ __all__ = [
     "Assistant",
     "AssistantConversation",
     "AssistantMessage",
+    # AI Model Settings
+    "AIModelSetting",
 ]
