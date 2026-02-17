@@ -19,6 +19,12 @@ from app.core.config import get_settings
 
 logger = logging.getLogger(__name__)
 
+# ---------------------------------------------------------------------------
+# Module-level DB model cache (sync-safe dict for gateway __init__)
+# Populated on startup and after admin updates.
+# ---------------------------------------------------------------------------
+_db_model_cache: dict[str, str] = {}
+
 
 class ModelPurpose(str, Enum):
     """Logical purpose for model selection."""
@@ -42,13 +48,14 @@ class AIGateway:
         settings = get_settings()
 
         # Model mapping from purpose → configured model name
+        # DB cache takes priority over env-var defaults
         self._models = {
-            ModelPurpose.CHAT: settings.AI_GATEWAY_CHAT_MODEL,
-            ModelPurpose.CHAT_FAST: settings.AI_GATEWAY_CHAT_FAST_MODEL,
-            ModelPurpose.EMBEDDING: settings.AI_GATEWAY_EMBEDDING_MODEL,
-            ModelPurpose.VISION: settings.AI_GATEWAY_VISION_MODEL,
-            ModelPurpose.CLASSIFIER: settings.AI_GATEWAY_CLASSIFIER_MODEL,
-            ModelPurpose.RERANKER: settings.AI_GATEWAY_RERANKER_MODEL,
+            ModelPurpose.CHAT: _db_model_cache.get("chat", settings.AI_GATEWAY_CHAT_MODEL),
+            ModelPurpose.CHAT_FAST: _db_model_cache.get("chat_fast", settings.AI_GATEWAY_CHAT_FAST_MODEL),
+            ModelPurpose.EMBEDDING: _db_model_cache.get("embedding", settings.AI_GATEWAY_EMBEDDING_MODEL),
+            ModelPurpose.VISION: _db_model_cache.get("vision", settings.AI_GATEWAY_VISION_MODEL),
+            ModelPurpose.CLASSIFIER: _db_model_cache.get("classifier", settings.AI_GATEWAY_CLASSIFIER_MODEL),
+            ModelPurpose.RERANKER: _db_model_cache.get("reranker", settings.AI_GATEWAY_RERANKER_MODEL),
         }
 
         # Store API credentials for passing to litellm calls
@@ -193,3 +200,30 @@ def get_ai_gateway() -> AIGateway:
             if _gateway_instance is None:
                 _gateway_instance = AIGateway()
     return _gateway_instance
+
+
+def update_model_cache(purpose: str, model_name: str) -> None:
+    """Update the sync cache for a single purpose (called after admin save)."""
+    _db_model_cache[purpose] = model_name
+
+
+def reset_gateway() -> None:
+    """Discard the current singleton so the next call rebuilds with fresh cache."""
+    global _gateway_instance
+    with _gateway_lock:
+        _gateway_instance = None
+
+
+async def load_settings_into_cache(session_factory) -> None:
+    """Pre-load DB model settings into module cache (called at startup)."""
+    try:
+        async with session_factory() as session:
+            from app.db.repositories.ai_model_settings_repository import AIModelSettingsRepository
+            repo = AIModelSettingsRepository(session)
+            rows = await repo.get_all_active()
+            for row in rows:
+                _db_model_cache[row.purpose] = row.model_name
+            if rows:
+                logger.info(f"Loaded {len(rows)} AI model settings from DB into cache")
+    except Exception as e:
+        logger.warning(f"Could not load AI model settings from DB (non-critical): {e}")
