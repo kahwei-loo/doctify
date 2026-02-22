@@ -1,23 +1,10 @@
 import React, { useState } from 'react';
-import {
-  Lock,
-  Loader2,
-  Shield,
-  Eye,
-  EyeOff,
-} from 'lucide-react';
+import { Loader2, Shield, Eye, EyeOff } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useChangePasswordMutation } from '@/store/api/authApi';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 interface SecurityTabProps {
@@ -60,15 +47,14 @@ export const SecurityTab: React.FC<SecurityTabProps> = ({ isDemoMode }) => {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center gap-2">
-          <Lock className="h-5 w-5 text-primary" />
-          <CardTitle>Security</CardTitle>
-        </div>
-        <CardDescription>Change your password</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <div>
+      <div className="mb-6">
+        <h2 className="text-lg font-semibold">Security</h2>
+        <p className="text-sm text-muted-foreground mt-1">
+          Change your password
+        </p>
+      </div>
+      <div className="space-y-6">
         <div className="space-y-2">
           <Label htmlFor="currentPassword">Current Password</Label>
           <div className="relative">
@@ -123,6 +109,8 @@ export const SecurityTab: React.FC<SecurityTabProps> = ({ isDemoMode }) => {
             className={cn(isDemoMode && 'bg-muted')}
           />
         </div>
+      </div>
+      <div className="border-t border-border mt-6 pt-6 flex justify-end">
         <Button onClick={handleChangePassword} disabled={isChangingPassword || isDemoMode}>
           {isChangingPassword ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -131,7 +119,7 @@ export const SecurityTab: React.FC<SecurityTabProps> = ({ isDemoMode }) => {
           )}
           Change Password
         </Button>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };

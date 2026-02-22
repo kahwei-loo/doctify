@@ -1,23 +1,71 @@
-import React from 'react';
-import { Lock } from 'lucide-react';
+import React, { useState } from 'react';
+import {
+  Lock,
+  User,
+  Bell,
+  Shield,
+  Key,
+  Bot,
+} from 'lucide-react';
 import { useAppSelector } from '@/store';
-import { selectIsSuperuser } from '@/store/selectors/authSelectors';
+import { selectUser, selectIsSuperuser } from '@/store/selectors/authSelectors';
 import { useDemoMode } from '@/features/demo/hooks/useDemoMode';
 import {
   AccountTab,
   SecurityTab,
   ApiKeysTab,
   AIModelsTab,
+  NotificationsSection,
 } from '@/features/settings';
 import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { getInitials } from '@/components/ui/project-avatar';
+import { cn } from '@/lib/utils';
+
+interface NavItem {
+  id: string;
+  label: string;
+  icon: React.ElementType;
+  adminOnly?: boolean;
+}
+
+const NAV_ITEMS: NavItem[] = [
+  { id: 'profile', label: 'Profile', icon: User },
+  { id: 'notifications', label: 'Notifications', icon: Bell },
+  { id: 'security', label: 'Security', icon: Shield },
+  { id: 'api-keys', label: 'API Keys', icon: Key },
+  { id: 'ai-models', label: 'AI Models', icon: Bot, adminOnly: true },
+];
 
 const SettingsPage: React.FC = () => {
   const { isDemoMode } = useDemoMode();
   const isSuperuser = useAppSelector(selectIsSuperuser);
+  const user = useAppSelector(selectUser);
+  const [activeSection, setActiveSection] = useState('profile');
+
+  const visibleNav = NAV_ITEMS.filter(
+    (item) => !item.adminOnly || isSuperuser
+  );
+
+  const renderContent = () => {
+    switch (activeSection) {
+      case 'profile':
+        return <AccountTab isDemoMode={isDemoMode} />;
+      case 'notifications':
+        return <NotificationsSection isDemoMode={isDemoMode} />;
+      case 'security':
+        return <SecurityTab isDemoMode={isDemoMode} />;
+      case 'api-keys':
+        return <ApiKeysTab isDemoMode={isDemoMode} />;
+      case 'ai-models':
+        return isSuperuser ? <AIModelsTab /> : null;
+      default:
+        return <AccountTab isDemoMode={isDemoMode} />;
+    }
+  };
 
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Settings</h1>
         <p className="text-muted-foreground mt-1">
@@ -44,34 +92,83 @@ const SettingsPage: React.FC = () => {
         </Card>
       )}
 
-      <Tabs defaultValue="account">
-        <TabsList>
-          <TabsTrigger value="account">Account</TabsTrigger>
-          <TabsTrigger value="security">Security</TabsTrigger>
-          <TabsTrigger value="api-keys">API Keys</TabsTrigger>
-          {isSuperuser && (
-            <TabsTrigger value="ai-models">AI Models</TabsTrigger>
-          )}
-        </TabsList>
+      {/* Mobile Nav — horizontal scroll */}
+      <div className="flex md:hidden overflow-x-auto gap-1 pb-3 -mb-3">
+        {visibleNav.map((item) => {
+          const Icon = item.icon;
+          return (
+            <button
+              key={item.id}
+              onClick={() => setActiveSection(item.id)}
+              className={cn(
+                'flex items-center gap-2 px-3 py-2 text-sm rounded-lg whitespace-nowrap transition-colors',
+                activeSection === item.id
+                  ? 'bg-muted text-foreground font-medium'
+                  : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+              )}
+            >
+              <Icon className="h-4 w-4" />
+              {item.label}
+              {item.adminOnly && (
+                <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Admin</Badge>
+              )}
+            </button>
+          );
+        })}
+      </div>
 
-        <TabsContent value="account">
-          <AccountTab isDemoMode={isDemoMode} />
-        </TabsContent>
+      {/* Desktop Layout — sidebar + content */}
+      <div className="flex gap-8">
+        {/* Sidebar */}
+        <div className="hidden md:block w-52 flex-shrink-0">
+          <div className="sticky top-24">
+            {/* User Identity */}
+            <div className="flex items-center gap-3 mb-6 px-3">
+              <div className="h-10 w-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-semibold text-sm flex-shrink-0">
+                {getInitials(user?.full_name || user?.email || 'U')}
+              </div>
+              <div className="min-w-0">
+                <p className="font-medium text-sm truncate">
+                  {user?.full_name || 'User'}
+                </p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {user?.email || ''}
+                </p>
+              </div>
+            </div>
 
-        <TabsContent value="security">
-          <SecurityTab isDemoMode={isDemoMode} />
-        </TabsContent>
+            {/* Nav Items */}
+            <nav className="space-y-1">
+              {visibleNav.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveSection(item.id)}
+                    className={cn(
+                      'flex items-center gap-3 w-full px-3 py-2 text-sm rounded-lg transition-colors',
+                      activeSection === item.id
+                        ? 'bg-muted text-foreground font-medium'
+                        : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                    )}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {item.label}
+                    {item.adminOnly && (
+                      <Badge variant="secondary" className="ml-auto text-[10px] px-1.5 py-0">Admin</Badge>
+                    )}
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+        </div>
 
-        <TabsContent value="api-keys">
-          <ApiKeysTab isDemoMode={isDemoMode} />
-        </TabsContent>
-
-        {isSuperuser && (
-          <TabsContent value="ai-models">
-            <AIModelsTab />
-          </TabsContent>
-        )}
-      </Tabs>
+        {/* Content Area */}
+        <div className="flex-1 min-w-0 max-w-2xl">
+          {renderContent()}
+        </div>
+      </div>
     </div>
   );
 };

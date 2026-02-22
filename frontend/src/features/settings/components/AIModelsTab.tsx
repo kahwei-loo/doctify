@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bot, Loader2, Save } from 'lucide-react';
+import { Loader2, Save } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
   useGetAIModelSettingsQuery,
@@ -8,13 +8,7 @@ import {
 } from '@/store/api/aiModelSettingsApi';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -37,16 +31,13 @@ export const AIModelsTab: React.FC = () => {
   const { data: catalogData } = useGetModelCatalogQuery();
   const [updateSetting, { isLoading: isSaving }] = useUpdateAIModelSettingMutation();
 
-  // Local draft state: purpose → model_name
   const [draft, setDraft] = useState<Record<string, string>>({});
-  // Track which purposes have been changed
   const [changed, setChanged] = useState<Set<string>>(new Set());
 
   const settings = settingsData?.data?.settings || [];
   const envDefaults = settingsData?.data?.env_defaults || {};
   const catalog = catalogData?.data || [];
 
-  // Initialize draft from server settings
   useEffect(() => {
     if (settings.length > 0) {
       const initial: Record<string, string> = {};
@@ -60,8 +51,6 @@ export const AIModelsTab: React.FC = () => {
 
   const handleChange = (purpose: string, modelName: string) => {
     setDraft((prev) => ({ ...prev, [purpose]: modelName }));
-
-    // Check if it differs from server value
     const serverValue = settings.find((s) => s.purpose === purpose)?.model_name;
     setChanged((prev) => {
       const next = new Set(prev);
@@ -77,7 +66,6 @@ export const AIModelsTab: React.FC = () => {
   const handleSave = async () => {
     const toSave = Array.from(changed);
     if (toSave.length === 0) return;
-
     try {
       for (const purpose of toSave) {
         await updateSetting({
@@ -94,45 +82,37 @@ export const AIModelsTab: React.FC = () => {
 
   if (isLoading) {
     return (
-      <Card>
-        <CardContent className="flex items-center justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        </CardContent>
-      </Card>
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
     );
   }
 
   if (isError) {
     return (
-      <Card>
-        <CardContent className="py-12 text-center text-muted-foreground">
-          Failed to load AI model settings. Please try again.
-        </CardContent>
-      </Card>
+      <div className="py-12 text-center text-muted-foreground">
+        Failed to load AI model settings. Please try again.
+      </div>
     );
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center gap-2">
-          <Bot className="h-5 w-5 text-primary" />
-          <CardTitle>AI Models</CardTitle>
-        </div>
-        <CardDescription>
+    <div>
+      <div className="mb-6">
+        <h2 className="text-lg font-semibold">AI Models</h2>
+        <p className="text-sm text-muted-foreground mt-1">
           Configure which AI models are used for each purpose. Changes take effect immediately.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
+        </p>
+      </div>
+      <div className="divide-y divide-border">
         {Object.entries(PURPOSE_LABELS).map(([purpose, { label, description }]) => {
           const currentValue = draft[purpose] || '';
           const envDefault = envDefaults[purpose] || '';
-          // Filter catalog entries to those that support this purpose
           const compatibleModels = catalog.filter((m) => m.purposes.includes(purpose));
 
           return (
-            <div key={purpose} className="space-y-2">
-              <Label>{label}</Label>
+            <div key={purpose} className="py-5 space-y-2">
+              <Label className="font-medium">{label}</Label>
               <Select
                 value={currentValue}
                 onValueChange={(val) => handleChange(purpose, val)}
@@ -146,7 +126,6 @@ export const AIModelsTab: React.FC = () => {
                       {model.display_name} ({model.provider})
                     </SelectItem>
                   ))}
-                  {/* If current value is not in catalog, show it as custom */}
                   {currentValue && !compatibleModels.some((m) => m.model_id === currentValue) && (
                     <SelectItem value={currentValue}>
                       {currentValue} (custom)
@@ -165,23 +144,20 @@ export const AIModelsTab: React.FC = () => {
             </div>
           );
         })}
-
-        <div className="pt-2">
-          <Button onClick={handleSave} disabled={isSaving || changed.size === 0}>
-            {isSaving ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Save className="mr-2 h-4 w-4" />
-            )}
-            Save Changes
-            {changed.size > 0 && (
-              <span className="ml-1.5 rounded-full bg-primary-foreground/20 px-2 py-0.5 text-xs">
-                {changed.size}
-              </span>
-            )}
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+      </div>
+      <div className="border-t border-border mt-6 pt-6 flex justify-end items-center gap-3">
+        {changed.size > 0 && (
+          <Badge variant="secondary">{changed.size} changed</Badge>
+        )}
+        <Button onClick={handleSave} disabled={isSaving || changed.size === 0}>
+          {isSaving ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Save className="mr-2 h-4 w-4" />
+          )}
+          Save Changes
+        </Button>
+      </div>
+    </div>
   );
 };

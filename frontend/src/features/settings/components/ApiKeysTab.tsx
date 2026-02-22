@@ -1,10 +1,5 @@
 import React, { useState } from 'react';
-import {
-  Key,
-  Loader2,
-  Plus,
-  Trash2,
-} from 'lucide-react';
+import { Loader2, Plus, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
   useListApiKeysQuery,
@@ -13,13 +8,6 @@ import {
 } from '@/store/api/authApi';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { RevokeApiKeyDialog } from './RevokeApiKeyDialog';
 
@@ -72,15 +60,14 @@ export const ApiKeysTab: React.FC<ApiKeysTabProps> = ({ isDemoMode }) => {
 
   return (
     <>
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Key className="h-5 w-5 text-primary" />
-            <CardTitle>API Keys</CardTitle>
-          </div>
-          <CardDescription>Manage your API keys for programmatic access</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <div>
+        <div className="mb-6">
+          <h2 className="text-lg font-semibold">API Keys</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Manage your API keys for programmatic access
+          </p>
+        </div>
+        <div className="space-y-6">
           <div className="flex gap-3">
             <Input
               value={newKeyName}
@@ -108,7 +95,7 @@ export const ApiKeysTab: React.FC<ApiKeysTabProps> = ({ isDemoMode }) => {
               No API keys created yet
             </p>
           ) : (
-            <div className="divide-y">
+            <div className="divide-y divide-border">
               {apiKeys.map((key) => (
                 <div
                   key={key.api_key_id}
@@ -139,8 +126,8 @@ export const ApiKeysTab: React.FC<ApiKeysTabProps> = ({ isDemoMode }) => {
               ))}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       <RevokeApiKeyDialog
         open={!!revokeDialogKey}

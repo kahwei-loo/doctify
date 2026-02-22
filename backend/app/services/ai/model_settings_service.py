@@ -26,15 +26,21 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 MODEL_CATALOG: List[Dict] = [
+    # ── Chat & Classifier ──────────────────────────────────────────────
     {"model_id": "openrouter/openai/gpt-4o", "display_name": "GPT-4o", "provider": "OpenAI", "purposes": ["chat", "classifier"]},
     {"model_id": "openrouter/openai/gpt-4o-mini", "display_name": "GPT-4o Mini", "provider": "OpenAI", "purposes": ["chat", "chat_fast", "classifier"]},
-    {"model_id": "openrouter/anthropic/claude-3.5-sonnet", "display_name": "Claude 3.5 Sonnet", "provider": "Anthropic", "purposes": ["chat"]},
-    {"model_id": "openrouter/google/gemini-2.5-flash-lite", "display_name": "Gemini 2.5 Flash Lite", "provider": "Google", "purposes": ["chat", "chat_fast"]},
+    {"model_id": "openrouter/anthropic/claude-sonnet-4.5", "display_name": "Claude Sonnet 4.5", "provider": "Anthropic", "purposes": ["chat"]},
+    {"model_id": "openrouter/deepseek/deepseek-chat", "display_name": "DeepSeek V3.2", "provider": "DeepSeek", "purposes": ["chat", "chat_fast", "classifier"]},
+    {"model_id": "openrouter/google/gemini-2.5-flash-lite", "display_name": "Gemini 2.5 Flash Lite", "provider": "Google", "purposes": ["chat", "chat_fast", "classifier"]},
+    {"model_id": "openrouter/google/gemini-3-flash-preview", "display_name": "Gemini 3 Flash Preview", "provider": "Google", "purposes": ["chat", "vision"]},
+    # ── Embedding ───────────────────────────────────────────────────────
     {"model_id": "openrouter/openai/text-embedding-3-small", "display_name": "text-embedding-3-small", "provider": "OpenAI", "purposes": ["embedding"]},
     {"model_id": "openrouter/openai/text-embedding-3-large", "display_name": "text-embedding-3-large", "provider": "OpenAI", "purposes": ["embedding"]},
-    {"model_id": "openrouter/qwen/qwen3-vl-8b-instruct", "display_name": "Qwen3 VL 8B", "provider": "Qwen", "purposes": ["vision"]},
+    # ── Vision / OCR ────────────────────────────────────────────────────
+    {"model_id": "openrouter/qwen/qwen3-vl-30b-a3b-instruct", "display_name": "Qwen3 VL 30B A3B", "provider": "Qwen", "purposes": ["vision"]},
     {"model_id": "openrouter/qwen/qwen3-vl-32b-instruct", "display_name": "Qwen3 VL 32B", "provider": "Qwen", "purposes": ["vision"]},
-    {"model_id": "openrouter/google/gemini-3-flash-preview", "display_name": "Gemini 3 Flash", "provider": "Google", "purposes": ["vision"]},
+    {"model_id": "openrouter/qwen/qwen3.5-397b-a17b", "display_name": "Qwen3.5 397B MoE", "provider": "Qwen", "purposes": ["vision"]},
+    # ── Reranker ────────────────────────────────────────────────────────
     {"model_id": "cohere/rerank-v3.5", "display_name": "Cohere Rerank v3.5", "provider": "Cohere", "purposes": ["reranker"]},
 ]
 

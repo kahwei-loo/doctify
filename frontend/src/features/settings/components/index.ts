@@ -9,3 +9,4 @@ export { AccountTab } from './AccountTab';
 export { SecurityTab } from './SecurityTab';
 export { ApiKeysTab } from './ApiKeysTab';
 export { AIModelsTab } from './AIModelsTab';
+export { NotificationsSection } from './NotificationsSection';
