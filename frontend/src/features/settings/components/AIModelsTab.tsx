@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Loader2, Save } from 'lucide-react';
+import { Loader2, Save, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
   useGetAIModelSettingsQuery,
   useGetModelCatalogQuery,
   useUpdateAIModelSettingMutation,
+  useDeleteCatalogEntryMutation,
 } from '@/store/api/aiModelSettingsApi';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -16,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { AddModelDialog } from './AddModelDialog';
 
 const PURPOSE_LABELS: Record<string, { label: string; description: string }> = {
   chat: { label: 'Chat Model', description: 'Primary model for RAG answers and general chat' },
@@ -30,6 +32,7 @@ export const AIModelsTab: React.FC = () => {
   const { data: settingsData, isLoading, isError } = useGetAIModelSettingsQuery();
   const { data: catalogData } = useGetModelCatalogQuery();
   const [updateSetting, { isLoading: isSaving }] = useUpdateAIModelSettingMutation();
+  const [deleteEntry] = useDeleteCatalogEntryMutation();
 
   const [draft, setDraft] = useState<Record<string, string>>({});
   const [changed, setChanged] = useState<Set<string>>(new Set());
@@ -80,6 +83,16 @@ export const AIModelsTab: React.FC = () => {
     }
   };
 
+  const handleDeleteEntry = async (entryId: string, displayName: string) => {
+    if (!confirm(`Remove "${displayName}" from the catalog?`)) return;
+    try {
+      await deleteEntry(entryId).unwrap();
+      toast.success(`Removed "${displayName}" from catalog.`);
+    } catch (error: any) {
+      toast.error(error?.data?.detail || 'Failed to delete model.');
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -98,6 +111,7 @@ export const AIModelsTab: React.FC = () => {
 
   return (
     <div>
+      {/* Purpose Assignments */}
       <div className="mb-6">
         <h2 className="text-lg font-semibold">AI Models</h2>
         <p className="text-sm text-muted-foreground mt-1">
@@ -157,6 +171,65 @@ export const AIModelsTab: React.FC = () => {
           )}
           Save Changes
         </Button>
+      </div>
+
+      {/* Model Catalog Management */}
+      <div className="border-t border-border mt-8 pt-8">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="text-base font-semibold">Model Catalog</h3>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Manage the available AI models. Models added here appear in the dropdowns above.
+            </p>
+          </div>
+          <AddModelDialog />
+        </div>
+
+        {catalog.length === 0 ? (
+          <p className="text-sm text-muted-foreground py-6 text-center">
+            No models in the catalog. Click "Add Model" to get started.
+          </p>
+        ) : (
+          <div className="space-y-2">
+            {catalog.map((entry) => (
+              <div
+                key={entry.id || entry.model_id}
+                className="flex items-center justify-between rounded-lg border border-border px-4 py-3"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-sm truncate">
+                      {entry.display_name}
+                    </span>
+                    <Badge variant="outline" className="text-xs shrink-0">
+                      {entry.provider}
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                    {entry.model_id}
+                  </p>
+                  <div className="flex flex-wrap gap-1 mt-1.5">
+                    {entry.purposes.map((p) => (
+                      <Badge key={p} variant="secondary" className="text-xs">
+                        {p}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+                {entry.id && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="shrink-0 text-muted-foreground hover:text-destructive"
+                    onClick={() => handleDeleteEntry(entry.id!, entry.display_name)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

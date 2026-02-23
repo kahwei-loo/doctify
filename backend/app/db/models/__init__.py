@@ -17,6 +17,7 @@ from .rag import DocumentEmbedding, RAGQuery
 from .assistant import Assistant
 from .assistant_conversation import AssistantConversation, AssistantMessage
 from .ai_model_setting import AIModelSetting
+from .model_catalog import ModelCatalog
 
 __all__ = [
     # Base classes
@@ -44,4 +45,6 @@ __all__ = [
     "AssistantMessage",
     # AI Model Settings
     "AIModelSetting",
+    # Model Catalog
+    "ModelCatalog",
 ]

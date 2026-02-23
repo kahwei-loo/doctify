@@ -26,6 +26,7 @@ from app.db.repositories.assistant_conversation_repository import (
     AssistantConversationRepository,
     AssistantMessageRepository,
 )
+from app.db.repositories.model_catalog_repository import ModelCatalogRepository
 
 __all__ = [
     # Base
@@ -51,4 +52,6 @@ __all__ = [
     "AssistantRepository",
     "AssistantConversationRepository",
     "AssistantMessageRepository",
+    # Model Catalog
+    "ModelCatalogRepository",
 ]

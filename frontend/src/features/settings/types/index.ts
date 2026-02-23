@@ -17,10 +17,26 @@ export interface AIModelSettingsResponse {
 }
 
 export interface ModelCatalogEntry {
+  id?: string;
   model_id: string;
   display_name: string;
   provider: string;
   purposes: string[];
+  is_active?: boolean;
+}
+
+export interface CreateModelCatalogEntryRequest {
+  model_id: string;
+  display_name: string;
+  provider: string;
+  purposes: string[];
+}
+
+export interface UpdateModelCatalogEntryRequest {
+  display_name?: string;
+  provider?: string;
+  purposes?: string[];
+  is_active?: boolean;
 }
 
 export interface UpdateAIModelSettingRequest {

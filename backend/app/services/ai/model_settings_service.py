@@ -2,47 +2,29 @@
 AI Model Settings Service — DB-first with env-var fallback.
 
 Manages the mapping of ModelPurpose → model_name, merging DB overrides
-with environment-variable defaults.
+with environment-variable defaults. Also provides CRUD for the model catalog.
 """
 
 import logging
+import uuid
 from typing import Dict, List, Optional
 
+from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
 from app.db.repositories.ai_model_settings_repository import AIModelSettingsRepository
+from app.db.repositories.model_catalog_repository import ModelCatalogRepository
 from app.models.ai_model_settings import (
     AIModelSettingResponse,
     AIModelSettingsListResponse,
     ModelCatalogEntry,
+    CreateModelCatalogEntry,
+    UpdateModelCatalogEntry,
 )
 from app.services.ai.gateway import ModelPurpose
 
 logger = logging.getLogger(__name__)
-
-# ---------------------------------------------------------------------------
-# Curated model catalog (served via API, no DB table needed)
-# ---------------------------------------------------------------------------
-
-MODEL_CATALOG: List[Dict] = [
-    # ── Chat & Classifier ──────────────────────────────────────────────
-    {"model_id": "openrouter/openai/gpt-4o", "display_name": "GPT-4o", "provider": "OpenAI", "purposes": ["chat", "classifier"]},
-    {"model_id": "openrouter/openai/gpt-4o-mini", "display_name": "GPT-4o Mini", "provider": "OpenAI", "purposes": ["chat", "chat_fast", "classifier"]},
-    {"model_id": "openrouter/anthropic/claude-sonnet-4.5", "display_name": "Claude Sonnet 4.5", "provider": "Anthropic", "purposes": ["chat"]},
-    {"model_id": "openrouter/deepseek/deepseek-chat", "display_name": "DeepSeek V3.2", "provider": "DeepSeek", "purposes": ["chat", "chat_fast", "classifier"]},
-    {"model_id": "openrouter/google/gemini-2.5-flash-lite", "display_name": "Gemini 2.5 Flash Lite", "provider": "Google", "purposes": ["chat", "chat_fast", "classifier"]},
-    {"model_id": "openrouter/google/gemini-3-flash-preview", "display_name": "Gemini 3 Flash Preview", "provider": "Google", "purposes": ["chat", "vision"]},
-    # ── Embedding ───────────────────────────────────────────────────────
-    {"model_id": "openrouter/openai/text-embedding-3-small", "display_name": "text-embedding-3-small", "provider": "OpenAI", "purposes": ["embedding"]},
-    {"model_id": "openrouter/openai/text-embedding-3-large", "display_name": "text-embedding-3-large", "provider": "OpenAI", "purposes": ["embedding"]},
-    # ── Vision / OCR ────────────────────────────────────────────────────
-    {"model_id": "openrouter/qwen/qwen3-vl-30b-a3b-instruct", "display_name": "Qwen3 VL 30B A3B", "provider": "Qwen", "purposes": ["vision"]},
-    {"model_id": "openrouter/qwen/qwen3-vl-32b-instruct", "display_name": "Qwen3 VL 32B", "provider": "Qwen", "purposes": ["vision"]},
-    {"model_id": "openrouter/qwen/qwen3.5-397b-a17b", "display_name": "Qwen3.5 397B MoE", "provider": "Qwen", "purposes": ["vision"]},
-    # ── Reranker ────────────────────────────────────────────────────────
-    {"model_id": "cohere/rerank-v3.5", "display_name": "Cohere Rerank v3.5", "provider": "Cohere", "purposes": ["reranker"]},
-]
 
 # Purpose → Settings field name
 _PURPOSE_ENV_MAP: Dict[str, str] = {
@@ -69,6 +51,7 @@ class AIModelSettingsService:
 
     def __init__(self, session: AsyncSession):
         self._repo = AIModelSettingsRepository(session)
+        self._catalog_repo = ModelCatalogRepository(session)
 
     async def get_all_settings(self) -> AIModelSettingsListResponse:
         """Merge DB rows + env defaults for all purposes."""
@@ -129,7 +112,81 @@ class AIModelSettingsService:
             source="database",
         )
 
-    @staticmethod
-    def get_model_catalog() -> List[ModelCatalogEntry]:
-        """Return the curated model catalog (no DB round-trip)."""
-        return [ModelCatalogEntry(**entry) for entry in MODEL_CATALOG]
+    # ------------------------------------------------------------------
+    # Model Catalog CRUD
+    # ------------------------------------------------------------------
+
+    async def get_model_catalog(self) -> List[ModelCatalogEntry]:
+        """Return all active models from the catalog table."""
+        rows = await self._catalog_repo.get_all_active()
+        return [
+            ModelCatalogEntry(
+                id=row.id,
+                model_id=row.model_id,
+                display_name=row.display_name,
+                provider=row.provider,
+                purposes=row.purposes,
+                is_active=row.is_active,
+            )
+            for row in rows
+        ]
+
+    async def create_catalog_entry(self, data: CreateModelCatalogEntry) -> ModelCatalogEntry:
+        """Add a new model to the catalog. Raises 409 on duplicate model_id."""
+        existing = await self._catalog_repo.get_by_model_id(data.model_id)
+        if existing:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Model '{data.model_id}' already exists in the catalog.",
+            )
+
+        row = await self._catalog_repo.create({
+            "model_id": data.model_id,
+            "display_name": data.display_name,
+            "provider": data.provider,
+            "purposes": data.purposes,
+        })
+        return ModelCatalogEntry(
+            id=row.id,
+            model_id=row.model_id,
+            display_name=row.display_name,
+            provider=row.provider,
+            purposes=row.purposes,
+            is_active=row.is_active,
+        )
+
+    async def update_catalog_entry(
+        self, entry_id: uuid.UUID, data: UpdateModelCatalogEntry,
+    ) -> ModelCatalogEntry:
+        """Partially update a catalog entry."""
+        update_fields = data.model_dump(exclude_unset=True)
+        if not update_fields:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No fields to update.",
+            )
+
+        row = await self._catalog_repo.update(entry_id, update_fields)
+        if not row:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Catalog entry not found.",
+            )
+        return ModelCatalogEntry(
+            id=row.id,
+            model_id=row.model_id,
+            display_name=row.display_name,
+            provider=row.provider,
+            purposes=row.purposes,
+            is_active=row.is_active,
+        )
+
+    async def delete_catalog_entry(self, entry_id: uuid.UUID) -> bool:
+        """Hard-delete a catalog entry."""
+        deleted = await self._catalog_repo.delete(entry_id)
+        if not deleted:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Catalog entry not found.",
+            )
+        return True
