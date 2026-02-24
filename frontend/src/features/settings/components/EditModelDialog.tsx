@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { Loader2, Plus } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Loader2, Pencil } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { useAddCatalogEntryMutation } from '@/store/api/aiModelSettingsApi';
+import { useUpdateCatalogEntryMutation } from '@/store/api/aiModelSettingsApi';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,6 +16,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { ProviderSelect } from './ProviderSelect';
+import type { ModelCatalogEntry } from '../types';
 
 const ALL_PURPOSES = [
   { value: 'chat', label: 'Chat' },
@@ -26,26 +27,28 @@ const ALL_PURPOSES = [
   { value: 'reranker', label: 'Reranker' },
 ];
 
-interface AddModelDialogProps {
+interface EditModelDialogProps {
+  entry: ModelCatalogEntry;
   existingProviders: string[];
 }
 
-export const AddModelDialog: React.FC<AddModelDialogProps> = ({
+export const EditModelDialog: React.FC<EditModelDialogProps> = ({
+  entry,
   existingProviders,
 }) => {
   const [open, setOpen] = useState(false);
-  const [modelId, setModelId] = useState('');
-  const [displayName, setDisplayName] = useState('');
-  const [provider, setProvider] = useState('');
-  const [purposes, setPurposes] = useState<string[]>([]);
-  const [addEntry, { isLoading }] = useAddCatalogEntryMutation();
+  const [displayName, setDisplayName] = useState(entry.display_name);
+  const [provider, setProvider] = useState(entry.provider);
+  const [purposes, setPurposes] = useState<string[]>(entry.purposes);
+  const [updateEntry, { isLoading }] = useUpdateCatalogEntryMutation();
 
-  const resetForm = () => {
-    setModelId('');
-    setDisplayName('');
-    setProvider('');
-    setPurposes([]);
-  };
+  useEffect(() => {
+    if (open) {
+      setDisplayName(entry.display_name);
+      setProvider(entry.provider);
+      setPurposes([...entry.purposes]);
+    }
+  }, [open, entry]);
 
   const togglePurpose = (value: string) => {
     setPurposes((prev) =>
@@ -55,63 +58,51 @@ export const AddModelDialog: React.FC<AddModelDialogProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!modelId || !displayName || !provider || purposes.length === 0) {
+    if (!displayName || !provider || purposes.length === 0) {
       toast.error('All fields are required and at least one purpose must be selected.');
       return;
     }
+    if (!entry.id) return;
     try {
-      await addEntry({
-        model_id: modelId,
-        display_name: displayName,
-        provider,
-        purposes,
+      await updateEntry({
+        entryId: entry.id,
+        body: { display_name: displayName, provider, purposes },
       }).unwrap();
-      toast.success(`Added "${displayName}" to the catalog.`);
-      resetForm();
+      toast.success(`Updated "${displayName}".`);
       setOpen(false);
     } catch (error: unknown) {
       const msg =
         error && typeof error === 'object' && 'data' in error
           ? (error as { data?: { detail?: string } }).data?.detail
           : undefined;
-      toast.error(msg || 'Failed to add model.');
+      toast.error(msg || 'Failed to update model.');
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          <Plus className="mr-2 h-4 w-4" />
-          Add Model
+        <Button
+          variant="ghost"
+          size="icon"
+          className="shrink-0 text-muted-foreground hover:text-foreground"
+        >
+          <Pencil className="h-4 w-4" />
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Add Model to Catalog</DialogTitle>
+            <DialogTitle>Edit Model</DialogTitle>
             <DialogDescription>
-              Add a new AI model that can be assigned to purposes.
+              Update details for <span className="font-medium">{entry.model_id}</span>
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="model-id">Model ID</Label>
+              <Label htmlFor="edit-display-name">Display Name</Label>
               <Input
-                id="model-id"
-                placeholder="e.g. openrouter/openai/gpt-4o"
-                value={modelId}
-                onChange={(e) => setModelId(e.target.value)}
-              />
-              <p className="text-xs text-muted-foreground">
-                LiteLLM format: <code>provider/model-name</code>
-              </p>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="display-name">Display Name</Label>
-              <Input
-                id="display-name"
-                placeholder="e.g. GPT-4o"
+                id="edit-display-name"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
               />
@@ -145,7 +136,7 @@ export const AddModelDialog: React.FC<AddModelDialogProps> = ({
           <DialogFooter>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Add Model
+              Save Changes
             </Button>
           </DialogFooter>
         </form>

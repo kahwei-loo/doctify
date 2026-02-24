@@ -1,15 +1,11 @@
-import React, { useState } from 'react';
-import { Switch } from '@/components/ui/switch';
+import React from 'react';
+import { Bell } from 'lucide-react';
 
 interface NotificationsSectionProps {
   isDemoMode: boolean;
 }
 
-export const NotificationsSection: React.FC<NotificationsSectionProps> = ({ isDemoMode }) => {
-  const [emailNotifications, setEmailNotifications] = useState(true);
-  const [documentProcessed, setDocumentProcessed] = useState(true);
-  const [weeklyDigest, setWeeklyDigest] = useState(false);
-
+export const NotificationsSection: React.FC<NotificationsSectionProps> = () => {
   return (
     <div>
       <div className="mb-6">
@@ -18,46 +14,15 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({ isDe
           Configure your notification preferences
         </p>
       </div>
-      <div className="divide-y divide-border">
-        <div className="flex items-center justify-between py-4">
-          <div>
-            <p className="font-medium">Email Notifications</p>
-            <p className="text-sm text-muted-foreground">
-              Receive email notifications for important updates
-            </p>
-          </div>
-          <Switch
-            checked={emailNotifications}
-            onCheckedChange={setEmailNotifications}
-            disabled={isDemoMode}
-          />
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-4">
+          <Bell className="h-6 w-6 text-muted-foreground" />
         </div>
-        <div className="flex items-center justify-between py-4">
-          <div>
-            <p className="font-medium">Document Processed</p>
-            <p className="text-sm text-muted-foreground">
-              Get notified when document processing completes
-            </p>
-          </div>
-          <Switch
-            checked={documentProcessed}
-            onCheckedChange={setDocumentProcessed}
-            disabled={isDemoMode}
-          />
-        </div>
-        <div className="flex items-center justify-between py-4">
-          <div>
-            <p className="font-medium">Weekly Digest</p>
-            <p className="text-sm text-muted-foreground">
-              Receive a weekly summary of your activity
-            </p>
-          </div>
-          <Switch
-            checked={weeklyDigest}
-            onCheckedChange={setWeeklyDigest}
-            disabled={isDemoMode}
-          />
-        </div>
+        <h3 className="text-base font-medium mb-1">Coming Soon</h3>
+        <p className="text-sm text-muted-foreground max-w-sm">
+          Email notifications for document processing, weekly digests, and team
+          activity will be available in a future update.
+        </p>
       </div>
     </div>
   );

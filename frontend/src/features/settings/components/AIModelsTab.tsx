@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Loader2, Save, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
@@ -18,6 +18,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { AddModelDialog } from './AddModelDialog';
+import { EditModelDialog } from './EditModelDialog';
+import { DeleteModelDialog } from './DeleteModelDialog';
+import type { ModelCatalogEntry } from '../types';
 
 const PURPOSE_LABELS: Record<string, { label: string; description: string }> = {
   chat: { label: 'Chat Model', description: 'Primary model for RAG answers and general chat' },
@@ -28,18 +31,35 @@ const PURPOSE_LABELS: Record<string, { label: string; description: string }> = {
   reranker: { label: 'Reranker Model', description: 'Re-ranks search results for relevance' },
 };
 
+/** Map raw purpose key to friendly label for badges. */
+const PURPOSE_SHORT_LABELS: Record<string, string> = {
+  chat: 'Chat',
+  chat_fast: 'Fast Chat',
+  embedding: 'Embedding',
+  vision: 'Vision',
+  classifier: 'Classifier',
+  reranker: 'Reranker',
+};
+
 export const AIModelsTab: React.FC = () => {
   const { data: settingsData, isLoading, isError } = useGetAIModelSettingsQuery();
-  const { data: catalogData } = useGetModelCatalogQuery();
+  const { data: catalogData, isLoading: isCatalogLoading } = useGetModelCatalogQuery();
   const [updateSetting, { isLoading: isSaving }] = useUpdateAIModelSettingMutation();
-  const [deleteEntry] = useDeleteCatalogEntryMutation();
+  const [deleteEntry, { isLoading: isDeleting }] = useDeleteCatalogEntryMutation();
 
   const [draft, setDraft] = useState<Record<string, string>>({});
   const [changed, setChanged] = useState<Set<string>>(new Set());
+  const [deleteTarget, setDeleteTarget] = useState<ModelCatalogEntry | null>(null);
 
   const settings = settingsData?.data?.settings || [];
   const envDefaults = settingsData?.data?.env_defaults || {};
   const catalog = catalogData?.data || [];
+
+  /** Distinct provider names from catalog for the combobox. */
+  const existingProviders = useMemo(
+    () => Array.from(new Set(catalog.map((m) => m.provider))).sort(),
+    [catalog]
+  );
 
   useEffect(() => {
     if (settings.length > 0) {
@@ -47,7 +67,12 @@ export const AIModelsTab: React.FC = () => {
       for (const s of settings) {
         initial[s.purpose] = s.model_name;
       }
-      setDraft(initial);
+      setDraft((prev) => {
+        // Only reset if the server values actually changed
+        const same = Object.keys(initial).every((k) => prev[k] === initial[k]);
+        if (same && Object.keys(prev).length === Object.keys(initial).length) return prev;
+        return initial;
+      });
       setChanged(new Set());
     }
   }, [settings]);
@@ -78,22 +103,31 @@ export const AIModelsTab: React.FC = () => {
       }
       toast.success(`Updated ${toSave.length} model${toSave.length > 1 ? 's' : ''}`);
       setChanged(new Set());
-    } catch (error: any) {
-      toast.error(error?.data?.detail || 'Failed to update model settings');
+    } catch (error: unknown) {
+      const msg =
+        error && typeof error === 'object' && 'data' in error
+          ? (error as { data?: { detail?: string } }).data?.detail
+          : undefined;
+      toast.error(msg || 'Failed to update model settings');
     }
   };
 
-  const handleDeleteEntry = async (entryId: string, displayName: string) => {
-    if (!confirm(`Remove "${displayName}" from the catalog?`)) return;
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget?.id) return;
     try {
-      await deleteEntry(entryId).unwrap();
-      toast.success(`Removed "${displayName}" from catalog.`);
-    } catch (error: any) {
-      toast.error(error?.data?.detail || 'Failed to delete model.');
+      await deleteEntry(deleteTarget.id).unwrap();
+      toast.success(`Removed "${deleteTarget.display_name}" from catalog.`);
+      setDeleteTarget(null);
+    } catch (error: unknown) {
+      const msg =
+        error && typeof error === 'object' && 'data' in error
+          ? (error as { data?: { detail?: string } }).data?.detail
+          : undefined;
+      toast.error(msg || 'Failed to delete model.');
     }
   };
 
-  if (isLoading) {
+  if (isLoading || isCatalogLoading) {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -135,6 +169,11 @@ export const AIModelsTab: React.FC = () => {
                   <SelectValue placeholder="Select a model" />
                 </SelectTrigger>
                 <SelectContent>
+                  {compatibleModels.length === 0 && (
+                    <div className="px-3 py-2 text-sm text-muted-foreground">
+                      No compatible models. Add one in the catalog below.
+                    </div>
+                  )}
                   {compatibleModels.map((model) => (
                     <SelectItem key={model.model_id} value={model.model_id}>
                       {model.display_name} ({model.provider})
@@ -182,7 +221,7 @@ export const AIModelsTab: React.FC = () => {
               Manage the available AI models. Models added here appear in the dropdowns above.
             </p>
           </div>
-          <AddModelDialog />
+          <AddModelDialog existingProviders={existingProviders} />
         </div>
 
         {catalog.length === 0 ? (
@@ -211,26 +250,40 @@ export const AIModelsTab: React.FC = () => {
                   <div className="flex flex-wrap gap-1 mt-1.5">
                     {entry.purposes.map((p) => (
                       <Badge key={p} variant="secondary" className="text-xs">
-                        {p}
+                        {PURPOSE_SHORT_LABELS[p] || p}
                       </Badge>
                     ))}
                   </div>
                 </div>
                 {entry.id && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="shrink-0 text-muted-foreground hover:text-destructive"
-                    onClick={() => handleDeleteEntry(entry.id!, entry.display_name)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <div className="flex items-center gap-1 shrink-0 ml-2">
+                    <EditModelDialog
+                      entry={entry}
+                      existingProviders={existingProviders}
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-muted-foreground hover:text-destructive"
+                      onClick={() => setDeleteTarget(entry)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 )}
               </div>
             ))}
           </div>
         )}
       </div>
+
+      <DeleteModelDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        modelName={deleteTarget?.display_name || ''}
+        onConfirm={handleConfirmDelete}
+        isDeleting={isDeleting}
+      />
     </div>
   );
 };

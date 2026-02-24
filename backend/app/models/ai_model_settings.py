@@ -2,10 +2,11 @@
 Pydantic schemas for AI Model Settings API.
 """
 
+import re
 import uuid
 from typing import Dict, List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class AIModelSettingResponse(BaseModel):
@@ -44,6 +45,10 @@ class ModelCatalogEntry(BaseModel):
     is_active: bool = True
 
 
+VALID_PURPOSES = {"chat", "chat_fast", "embedding", "vision", "classifier", "reranker"}
+MODEL_ID_PATTERN = re.compile(r"^[a-zA-Z0-9/_.\-:]+$")
+
+
 class CreateModelCatalogEntry(BaseModel):
     """Payload for adding a new model to the catalog."""
 
@@ -51,6 +56,32 @@ class CreateModelCatalogEntry(BaseModel):
     display_name: str = Field(min_length=1, max_length=100)
     provider: str = Field(min_length=1, max_length=50)
     purposes: List[str] = Field(min_length=1)
+
+    @field_validator("model_id")
+    @classmethod
+    def validate_model_id_format(cls, v: str) -> str:
+        v = v.strip()
+        if not MODEL_ID_PATTERN.match(v):
+            raise ValueError(
+                "model_id may only contain letters, digits, '/', '_', '.', '-', ':'."
+            )
+        return v
+
+    @field_validator("purposes")
+    @classmethod
+    def validate_purposes(cls, v: List[str]) -> List[str]:
+        invalid = set(v) - VALID_PURPOSES
+        if invalid:
+            raise ValueError(
+                f"Invalid purposes: {sorted(invalid)}. "
+                f"Valid: {sorted(VALID_PURPOSES)}"
+            )
+        return v
+
+    @field_validator("provider")
+    @classmethod
+    def normalize_provider(cls, v: str) -> str:
+        return v.strip()
 
 
 class UpdateModelCatalogEntry(BaseModel):
@@ -60,6 +91,23 @@ class UpdateModelCatalogEntry(BaseModel):
     provider: Optional[str] = Field(default=None, max_length=50)
     purposes: Optional[List[str]] = None
     is_active: Optional[bool] = None
+
+    @field_validator("purposes")
+    @classmethod
+    def validate_purposes(cls, v: Optional[List[str]]) -> Optional[List[str]]:
+        if v is not None:
+            invalid = set(v) - VALID_PURPOSES
+            if invalid:
+                raise ValueError(
+                    f"Invalid purposes: {sorted(invalid)}. "
+                    f"Valid: {sorted(VALID_PURPOSES)}"
+                )
+        return v
+
+    @field_validator("provider")
+    @classmethod
+    def normalize_provider(cls, v: Optional[str]) -> Optional[str]:
+        return v.strip() if v else v
 
 
 class AIModelSettingsApiResponse(BaseModel):
