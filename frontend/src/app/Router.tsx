@@ -13,6 +13,7 @@ import { selectIsDemoMode } from '../store/slices/demoSlice';
 import { useGetCurrentUserQuery } from '../store/api/authApi';
 
 // Lazy load pages for code splitting
+const LandingPage = lazy(() => import('../pages/LandingPage'));
 const LoginPage = lazy(() => import('../pages/LoginPage'));
 const RegisterPage = lazy(() => import('../pages/RegisterPage'));
 const DashboardPage = lazy(() => import('../pages/DashboardPage'));
@@ -41,6 +42,26 @@ const PageLoader: React.FC = () => (
 );
 
 /**
+ * Landing guard for the public '/' route.
+ * Redirects authenticated/demo users to dashboard; shows landing page otherwise.
+ */
+const LandingGuard: React.FC = () => {
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const isDemoMode = useAppSelector(selectIsDemoMode);
+  const hasToken = localStorage.getItem('access_token') !== null;
+
+  if (isAuthenticated || isDemoMode || hasToken) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <LandingPage />
+    </Suspense>
+  );
+};
+
+/**
  * Protected route wrapper
  * Uses Redux auth state with backend verification for security
  * Allows demo mode access without authentication
@@ -66,9 +87,9 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
     return <Loading size="large" message="Verifying authentication..." fullScreen />;
   }
 
-  // Not authenticated - redirect to login
+  // Not authenticated - redirect to landing page
   if (!isAuthenticated && (!hasToken || isError)) {
-    return <Navigate to="/auth/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;
@@ -78,8 +99,13 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
  * Router configuration
  */
 const router = createBrowserRouter([
+  // Public landing page
   {
     path: '/',
+    element: <LandingGuard />,
+  },
+  // Authenticated app routes (pathless layout route)
+  {
     element: (
       <Suspense fallback={<PageLoader />}>
         <ProtectedRoute>
@@ -88,10 +114,6 @@ const router = createBrowserRouter([
       </Suspense>
     ),
     children: [
-      {
-        index: true,
-        element: <Navigate to="/dashboard" replace />,
-      },
       {
         path: 'dashboard',
         element: (

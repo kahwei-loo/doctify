@@ -1,219 +1,165 @@
-# Doctify 📄
+<div align="center">
 
-> AI-Powered Document Intelligence Platform - Transform business documents into structured data automatically
+# Doctify
 
-[![Build Status](https://img.shields.io/github/actions/workflow/status/kahwei-loo/doctify/ci.yml?branch=main)](https://github.com/kahwei-loo/doctify/actions)
-[![Coverage](https://img.shields.io/codecov/c/github/kahwei-loo/doctify)](https://codecov.io/gh/kahwei-loo/doctify)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![React 18](https://img.shields.io/badge/react-18.0+-61dafb.svg)](https://reactjs.org/)
+### AI-Powered Document Intelligence Platform
 
-## 🎯 Overview
+Turn documents into structured data and searchable knowledge with multi-provider AI.
 
-Doctify is a production-ready SaaS platform that leverages AI to automatically parse and extract structured data from business documents. Built as a **portfolio project** and **experimental lab**, it showcases modern software architecture patterns, clean code practices, and production-grade DevOps workflows.
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![React 18](https://img.shields.io/badge/react-18-61DAFB?logo=react&logoColor=white)](https://react.dev/)
+[![FastAPI](https://img.shields.io/badge/fastapi-0.100+-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![PostgreSQL](https://img.shields.io/badge/postgresql-15-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](./LICENSE)
 
-**Live Demo**: [https://doctify.yourdomain.com](https://doctify.yourdomain.com) *(Coming Soon)*
+</div>
 
-### Key Features
+---
 
-- 🤖 **AI-Powered OCR** - Intelligent document parsing using OpenAI-compatible APIs
-- 🧠 **RAG Q&A System** - Ask questions about documents and get AI-generated answers with source citations
-- 📊 **Structured Data Extraction** - Convert unstructured documents to JSON/CSV/XLSX
-- ⚡ **Real-time Processing** - WebSocket-based live progress updates
-- 🔄 **Async Task Queue** - Celery-powered background processing with Redis
-- 📝 **Version Control** - Track document parsing history and edits
-- 🔐 **Authentication** - JWT tokens + API keys for secure access
-- 🎨 **Modern UI** - React 18 with TypeScript, Tailwind CSS, and Radix UI
-- 🐳 **Docker-Ready** - Full containerization with Docker Compose
-- 📈 **Monitoring** - Prometheus metrics and structured logging
-- 🧪 **Well-Tested** - 80%+ backend and 70%+ frontend test coverage
+![Dashboard](docs/screenshots/hero-dashboard.png)
 
-## 🏗️ Architecture
+## What is Doctify?
 
-### Tech Stack
+Doctify is a full-stack SaaS platform that processes business documents through a multi-AI pipeline and organizes the results into queryable knowledge bases.
 
-**Backend**:
-- **Framework**: FastAPI (Python 3.11+)
-- **Database**: PostgreSQL 15 with pgvector extension (for RAG)
-- **Cache/Queue**: Redis 7
-- **Task Queue**: Celery with async workers
-- **AI Provider**: OpenRouter API (OpenAI-compatible)
-- **Vector Search**: pgvector with HNSW/IVFFlat indexes
+1. **Upload** — PDF, PNG, JPG, TIFF documents via drag-and-drop
+2. **Extract** — Multi-provider OCR with GPT-4V → Claude → Gemini automatic fallback
+3. **Organize** — Build knowledge bases with vector embeddings and semantic search
+4. **Ask** — RAG-powered Q&A with source citations and groundedness verification
 
-**Frontend**:
-- **Framework**: React 18 with TypeScript
-- **Build Tool**: Vite
-- **State Management**: Redux Toolkit + RTK Query
-- **UI Components**: Radix UI + Tailwind CSS
-- **Charts**: Recharts
+> **Try it out**: Clone the repo, run `docker-compose up -d`, and visit `localhost:3003`. Use the **Try Demo** button on the landing page to explore with sample data — no API keys needed.
 
-**Infrastructure**:
-- **Containerization**: Docker + Docker Compose
-- **CI/CD**: GitHub Actions
-- **Monitoring**: Prometheus + Grafana
-- **Logging**: Structured JSON logs with ELK-ready format
+## Key Features
 
-### System Architecture
+| Feature | Description | Tech |
+|---------|-------------|------|
+| AI-Powered OCR | Multi-provider extraction with automatic fallback chain | GPT-4V, Claude, Gemini via LiteLLM |
+| Knowledge Bases | Organize documents into searchable vector collections | pgvector + Cohere reranking |
+| RAG Q&A | Ask questions grounded in your documents with citations | 4-layer pipeline: retrieve → rerank → generate → verify |
+| AI Assistants | Custom assistants with system prompts, KB binding, widget embed | Configurable per-assistant model + prompt |
+| Real-time Processing | Live progress updates via WebSocket | Celery + Redis + WebSocket |
+| AI Model Management | Admin UI for model catalog, purpose assignment, gateway config | LiteLLM gateway + DB-backed settings |
+| Dashboard Analytics | Document stats, processing trends, cost tracking | Recharts + unified stats API |
+| Security | JWT with jti blacklist, bcrypt, Redis rate limiting, account lockout | HSTS, CSP, security headers |
 
+<details>
+<summary><strong>Screenshots</strong></summary>
+
+| Feature | Screenshot |
+|---------|------------|
+| Landing Page | ![Landing](docs/screenshots/feature-landing.png) |
+| OCR Results | ![OCR](docs/screenshots/feature-ocr.png) |
+| Knowledge Base | ![KB](docs/screenshots/feature-kb.png) |
+
+</details>
+
+## Architecture
+
+```mermaid
+graph TB
+    subgraph Frontend["Frontend (React 18 + TypeScript)"]
+        UI[UI Components<br/>114 React + 28 shadcn]
+        RTK[RTK Query<br/>State Management]
+    end
+
+    subgraph Backend["Backend (FastAPI + Python)"]
+        API[REST API<br/>150+ endpoints]
+        SVC[Services Layer<br/>DDD + Repository Pattern]
+        GW[LiteLLM Gateway<br/>Multi-provider AI]
+    end
+
+    subgraph Data["Data Layer"]
+        PG[(PostgreSQL 15<br/>+ pgvector)]
+        RD[(Redis 7<br/>Cache + Broker)]
+    end
+
+    subgraph Workers["Async Workers"]
+        CL[Celery Workers<br/>OCR + Embeddings]
+    end
+
+    subgraph AI["AI Providers"]
+        OAI[OpenAI<br/>GPT-4V]
+        ANT[Anthropic<br/>Claude]
+        GGL[Google<br/>Gemini]
+        COH[Cohere<br/>Reranking]
+    end
+
+    UI --> RTK --> API
+    API --> SVC --> GW
+    SVC --> PG
+    SVC --> RD
+    API --> CL
+    CL --> GW
+    GW --> OAI
+    GW --> ANT
+    GW --> GGL
+    GW --> COH
 ```
-┌─────────────┐      ┌─────────────┐      ┌─────────────┐
-│   React     │─────▶│  FastAPI    │─────▶│ PostgreSQL  │
-│   Frontend  │      │   Backend   │      │   Database  │
-│             │◀─────│             │◀─────│             │
-└─────────────┘      └─────────────┘      └─────────────┘
-                            │
-                            │
-                     ┌──────┴──────┐
-                     │             │
-                     ▼             ▼
-              ┌────────────┐ ┌──────────┐
-              │   Celery   │ │  Redis   │
-              │   Worker   │ │  Cache   │
-              └────────────┘ └──────────┘
-```
 
-For detailed architecture documentation, see [docs/architecture/](./docs/architecture/).
+**Backend**: FastAPI, SQLAlchemy 2.0 (async), Repository Pattern, DDD, Celery, LiteLLM gateway
+**Frontend**: React 18, TypeScript, Vite, TailwindCSS, shadcn/ui, RTK Query, Recharts
+**Infrastructure**: Docker Compose, PostgreSQL 15 + pgvector, Redis 7, GitHub Actions
 
-## 🚀 Quick Start
+## Project Scale
 
-### Prerequisites
+| Metric | Value |
+|--------|-------|
+| Total Lines of Code | ~84K (37K frontend + 47K backend) |
+| Source Files | 447 (296 TS/TSX + 151 Python) |
+| API Endpoints | 150+ |
+| Database Models | 16 |
+| Alembic Migrations | 19 |
+| React Components | 114 + 28 UI primitives |
+| Feature Modules | 12 |
 
-- Docker & Docker Compose
-- Node.js 18+ (for local frontend development)
-- Python 3.11+ (for local backend development)
+## Quick Start
 
-### Installation
-
-1. **Clone the repository**
+### Docker (recommended)
 
 ```bash
 git clone https://github.com/kahwei-loo/doctify.git
 cd doctify
-```
-
-2. **Set up environment variables**
-
-```bash
-# Backend
-cp backend/.env.example backend/.env
-# Edit backend/.env with your configuration
-
-# Frontend
+cp backend/.env.example backend/.env    # Add your AI API keys
 cp frontend/.env.example frontend/.env.local
-# Edit frontend/.env.local with your configuration
-```
-
-3. **Start with Docker Compose**
-
-```bash
 docker-compose up -d
 ```
 
-4. **Access the application**
-
-- Frontend: http://localhost:3003
-- Backend API: http://localhost:8008
-- API Documentation: http://localhost:8008/docs
+Open `http://localhost:3003` and click **Try Demo** to explore with sample data.
 
 ### Local Development
 
-**Backend**:
 ```bash
+# Backend
 cd backend
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+python -m venv venv && source venv/bin/activate
 pip install -r requirements/dev.txt
 uvicorn app.main:app --reload --port 8008
-```
 
-**Frontend**:
-```bash
+# Frontend (separate terminal)
 cd frontend
-npm install
-npm run dev
-```
+npm install && npm run dev
 
-**Celery Worker** (Required for document processing):
-```bash
+# Celery worker (separate terminal)
 cd backend
 celery -A app.workers.celery_app worker -l info --pool=solo -Q ocr_queue
 ```
 
-## 📖 Documentation
+| Service | URL |
+|---------|-----|
+| Frontend | http://localhost:3003 |
+| Backend API | http://localhost:8008 |
+| API Docs (Swagger) | http://localhost:8008/docs |
 
-- [API Documentation](./docs/api/) - REST API specifications and examples
-- [Architecture Design](./docs/architecture/) - System architecture and design decisions
-- [Deployment Guide](./docs/deployment/) - Production deployment instructions
-- [Development Guide](./docs/development/) - Local development setup and workflows
-- **[RAG Documentation](./docs/rag/)** - AI-powered Q&A system user guide and tuning guide
+## Documentation
 
-## 🧪 Testing
+- [Architecture Design](./docs/architecture/) — System architecture and design decisions
+- [Deployment Guide](./docs/deployment/) — Production deployment with Docker
+- [RAG Documentation](./docs/rag/) — AI Q&A system guide and tuning
 
-**Run Backend Tests**:
-```bash
-cd backend
-pytest -v --cov=app --cov-report=html
-```
+## Author
 
-**Run Frontend Tests**:
-```bash
-cd frontend
-npm run test
-npm run test:coverage
-```
+**Kah Wei Loo** — [GitHub](https://github.com/kahwei-loo) · [LinkedIn](https://linkedin.com/in/kahwei-loo) · [Portfolio](https://kahweiloo.com)
 
-**Run E2E Tests**:
-```bash
-npm run test:e2e
-```
+## License
 
-## 📊 Project Status
-
-This is an **active portfolio project** serving as an experimental lab for:
-- Modern software architecture patterns (Repository Pattern, DDD, CQRS)
-- Production-grade DevOps practices (CI/CD, monitoring, logging)
-- Clean code principles and test-driven development
-- Performance optimization and scalability patterns
-
-**Current Phase**: MVP Complete (90%) - Refactoring for production-readiness
-
-**Roadmap**:
-- [x] Core document processing functionality
-- [x] User authentication and authorization
-- [x] Real-time WebSocket updates
-- [x] Export functionality (JSON/CSV/XLSX)
-- [ ] Enhanced monitoring and alerting
-- [ ] Performance optimization (target: <200ms API response)
-- [ ] Comprehensive test suite (target: 80%+ coverage)
-- [ ] Production deployment to subdomain
-
-## 🤝 Contributing
-
-Contributions are welcome! This project serves as a learning platform, so feel free to:
-- Report bugs and issues
-- Suggest new features or improvements
-- Submit pull requests
-- Share your ideas and feedback
-
-Please read [CONTRIBUTING.md](./CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
-
-## 👤 Author
-
-**Kah Wei Loo**
-- Portfolio: [https://kahweiloo.com](https://kahweiloo.com)
-- GitHub: [@kahwei-loo](https://github.com/kahwei-loo)
-- LinkedIn: [kahwei-loo](https://linkedin.com/in/kahwei-loo)
-
-## 🙏 Acknowledgments
-
-- Built with modern open-source technologies
-- Inspired by production SaaS platforms
-- Continuous learning and improvement
-
----
-
-**⭐ If you find this project useful, please consider giving it a star!**
+[MIT](./LICENSE)

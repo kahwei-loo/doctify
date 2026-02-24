@@ -53,6 +53,7 @@ const demoSlice = createSlice({
       try {
         localStorage.removeItem(DEMO_MODE_KEY);
         localStorage.removeItem(DEMO_ENTERED_AT_KEY);
+        localStorage.removeItem('doctify_onboarding_completed');
       } catch (error) {
         console.warn('[Demo] Failed to clear localStorage:', error);
       }
