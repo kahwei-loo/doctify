@@ -1,157 +1,157 @@
-# Doctify 项目计划归档
+# Doctify Project Plan Archive
 
-本文件保存已完成阶段的详细任务描述和验收标准，作为历史参考。
-简要变更记录请参阅 [PLAN_CHANGELOG.md](./PLAN_CHANGELOG.md)。
-
----
-
-## 目录
-
-- [项目概览](#项目概览)
-- [架构决策](#架构决策)
-- [Phase 0: 数据库切换](#phase-0-数据库切换)
-- [Phase 1: 准备和基础设施](#phase-1-准备和基础设施)
-- [Phase 2: 后端重构](#phase-2-后端重构)
-- [Phase 3: 前端重构](#phase-3-前端重构)
-- [Phase 4: 测试完善](#phase-4-测试完善)
-- [Phase 5: 部署和监控](#phase-5-部署和监控)
-- [安全审查发现](#安全审查发现)
-- [目录结构设计](#目录结构设计)
+This file preserves detailed task descriptions and acceptance criteria for completed phases, serving as a historical reference.
+For a brief changelog, see [PLAN_CHANGELOG.md](./PLAN_CHANGELOG.md).
 
 ---
 
-## 项目概览
+## Table of Contents
 
-**项目路径**: `C:\Users\KahWei\Projects\ai-works\kahwei-loo\doctify`
-**项目类型**: AI 文档智能解析 SaaS 平台
-**技术栈**: FastAPI + React TypeScript + PostgreSQL + Redis + Celery
-
-### 重构目标
-
-- ✅ 代码质量提升 - 清晰架构、命名规范、注释完善
-- ✅ 性能优化 - 数据库查询优化、前端加载速度提升
-- ✅ 架构现代化 - Repository Pattern、依赖注入、模块化设计
-- ✅ 测试覆盖率 - 后端 ≥ 80%、前端 ≥ 70%
-- ✅ 部署自动化 - CI/CD、监控、日志系统
-
-### 实施策略
-
-- **方式**: 一次性完成所有 5 个阶段
-- **迁移策略**: 边迁移边优化（重构迁移）
-- **预估时间**: 25-37 天（5-7 周）
+- [Project Overview](#project-overview)
+- [Architecture Decisions](#architecture-decisions)
+- [Phase 0: Database Migration](#phase-0-database-migration)
+- [Phase 1: Preparation and Infrastructure](#phase-1-preparation-and-infrastructure)
+- [Phase 2: Backend Refactoring](#phase-2-backend-refactoring)
+- [Phase 3: Frontend Refactoring](#phase-3-frontend-refactoring)
+- [Phase 4: Test Improvements](#phase-4-test-improvements)
+- [Phase 5: Deployment and Monitoring](#phase-5-deployment-and-monitoring)
+- [Security Audit Findings](#security-audit-findings)
+- [Directory Structure Design](#directory-structure-design)
 
 ---
 
-## 架构决策
+## Project Overview
 
-**确认日期**: 2026-01-15
+**Project Path**: `C:\Users\KahWei\Projects\ai-works\kahwei-loo\doctify`
+**Project Type**: AI Document Intelligence SaaS Platform
+**Tech Stack**: FastAPI + React TypeScript + PostgreSQL + Redis + Celery
 
-### 部署优先级
-1. 🥇 本地开发/部署（docker-compose up 一键启动）
-2. 🥈 云端部署（VPS 作为 portfolio 展示）
-3. 🥉 Kubernetes（可选，未来）
+### Refactoring Goals
 
-### 技术选型
-- **架构模式**: 模块化单体（Modular Monolith）
-- **数据库**: PostgreSQL + pgvector（替代原 MongoDB）
-- **AI 策略**: 外部 API 调用（OpenAI/Claude），不跑本地模型
+- ✅ Code quality improvement - Clear architecture, naming conventions, thorough comments
+- ✅ Performance optimization - Database query optimization, frontend load speed improvement
+- ✅ Architecture modernization - Repository Pattern, dependency injection, modular design
+- ✅ Test coverage - Backend ≥ 80%, Frontend ≥ 70%
+- ✅ Deployment automation - CI/CD, monitoring, logging system
+
+### Implementation Strategy
+
+- **Approach**: Complete all 5 phases at once
+- **Migration strategy**: Migrate and optimize simultaneously (refactoring migration)
+- **Estimated time**: 25-37 days (5-7 weeks)
+
+---
+
+## Architecture Decisions
+
+**Confirmed**: 2026-01-15
+
+### Deployment Priority
+1. 🥇 Local development/deployment (one-command `docker-compose up`)
+2. 🥈 Cloud deployment (VPS as portfolio showcase)
+3. 🥉 Kubernetes (optional, future)
+
+### Technology Choices
+- **Architecture pattern**: Modular Monolith
+- **Database**: PostgreSQL + pgvector (replacing MongoDB)
+- **AI strategy**: External API calls (OpenAI/Claude), no local models
 - **Portfolio VPS**: Racknerd KVM VPS (6GB RAM, 5 vCPU, 100GB SSD, Ubuntu 24.04)
 
-### 模块化架构
+### Modular Architecture
 ```
 backend/app/modules/
-├── auth/       # 认证授权
-├── documents/  # 文档管理
-├── ocr/        # OCR 解析
-├── rag/        # RAG 检索
-├── chat/       # AI 对话
-└── reports/    # 报告生成
+├── auth/       # Authentication & authorization
+├── documents/  # Document management
+├── ocr/        # OCR processing
+├── rag/        # RAG retrieval
+├── chat/       # AI conversations
+└── reports/    # Report generation
 ```
 
-### PostgreSQL 安全配置
+### PostgreSQL Security Configuration
 
-| 安全项 | 配置 | 文件 |
-|--------|------|------|
-| 连接字符串 | 环境变量 | `.env`, `config.py` |
-| SSL/TLS | 生产环境强制 | `config.py` |
-| 最小权限 | 应用用户只授予 CRUD | `docs/deployment.md` |
-| 连接池限制 | 防止资源耗尽 | `config.py` |
-
----
-
-## Phase 0: 数据库切换
-
-**状态**: ✅ 已完成 (2026-01-15)
-**目标**: 完全切换到 PostgreSQL
-
-### 完成情况
-- ✅ PostgreSQL + pgvector 数据库运行正常
-- ✅ SQLAlchemy 2.0 异步模型已创建
-- ✅ Alembic 迁移已设置
-- ✅ Repository 层已更新
-- ✅ Backend API 健康检查通过
-- ✅ Redis 运行正常
-- ✅ Celery Worker 运行中
-
-### 任务列表
-
-| 任务 | 文件 | 说明 |
-|------|------|------|
-| 0.1 更新依赖 | requirements/base.txt | 移除motor/pymongo, 添加asyncpg/sqlalchemy/alembic |
-| 0.2 更新配置 | app/core/config.py | PostgreSQL配置替代MongoDB |
-| 0.3 数据库模块 | app/db/database.py | SQLAlchemy 2.0异步引擎 |
-| 0.4 数据模型 | app/db/models/ | user.py, document.py, project.py, api_key.py |
-| 0.5 Alembic迁移 | alembic/ | 初始化迁移配置 |
-| 0.6 Repository层 | app/db/repositories/ | 更新为SQLAlchemy查询 |
-| 0.7 Services层 | app/services/auth/ | 移除MongoDB特定操作 |
-| 0.8 API路由 | app/main.py | 启用auth/documents/projects路由 |
-| 0.9 Docker配置 | docker-compose.yml | PostgreSQL服务+pgvector |
-| 0.10 环境变量 | .env.example | PostgreSQL变量模板 |
-| 0.11 本地验证 | - | docker-compose up + 健康检查 |
+| Security Item | Configuration | File |
+|---------------|---------------|------|
+| Connection string | Environment variables | `.env`, `config.py` |
+| SSL/TLS | Enforced in production | `config.py` |
+| Least privilege | App user granted CRUD only | `docs/deployment.md` |
+| Connection pool limit | Prevent resource exhaustion | `config.py` |
 
 ---
 
-## Phase 1: 准备和基础设施
+## Phase 0: Database Migration
 
-**状态**: ✅ 已完成 (2026-01-15)
-**预估时间**: 3-5 天
-**目标**: 建立新项目结构和迁移基础
+**Status**: ✅ Complete (2026-01-15)
+**Goal**: Fully migrate to PostgreSQL
 
-### 完成情况
-- ✅ 目录结构完整
-- ✅ Pydantic Settings v2 配置
-- ✅ 依赖管理重组 (requirements/base.txt, dev.txt, prod.txt)
-- ✅ Docker 多阶段构建优化
-- ✅ CI/CD 工作流配置
+### Completion Status
+- ✅ PostgreSQL + pgvector database running properly
+- ✅ SQLAlchemy 2.0 async models created
+- ✅ Alembic migrations configured
+- ✅ Repository layer updated
+- ✅ Backend API health check passing
+- ✅ Redis running properly
+- ✅ Celery Worker running
 
-### 核心任务
+### Task List
 
-1. **创建目录结构**
-   - 完整目录树创建
-   - .gitignore、.editorconfig 等配置文件
-   - Git 仓库初始化
+| Task | File | Description |
+|------|------|-------------|
+| 0.1 Update dependencies | requirements/base.txt | Remove motor/pymongo, add asyncpg/sqlalchemy/alembic |
+| 0.2 Update config | app/core/config.py | PostgreSQL config replacing MongoDB |
+| 0.3 Database module | app/db/database.py | SQLAlchemy 2.0 async engine |
+| 0.4 Data models | app/db/models/ | user.py, document.py, project.py, api_key.py |
+| 0.5 Alembic migration | alembic/ | Initialize migration config |
+| 0.6 Repository layer | app/db/repositories/ | Update to SQLAlchemy queries |
+| 0.7 Services layer | app/services/auth/ | Remove MongoDB-specific operations |
+| 0.8 API routes | app/main.py | Enable auth/documents/projects routes |
+| 0.9 Docker config | docker-compose.yml | PostgreSQL service + pgvector |
+| 0.10 Environment vars | .env.example | PostgreSQL variable template |
+| 0.11 Local verification | - | docker-compose up + health check |
 
-2. **配置管理优化**
-   - Pydantic Settings v2 重构 config.py
-   - 统一环境变量管理
-   - 分离开发/生产配置
+---
 
-3. **依赖管理重组**
-   - requirements 拆分 (base.txt, dev.txt, prod.txt)
-   - pyproject.toml 创建
-   - 版本锁定
+## Phase 1: Preparation and Infrastructure
 
-4. **Docker 配置优化**
-   - 多阶段构建
-   - Redis 端口配置修复
-   - 前端 Dockerfile 修正
+**Status**: ✅ Complete (2026-01-15)
+**Estimated time**: 3-5 days
+**Goal**: Establish new project structure and migration foundation
 
-5. **CI/CD 基础设置**
-   - GitHub Actions 工作流
-   - 测试流水线
-   - 代码质量检查
+### Completion Status
+- ✅ Directory structure complete
+- ✅ Pydantic Settings v2 configuration
+- ✅ Dependency management reorganization (requirements/base.txt, dev.txt, prod.txt)
+- ✅ Docker multi-stage build optimization
+- ✅ CI/CD workflow configuration
 
-### 关键文件创建
+### Core Tasks
+
+1. **Create directory structure**
+   - Full directory tree creation
+   - .gitignore, .editorconfig and other config files
+   - Git repository initialization
+
+2. **Configuration management optimization**
+   - Pydantic Settings v2 refactoring of config.py
+   - Unified environment variable management
+   - Separate development/production configurations
+
+3. **Dependency management reorganization**
+   - requirements split (base.txt, dev.txt, prod.txt)
+   - pyproject.toml creation
+   - Version pinning
+
+4. **Docker configuration optimization**
+   - Multi-stage builds
+   - Redis port configuration fix
+   - Frontend Dockerfile correction
+
+5. **CI/CD foundation setup**
+   - GitHub Actions workflows
+   - Testing pipeline
+   - Code quality checks
+
+### Key Files Created
 
 ```
 backend/requirements/base.txt
@@ -166,55 +166,55 @@ frontend/.prettierrc
 CONTRIBUTING.md
 ```
 
-### 验收标准
+### Acceptance Criteria
 
-- ✅ 目录结构完整创建
-- ✅ 配置文件正确加载
-- ✅ 依赖安装无错误
-- ✅ Docker Compose 本地启动成功
-- ✅ 基础 CI 流水线运行通过
+- ✅ Directory structure fully created
+- ✅ Configuration files loading correctly
+- ✅ Dependencies install without errors
+- ✅ Docker Compose local startup successful
+- ✅ Basic CI pipeline passing
 
 ---
 
-## Phase 2: 后端重构
+## Phase 2: Backend Refactoring
 
-**状态**: ✅ 基本完成 (~99%)
-**预估时间**: 7-10 天
-**目标**: 后端代码质量提升和架构优化
+**Status**: ✅ Mostly complete (~99%)
+**Estimated time**: 7-10 days
+**Goal**: Backend code quality improvement and architecture optimization
 
-### 完成情况
+### Completion Status
 
-| 子阶段 | 完成度 | 状态 |
-|--------|--------|------|
-| 2.1 核心层重构 | 100% | ✅ 完成 |
-| 2.2 服务层重构 | 95% | ✅ 基本完成 |
-| 2.3 API层优化 | 100% | ✅ 完成 |
-| 2.4 异步任务优化 | 100% | ✅ 完成 |
+| Sub-phase | Progress | Status |
+|-----------|----------|--------|
+| 2.1 Core layer refactoring | 100% | ✅ Complete |
+| 2.2 Service layer refactoring | 95% | ✅ Mostly complete |
+| 2.3 API layer optimization | 100% | ✅ Complete |
+| 2.4 Async task optimization | 100% | ✅ Complete |
 
-### 已完成关键组件
+### Completed Key Components
 
 - ✅ Repository Pattern (base.py, document.py, project.py, user.py)
 - ✅ Domain Layer (entities/, value_objects/)
-- ✅ Pydantic Settings v2 配置
-- ✅ API 依赖注入 (deps.py)
-- ✅ Celery 任务 (ocr.py, export.py)
-- ✅ OCR 编排器 (orchestrator.py)
-- ✅ 文档服务 (upload.py, processing.py, export.py)
-- ✅ 存储服务 (base.py, local.py, s3.py)
+- ✅ Pydantic Settings v2 configuration
+- ✅ API dependency injection (deps.py)
+- ✅ Celery tasks (ocr.py, export.py)
+- ✅ OCR orchestrator (orchestrator.py)
+- ✅ Document services (upload.py, processing.py, export.py)
+- ✅ Storage services (base.py, local.py, s3.py)
 
-### 子阶段 2.1: 核心层重构
+### Sub-phase 2.1: Core Layer Refactoring
 
-**Repository Pattern 文件**:
+**Repository Pattern files**:
 ```
 backend/app/db/repositories/
-├── base.py        # 基础 Repository (CRUD)
-├── document.py    # 文档仓库
-├── project.py     # 项目仓库
-├── user.py        # 用户仓库
-└── api_key.py     # API Key仓库
+├── base.py        # Base Repository (CRUD)
+├── document.py    # Document repository
+├── project.py     # Project repository
+├── user.py        # User repository
+└── api_key.py     # API Key repository
 ```
 
-**Domain Layer 文件**:
+**Domain Layer files**:
 ```
 backend/app/domain/
 ├── entities/
@@ -226,18 +226,18 @@ backend/app/domain/
     └── token_usage.py
 ```
 
-**配置重构文件**:
+**Configuration refactoring files**:
 ```
 backend/app/core/
 ├── config.py       # Pydantic Settings v2
-├── security.py     # 统一安全工具
-├── exceptions.py   # 自定义异常类
-└── dependencies.py # 全局依赖
+├── security.py     # Unified security utilities
+├── exceptions.py   # Custom exception classes
+└── dependencies.py # Global dependencies
 ```
 
-### 子阶段 2.2: 服务层重构
+### Sub-phase 2.2: Service Layer Refactoring
 
-**文档服务模块**:
+**Document service module**:
 ```
 backend/app/services/document/
 ├── upload.py
@@ -246,16 +246,16 @@ backend/app/services/document/
 └── views.py
 ```
 
-**OCR 服务模块**:
+**OCR service module**:
 ```
 backend/app/services/ocr/
-├── orchestrator.py  # L25 编排引擎
-├── provider.py      # AI 提供商抽象 (嵌入orchestrator)
-├── retry.py         # 重试策略 (嵌入orchestrator)
-└── validation.py    # 结果验证 (嵌入orchestrator)
+├── orchestrator.py  # L25 orchestration engine
+├── provider.py      # AI provider abstraction (embedded in orchestrator)
+├── retry.py         # Retry strategy (embedded in orchestrator)
+└── validation.py    # Result validation (embedded in orchestrator)
 ```
 
-**认证和存储服务**:
+**Authentication and storage services**:
 ```
 backend/app/services/auth/
 ├── jwt.py
@@ -267,73 +267,73 @@ backend/app/services/storage/
 └── s3.py
 ```
 
-### 子阶段 2.3: API 层优化
+### Sub-phase 2.3: API Layer Optimization
 
-**依赖注入**: `backend/app/api/v1/deps.py`
-- Repository 和 Service 工厂函数
-- 认证依赖 (get_current_user, verify_api_key)
-- 数据库连接依赖
+**Dependency injection**: `backend/app/api/v1/deps.py`
+- Repository and Service factory functions
+- Authentication dependencies (get_current_user, verify_api_key)
+- Database connection dependencies
 
-**端点重构**:
+**Endpoint refactoring**:
 ```
 backend/app/api/v1/endpoints/
 ├── documents.py
 ├── projects.py
-├── auth.py      # 整合 users
-├── websocket.py # 合并所有 WS 端点
+├── auth.py      # Consolidated users
+├── websocket.py # Merged all WS endpoints
 └── api_keys.py
 ```
 
-### 子阶段 2.4: 异步任务优化
+### Sub-phase 2.4: Async Task Optimization
 
-**Celery 任务**:
+**Celery tasks**:
 ```
 backend/app/tasks/
-├── celery_app.py     # Celery 配置
+├── celery_app.py     # Celery configuration
 ├── document/
-│   ├── ocr.py        # OCR 任务
-│   └── export.py     # 导出任务
-└── cleanup/          # 清理任务
+│   ├── ocr.py        # OCR tasks
+│   └── export.py     # Export tasks
+└── cleanup/          # Cleanup tasks
 ```
 
-**队列配置**: ocr_queue, export_queue, cleanup_queue
+**Queue configuration**: ocr_queue, export_queue, cleanup_queue
 
-### 验收标准
+### Acceptance Criteria
 
-- ✅ 单元测试覆盖率 ≥ 80%
-- ✅ 集成测试通过率 100%
-- ✅ API 文档完整自动生成
-- ✅ 代码质量检查通过 (Flake8, MyPy, Black)
+- ✅ Unit test coverage ≥ 80%
+- ✅ Integration test pass rate 100%
+- ✅ API documentation auto-generated completely
+- ✅ Code quality checks passing (Flake8, MyPy, Black)
 
 ---
 
-## Phase 3: 前端重构
+## Phase 3: Frontend Refactoring
 
-**状态**: ✅ 基本完成 (~94%)
-**预估时间**: 7-10 天
-**目标**: 前端代码组织和性能优化
+**Status**: ✅ Mostly complete (~94%)
+**Estimated time**: 7-10 days
+**Goal**: Frontend code organization and performance optimization
 
-### 完成情况
+### Completion Status
 
-| 子阶段 | 完成度 | 状态 |
-|--------|--------|------|
-| 3.1 功能模块化 | 75% | ⚠️ projects/dashboard为空 |
-| 3.2 状态管理优化 | 100% | ✅ 完成 |
-| 3.3 服务层和API | 100% | ✅ 完成 |
-| 3.4 性能优化 | 100% | ✅ 完成 |
+| Sub-phase | Progress | Status |
+|-----------|----------|--------|
+| 3.1 Feature modularization | 75% | ⚠️ projects/dashboard empty |
+| 3.2 State management optimization | 100% | ✅ Complete |
+| 3.3 Service layer and API | 100% | ✅ Complete |
+| 3.4 Performance optimization | 100% | ✅ Complete |
 
-### 已完成关键组件
+### Completed Key Components
 
-- ✅ Features 目录结构 (auth/, documents/)
+- ✅ Features directory structure (auth/, documents/)
 - ✅ Shared components (ui/, common/)
 - ✅ Redux Store + RTK Query + Selectors
 - ✅ API Client + Interceptors
 - ✅ WebSocket Client + Manager
-- ✅ Vite 代码分割、压缩、懒加载
+- ✅ Vite code splitting, compression, lazy loading
 
-### 子阶段 3.1: 功能模块化
+### Sub-phase 3.1: Feature Modularization
 
-**Features 目录结构**:
+**Features directory structure**:
 ```
 frontend/src/features/
 ├── auth/
@@ -350,11 +350,11 @@ frontend/src/features/
 │   ├── hooks/
 │   ├── services/
 │   └── store/
-├── projects/     # 待实现
-└── dashboard/    # 待实现
+├── projects/     # To be implemented
+└── dashboard/    # To be implemented
 ```
 
-**Shared 组件**:
+**Shared components**:
 ```
 frontend/src/shared/
 ├── components/
@@ -367,7 +367,7 @@ frontend/src/shared/
 └── constants/
 ```
 
-### 子阶段 3.2: 状态管理优化
+### Sub-phase 3.2: State Management Optimization
 
 **Redux Store**:
 ```
@@ -377,53 +377,53 @@ frontend/src/store/
 └── api/            # RTK Query
 ```
 
-### 子阶段 3.3: 服务层和 API
+### Sub-phase 3.3: Service Layer and API
 
-**API 客户端**:
+**API Client**:
 ```
 frontend/src/services/
 ├── api/
-│   ├── client.ts       # Axios 实例
-│   ├── interceptors.ts # 拦截器
-│   └── endpoints/      # API 端点定义
+│   ├── client.ts       # Axios instance
+│   ├── interceptors.ts # Interceptors
+│   └── endpoints/      # API endpoint definitions
 └── websocket/
     ├── client.ts
     └── handlers.ts
 ```
 
-### 子阶段 3.4: 性能优化
+### Sub-phase 3.4: Performance Optimization
 
-**Vite 优化** (`vite.config.ts`):
-- 代码分割和懒加载
-- React.memo 优化
-- 手动代码分块 (vendor chunks)
-- Gzip/Brotli 压缩
+**Vite optimization** (`vite.config.ts`):
+- Code splitting and lazy loading
+- React.memo optimization
+- Manual code chunking (vendor chunks)
+- Gzip/Brotli compression
 
-### 验收标准
+### Acceptance Criteria
 
-- ✅ 组件单元测试覆盖率 ≥ 70%
-- ✅ E2E 测试通过率 100%
-- ✅ Lighthouse 性能评分 ≥ 90
-- ✅ ESLint/Prettier 检查通过
+- ✅ Component unit test coverage ≥ 70%
+- ✅ E2E test pass rate 100%
+- ✅ Lighthouse performance score ≥ 90
+- ✅ ESLint/Prettier checks passing
 
 ---
 
-## Phase 4: 测试完善
+## Phase 4: Test Improvements
 
-**状态**: ✅ 基本完成 (~90%)
-**预估时间**: 5-7 天
-**目标**: 建立完整的测试体系
+**Status**: ✅ Mostly complete (~90%)
+**Estimated time**: 5-7 days
+**Goal**: Establish a comprehensive testing framework
 
-### 完成情况
+### Completion Status
 
 - ✅ Backend: conftest.py + unit/ + integration/ + e2e/
 - ✅ Frontend: setup.ts + unit/ + e2e/
-- ✅ pytest 配置 + 覆盖率 ≥80%
-- ✅ vitest + playwright 配置
-- ✅ CI/CD 自动测试 + 覆盖率报告
-- ✅ fixtures/ 补充完成 (mocks.py, files.py, api_keys.py)
+- ✅ pytest configuration + coverage ≥80%
+- ✅ vitest + playwright configuration
+- ✅ CI/CD automated testing + coverage reporting
+- ✅ fixtures/ completed (mocks.py, files.py, api_keys.py)
 
-### 后端测试框架
+### Backend Test Framework
 
 ```
 requirements/dev.txt:
@@ -435,15 +435,15 @@ httpx==0.27.0
 faker==22.0.0
 ```
 
-### 测试文件结构
+### Test File Structure
 
 ```
 backend/tests/
 ├── conftest.py
 ├── fixtures/
-│   ├── mocks.py      # Mock对象 (521行)
-│   ├── files.py      # 测试文件生成 (303行)
-│   └── api_keys.py   # API密钥数据 (203行)
+│   ├── mocks.py      # Mock objects (521 lines)
+│   ├── files.py      # Test file generation (303 lines)
+│   └── api_keys.py   # API key test data (203 lines)
 ├── unit/
 │   ├── test_repositories/
 │   ├── test_services/
@@ -453,7 +453,7 @@ backend/tests/
 └── e2e/
 ```
 
-### 前端测试框架
+### Frontend Test Framework
 
 ```json
 {
@@ -464,171 +464,171 @@ backend/tests/
 }
 ```
 
-### 验收标准
+### Acceptance Criteria
 
-- ✅ 后端测试覆盖率 ≥ 80%
-- ✅ 前端测试覆盖率 ≥ 70%
-- ✅ 所有测试通过率 100%
-- ✅ CI 自动化测试运行正常
+- ✅ Backend test coverage ≥ 80%
+- ✅ Frontend test coverage ≥ 70%
+- ✅ All test pass rate 100%
+- ✅ CI automated testing running properly
 
 ---
 
-## Phase 5: 部署和监控
+## Phase 5: Deployment and Monitoring
 
-**状态**: ✅ 基本完成 (~85%)
-**预估时间**: 3-5 天
-**目标**: 生产就绪的部署和监控
+**Status**: ✅ Mostly complete (~85%)
+**Estimated time**: 3-5 days
+**Goal**: Production-ready deployment and monitoring
 
-### 完成情况
+### Completion Status
 
-- ✅ Docker: 多阶段构建 (backend + frontend)
-- ✅ 非 root 用户 + 安全加固
+- ✅ Docker: Multi-stage builds (backend + frontend)
+- ✅ Non-root user + security hardening
 - ✅ CI/CD: backend-ci.yml, frontend-ci.yml, deploy.yml
-- ✅ 零停机部署 + 回滚能力
-- ✅ 安全扫描: Bandit, Safety, Trivy, npm audit
-- ✅ Prometheus 监控 (7 exporters + 21 alert rules)
+- ✅ Zero-downtime deployment + rollback capability
+- ✅ Security scanning: Bandit, Safety, Trivy, npm audit
+- ✅ Prometheus monitoring (7 exporters + 21 alert rules)
 - ✅ Grafana dashboards (application, celery, system)
 
-### Docker 优化
+### Docker Optimization
 
-**多阶段构建**:
+**Multi-stage builds**:
 ```dockerfile
 FROM python:3.11-slim as builder
-# 构建依赖
+# Build dependencies
 
 FROM python:3.11-slim
-# 最小运行时
+# Minimal runtime
 ```
 
-**镜像大小目标**:
-- 后端: < 500MB
-- 前端: < 100MB
+**Image size targets**:
+- Backend: < 500MB
+- Frontend: < 100MB
 
-### CI/CD 配置
+### CI/CD Configuration
 
 ```
 .github/workflows/
-├── backend-ci.yml    # 后端测试+构建
-├── frontend-ci.yml   # 前端测试+构建
-└── deploy.yml        # 部署流水线
+├── backend-ci.yml    # Backend testing + build
+├── frontend-ci.yml   # Frontend testing + build
+└── deploy.yml        # Deployment pipeline
 ```
 
-### 监控配置
+### Monitoring Configuration
 
 **Prometheus** (`infrastructure/docker/prometheus/`):
 - prometheus.yml
-- alert_rules.yml (21条规则)
+- alert_rules.yml (21 rules)
 
 **Grafana Dashboards** (`infrastructure/docker/grafana/dashboards/`):
-- doctify-application.json - 应用性能
-- doctify-celery.json - 任务队列
-- doctify-system.json - 系统资源
+- doctify-application.json - Application performance
+- doctify-celery.json - Task queue
+- doctify-system.json - System resources
 
-### 未实现 (低优先级)
+### Not Implemented (Low Priority)
 
 - ❌ Kubernetes manifests
 - ❌ Terraform IaC
-- ❌ ELK/Loki 日志聚合
-- ❌ AlertManager (被注释)
+- ❌ ELK/Loki log aggregation
+- ❌ AlertManager (commented out)
 
-### 验收标准
+### Acceptance Criteria
 
-- ✅ 部署自动化完成
-- ✅ 监控系统运行正常
-- ✅ 安全检查通过
-- ✅ 生产环境就绪
-
----
-
-## 安全审查发现
-
-**审查日期**: 2026-01-15
-
-### ✅ 已实现的安全措施
-
-- 速率限制 (Redis滑动窗口)
-- 多层输入验证 (Pydantic + DB层)
-- JWT认证 + 账户锁定 + API Key
-- OWASP安全头 (CSP, HSTS, X-Frame-Options)
-- 参数化查询防SQL注入
-- 审计日志系统
-
-### ❌ 关键缺失
-
-- 无数据库自动备份
-- 无文件上传备份策略
-- 无灾难恢复计划
-- 无RTO/RPO定义
-
-### ⚠️ 建议改进
-
-- 集中化日志系统 (ELK/CloudWatch)
-- 密钥管理服务 (Vault/AWS Secrets Manager)
-- MFA双因素认证
-- 显式RBAC权限系统
-
-### 安全加固计划优先级
-
-| 问题 | 优先级 | 预估时间 |
-|------|--------|----------|
-| Email验证修复 | P0 | 2-3h |
-| 输入验证加固 | P0 | 4-6h |
-| 账户锁定实现 | P0 | 3-4h |
-| JWT令牌撤销 | P0 | 4-6h |
-| 速率限制实现 | P0 | 6-8h |
-| 文件上传安全 | P0 | 4-5h |
-| MongoDB注入防护 | P0 | 3-4h |
-| 密码策略执行 | P0 | 2-3h |
-| 审计日志系统 | P0 | 3-4h |
+- ✅ Deployment automation complete
+- ✅ Monitoring system running properly
+- ✅ Security checks passing
+- ✅ Production environment ready
 
 ---
 
-## 目录结构设计
+## Security Audit Findings
 
-### 后端核心结构
+**Audit date**: 2026-01-15
+
+### ✅ Implemented Security Measures
+
+- Rate limiting (Redis sliding window)
+- Multi-layer input validation (Pydantic + DB layer)
+- JWT authentication + account lockout + API Key
+- OWASP security headers (CSP, HSTS, X-Frame-Options)
+- Parameterized queries to prevent SQL injection
+- Audit logging system
+
+### ❌ Critical Gaps
+
+- No automated database backups
+- No file upload backup strategy
+- No disaster recovery plan
+- No RTO/RPO definitions
+
+### ⚠️ Recommended Improvements
+
+- Centralized logging system (ELK/CloudWatch)
+- Secrets management service (Vault/AWS Secrets Manager)
+- MFA two-factor authentication
+- Explicit RBAC permission system
+
+### Security Hardening Plan Priority
+
+| Issue | Priority | Estimated Time |
+|-------|----------|----------------|
+| Email verification fix | P0 | 2-3h |
+| Input validation hardening | P0 | 4-6h |
+| Account lockout implementation | P0 | 3-4h |
+| JWT token revocation | P0 | 4-6h |
+| Rate limiting implementation | P0 | 6-8h |
+| File upload security | P0 | 4-5h |
+| MongoDB injection prevention | P0 | 3-4h |
+| Password policy enforcement | P0 | 2-3h |
+| Audit logging system | P0 | 3-4h |
+
+---
+
+## Directory Structure Design
+
+### Backend Core Structure
 
 ```
 backend/
 ├── app/
-│   ├── api/v1/           # API 路由层
-│   │   ├── deps.py       # 依赖注入配置
-│   │   └── endpoints/    # 端点模块
-│   ├── core/             # 核心配置
-│   ├── db/               # 数据库层
+│   ├── api/v1/           # API routing layer
+│   │   ├── deps.py       # Dependency injection config
+│   │   └── endpoints/    # Endpoint modules
+│   ├── core/             # Core configuration
+│   ├── db/               # Database layer
 │   │   ├── database.py
 │   │   ├── redis.py
 │   │   └── repositories/
-│   ├── domain/           # 领域层
+│   ├── domain/           # Domain layer
 │   │   ├── entities/
 │   │   └── value_objects/
-│   ├── models/           # Pydantic 模型
-│   ├── services/         # 业务逻辑层
-│   ├── tasks/            # Celery 异步任务
-│   ├── middleware/       # 中间件
-│   ├── utils/            # 工具函数
-│   └── main.py           # 应用入口
+│   ├── models/           # Pydantic models
+│   ├── services/         # Business logic layer
+│   ├── tasks/            # Celery async tasks
+│   ├── middleware/       # Middleware
+│   ├── utils/            # Utility functions
+│   └── main.py           # Application entry point
 ├── tests/
 ├── requirements/
 └── config/
 ```
 
-### 前端核心结构
+### Frontend Core Structure
 
 ```
 frontend/
 ├── src/
-│   ├── app/              # 应用配置
-│   ├── features/         # 功能模块
-│   ├── shared/           # 共享资源
-│   ├── pages/            # 页面组件
+│   ├── app/              # Application configuration
+│   ├── features/         # Feature modules
+│   ├── shared/           # Shared resources
+│   ├── pages/            # Page components
 │   ├── store/            # Redux Store
-│   ├── services/         # API 服务层
-│   └── main.tsx          # 应用入口
+│   ├── services/         # API service layer
+│   └── main.tsx          # Application entry point
 ├── tests/
 └── public/
 ```
 
-### 项目根目录结构
+### Project Root Structure
 
 ```
 kahwei-loo/doctify/
@@ -637,7 +637,7 @@ kahwei-loo/doctify/
 ├── infrastructure/
 │   └── docker/
 ├── docs/
-│   ├── planning/         # 计划归档
+│   ├── planning/         # Plan archive
 │   ├── architecture/
 │   ├── api/
 │   └── deployment/
@@ -649,5 +649,5 @@ kahwei-loo/doctify/
 
 ---
 
-*归档日期: 2026-01-16*
-*本文件仅作历史参考，当前活跃任务请查看主计划文件*
+*Archived: 2026-01-16*
+*This file is for historical reference only. For current active tasks, see the main plan file.*

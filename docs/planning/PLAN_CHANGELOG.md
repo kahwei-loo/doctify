@@ -1,108 +1,169 @@
-# Doctify 项目计划变更记录
+# Doctify Project Plan Changelog
 
-本文件记录项目重构迁移的关键里程碑和完成时间。详细任务描述请参阅 [PLAN_ARCHIVE.md](./PLAN_ARCHIVE.md)。
-
----
-
-## [2026-01-16] - Phase 4 & 5 完善
-
-### Phase 4: 测试完善 (↑90%)
-- ✅ 创建 `frontend/vitest.config.ts` 配置
-- ✅ 补充 `backend/tests/fixtures/` 共享测试数据
-  - mocks.py (521行) - 外部服务Mock对象
-  - files.py (303行) - 测试文件生成工具
-  - api_keys.py (203行) - API密钥测试数据
-
-### Phase 5: 部署和监控 (↑85%)
-- ✅ 创建 Grafana Dashboards JSON文件
-  - doctify-application.json - 应用性能监控
-  - doctify-celery.json - Celery任务监控
-  - doctify-system.json - 系统资源监控
+This file records key milestones and completion dates for the project restructuring and migration. For detailed task descriptions, see [PLAN_ARCHIVE.md](./PLAN_ARCHIVE.md).
 
 ---
 
-## [2026-01-16] - PM验证与状态更新
+## [2026-02-24] - AI Model Management Settings (Phase 1)
 
-### 全面验证结果
-- Phase 2: 82% → 99% (Repository Pattern完整)
-- Phase 3: 87.5% → 94% (Features/Redux/Vite完成)
-- Phase 4: 95% → 90% (发现fixtures缺失)
-- Phase 5: 98% → 85% (Grafana dashboards缺失)
+### Backend: Dynamic Model Catalog (DB-backed CRUD)
+- ✅ `model_catalog` DB table + Alembic migration with 12 seed entries
+- ✅ `ModelCatalogRepository` — CRUD with `get_all_active()`, `get_by_model_id()`
+- ✅ Pydantic schemas with `field_validator`: purposes enum, model_id regex, provider normalization
+- ✅ Admin API: GET/POST/PATCH/DELETE `/admin/ai-models/catalog`
+- ✅ Service layer: uniqueness check, gateway cache refresh on save
 
-### 优先级任务识别
-- 🔴 高优先级任务全部完成
-- 🟡 中优先级: projects/dashboard功能实现 (可选)
-- 🟢 低优先级: K8s/Terraform/ELK (未来)
+### Frontend: Settings UI Redesign + Model Management
+- ✅ Settings page redesigned: sidebar nav (desktop) + horizontal scroll (mobile)
+- ✅ Admin-only "AI Models" tab with `adminOnly` filtering
+- ✅ Purpose assignment dropdowns populated from DB catalog
+- ✅ Model Catalog section: card list with provider badge + purpose badges
+- ✅ `AddModelDialog` — form with ProviderSelect combobox + purpose checkboxes
+- ✅ `EditModelDialog` — pre-filled form with partial update
+- ✅ `DeleteModelDialog` — styled AlertDialog with warning (replaces native confirm)
+- ✅ `ProviderSelect` — custom combobox (search existing + "Add custom" option)
+- ✅ RTK Query endpoints (6 hooks) with `AIModelSettings` tag invalidation
+- ✅ `NotificationsSection` → honest "Coming Soon" placeholder
+
+### Architecture
+- ✅ `is_superuser` field added to login response for frontend role detection
+- ✅ Gateway singleton DB cache + `update_model_cache()` + `reset_gateway()`
 
 ---
 
-## [2026-01-15] - Phase 0-3 完成
+## [2026-02-13] - LiteLLM AI Gateway (PR #6 Merged)
 
-### Phase 0: 数据库迁移 (100%)
-- ✅ PostgreSQL + pgvector 替代 MongoDB
-- ✅ SQLAlchemy 2.0 异步模型
-- ✅ Alembic 迁移配置
-- ✅ Repository层更新
+### Centralized AI Gateway
+- ✅ `AIGateway` singleton (`gateway.py` ~190 lines) wrapping LiteLLM library mode
+- ✅ `ModelPurpose` enum: CHAT, CHAT_FAST, EMBEDDING, VISION, CLASSIFIER, RERANKER
+- ✅ Migrated 9 services: embedding, generation, groundedness, classifiers, evaluation, reranker, public_chat, insights
+- ✅ Migrated L25 OCR orchestrator to LiteLLM
+- ✅ Removed langchain packages, fixed dependency pins (pydantic≥2.5.0, openai≥1.68.2)
 
-### Phase 1: 基础设施 (100%)
-- ✅ 目录结构创建 (backend/frontend)
-- ✅ Pydantic Settings v2 配置
-- ✅ 依赖管理重组 (requirements/, pyproject.toml)
-- ✅ Docker多阶段构建
-- ✅ CI/CD工作流 (backend-ci, frontend-ci, deploy)
+---
 
-### Phase 2: 后端重构 (99%)
+## [2026-02-12] - AI Assistants P0/P1 (PR #5 Merged)
+
+### P0: Core Assistant Configuration
+- ✅ System prompt textarea + KB dropdown + dialog useEffect fix
+
+### P1: Assistant Management Features
+- ✅ `WidgetEmbedDialog`, `TestAssistantDialog`, `AssistantAnalyticsDialog`
+- ✅ PublicChatDemo assistant selector
+- ✅ Bug fixes: RAG fallback to direct LLM, loading/error states, source badges, polling, widget dedup
+
+---
+
+## [2026-02-10] - Unified Knowledge & Insights v2.0 (PR #3 Merged)
+
+### KB NotebookLM Redesign
+- ✅ Side-by-side Sources + Chat layout (42 files changed)
+- ✅ Source Cards → Expanded View → Chat Panel → Polish
+
+---
+
+## [2026-01-16] - Phase 4 & 5 Improvements
+
+### Phase 4: Test Improvements (↑90%)
+- ✅ Created `frontend/vitest.config.ts` configuration
+- ✅ Added `backend/tests/fixtures/` shared test data
+  - mocks.py (521 lines) - External service mock objects
+  - files.py (303 lines) - Test file generation utilities
+  - api_keys.py (203 lines) - API key test data
+
+### Phase 5: Deployment & Monitoring (↑85%)
+- ✅ Created Grafana Dashboard JSON files
+  - doctify-application.json - Application performance monitoring
+  - doctify-celery.json - Celery task monitoring
+  - doctify-system.json - System resource monitoring
+
+---
+
+## [2026-01-16] - PM Verification & Status Update
+
+### Comprehensive Verification Results
+- Phase 2: 82% → 99% (Repository Pattern complete)
+- Phase 3: 87.5% → 94% (Features/Redux/Vite complete)
+- Phase 4: 95% → 90% (discovered missing fixtures)
+- Phase 5: 98% → 85% (missing Grafana dashboards)
+
+### Priority Task Identification
+- 🔴 All high-priority tasks completed
+- 🟡 Medium priority: projects/dashboard feature implementation (optional)
+- 🟢 Low priority: K8s/Terraform/ELK (future)
+
+---
+
+## [2026-01-15] - Phase 0-3 Complete
+
+### Phase 0: Database Migration (100%)
+- ✅ PostgreSQL + pgvector replacing MongoDB
+- ✅ SQLAlchemy 2.0 async models
+- ✅ Alembic migration configuration
+- ✅ Repository layer updates
+
+### Phase 1: Infrastructure (100%)
+- ✅ Directory structure created (backend/frontend)
+- ✅ Pydantic Settings v2 configuration
+- ✅ Dependency management reorganization (requirements/, pyproject.toml)
+- ✅ Docker multi-stage builds
+- ✅ CI/CD workflows (backend-ci, frontend-ci, deploy)
+
+### Phase 2: Backend Refactoring (99%)
 - ✅ Repository Pattern (base, document, project, user)
 - ✅ Domain Layer (entities, value_objects)
 - ✅ Services (document, ocr, auth, storage)
-- ✅ API依赖注入 (deps.py)
-- ✅ Celery任务 (ocr.py, export.py)
+- ✅ API dependency injection (deps.py)
+- ✅ Celery tasks (ocr.py, export.py)
 
-### Phase 3: 前端重构 (94%)
-- ✅ Features目录结构 (auth, documents)
+### Phase 3: Frontend Refactoring (94%)
+- ✅ Features directory structure (auth, documents)
 - ✅ Redux Store + RTK Query
 - ✅ API Client + Interceptors
 - ✅ WebSocket Client
-- ✅ Vite代码分割和压缩
+- ✅ Vite code splitting and compression
 
 ---
 
-## [2026-01-15] - 安全审查
+## [2026-01-15] - Security Audit
 
-### 发现关键问题
-- 🔴 速率限制未实现 → 已设计实施方案
-- 🔴 JWT令牌撤销缺失 → 已设计Redis黑名单方案
-- 🔴 Email验证断裂 → 已识别方法签名问题
-- 🔴 输入验证缺失 → 已设计Pydantic schema
-- 🔴 账户锁定未实现 → 已设计锁定服务
+### Critical Issues Identified
+- 🔴 Rate limiting not implemented → Implementation plan designed
+- 🔴 JWT token revocation missing → Redis blacklist approach designed
+- 🔴 Email verification broken → Method signature issue identified
+- 🔴 Input validation missing → Pydantic schema designed
+- 🔴 Account lockout not implemented → Lockout service designed
 
-### 安全加固计划
-- 预估时间: 3-4天
-- 优先级: P0 (立即执行)
-
----
-
-## [2026-01-15] - 架构决策确认
-
-### 部署优先级
-1. 🥇 本地开发 (docker-compose)
-2. 🥈 云端部署 (VPS Portfolio)
-3. 🥉 Kubernetes (可选/未来)
-
-### 技术选型
-- 架构模式: 模块化单体 (Modular Monolith)
-- 数据库: PostgreSQL + pgvector
-- AI策略: 外部API (OpenAI/Claude)
+### Security Hardening Plan
+- Estimated effort: 3-4 days
+- Priority: P0 (immediate)
 
 ---
 
-## 项目总体状态
+## [2026-01-15] - Architecture Decisions Confirmed
 
-| 日期 | 总完成度 | 状态 |
-|------|----------|------|
-| 2026-01-16 | ~93% | 🚀 基本可部署 |
-| 2026-01-15 | ~85% | 🔧 重构进行中 |
+### Deployment Priority
+1. 🥇 Local development (docker-compose)
+2. 🥈 Cloud deployment (VPS Portfolio)
+3. 🥉 Kubernetes (optional/future)
+
+### Technology Choices
+- Architecture pattern: Modular Monolith
+- Database: PostgreSQL + pgvector
+- AI strategy: External APIs (OpenAI/Claude)
 
 ---
 
-*最后更新: 2026-01-16*
+## Overall Project Status
+
+| Date | Completion | Status |
+|------|-----------|--------|
+| 2026-02-24 | ~97% | 🚀 Feature-complete, merge-ready |
+| 2026-02-13 | ~96% | ✅ LiteLLM Gateway merged |
+| 2026-02-12 | ~95% | ✅ Assistants + KB redesign merged |
+| 2026-01-16 | ~93% | 🚀 Basically deployable |
+| 2026-01-15 | ~85% | 🔧 Refactoring in progress |
+
+---
+
+*Last updated: 2026-02-24*

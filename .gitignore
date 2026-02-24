@@ -138,3 +138,11 @@ backups/
 temp_*
 tmpclaude-*-cwd
 nul
+
+# Playwright MCP artifacts (screenshots, console logs)
+.playwright-mcp/page-*.png
+.playwright-mcp/console-*.log
+
+# Root-level screenshots (temporary verification artifacts)
+settings-*.png
+ai-models-*.png

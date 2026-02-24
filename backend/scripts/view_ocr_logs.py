@@ -1,24 +1,24 @@
 #!/usr/bin/env python3
 """
-OCR 日志查看器 - 快速查看和分析 JSON 格式的 OCR 日志
+OCR Log Viewer - Quickly view and analyze JSON-formatted OCR logs
 
-用法:
-    # 查看最近 10 条日志
+Usage:
+    # View the 10 most recent logs
     python scripts/view_ocr_logs.py
 
-    # 查看最近 20 条日志
+    # View the 20 most recent logs
     python scripts/view_ocr_logs.py --limit 20
 
-    # 查看特定文档的日志
+    # View logs for a specific document
     python scripts/view_ocr_logs.py --document-id <uuid>
 
-    # 查看特定日志文件
+    # View a specific log file
     python scripts/view_ocr_logs.py --view <filepath>
 
-    # 生成统计分析报告
+    # Generate an analysis report
     python scripts/view_ocr_logs.py --analyze
 
-    # 在 Docker 容器中运行
+    # Run inside a Docker container
     docker exec doctify-celery-dev python scripts/view_ocr_logs.py
 """
 
@@ -32,7 +32,7 @@ LOGS_DIR = Path("/app/logs/ocr_attempts")
 
 
 def format_timestamp(ts_str: str) -> str:
-    """格式化时间戳"""
+    """Format a timestamp string for display."""
     try:
         dt = datetime.fromisoformat(ts_str.replace('Z', '+00:00'))
         return dt.strftime("%Y-%m-%d %H:%M:%S")
@@ -41,7 +41,7 @@ def format_timestamp(ts_str: str) -> str:
 
 
 def format_tokens(tokens_dict: dict) -> str:
-    """格式化 token 信息"""
+    """Format token information for display."""
     if not tokens_dict:
         return "N/A"
     total = tokens_dict.get("total_tokens", 0)
@@ -51,7 +51,7 @@ def format_tokens(tokens_dict: dict) -> str:
 
 
 def list_recent_logs(limit: int = 10):
-    """列出最近的日志文件"""
+    """List the most recent log files."""
     if not LOGS_DIR.exists():
         print(f"❌ Log directory not found: {LOGS_DIR}")
         return
@@ -91,7 +91,7 @@ def list_recent_logs(limit: int = 10):
 
 
 def view_log(log_file: Path):
-    """显示日志文件详细内容"""
+    """Display detailed contents of a log file."""
     if not log_file.exists():
         print(f"❌ Log file not found: {log_file}")
         return
@@ -104,7 +104,7 @@ def view_log(log_file: Path):
         print(f"📄 {log_file.name}")
         print("=" * 100)
 
-        # 基本信息
+        # Basic information
         print("\n📋 Basic Information:")
         print(f"  Timestamp:    {format_timestamp(data.get('timestamp', ''))}")
         print(f"  Document ID:  {data.get('document_id', 'N/A')}")
@@ -112,7 +112,7 @@ def view_log(log_file: Path):
         print(f"  Filename:     {data.get('filename', 'N/A')}")
         print(f"  Attempt:      #{data.get('attempt_number', 1)}")
 
-        # AI 模型信息
+        # AI model information
         print("\n🤖 AI Model Information:")
         print(f"  Model:        {data.get('model', 'N/A')}")
         print(f"  Tokens:       {format_tokens(data.get('tokens'))}")
@@ -120,7 +120,7 @@ def view_log(log_file: Path):
         if proc_time:
             print(f"  Proc Time:    {proc_time:.2f}s")
 
-        # 质量指标
+        # Quality metrics
         print("\n📊 Quality Metrics:")
         conf = data.get('confidence')
         if conf is not None:
@@ -135,7 +135,7 @@ def view_log(log_file: Path):
             for tool in tools:
                 print(f"  - {tool}")
 
-        # Prompt (前 500 字符)
+        # Prompt (first 500 characters)
         prompt = data.get('prompt')
         if prompt:
             print("\n📝 Prompt (first 500 chars):")
@@ -162,7 +162,7 @@ def view_log(log_file: Path):
 
 
 def find_document_logs(document_id: str):
-    """查找特定文档的所有日志"""
+    """Find all logs for a specific document."""
     if not LOGS_DIR.exists():
         print(f"❌ Log directory not found: {LOGS_DIR}")
         return
@@ -199,12 +199,12 @@ def find_document_logs(document_id: str):
 
 
 def analyze_logs(document_id: str = None, limit: int = 100):
-    """分析日志并生成统计报告"""
+    """Analyze logs and generate a statistical report."""
     if not LOGS_DIR.exists():
         print(f"❌ Log directory not found: {LOGS_DIR}")
         return
 
-    # 查找日志文件
+    # Find log files
     if document_id:
         pattern = f"ocr_{document_id}_*.json"
     else:
@@ -220,7 +220,7 @@ def analyze_logs(document_id: str = None, limit: int = 100):
         print("📭 No log files found for analysis")
         return
 
-    # 统计数据
+    # Statistics
     total_requests = 0
     total_tokens = 0
     total_time = 0.0
@@ -234,16 +234,16 @@ def analyze_logs(document_id: str = None, limit: int = 100):
 
             total_requests += 1
 
-            # Token 统计
+            # Token statistics
             tokens = data.get("tokens", {})
             total_tokens += tokens.get("total_tokens", 0)
 
-            # 耗时统计
+            # Processing time statistics
             proc_time = data.get("processing_time_seconds", 0)
             if proc_time:
                 total_time += proc_time
 
-            # 模型统计
+            # Model statistics
             model = data.get("model", "unknown")
             if model not in model_stats:
                 model_stats[model] = {"count": 0, "total_tokens": 0, "total_time": 0}
@@ -251,7 +251,7 @@ def analyze_logs(document_id: str = None, limit: int = 100):
             model_stats[model]["total_tokens"] += tokens.get("total_tokens", 0)
             model_stats[model]["total_time"] += proc_time or 0
 
-            # 置信度统计
+            # Confidence statistics
             conf = data.get("confidence")
             if conf is not None:
                 confidence_scores.append(conf)
@@ -259,7 +259,7 @@ def analyze_logs(document_id: str = None, limit: int = 100):
         except Exception as e:
             print(f"⚠️  Error analyzing {log_file.name}: {e}")
 
-    # 打印报告
+    # Print report
     print("\n" + "=" * 100)
     print("📊 OCR Logs Analysis Report")
     print("=" * 100)

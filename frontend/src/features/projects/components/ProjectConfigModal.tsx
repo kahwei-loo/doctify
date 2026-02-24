@@ -7,10 +7,10 @@
  *
  * Features:
  * - Tabbed interface for different config sections
- * - Field configuration builder (字段配置)
- * - Table configuration builder (表格配置)
- * - Sample output editor (示例输出)
- * - Custom prompt editor (自定义提示词 Layer 3)
+ * - Field configuration builder
+ * - Table configuration builder
+ * - Sample output editor
+ * - Custom prompt editor (Layer 3)
  * - Processing settings (AI model, OCR, language)
  * - Save/cancel workflow
  * - Loading and error states

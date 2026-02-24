@@ -476,10 +476,7 @@ async def send_query(
     - "What's the total sales this month?"
     - "Show sales breakdown by product category"
     - "Which customer contributed the most?"
-    - "这个月销售额多少？"
-    - "按产品分类看销售情况"
-    - "哪个客户贡献最多？"
-    - "那上个月呢？" (follow-up)
+    - "What about last month?" (follow-up)
 
     The system supports:
     - Multi-turn conversations with context awareness

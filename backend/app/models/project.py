@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field, field_validator
 
 
 # =============================================================================
-# Field Configuration Models (字段配置)
+# Field Configuration Models
 # =============================================================================
 
 class FieldDefinition(BaseModel):
@@ -50,7 +50,7 @@ class FieldDefinition(BaseModel):
 
 
 # =============================================================================
-# Column Configuration Models (表格列配置)
+# Column Configuration Models
 # =============================================================================
 
 class ColumnDefinition(BaseModel):
@@ -86,7 +86,7 @@ class ColumnDefinition(BaseModel):
 
 
 # =============================================================================
-# Table Configuration Models (表格配置)
+# Table Configuration Models
 # =============================================================================
 
 class TableDefinition(BaseModel):
@@ -126,7 +126,7 @@ class TableDefinition(BaseModel):
 
 
 # =============================================================================
-# Project Configuration Model (项目配置)
+# Project Configuration Model
 # =============================================================================
 
 class ProjectConfig(BaseModel):
@@ -148,13 +148,13 @@ class ProjectConfig(BaseModel):
         description="Output format for extracted data"
     )
 
-    # Field configuration (旧项目核心功能)
+    # Field configuration (legacy project core feature)
     fields: List[FieldDefinition] = Field(
         default_factory=list,
         description="Field definitions for extraction"
     )
 
-    # Table configuration (旧项目核心功能)
+    # Table configuration (legacy project core feature)
     tables: List[TableDefinition] = Field(
         default_factory=list,
         description="Table definitions for line item extraction"

@@ -1,33 +1,33 @@
-# Doctify 前端重设计需求文档
+# Doctify Frontend Redesign Requirements
 
-**文档版本**: v1.0
-**创建日期**: 2026-01-19
-**状态**: Draft - 待审核
-
----
-
-## 1. 文档概述
-
-### 1.1 目的
-本文档基于参考设计截图与当前实现的对比分析，定义前端UI/UX重设计的详细需求规格。
-
-### 1.2 参考资料
-- 参考设计截图 (9张): `C:\Users\KahWei\Pictures\Screenshots\Screenshot 2026-01-19 14*.png`
-- 当前实现: `frontend/src/pages/` 和 `frontend/src/features/`
-
-### 1.3 范围
-- Documents 页面
-- Document 详情页
-- Projects 页面
-- 项目配置弹窗
+**Document Version**: v1.0
+**Created**: 2026-01-19
+**Status**: Draft - Pending Review
 
 ---
 
-## 2. 参考设计优势分析
+## 1. Document Overview
 
-### 2.1 Documents 页面内的 Project 侧边栏 (参考设计 - 优秀)
+### 1.1 Purpose
+This document defines detailed UI/UX redesign requirements based on a comparison analysis of reference design screenshots and the current implementation.
 
-参考设计中的 Project 侧边栏具有以下优秀设计特点：
+### 1.2 References
+- Reference design screenshots (9 images): `C:\Users\KahWei\Pictures\Screenshots\Screenshot 2026-01-19 14*.png`
+- Current implementation: `frontend/src/pages/` and `frontend/src/features/`
+
+### 1.3 Scope
+- Documents page
+- Document detail page
+- Projects page
+- Project configuration modal
+
+---
+
+## 2. Reference Design Analysis
+
+### 2.1 Project Sidebar in Documents Page (Reference Design - Excellent)
+
+The Project sidebar in the reference design has the following excellent design characteristics:
 
 ```
 ┌─────────────────────────────────────┐
@@ -36,50 +36,50 @@
 │ [🔍 Search...]                      │
 ├─────────────────────────────────────┤
 │ ┌─────────────────────────────────┐ │
-│ │ [AD] Auto Detect          ✓    │ │  ← 选中状态: 深色背景 + 高亮
-│ │      document                   │ │  ← 副标题: 项目类型
+│ │ [AD] Auto Detect          ✓    │ │  ← Selected: dark background + highlight
+│ │      document                   │ │  ← Subtitle: project type
 │ └─────────────────────────────────┘ │
 │                                     │
-│ │ [TE] Test1                      │ │  ← 未选中: 浅色背景
+│ │ [TE] Test1                      │ │  ← Unselected: light background
 │ │      Not set                    │ │
 │                                     │
-│           + New Project             │  ← 底部添加按钮
+│           + New Project             │  ← Bottom add button
 └─────────────────────────────────────┘
 ```
 
-**优秀设计要点**:
+**Excellent Design Elements**:
 
-| 设计元素 | 描述 | 价值 |
-|----------|------|------|
-| **彩色头像/首字母** | 每个项目有独特的彩色圆形头像显示首字母 (AD, TE) | 快速视觉识别，增强品牌感 |
-| **双行信息展示** | 主标题 + 副标题（项目类型/描述） | 信息层次清晰 |
-| **选中状态高亮** | 深蓝色背景 + 白色文字 | 明确的选中反馈 |
-| **折叠状态** | 可折叠为仅显示头像的窄条 | 灵活的空间管理 |
-| **搜索功能** | 顶部搜索框可快速过滤项目 | 提升效率 |
-| **新建入口** | 底部"+ New Project"按钮 | 便捷的操作入口 |
+| Design Element | Description | Value |
+|----------------|-------------|-------|
+| **Colored avatar/initials** | Each project has a unique colored circular avatar showing initials (AD, TE) | Quick visual identification, enhanced branding |
+| **Two-line information display** | Title + subtitle (project type/description) | Clear information hierarchy |
+| **Selected state highlight** | Dark blue background + white text | Clear selection feedback |
+| **Collapsed state** | Can collapse to narrow strip showing only avatars | Flexible space management |
+| **Search functionality** | Top search box for quick project filtering | Improved efficiency |
+| **Create entry point** | Bottom "+ New Project" button | Convenient action entry point |
 
 ---
 
-## 3. 当前实现问题分析
+## 3. Current Implementation Analysis
 
-### 3.1 Documents 页面内的 ProjectPanel (当前 - 有设计问题)
+### 3.1 ProjectPanel in Documents Page (Current - Has Design Issues)
 
-**文件位置**: `frontend/src/features/documents/components/ProjectPanel.tsx`
+**File location**: `frontend/src/features/documents/components/ProjectPanel.tsx`
 
-**存在的设计问题**:
+**Existing design issues**:
 
-| 问题 | 描述 | 影响 |
-|------|------|------|
-| **头像设计缺失** | 仅显示单字母，无彩色背景圆形 | 视觉识别度低 |
-| **信息层次不足** | 只显示项目名称，无副标题/类型 | 用户需要额外点击才能了解项目 |
-| **选中状态弱** | 使用 `bg-primary/10` 透明度过低 | 选中反馈不够明显 |
-| **视觉对比度** | 文字与背景对比度不足 | 可读性问题 |
-| **项目类型缺失** | 不显示项目的文档类型标签 | 用户无法快速识别项目用途 |
-| **折叠状态简陋** | 折叠后仅显示字母，无视觉美感 | 体验不佳 |
+| Issue | Description | Impact |
+|-------|-------------|--------|
+| **Missing avatar design** | Only shows single letter, no colored circular background | Low visual recognition |
+| **Insufficient information hierarchy** | Only shows project name, no subtitle/type | Users need extra clicks to understand projects |
+| **Weak selected state** | Uses `bg-primary/10` with too low opacity | Selection feedback not obvious enough |
+| **Visual contrast** | Insufficient contrast between text and background | Readability issues |
+| **Missing project type** | Doesn't show project document type labels | Users can't quickly identify project purpose |
+| **Basic collapsed state** | Only shows letters when collapsed, no visual appeal | Poor experience |
 
-**当前代码问题片段** (ProjectPanel.tsx:88-104):
+**Current code issue snippet** (ProjectPanel.tsx:88-104):
 ```tsx
-// 折叠状态下仅显示简单字母
+// Collapsed state only shows plain letters
 {filteredProjects.slice(0, 5).map((project) => (
   <Button
     key={project.project_id}
@@ -93,7 +93,7 @@
     title={project.name}
   >
     <span className="text-xs font-medium">
-      {project.name.charAt(0).toUpperCase()}  // ← 缺少彩色背景
+      {project.name.charAt(0).toUpperCase()}  // ← Missing colored background
     </span>
   </Button>
 ))}
@@ -101,93 +101,93 @@
 
 ---
 
-## 4. 详细需求规格
+## 4. Detailed Requirements Specification
 
-### 4.1 ProjectPanel 组件重设计 (P0 - 高优先级)
+### 4.1 ProjectPanel Component Redesign (P0 - High Priority)
 
-#### 4.1.1 项目头像组件
+#### 4.1.1 Project Avatar Component
 
-**需求**: 创建 `ProjectAvatar` 组件
+**Requirement**: Create `ProjectAvatar` component
 
 ```tsx
 interface ProjectAvatarProps {
-  name: string;           // 项目名称
-  type?: string;          // 项目类型 (document, invoice, receipt, etc.)
+  name: string;           // Project name
+  type?: string;          // Project type (document, invoice, receipt, etc.)
   size?: 'sm' | 'md' | 'lg';
   className?: string;
 }
 ```
 
-**设计规格**:
-- 圆形背景，根据项目名称生成唯一颜色 (HSL色相基于名称hash)
-- 显示项目名称的前两个字母大写 (如 "Auto Detect" → "AD")
-- 尺寸: sm=24px, md=32px, lg=40px
-- 字体: Inter/系统字体, 粗体, 白色
+**Design Specifications**:
+- Circular background with unique color generated from project name (HSL hue based on name hash)
+- Display first two uppercase letters of project name (e.g., "Auto Detect" → "AD")
+- Sizes: sm=24px, md=32px, lg=40px
+- Font: Inter/system font, bold, white
 
-**颜色生成算法**:
+**Color Generation Algorithm**:
 ```typescript
 const generateAvatarColor = (name: string): string => {
   const hash = name.split('').reduce((acc, char) => {
     return char.charCodeAt(0) + ((acc << 5) - acc);
   }, 0);
   const hue = Math.abs(hash % 360);
-  return `hsl(${hue}, 65%, 45%)`; // 饱和度65%, 亮度45%
+  return `hsl(${hue}, 65%, 45%)`; // Saturation 65%, Lightness 45%
 };
 ```
 
-#### 4.1.2 ProjectPanelItem 组件改进
+#### 4.1.2 ProjectPanelItem Component Improvements
 
-**当前文件**: `frontend/src/features/documents/components/ProjectPanelItem.tsx`
+**Current file**: `frontend/src/features/documents/components/ProjectPanelItem.tsx`
 
-**需求改进**:
+**Required improvements**:
 
-| 属性 | 当前 | 改进后 |
-|------|------|--------|
-| 头像 | 无 | ProjectAvatar 组件 |
-| 主标题 | 仅名称 | 名称 (加粗) |
-| 副标题 | 无 | 项目类型或描述 (灰色小字) |
-| 选中状态 | `bg-primary/10` | `bg-primary text-primary-foreground` |
-| 悬浮效果 | `hover:bg-muted` | `hover:bg-accent` |
+| Property | Current | Improved |
+|----------|---------|----------|
+| Avatar | None | ProjectAvatar component |
+| Title | Name only | Name (bold) |
+| Subtitle | None | Project type or description (gray small text) |
+| Selected state | `bg-primary/10` | `bg-primary text-primary-foreground` |
+| Hover effect | `hover:bg-muted` | `hover:bg-accent` |
 
-**视觉规格**:
+**Visual Specifications**:
 ```
-选中状态:
-  背景: bg-[#1e3a5f] (深蓝色)
-  文字: text-white
-  头像: 保持彩色，加白色边框
+Selected state:
+  Background: bg-[#1e3a5f] (dark blue)
+  Text: text-white
+  Avatar: keep colored, add white border
 
-未选中状态:
-  背景: transparent
-  悬浮: bg-accent (浅灰色)
-  文字: text-foreground
+Unselected state:
+  Background: transparent
+  Hover: bg-accent (light gray)
+  Text: text-foreground
 ```
 
-#### 4.1.3 折叠状态改进
+#### 4.1.3 Collapsed State Improvements
 
-**需求**: 折叠状态下也显示彩色头像
+**Requirement**: Show colored avatars in collapsed state
 
 ```
-展开状态 (w-64):
+Expanded state (w-64):
 ┌──────────────────────┐
 │ [AD] Auto Detect     │
 │      document        │
 └──────────────────────┘
 
-折叠状态 (w-16):
+Collapsed state (w-16):
 ┌────┐
-│[AD]│  ← 保持彩色圆形头像
+│[AD]│  ← Keep colored circular avatar
 └────┘
 ```
 
 ---
 
-### 4.2 Documents 页面重设计 (P0 - 高优先级)
+### 4.2 Documents Page Redesign (P0 - High Priority)
 
-#### 4.2.1 拖拽上传区
+#### 4.2.1 Drag & Drop Upload Zone
 
-**需求**: 创建 `DocumentUploadZone` 组件
+**Requirement**: Create `DocumentUploadZone` component
 
-**设计规格**:
+**Design Specifications**:
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  ┌─────────────────────────────────────────────────────┐    │
@@ -200,45 +200,45 @@ const generateAvatarColor = (name: string): string => {
 └─────────────────────────────────────────────────────────────┘
 ```
 
-**交互规格**:
-- 虚线边框 (border-dashed)
-- 拖拽悬浮时: 边框变为实线 + 背景色变化
-- 支持多文件同时拖拽
-- 右侧蓝色 "Select Files" 按钮
+**Interaction Specifications**:
+- Dashed border (border-dashed)
+- On drag hover: border becomes solid + background color change
+- Support multi-file drag & drop
+- Blue "Select Files" button on the right
 
-#### 4.2.2 上传队列状态
+#### 4.2.2 Upload Queue Status
 
-**需求**: 创建 `UploadQueue` 组件
+**Requirement**: Create `UploadQueue` component
 
 ```
 > Upload Queue    0 uploading    0 complete    0 failed
 ```
 
-**设计规格**:
-- 可折叠/展开的队列列表
-- 实时显示上传进度
-- 彩色状态标签:
-  - uploading: 蓝色
-  - complete: 绿色
-  - failed: 红色
+**Design Specifications**:
+- Collapsible/expandable queue list
+- Real-time upload progress display
+- Colored status labels:
+  - uploading: blue
+  - complete: green
+  - failed: red
 
-#### 4.2.3 文档表格
+#### 4.2.3 Document Table
 
-**需求**: 重构 `DocumentTable` 组件
+**Requirement**: Refactor `DocumentTable` component
 
-**列定义**:
-| 列名 | 宽度 | 内容 |
-|------|------|------|
-| Checkbox | 40px | 全选/单选 |
-| File | flex | 文件图标 + 名称 + 大小/页数 |
-| Type | 80px | 文档类型 + 置信度百分比 |
-| Status | 100px | 状态Badge (Completed/Processing/Failed) |
-| Confidence | 120px | 进度条 + 百分比 |
-| Notes | 80px | 备注图标或文字 |
-| Uploaded | 120px | 日期时间 |
-| Actions | 100px | 查看/下载/更多 图标按钮 |
+**Column Definitions**:
+| Column | Width | Content |
+|--------|-------|---------|
+| Checkbox | 40px | Select all / single select |
+| File | flex | File icon + name + size/page count |
+| Type | 80px | Document type + confidence percentage |
+| Status | 100px | Status badge (Completed/Processing/Failed) |
+| Confidence | 120px | Progress bar + percentage |
+| Notes | 80px | Note icon or text |
+| Uploaded | 120px | Date and time |
+| Actions | 100px | View/download/more icon buttons |
 
-**文件类型图标**:
+**File Type Icons**:
 ```typescript
 const fileTypeIcons: Record<string, { icon: string; color: string }> = {
   'application/pdf': { icon: 'FileText', color: 'text-red-500 bg-red-50' },
@@ -248,9 +248,9 @@ const fileTypeIcons: Record<string, { icon: string; color: string }> = {
 };
 ```
 
-#### 4.2.4 置信度进度条
+#### 4.2.4 Confidence Progress Bar
 
-**需求**: 创建 `ConfidenceBar` 组件
+**Requirement**: Create `ConfidenceBar` component
 
 ```tsx
 interface ConfidenceBarProps {
@@ -259,19 +259,19 @@ interface ConfidenceBarProps {
 }
 ```
 
-**颜色规则**:
-- 0-50%: 红色 (bg-red-500)
-- 51-70%: 橙色 (bg-orange-500)
-- 71-85%: 黄色 (bg-yellow-500)
-- 86-100%: 绿色 (bg-green-500)
+**Color Rules**:
+- 0-50%: Red (bg-red-500)
+- 51-70%: Orange (bg-orange-500)
+- 71-85%: Yellow (bg-yellow-500)
+- 86-100%: Green (bg-green-500)
 
 ---
 
-### 4.3 Document 详情页重设计 (P0 - 高优先级)
+### 4.3 Document Detail Page Redesign (P0 - High Priority)
 
-#### 4.3.1 分屏布局
+#### 4.3.1 Split-Screen Layout
 
-**需求**: 实现可调整的分屏视图
+**Requirement**: Implement adjustable split-screen view
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -303,26 +303,26 @@ interface ConfidenceBarProps {
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-#### 4.3.2 文档预览器 (PDF + 图片)
+#### 4.3.2 Document Previewer (PDF + Images)
 
-**需求**: 创建 `DocumentPreview` 组件，支持PDF和图片两种格式
+**Requirement**: Create `DocumentPreview` component supporting both PDF and image formats
 
-**支持的文件类型**:
-| 格式 | MIME类型 | 渲染方式 |
-|------|----------|----------|
+**Supported File Types**:
+| Format | MIME Type | Rendering Method |
+|--------|-----------|------------------|
 | PDF | `application/pdf` | react-pdf / pdf.js |
-| PNG | `image/png` | `<img>` 标签 |
-| JPG/JPEG | `image/jpeg` | `<img>` 标签 |
+| PNG | `image/png` | `<img>` tag |
+| JPG/JPEG | `image/jpeg` | `<img>` tag |
 
-**功能**:
-- **PDF文件**: 显示PDF页面、页码导航 (多页文档)
-- **图片文件**: 直接渲染图片
-- **通用功能**:
-  - 缩放控制 (50% - 200%)
-  - 下载链接 (预览不可用时)
-  - 自动检测文件类型并选择渲染方式
+**Features**:
+- **PDF files**: Display PDF pages, page navigation (multi-page documents)
+- **Image files**: Direct image rendering
+- **Common features**:
+  - Zoom control (50% - 200%)
+  - Download link (when preview unavailable)
+  - Auto-detect file type and select rendering method
 
-**组件接口**:
+**Component Interface**:
 ```tsx
 interface DocumentPreviewProps {
   fileUrl: string;
@@ -332,40 +332,40 @@ interface DocumentPreviewProps {
 }
 ```
 
-#### 4.3.3 Structured/JSON 切换
+#### 4.3.3 Structured/JSON Toggle
 
-**需求**: Tab切换两种视图模式
+**Requirement**: Tab-based toggle between two view modes
 
-**Structured 视图**:
-- 两列网格布局显示字段
-- 字段标签 (灰色小字) + 字段值 (黑色正文)
-- 支持内联编辑
+**Structured View**:
+- Two-column grid layout for field display
+- Field label (gray small text) + field value (black body text)
+- Inline editing support
 
-**JSON 视图**:
-- 语法高亮的JSON代码块
-- 深色背景 (类似代码编辑器)
-- 复制按钮
+**JSON View**:
+- Syntax-highlighted JSON code block
+- Dark background (code editor style)
+- Copy button
 
-#### 4.3.4 行项目表格 (提取结果明细)
+#### 4.3.4 Line Items Table (Extracted Results Detail)
 
-**需求**: 创建 `LineItemsTable` 组件
+**Requirement**: Create `LineItemsTable` component
 
-**用途说明**:
-此表格用于展示AI从发票、收据、采购单等文档中**提取出的商品/服务明细行数据**。这是OCR提取结果的一部分，不是通用表格组件。
+**Purpose**:
+This table displays **item/service line data extracted by AI** from invoices, receipts, purchase orders, and other documents. It is part of the OCR extraction results, not a general-purpose table component.
 
-**标准列定义**:
-| 列名 | 字段键 | 类型 | 对齐 | 说明 |
-|------|--------|------|------|------|
-| 项目编号 | `itemNo` | string | left | 商品编码/SKU |
-| 描述 | `description` | string | left | 商品/服务名称 |
-| 数量 | `quantity` | number | right | 购买数量 |
-| 单价 | `unitPrice` | number | right | 单位价格 |
-| 折扣 | `discount` | number | right | 折扣金额 |
-| 税率 | `taxRate` | number | right | 税率百分比 |
-| 税额 | `taxAmount` | number | right | 税金金额 |
-| 金额 | `amount` | number | right | 行小计 |
+**Standard Column Definitions**:
+| Column | Field Key | Type | Alignment | Description |
+|--------|-----------|------|-----------|-------------|
+| Item No. | `itemNo` | string | left | Product code/SKU |
+| Description | `description` | string | left | Product/service name |
+| Quantity | `quantity` | number | right | Purchase quantity |
+| Unit Price | `unitPrice` | number | right | Price per unit |
+| Discount | `discount` | number | right | Discount amount |
+| Tax Rate | `taxRate` | number | right | Tax rate percentage |
+| Tax Amount | `taxAmount` | number | right | Tax amount |
+| Amount | `amount` | number | right | Line subtotal |
 
-**组件接口**:
+**Component Interface**:
 ```tsx
 interface LineItem {
   itemNo: string;
@@ -380,24 +380,24 @@ interface LineItem {
 
 interface LineItemsTableProps {
   items: LineItem[];
-  showTotal?: boolean;  // 是否显示合计行
-  editable?: boolean;   // 是否可编辑
+  showTotal?: boolean;  // Whether to show total row
+  editable?: boolean;   // Whether fields are editable
 }
 ```
 
-**功能**:
-- 可排序 (点击列头)
-- 金额列右对齐 + 数字格式化
-- 合计行 (可选显示)
-- 响应式: 小屏幕水平滚动
+**Features**:
+- Sortable (click column headers)
+- Amount columns right-aligned + number formatting
+- Total row (optional display)
+- Responsive: horizontal scroll on small screens
 
 ---
 
-### 4.4 Projects 页面重设计 (P0 - 高优先级)
+### 4.4 Projects Page Redesign (P0 - High Priority)
 
-#### 4.4.1 统计卡片
+#### 4.4.1 Statistics Cards
 
-**需求**: 顶部统计概览
+**Requirement**: Top-level statistics overview
 
 ```
 ┌─────────────────┬─────────────────┬─────────────────┐
@@ -407,19 +407,19 @@ interface LineItemsTableProps {
 └─────────────────┴─────────────────┴─────────────────┘
 ```
 
-#### 4.4.2 图表组件
+#### 4.4.2 Chart Components
 
-**Processing Status (环形图)**:
-- 显示总数在中心
-- 不同状态用不同颜色
-- 底部图例
+**Processing Status (Donut Chart)**:
+- Display total count in center
+- Different colors for different statuses
+- Bottom legend
 
-**Token Usage by Project (柱状图)**:
-- 横向柱状图
-- 按项目分组
-- 显示数值标签
+**Token Usage by Project (Bar Chart)**:
+- Horizontal bar chart
+- Grouped by project
+- Display value labels
 
-#### 4.4.3 增强项目卡片
+#### 4.4.3 Enhanced Project Card
 
 ```
 ┌─────────────────────────────────────────┐
@@ -440,61 +440,61 @@ interface LineItemsTableProps {
 
 ---
 
-### 4.5 项目配置弹窗 / Schema Builder (P1 - 中优先级)
+### 4.5 Project Configuration Modal / Schema Builder (P1 - Medium Priority)
 
-**需求**: 使用 Accordion 组件创建 `ProjectConfigModal` (Schema Builder)
+**Requirement**: Create `ProjectConfigModal` (Schema Builder) using Accordion component
 
-**功能说明**:
-Schema Builder 是一个**文档提取模板配置器**，用户通过它定义"AI应从文档中提取哪些信息"。每个项目可以有自己的提取模板。
+**Description**:
+Schema Builder is a **document extraction template configurator** where users define "what information AI should extract from documents". Each project can have its own extraction template.
 
-**四个配置区块**:
+**Four Configuration Sections**:
 
-#### 4.5.1 Project Information (项目基本信息)
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| Project Title | text | ✅ | 项目/模板名称 |
-| Project Description | textarea (500字符) | ✅ | 描述此模板用途 (如: "智能识别各类文档，自动提取所有可见信息") |
+#### 4.5.1 Project Information (Basic Details)
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| Project Title | text | ✅ | Project/template name |
+| Project Description | textarea (500 chars) | ✅ | Describe template purpose (e.g., "Intelligently recognize various documents, automatically extract all visible information") |
 
-#### 4.5.2 Field Configuration (字段配置)
-**用途**: 定义AI应从文档中提取的**键值对字段**
+#### 4.5.2 Field Configuration
+**Purpose**: Define **key-value pair fields** that AI should extract from documents
 
-**功能**:
-- "+ Add Fields" 按钮动态添加字段
-- 每个字段包含:
-  - Field Name (字段名，如: buyerName, documentNo)
-  - Field Type (类型: text, number, date, boolean)
-  - Description (描述，帮助AI理解)
-  - Required (是否必填)
-- 支持拖拽排序
-- 支持删除字段
+**Features**:
+- "+ Add Fields" button to dynamically add fields
+- Each field includes:
+  - Field Name (e.g., buyerName, documentNo)
+  - Field Type (text, number, date, boolean)
+  - Description (helps AI understand the field)
+  - Required (whether the field is mandatory)
+- Drag & drop reordering support
+- Field deletion support
 
-**示例字段**: `buyerName`, `buyerAddress`, `buyerPhone`, `buyerEmail`, `buyerTaxId`, `documentNo`, `documentDate`
+**Example Fields**: `buyerName`, `buyerAddress`, `buyerPhone`, `buyerEmail`, `buyerTaxId`, `documentNo`, `documentDate`
 
-#### 4.5.3 Table Configuration (表格配置)
-**用途**: 定义AI应从文档中提取的**表格/明细行数据结构**
+#### 4.5.3 Table Configuration
+**Purpose**: Define **table/line item data structures** that AI should extract from documents
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| Table Description | textarea | 描述表格内容 (如: "商品明细行，包含编号、描述、数量、单价、金额") |
-| Column Definitions | 动态列表 | 定义表格列 (itemNo, description, quantity, unitPrice, amount等) |
+| Field | Type | Description |
+|-------|------|-------------|
+| Table Description | textarea | Describe table content (e.g., "Line items including item number, description, quantity, unit price, amount") |
+| Column Definitions | dynamic list | Define table columns (itemNo, description, quantity, unitPrice, amount, etc.) |
 
-#### 4.5.4 Sample Output (示例输出预览)
-**用途**: 展示配置后的预期提取结果JSON格式
+#### 4.5.4 Sample Output (Preview)
+**Purpose**: Display expected extraction result JSON format based on configuration
 
 ```json
 {
-  "buyerName": "示例公司",
+  "buyerName": "Example Company",
   "documentNo": "INV-001",
   "lineItems": [
-    { "itemNo": "001", "description": "商品A", "quantity": 1, "amount": 100 }
+    { "itemNo": "001", "description": "Product A", "quantity": 1, "amount": 100 }
   ]
 }
 ```
 
-**组件接口**:
+**Component Interface**:
 ```tsx
 interface ProjectConfigModalProps {
-  projectId?: string;           // 编辑时传入
+  projectId?: string;           // Passed when editing
   defaultConfig?: ProjectSchema;
   onSave: (config: ProjectSchema) => void;
   onClose: () => void;
@@ -510,9 +510,9 @@ interface ProjectSchema {
 
 ---
 
-## 5. 技术规格
+## 5. Technical Specifications
 
-### 5.1 新增依赖
+### 5.1 New Dependencies
 
 ```json
 {
@@ -525,10 +525,10 @@ interface ProjectSchema {
 }
 ```
 
-### 5.2 新增组件清单
+### 5.2 New Components List
 
-| 组件 | 路径 | 优先级 |
-|------|------|--------|
+| Component | Path | Priority |
+|-----------|------|----------|
 | ProjectAvatar | `shared/components/ui/project-avatar.tsx` | P0 |
 | DocumentUploadZone | `features/documents/components/DocumentUploadZone.tsx` | P0 |
 | UploadQueue | `features/documents/components/UploadQueue.tsx` | P0 |
@@ -543,132 +543,132 @@ interface ProjectSchema {
 | TokenUsageChart | `features/projects/components/TokenUsageChart.tsx` | P1 |
 | EnhancedProjectCard | `features/projects/components/EnhancedProjectCard.tsx` | P0 |
 
-### 5.3 重构组件清单
+### 5.3 Refactored Components List
 
-| 组件 | 当前路径 | 改动范围 |
-|------|----------|----------|
-| ProjectPanel | `features/documents/components/ProjectPanel.tsx` | 大幅重构 |
-| ProjectPanelItem | `features/documents/components/ProjectPanelItem.tsx` | 大幅重构 |
-| DocumentsPage | `pages/DocumentsPage.tsx` | 大幅重构 |
-| DocumentDetailPage | `pages/DocumentDetailPage.tsx` | 完全重写 |
-| ProjectsPage | `pages/ProjectsPage.tsx` | 大幅重构 |
+| Component | Current Path | Scope of Changes |
+|-----------|-------------|------------------|
+| ProjectPanel | `features/documents/components/ProjectPanel.tsx` | Major refactor |
+| ProjectPanelItem | `features/documents/components/ProjectPanelItem.tsx` | Major refactor |
+| DocumentsPage | `pages/DocumentsPage.tsx` | Major refactor |
+| DocumentDetailPage | `pages/DocumentDetailPage.tsx` | Complete rewrite |
+| ProjectsPage | `pages/ProjectsPage.tsx` | Major refactor |
 
 ---
 
-## 6. 优先级与时间线
+## 6. Priority and Timeline
 
-### 6.1 Phase 1: P0 核心功能 (预估: 16-24小时)
+### 6.1 Phase 1: P0 Core Features (Estimate: 16-24 hours)
 
-| 任务 | 预估 |
-|------|------|
-| ProjectAvatar + ProjectPanel 重构 | 3-4h |
+| Task | Estimate |
+|------|----------|
+| ProjectAvatar + ProjectPanel refactor | 3-4h |
 | DocumentUploadZone + UploadQueue | 4-5h |
 | DocumentTable + ConfidenceBar | 3-4h |
-| DocumentSplitView + DocumentPreview (PDF+图片) | 4-5h |
+| DocumentSplitView + DocumentPreview (PDF+images) | 4-5h |
 | ExtractedStructuredView + LineItemsTable | 3-4h |
 | ProjectStats + EnhancedProjectCard | 2-3h |
 
-### 6.2 Phase 2: P1 重要功能 (预估: 12-16小时)
+### 6.2 Phase 2: P1 Important Features (Estimate: 12-16 hours)
 
-| 任务 | 预估 |
-|------|------|
+| Task | Estimate |
+|------|----------|
 | ProcessingChart + TokenUsageChart | 4-5h |
-| 项目配置弹窗重构 | 4-5h |
-| 面包屑导航 | 2-3h |
-| 面板比例滑块 | 2-3h |
+| Project config modal refactor | 4-5h |
+| Breadcrumb navigation | 2-3h |
+| Panel ratio slider | 2-3h |
 
-### 6.3 Phase 3: P2 优化功能 (预估: 4-8小时)
+### 6.3 Phase 3: P2 Enhancement Features (Estimate: 4-8 hours)
 
-| 任务 | 预估 |
-|------|------|
-| "Live"连接指示器 | 1-2h |
-| Sample Output预览 | 2-3h |
-| 其他细节优化 | 1-3h |
-
----
-
-## 7. 验收标准
-
-### 7.1 功能验收
-
-- [ ] ProjectPanel 显示彩色头像和双行信息
-- [ ] Documents 页面支持拖拽上传
-- [ ] Documents 页面显示完整表格列
-- [ ] Document 详情页支持分屏预览
-- [ ] Document 详情页支持 PDF 和 图片 两种格式预览
-- [ ] Document 详情页支持 Structured/JSON 切换
-- [ ] Document 详情页正确显示 LineItems 表格
-- [ ] Projects 页面显示统计卡片
-- [ ] Schema Builder 四个区块 (Project Info, Fields, Table, Sample) 可用
-- [ ] 所有现有功能保持正常工作
-
-### 7.2 设计验收
-
-- [ ] 与参考设计截图视觉一致性 ≥ 90%
-- [ ] 响应式布局在 1280px+ 宽度下正常
-- [ ] 深色/浅色主题支持
-- [ ] 动画过渡流畅
-
-### 7.3 性能验收
-
-- [ ] 首屏加载 < 3s
-- [ ] 表格渲染 100 条数据无卡顿
-- [ ] 文档预览加载 (PDF/图片) < 2s
+| Task | Estimate |
+|------|----------|
+| "Live" connection indicator | 1-2h |
+| Sample Output preview | 2-3h |
+| Other detail refinements | 1-3h |
 
 ---
 
-## 8. 风险与依赖
+## 7. Acceptance Criteria
 
-### 8.1 技术风险
+### 7.1 Functional Acceptance
 
-| 风险 | 概率 | 影响 | 缓解措施 |
-|------|------|------|----------|
-| PDF.js 集成复杂度 | 中 | 中 | 可降级为下载链接 |
-| 分屏组件性能 | 低 | 低 | 使用虚拟滚动 |
+- [ ] ProjectPanel displays colored avatars and two-line information
+- [ ] Documents page supports drag & drop upload
+- [ ] Documents page displays full table columns
+- [ ] Document detail page supports split-screen preview
+- [ ] Document detail page supports both PDF and image format preview
+- [ ] Document detail page supports Structured/JSON toggle
+- [ ] Document detail page correctly displays LineItems table
+- [ ] Projects page displays statistics cards
+- [ ] Schema Builder four sections (Project Info, Fields, Table, Sample) are functional
+- [ ] All existing features remain working
 
-### 8.2 外部依赖
+### 7.2 Design Acceptance
 
-- 后端 API 需支持返回更多字段数据 (token_usage, document_type)
-- 后端需提供项目统计汇总 API
+- [ ] Visual consistency with reference design screenshots ≥ 90%
+- [ ] Responsive layout works correctly at 1280px+ width
+- [ ] Dark/light theme support
+- [ ] Smooth animation transitions
+
+### 7.3 Performance Acceptance
+
+- [ ] Initial page load < 3s
+- [ ] Table renders 100 rows without lag
+- [ ] Document preview load (PDF/images) < 2s
 
 ---
 
-## 9. 审批记录
+## 8. Risks and Dependencies
 
-| 版本 | 日期 | 审批人 | 状态 |
-|------|------|--------|------|
-| v1.0 | 2026-01-19 | - | Draft - 待审核 |
-| v1.1 | 2026-01-20 | - | 修订 - 根据用户反馈更新 |
+### 8.1 Technical Risks
+
+| Risk | Probability | Impact | Mitigation |
+|------|-------------|--------|------------|
+| PDF.js integration complexity | Medium | Medium | Can downgrade to download link |
+| Split-screen component performance | Low | Low | Use virtual scrolling |
+
+### 8.2 External Dependencies
+
+- Backend API needs to support returning additional field data (token_usage, document_type)
+- Backend needs to provide project statistics summary API
 
 ---
 
-## 10. 更新日志
+## 9. Approval Records
+
+| Version | Date | Approver | Status |
+|---------|------|----------|--------|
+| v1.0 | 2026-01-19 | - | Draft - Pending Review |
+| v1.1 | 2026-01-20 | - | Revised - Updated based on user feedback |
+
+---
+
+## 10. Changelog
 
 ### v1.1 (2026-01-20)
 
-根据用户审核反馈，进行以下修订:
+Revisions based on user review feedback:
 
-1. **Schema Builder 说明补充** (Section 4.5)
-   - 明确 Schema Builder 是"文档提取模板配置器"
-   - 详细说明四个配置区块的具体功能和用途
-   - 添加组件接口定义
+1. **Schema Builder clarification** (Section 4.5)
+   - Clarified that Schema Builder is a "document extraction template configurator"
+   - Detailed description of four configuration sections with specific features and purposes
+   - Added component interface definitions
 
-2. **Line Items 表格说明补充** (Section 4.3.4)
-   - 明确此表格是展示"AI从文档中提取的商品/服务明细行"
-   - 添加标准列定义表格 (8列)
-   - 添加 TypeScript 接口定义
+2. **Line Items table clarification** (Section 4.3.4)
+   - Clarified that this table displays "item/service line data extracted by AI from documents"
+   - Added standard column definition table (8 columns)
+   - Added TypeScript interface definitions
 
-3. **文档预览器支持图片** (Section 4.3.2)
-   - 将 "PDF预览器" 改为 "文档预览器 (PDF + 图片)"
-   - 添加支持的文件类型: PDF, PNG, JPG/JPEG
-   - 组件重命名: `PDFPreview` → `DocumentPreview`
+3. **Document previewer image support** (Section 4.3.2)
+   - Changed "PDF previewer" to "Document previewer (PDF + images)"
+   - Added supported file types: PDF, PNG, JPG/JPEG
+   - Renamed component: `PDFPreview` → `DocumentPreview`
 
-4. **验收标准更新** (Section 7.1)
-   - 新增: "Document 详情页支持 PDF 和 图片 两种格式预览"
-   - 新增: "Document 详情页正确显示 LineItems 表格"
-   - 新增: "Schema Builder 四个区块可用"
+4. **Acceptance criteria updates** (Section 7.1)
+   - Added: "Document detail page supports both PDF and image format preview"
+   - Added: "Document detail page correctly displays LineItems table"
+   - Added: "Schema Builder four sections are functional"
 
 ---
 
-*文档创建者: Claude (PM Agent)*
-*最后更新: 2026-01-20*
+*Document created by: Claude (PM Agent)*
+*Last updated: 2026-01-20*
