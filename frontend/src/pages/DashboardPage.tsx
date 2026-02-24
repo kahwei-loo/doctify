@@ -49,6 +49,9 @@ import {
 } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
+// Onboarding
+import { OnboardingDialog, useOnboarding } from '@/features/onboarding';
+
 // Import new dashboard components
 import StatCardWithTrend from '@/features/dashboard/components/StatCardWithTrend';
 import ProjectDistributionChart from '@/features/dashboard/components/ProjectDistributionChart';
@@ -106,6 +109,7 @@ const StatCard: React.FC<StatCardProps> = ({
 const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const user = useAppSelector(selectUser);
+  const { showOnboarding, currentStep, nextStep, prevStep, completeOnboarding, skipOnboarding } = useOnboarding();
 
   // Fetch unified stats with 30-second auto-refresh
   const {
@@ -495,6 +499,15 @@ const DashboardPage: React.FC = () => {
           </CardContent>
         </Card>
       </div>
+      {/* Onboarding dialog for demo mode */}
+      <OnboardingDialog
+        open={showOnboarding}
+        currentStep={currentStep}
+        onNext={nextStep}
+        onPrev={prevStep}
+        onComplete={completeOnboarding}
+        onSkip={skipOnboarding}
+      />
     </div>
   );
 };

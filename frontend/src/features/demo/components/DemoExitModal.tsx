@@ -33,7 +33,7 @@ export const DemoExitModal: React.FC<DemoExitModalProps> = ({ open, onOpenChange
   const handleExitToHome = () => {
     exitDemo();
     onOpenChange(false);
-    navigate('/auth/login');
+    navigate('/');
   };
 
   const handleExitAndSignUp = () => {
