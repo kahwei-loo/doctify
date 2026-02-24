@@ -1,11 +1,11 @@
 """
-Simple OCR Logger for MVP - JSON 格式，便于分析和调试
+Simple OCR Logger for MVP - JSON format for analysis and debugging
 
-特点:
-- JSON 文件日志 (机器可读, 便于分析)
-- 清晰的 stdout 输出 (人类可读, 实时监控)
-- 容错设计 (日志失败不影响业务)
-- 完整信息 (Prompt, Response, Tokens, 性能指标)
+Features:
+- JSON file logging (machine-readable, easy to analyze)
+- Clear stdout output (human-readable, real-time monitoring)
+- Fault-tolerant design (logging failures don't affect business logic)
+- Complete information (Prompt, Response, Tokens, performance metrics)
 """
 
 import json
@@ -16,30 +16,30 @@ from typing import Dict, Any, Optional, List
 
 logger = logging.getLogger(__name__)
 
-# 日志目录
+# Log directory
 LOGS_DIR = Path("/app/logs/ocr_attempts")
 
 
 def ensure_log_directory() -> Path:
-    """确保日志目录存在"""
+    """Ensure the log directory exists."""
     try:
         LOGS_DIR.mkdir(parents=True, exist_ok=True)
         return LOGS_DIR
     except Exception as e:
         logger.error(f"Failed to create log directory {LOGS_DIR}: {e}")
-        # 降级: 使用临时目录
+        # Fallback: use temporary directory
         fallback_dir = Path("/tmp/ocr_logs")
         fallback_dir.mkdir(parents=True, exist_ok=True)
         return fallback_dir
 
 
 def log_ocr_request(
-    # 基本信息
+    # Basic information
     document_id: str,
     user_id: Optional[str] = None,
     filename: str = "unknown",
 
-    # 处理信息
+    # Processing information
     attempt_number: int = 1,
     model: str = "unknown",
 
@@ -47,41 +47,41 @@ def log_ocr_request(
     prompt: Optional[str] = None,
     raw_response: Optional[str] = None,
 
-    # 结构化输出
+    # Structured output
     extracted_data: Optional[Dict[str, Any]] = None,
 
     # Function/Tool Calling
     tools_called: Optional[List[str]] = None,
 
-    # Token 使用
+    # Token usage
     tokens: Optional[Dict[str, int]] = None,
 
-    # 性能指标
+    # Performance metrics
     processing_time_seconds: Optional[float] = None,
 
-    # 质量指标
+    # Quality metrics
     confidence: Optional[float] = None,
     doc_type: Optional[str] = None,
     validation_errors: int = 0,
 
-    # 额外信息
+    # Additional information
     additional_data: Optional[Dict[str, Any]] = None,
 ) -> Optional[Path]:
     """
-    记录 OCR 请求完整信息
+    Log complete OCR request information.
 
-    策略:
-    1. 清晰的 stdout 输出 (带分隔符, Docker logs 可见)
-    2. 结构化 JSON 文件 (完整数据, 便于分析)
-    3. 容错设计 (日志失败不影响业务)
+    Strategy:
+    1. Clear stdout output (with separators, visible in Docker logs)
+    2. Structured JSON file (complete data, easy to analyze)
+    3. Fault-tolerant design (logging failures don't affect business logic)
 
     Returns:
-        成功返回日志文件路径, 失败返回 None
+        Log file path on success, None on failure.
     """
     timestamp = datetime.utcnow()
 
     # ========================================================================
-    # Step 1: 清晰的 stdout 输出 (实时可见)
+    # Step 1: Clear stdout output (real-time visibility)
     # ========================================================================
     try:
         _print_stdout_log(
@@ -101,29 +101,29 @@ def log_ocr_request(
         logger.error(f"Failed to print stdout log: {e}")
 
     # ========================================================================
-    # Step 2: JSON 文件日志 (完整数据)
+    # Step 2: JSON file log (complete data)
     # ========================================================================
     try:
         log_dir = ensure_log_directory()
 
-        # 文件名: ocr_<document_id>_attempt<N>_<timestamp>.json
+        # Filename: ocr_<document_id>_attempt<N>_<timestamp>.json
         timestamp_str = timestamp.strftime("%Y%m%d_%H%M%S")
         log_filename = f"ocr_{document_id}_attempt{attempt_number}_{timestamp_str}.json"
         log_file = log_dir / log_filename
 
-        # 构建完整的日志数据
+        # Build complete log data
         log_data = {
-            # 元数据
+            # Metadata
             "timestamp": timestamp.isoformat() + "Z",
             "log_version": "1.0",
 
-            # 基本信息
+            # Basic information
             "document_id": document_id,
             "user_id": user_id,
             "filename": filename,
             "attempt_number": attempt_number,
 
-            # AI 模型信息
+            # AI model information
             "model": model,
             "tokens": tokens or {},
             "processing_time_seconds": processing_time_seconds,
@@ -132,22 +132,22 @@ def log_ocr_request(
             "prompt": prompt,
             "raw_response": raw_response,
 
-            # 结构化输出
+            # Structured output
             "extracted_data": extracted_data,
 
             # Function/Tool Calling
             "tools_called": tools_called or [],
 
-            # 质量指标
+            # Quality metrics
             "confidence": confidence,
             "doc_type": doc_type,
             "validation_errors": validation_errors,
 
-            # 额外信息
+            # Additional information
             "additional_data": additional_data or {},
         }
 
-        # 写入 JSON 文件 (格式化, 便于阅读)
+        # Write JSON file (formatted for readability)
         with open(log_file, "w", encoding="utf-8") as f:
             json.dump(log_data, f, indent=2, ensure_ascii=False)
 
@@ -157,7 +157,7 @@ def log_ocr_request(
         return log_file
 
     except Exception as e:
-        # 日志失败不影响业务
+        # Logging failures don't affect business logic
         logger.error(f"Failed to write OCR log file: {e}", exc_info=True)
         print(f"❌ OCR_LOG_ERROR: {e}")
         return None
@@ -176,12 +176,12 @@ def _print_stdout_log(
     doc_type: Optional[str],
     validation_errors: int,
 ):
-    """打印清晰的 stdout 日志 (带分隔符)"""
+    """Print clear stdout log with separators."""
 
-    # 格式化时间
+    # Format timestamp
     time_str = timestamp.strftime("%Y-%m-%d %H:%M:%S UTC")
 
-    # 格式化 tokens
+    # Format tokens
     if tokens:
         prompt_tokens = tokens.get("prompt_tokens", 0)
         completion_tokens = tokens.get("completion_tokens", 0)
@@ -190,7 +190,7 @@ def _print_stdout_log(
     else:
         token_str = "N/A"
 
-    # 格式化耗时
+    # Format duration
     if processing_time_seconds is not None:
         if processing_time_seconds >= 1:
             time_str_duration = f"{processing_time_seconds:.2f}s"
@@ -199,10 +199,10 @@ def _print_stdout_log(
     else:
         time_str_duration = "N/A"
 
-    # 格式化置信度
+    # Format confidence
     conf_str = f"{confidence:.1%}" if confidence is not None else "N/A"
 
-    # 打印分隔符日志
+    # Print separated log
     print("=" * 80)
     print(f"📊 OCR Request #{attempt_number} [{time_str}]")
     print("=" * 80)
@@ -227,12 +227,12 @@ def log_all_attempts_summary(
     selected_attempt: int,
 ) -> Optional[Path]:
     """
-    记录所有尝试的汇总对比 (JSON 格式)
+    Log a summary comparison of all attempts (JSON format).
 
-    用于分析:
-    - 哪次尝试效果最好?
-    - 不同模型的表现对比
-    - Retry 策略是否有效
+    Useful for analyzing:
+    - Which attempt performed best?
+    - Performance comparison across different models
+    - Whether the retry strategy was effective
     """
     try:
         log_dir = ensure_log_directory()
@@ -240,7 +240,7 @@ def log_all_attempts_summary(
         log_filename = f"ocr_summary_{document_id}_{timestamp_str}.json"
         log_file = log_dir / log_filename
 
-        # 构建汇总数据
+        # Build summary data
         summary_data = {
             "timestamp": datetime.utcnow().isoformat() + "Z",
             "document_id": document_id,
@@ -248,7 +248,7 @@ def log_all_attempts_summary(
             "selected_attempt": selected_attempt,
             "attempts": attempts,
 
-            # 统计信息
+            # Statistics
             "statistics": {
                 "avg_confidence": sum(a.get("confidence", 0) for a in attempts) / len(attempts) if attempts else 0,
                 "max_confidence": max((a.get("confidence", 0) for a in attempts), default=0),
@@ -258,7 +258,7 @@ def log_all_attempts_summary(
             }
         }
 
-        # 写入文件
+        # Write file
         with open(log_file, "w", encoding="utf-8") as f:
             json.dump(summary_data, f, indent=2, ensure_ascii=False)
 
@@ -273,7 +273,7 @@ def log_all_attempts_summary(
 
 
 def get_recent_logs(limit: int = 10) -> List[Path]:
-    """获取最近的日志文件列表"""
+    """Get a list of the most recent log files."""
     try:
         log_dir = ensure_log_directory()
         log_files = sorted(
@@ -288,7 +288,7 @@ def get_recent_logs(limit: int = 10) -> List[Path]:
 
 
 def read_log(log_file: Path) -> Optional[Dict[str, Any]]:
-    """读取日志文件并返回 JSON 数据"""
+    """Read a log file and return its JSON data."""
     try:
         with open(log_file, "r", encoding="utf-8") as f:
             return json.load(f)
@@ -302,17 +302,17 @@ def analyze_logs(
     limit: int = 100
 ) -> Dict[str, Any]:
     """
-    分析日志文件，生成统计报告
+    Analyze log files and generate a statistical report.
 
-    可用于:
-    - 统计平均 token 使用
-    - 对比不同模型效果
-    - 分析处理耗时
+    Useful for:
+    - Tracking average token usage
+    - Comparing model performance
+    - Analyzing processing times
     """
     try:
         log_dir = ensure_log_directory()
 
-        # 查找日志文件
+        # Find log files
         if document_id:
             pattern = f"ocr_{document_id}_*.json"
         else:
@@ -327,7 +327,7 @@ def analyze_logs(
         if not log_files:
             return {"error": "No log files found"}
 
-        # 统计数据
+        # Statistics
         total_requests = 0
         total_tokens = 0
         total_time = 0
@@ -342,23 +342,23 @@ def analyze_logs(
 
                 total_requests += 1
 
-                # Token 统计
+                # Token statistics
                 tokens = data.get("tokens", {})
                 total_tokens += tokens.get("total_tokens", 0)
 
-                # 耗时统计
+                # Processing time statistics
                 proc_time = data.get("processing_time_seconds", 0)
                 if proc_time:
                     total_time += proc_time
 
-                # 模型统计
+                # Model statistics
                 model = data.get("model", "unknown")
                 if model not in model_stats:
                     model_stats[model] = {"count": 0, "total_tokens": 0}
                 model_stats[model]["count"] += 1
                 model_stats[model]["total_tokens"] += tokens.get("total_tokens", 0)
 
-                # 置信度统计
+                # Confidence statistics
                 conf = data.get("confidence")
                 if conf is not None:
                     confidence_scores.append(conf)
@@ -366,7 +366,7 @@ def analyze_logs(
             except Exception as e:
                 logger.error(f"Error analyzing log {log_file}: {e}")
 
-        # 生成报告
+        # Generate report
         report = {
             "total_requests": total_requests,
             "total_tokens": total_tokens,
@@ -389,7 +389,7 @@ def analyze_logs(
 
 
 def cleanup_old_logs(days_to_keep: int = 30) -> int:
-    """清理旧日志文件"""
+    """Clean up old log files."""
     try:
         log_dir = ensure_log_directory()
         cutoff_time = datetime.utcnow().timestamp() - (days_to_keep * 86400)

@@ -332,6 +332,7 @@ class AuthenticationService(BaseService[User, UserRepository]):
                 "full_name": user.full_name,
                 "is_verified": user.is_verified,
                 "is_active": user.is_active,
+                "is_superuser": user.is_superuser,
             },
         }
 

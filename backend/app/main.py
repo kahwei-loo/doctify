@@ -12,7 +12,7 @@ import logging
 
 from app.core.config import get_settings
 from app.middleware import SecurityHeadersMiddleware, RateLimitMiddleware, get_security_middleware_config
-from app.api.v1.endpoints import auth, documents, projects, dashboard, settings, templates, edit_history, insights, rag, chat, websockets, knowledge_bases, data_sources, embeddings, assistants, public_chat
+from app.api.v1.endpoints import auth, documents, projects, dashboard, settings, templates, edit_history, insights, rag, chat, websockets, knowledge_bases, data_sources, embeddings, assistants, public_chat, ai_model_settings
 from app.db.database import init_db, close_db
 from app.db.redis import init_redis, close_redis
 from app.core.exceptions import (
@@ -139,6 +139,14 @@ def create_application() -> FastAPI:
             except Exception as e:
                 logger.warning(f"Redis initialization failed (non-critical): {e}")
 
+        # Pre-load AI model settings from DB into gateway cache
+        try:
+            from app.db.database import get_session_factory
+            from app.services.ai.gateway import load_settings_into_cache
+            await load_settings_into_cache(get_session_factory())
+        except Exception as e:
+            logger.warning(f"AI model settings cache load skipped: {e}")
+
         logger.info("Application startup complete")
 
     @app.on_event("shutdown")
@@ -215,6 +223,7 @@ def create_application() -> FastAPI:
     app.include_router(websockets.router, prefix="/api/v1", tags=["WebSockets"])  # Phase 11: Real-time WebSocket endpoints
     app.include_router(assistants.router, prefix="/api/v1/assistants", tags=["AI Assistants"])  # Week 5: AI Assistants endpoints
     app.include_router(public_chat.router, prefix="/api/v1", tags=["Public Chat"])  # Week 5: Public Chat Widget endpoints
+    app.include_router(ai_model_settings.router, prefix="/api/v1/admin/ai-models", tags=["AI Model Settings"])
 
     # ========================================================================
     # Exception Handlers

@@ -333,7 +333,7 @@ def sanitize_filename(filename: str) -> str:
     import re
     import os
 
-    # Unicode normalization (防止同形异义字符攻击)
+    # Unicode normalization (prevent homoglyph attacks)
     filename = unicodedata.normalize('NFKD', filename)
 
     # Get just the basename (remove any path components)
@@ -342,7 +342,7 @@ def sanitize_filename(filename: str) -> str:
     # Remove path traversal attempts
     filename = filename.replace("../", "").replace("..\\", "")
 
-    # Remove NULL bytes (防止截断攻击)
+    # Remove NULL bytes (prevent truncation attacks)
     filename = filename.replace('\x00', '')
 
     # Replace unsafe characters with underscore
@@ -357,7 +357,7 @@ def sanitize_filename(filename: str) -> str:
     if filename.startswith('.'):
         filename = '_' + filename
 
-    # Limit length (留空间给扩展名)
+    # Limit length (leave room for file extension)
     max_length = 255
     if len(filename) > max_length:
         name, ext = filename.rsplit(".", 1) if "." in filename else (filename, "")
