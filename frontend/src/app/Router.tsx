@@ -13,7 +13,7 @@ import { selectIsDemoMode } from '../store/slices/demoSlice';
 import { useGetCurrentUserQuery } from '../store/api/authApi';
 
 // Lazy load pages for code splitting
-const LandingPage = lazy(() => import('../pages/LandingPage'));
+const LandingPage = lazy(() => import('../pages/landing'));
 const LoginPage = lazy(() => import('../pages/LoginPage'));
 const RegisterPage = lazy(() => import('../pages/RegisterPage'));
 const DashboardPage = lazy(() => import('../pages/DashboardPage'));
