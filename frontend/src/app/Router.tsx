@@ -45,7 +45,7 @@ const PageLoader: React.FC = () => (
  * Landing guard for the public '/' route.
  * Redirects authenticated/demo users to dashboard; shows landing page otherwise.
  */
-const LandingGuard: React.FC = () => {
+export const LandingGuard: React.FC = () => {
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const isDemoMode = useAppSelector(selectIsDemoMode);
   const hasToken = localStorage.getItem('access_token') !== null;
@@ -66,7 +66,7 @@ const LandingGuard: React.FC = () => {
  * Uses Redux auth state with backend verification for security
  * Allows demo mode access without authentication
  */
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const authLoading = useAppSelector(selectAuthLoading);
   const isDemoMode = useAppSelector(selectIsDemoMode);
