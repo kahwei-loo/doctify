@@ -13,8 +13,6 @@
 # - Does NOT expose database ports
 # - Implements proper security controls
 
-version: '3.8'
-
 services:
   # ============================================================================
   # PostgreSQL Database (with pgvector for RAG)
@@ -49,7 +47,7 @@ services:
     container_name: doctify-redis-dev
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "16379:6379"  # Host port 16379 to avoid Windows Hyper-V port reservation (6290-6589)
     volumes:
       - redis_data:/data
     networks:
@@ -158,9 +156,12 @@ services:
       - backend_temp:/app/temp_uploads
       - backend_logs:/app/logs
     depends_on:
-      - doctify-postgres
-      - doctify-redis
-      - doctify-backend
+      doctify-postgres:
+        condition: service_healthy
+      doctify-redis:
+        condition: service_healthy
+      doctify-backend:
+        condition: service_healthy
     networks:
       - doctify-network
     command: celery -A app.tasks.celery_app worker -l info --pool=solo -Q ocr_queue
