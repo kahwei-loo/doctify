@@ -13,6 +13,7 @@ import Navbar from './Navbar';
 import HeroSection from './HeroSection';
 import FeaturesSection from './FeaturesSection';
 import HowItWorksSection from './HowItWorksSection';
+import SocialProofSection from './SocialProofSection';
 import CTASection from './CTASection';
 import Footer from './Footer';
 
@@ -31,6 +32,7 @@ const LandingPage: React.FC = () => {
       <HeroSection onTryDemo={handleTryDemo} />
       <FeaturesSection />
       <HowItWorksSection />
+      <SocialProofSection />
       <CTASection onTryDemo={handleTryDemo} />
       <Footer />
     </div>

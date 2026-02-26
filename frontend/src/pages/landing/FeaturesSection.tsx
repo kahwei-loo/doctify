@@ -47,11 +47,19 @@ const FeaturesSection: React.FC = () => {
                   className={`absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r ${feature.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}
                 />
 
-                <div
+                {/* Hover shine sweep */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none overflow-hidden">
+                  <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/[0.07] to-transparent" />
+                </div>
+
+                {/* Icon with hover micro-interaction */}
+                <motion.div
                   className={`mb-5 inline-flex rounded-xl p-3 bg-gradient-to-br ${feature.gradient} shadow-lg`}
+                  whileHover={{ scale: 1.1, rotate: -5 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 15 }}
                 >
                   <Icon className="h-6 w-6 text-white" />
-                </div>
+                </motion.div>
 
                 <h3 className="text-lg font-semibold">{feature.title}</h3>
                 <p className="mt-2 text-sm text-muted-foreground/80 leading-relaxed">

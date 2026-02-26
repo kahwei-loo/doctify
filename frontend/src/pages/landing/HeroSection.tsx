@@ -1,6 +1,6 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, useInView } from 'framer-motion';
 import { Sparkles, ArrowRight, Shield, Brain, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { blurFadeUp, staggerContainer } from './animations';
@@ -17,8 +17,50 @@ const trustIndicators = [
   { icon: Shield, label: 'Enterprise Security' },
 ];
 
+const chartHeights = [40, 65, 45, 80, 55, 90, 70, 85, 60, 95, 75, 88];
+
+const stats = [
+  { label: 'Documents', value: 1247, suffix: '', color: 'text-landing-teal', sub: '+12% this week' },
+  { label: 'OCR Accuracy', value: 98.5, suffix: '%', color: 'text-landing-accent', sub: 'Multi-AI verified' },
+  { label: 'RAG Queries', value: 3891, suffix: '', color: 'text-landing-rose', sub: 'Grounded answers' },
+];
+
+function useCountUp(target: number, duration = 1800, start = false) {
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    if (!start) return;
+    let startTime: number | null = null;
+    let raf: number;
+    const step = (ts: number) => {
+      if (!startTime) startTime = ts;
+      const progress = Math.min((ts - startTime) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+      setValue(eased * target);
+      if (progress < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [target, duration, start]);
+  return value;
+}
+
+function formatStat(value: number, target: number, suffix: string) {
+  if (suffix === '%') return value.toFixed(1) + '%';
+  return Math.round(value).toLocaleString() + suffix;
+}
+
 const HeroSection: React.FC<HeroSectionProps> = ({ onTryDemo }) => {
   const navigate = useNavigate();
+  const mockupRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(mockupRef, { once: true });
+  const [animateChart, setAnimateChart] = useState(false);
+
+  useEffect(() => {
+    if (isInView) {
+      const timer = setTimeout(() => setAnimateChart(true), 400);
+      return () => clearTimeout(timer);
+    }
+  }, [isInView]);
 
   return (
     <section className="relative overflow-hidden min-h-[80vh] flex items-center">
@@ -108,8 +150,9 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onTryDemo }) => {
             </motion.div>
           </motion.div>
 
-          {/* Right: Product mockup */}
+          {/* Right: Animated product mockup */}
           <motion.div
+            ref={mockupRef}
             initial={{ opacity: 0, x: 60, filter: 'blur(10px)' }}
             animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
             transition={{ duration: 0.8, delay: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
@@ -131,35 +174,24 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onTryDemo }) => {
                 </div>
                 {/* Dashboard mockup content */}
                 <div className="p-6 space-y-4 min-h-[320px]">
-                  {/* Stat row */}
+                  {/* Animated stat row */}
                   <div className="grid grid-cols-3 gap-3">
-                    <div className="glass-card rounded-xl p-4">
-                      <div className="text-xs text-muted-foreground/60">Documents</div>
-                      <div className="text-2xl font-bold mt-1">1,247</div>
-                      <div className="text-xs text-landing-teal mt-1">+12% this week</div>
-                    </div>
-                    <div className="glass-card rounded-xl p-4">
-                      <div className="text-xs text-muted-foreground/60">OCR Accuracy</div>
-                      <div className="text-2xl font-bold mt-1">98.5%</div>
-                      <div className="text-xs text-landing-accent mt-1">Multi-AI verified</div>
-                    </div>
-                    <div className="glass-card rounded-xl p-4">
-                      <div className="text-xs text-muted-foreground/60">RAG Queries</div>
-                      <div className="text-2xl font-bold mt-1">3,891</div>
-                      <div className="text-xs text-landing-rose mt-1">Grounded answers</div>
-                    </div>
+                    {stats.map((stat) => (
+                      <AnimatedStat key={stat.label} {...stat} animate={isInView} />
+                    ))}
                   </div>
-                  {/* Simulated chart area */}
+                  {/* Animated chart */}
                   <div className="glass-card rounded-xl p-4 h-[140px] flex items-end gap-1.5">
-                    {[40, 65, 45, 80, 55, 90, 70, 85, 60, 95, 75, 88].map(
-                      (h, i) => (
-                        <div
-                          key={i}
-                          className="flex-1 rounded-t-sm bg-gradient-to-t from-landing-accent/40 to-landing-teal/40"
-                          style={{ height: `${h}%` }}
-                        />
-                      )
-                    )}
+                    {chartHeights.map((h, i) => (
+                      <div
+                        key={i}
+                        className="flex-1 rounded-t-sm bg-gradient-to-t from-landing-accent/40 to-landing-teal/40 transition-all duration-700 ease-out"
+                        style={{
+                          height: animateChart ? `${h}%` : '0%',
+                          transitionDelay: `${i * 60}ms`,
+                        }}
+                      />
+                    ))}
                   </div>
                 </div>
               </div>
@@ -197,5 +229,22 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onTryDemo }) => {
     </section>
   );
 };
+
+function AnimatedStat({
+  label, value, suffix, color, sub, animate,
+}: {
+  label: string; value: number; suffix: string; color: string; sub: string; animate: boolean;
+}) {
+  const count = useCountUp(value, 1800, animate);
+  return (
+    <div className="glass-card rounded-xl p-4">
+      <div className="text-xs text-muted-foreground/60">{label}</div>
+      <div className="text-2xl font-bold mt-1 tabular-nums">
+        {formatStat(count, value, suffix)}
+      </div>
+      <div className={`text-xs ${color} mt-1`}>{sub}</div>
+    </div>
+  );
+}
 
 export default HeroSection;
