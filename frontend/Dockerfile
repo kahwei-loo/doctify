@@ -6,7 +6,7 @@
 # ===========================================
 # Stage 1: Builder
 # ===========================================
-FROM node:18-alpine as builder
+FROM node:22-alpine AS builder
 
 LABEL maintainer="Kah Wei Loo <noreply@kahweiloo.com>"
 LABEL description="Doctify Frontend - React TypeScript Application"
@@ -19,7 +19,7 @@ COPY package*.json ./
 
 # Install dependencies
 # Use ci for reproducible builds
-RUN npm ci --only=production=false
+RUN npm ci
 
 # Copy application source
 COPY . .
@@ -31,7 +31,7 @@ RUN npm run build
 # ===========================================
 # Stage 2: Production (Nginx)
 # ===========================================
-FROM nginx:alpine
+FROM nginx:1.27-alpine
 
 # Install curl for health checks
 RUN apk add --no-cache curl

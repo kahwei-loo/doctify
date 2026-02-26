@@ -6,7 +6,7 @@
 # ===========================================
 # Stage 1: Builder
 # ===========================================
-FROM python:3.11-slim as builder
+FROM python:3.11-slim AS builder
 
 LABEL maintainer="Kah Wei Loo <noreply@kahweiloo.com>"
 LABEL description="Doctify Backend - AI-Powered Document Intelligence Platform"
@@ -42,8 +42,9 @@ ENV PYTHONUNBUFFERED=1 \
     PORT=8000
 
 # Create application user (security best practice - run as non-root)
-RUN groupadd -r appuser && \
-    useradd -r -g appuser -d /home/appuser -s /bin/bash appuser && \
+# Explicit UID/GID 1000 to match docker-compose user: "1000:1000"
+RUN groupadd -g 1000 appuser && \
+    useradd -u 1000 -g appuser -d /home/appuser -s /bin/bash appuser && \
     mkdir -p /home/appuser && \
     chown -R appuser:appuser /home/appuser
 

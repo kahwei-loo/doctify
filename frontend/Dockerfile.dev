@@ -3,7 +3,7 @@
 # ===========================================
 # Development image with hot-reload support
 
-FROM node:18-alpine
+FROM node:22-alpine
 
 LABEL maintainer="Kah Wei Loo <noreply@kahweiloo.com>"
 LABEL description="Doctify Frontend Development Environment"

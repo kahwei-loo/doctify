@@ -12,40 +12,37 @@
 # - Read-only root filesystem where possible
 # - Health checks for all services
 #
+# Deployment Model:
+#   - Frontend: Vercel (not included in this compose file)
+#   - Backend + infra: This compose file on cloud VPS
+#
 # Usage:
-#   docker-compose -f docker-compose.prod.yml up -d
+#   docker compose -f docker-compose.prod.yml --env-file .env.prod up -d
 #
 # Prerequisites:
-#   1. Create Docker secrets (see below)
-#   2. Configure .env.prod file
-#   3. Ensure domain DNS is configured
-
-version: '3.8'
+#   1. Configure .env.prod file with all secrets (POSTGRES_PASSWORD, REDIS_PASSWORD, etc.)
+#   2. Ensure domain DNS is configured
+#   3. For Docker Swarm mode, create secrets instead of using .env.prod
 
 # ===========================================
-# Docker Secrets (More secure than env vars)
+# Docker Secrets (optional, for Swarm mode)
 # ===========================================
-# Create secrets before running:
+# For single-server deployment: use .env.prod file instead
+# For Docker Swarm mode: uncomment and create secrets:
 #   echo "your_password" | docker secret create postgres_password -
-#   echo "your_password" | docker secret create redis_password -
 #   echo "your_secret" | docker secret create secret_key -
-#   echo "your_api_key" | docker secret create openai_api_key -
-secrets:
-  postgres_password:
-    external: true
-  redis_password:
-    external: true
-  secret_key:
-    external: true
-  openai_api_key:
-    external: true
+# secrets:
+#   postgres_password:
+#     external: true
+#   secret_key:
+#     external: true
 
 services:
   # ============================================================================
   # Traefik - Reverse Proxy & SSL Termination
   # ============================================================================
   traefik:
-    image: traefik:v3.0
+    image: traefik:v3.3
     container_name: doctify-traefik
     restart: always
     security_opt:
@@ -57,7 +54,7 @@ services:
       - ACME_EMAIL=${ACME_EMAIL}
       - TRAEFIK_DASHBOARD_USER=${TRAEFIK_DASHBOARD_USER}
     volumes:
-      - /var/run/docker.sock:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./infrastructure/docker/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
       - ./infrastructure/docker/traefik/dynamic:/etc/traefik/dynamic:ro
       - traefik_letsencrypt:/letsencrypt
@@ -96,11 +93,9 @@ services:
     user: "999:999"  # postgres user
     environment:
       - POSTGRES_USER=${POSTGRES_USER:-doctify}
-      - POSTGRES_PASSWORD_FILE=/run/secrets/postgres_password
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB:-doctify_production}
       - PGDATA=/var/lib/postgresql/data/pgdata
-    secrets:
-      - postgres_password
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./infrastructure/docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
@@ -135,19 +130,17 @@ services:
     restart: always
     user: "999:999"  # redis user
     command: >
-      sh -c "redis-server
+      redis-server
       --appendonly yes
-      --requirepass $$(cat /run/secrets/redis_password)
+      --requirepass ${REDIS_PASSWORD}
       --maxmemory 512mb
-      --maxmemory-policy allkeys-lru"
-    secrets:
-      - redis_password
+      --maxmemory-policy allkeys-lru
     volumes:
       - redis_data:/data
     networks:
       - doctify-internal  # Internal only
     healthcheck:
-      test: ["CMD", "redis-cli", "--no-auth-warning", "-a", "$$(cat /run/secrets/redis_password)", "ping"]
+      test: ["CMD-SHELL", "redis-cli --no-auth-warning -a ${REDIS_PASSWORD} ping"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -186,26 +179,25 @@ services:
       - DEBUG=false
       - LOG_LEVEL=WARNING
       - LOG_FORMAT=json
-      # PostgreSQL
+      # PostgreSQL (individual fields read by config.py)
       - POSTGRES_HOST=doctify-postgres
       - POSTGRES_PORT=5432
       - POSTGRES_USER=${POSTGRES_USER:-doctify}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB:-doctify_production}
-      # Redis (password from secret file)
-      - REDIS_HOST=doctify-redis
-      - REDIS_PORT=6379
-      # Celery
-      - CELERY_BROKER_URL=redis://doctify-redis:6379/1
-      - CELERY_RESULT_BACKEND=redis://doctify-redis:6379/1
-      # CORS
+      # Redis (config.py reads REDIS_URL, not REDIS_HOST/PORT)
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@doctify-redis:6379/0
+      # Celery (must include Redis password)
+      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD}@doctify-redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://:${REDIS_PASSWORD}@doctify-redis:6379/1
+      # CORS (frontend on Vercel)
       - BACKEND_CORS_ORIGINS=["https://${DOMAIN}","https://www.${DOMAIN}"]
+      # AI
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL}
       # Metrics
+      - SECRET_KEY=${SECRET_KEY}
       - ENABLE_PROMETHEUS=true
-    secrets:
-      - postgres_password
-      - redis_password
-      - secret_key
-      - openai_api_key
     volumes:
       - backend_uploads:/app/uploads
       - backend_logs:/app/logs
@@ -277,18 +269,17 @@ services:
       - POSTGRES_HOST=doctify-postgres
       - POSTGRES_PORT=5432
       - POSTGRES_USER=${POSTGRES_USER:-doctify}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB:-doctify_production}
       # Redis
-      - REDIS_HOST=doctify-redis
-      - REDIS_PORT=6379
-      # Celery
-      - CELERY_BROKER_URL=redis://doctify-redis:6379/1
-      - CELERY_RESULT_BACKEND=redis://doctify-redis:6379/1
-    secrets:
-      - postgres_password
-      - redis_password
-      - secret_key
-      - openai_api_key
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@doctify-redis:6379/0
+      # Celery (must include Redis password)
+      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD}@doctify-redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://:${REDIS_PASSWORD}@doctify-redis:6379/1
+      # AI
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL}
+      - SECRET_KEY=${SECRET_KEY}
     volumes:
       - backend_uploads:/app/uploads
       - backend_logs:/app/logs
@@ -336,14 +327,9 @@ services:
       - ENVIRONMENT=production
       - DEBUG=false
       - LOG_LEVEL=WARNING
-      # Redis
-      - REDIS_HOST=doctify-redis
-      - REDIS_PORT=6379
-      # Celery
-      - CELERY_BROKER_URL=redis://doctify-redis:6379/1
-      - CELERY_RESULT_BACKEND=redis://doctify-redis:6379/1
-    secrets:
-      - redis_password
+      # Celery (must include Redis password)
+      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD}@doctify-redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://:${REDIS_PASSWORD}@doctify-redis:6379/1
     volumes:
       - celery_beat_data:/app/celerybeat-schedule
     tmpfs:
@@ -370,7 +356,7 @@ services:
   # Prometheus (Metrics Collection)
   # ============================================================================
   prometheus:
-    image: prom/prometheus:v2.48.0
+    image: prom/prometheus:v3.2.1
     container_name: doctify-prometheus-prod
     restart: always
     user: "65534:65534"  # nobody user
@@ -417,14 +403,14 @@ services:
   # Grafana (Monitoring Dashboard)
   # ============================================================================
   grafana:
-    image: grafana/grafana:10.2.2
+    image: grafana/grafana:11.5.2
     container_name: doctify-grafana-prod
     restart: always
     user: "472:472"  # grafana user
     security_opt:
       - no-new-privileges:true
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD__FILE=/run/secrets/grafana_password
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
       - GF_USERS_ALLOW_SIGN_UP=false
       - GF_SERVER_ROOT_URL=https://grafana.${DOMAIN}
       - GF_ALERTING_ENABLED=true
@@ -463,7 +449,7 @@ services:
   # AlertManager (Notifications)
   # ============================================================================
   alertmanager:
-    image: prom/alertmanager:v0.26.0
+    image: prom/alertmanager:v0.28.1
     container_name: doctify-alertmanager-prod
     restart: always
     user: "65534:65534"
