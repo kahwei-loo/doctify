@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { blurFadeUp, staggerContainer } from './animations';
+import { blurFadeUp, slideInFromLeft, staggerSlow } from './animations';
 import { steps } from './constants';
 
 const HowItWorksSection: React.FC = () => {
@@ -12,7 +12,7 @@ const HowItWorksSection: React.FC = () => {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: '-100px' }}
-          variants={blurFadeUp}
+          variants={slideInFromLeft}
         >
           <h2 className="text-3xl sm:text-4xl font-bold">
             How it{' '}
@@ -30,7 +30,7 @@ const HowItWorksSection: React.FC = () => {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: '-100px' }}
-          variants={staggerContainer}
+          variants={staggerSlow}
         >
           {steps.map((step, index) => {
             const Icon = step.icon;
