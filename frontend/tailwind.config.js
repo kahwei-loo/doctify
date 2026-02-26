@@ -48,6 +48,18 @@ export default {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
+        'landing-accent': 'hsl(var(--landing-accent) / <alpha-value>)',
+        'landing-teal': 'hsl(var(--landing-teal) / <alpha-value>)',
+        'landing-rose': 'hsl(var(--landing-rose) / <alpha-value>)',
+      },
+      backgroundImage: {
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+        'mesh-gradient': 'radial-gradient(ellipse at 20% 50%, var(--mesh-1) 0%, transparent 50%), radial-gradient(ellipse at 80% 20%, var(--mesh-2) 0%, transparent 50%), radial-gradient(ellipse at 50% 80%, var(--mesh-3) 0%, transparent 50%)',
+      },
+      boxShadow: {
+        'glow-sm': '0 0 15px -3px hsl(var(--landing-accent) / 0.3)',
+        'glow-md': '0 0 30px -5px hsl(var(--landing-accent) / 0.4)',
+        'glow-lg': '0 0 60px -10px hsl(var(--landing-accent) / 0.3)',
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -82,6 +94,19 @@ export default {
           from: { transform: 'translateX(0)' },
           to: { transform: 'translateX(100%)' },
         },
+        'float': {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-10px)' },
+        },
+        'pulse-glow': {
+          '0%, 100%': { boxShadow: '0 0 20px hsl(var(--landing-accent) / 0.2)' },
+          '50%': { boxShadow: '0 0 40px hsl(var(--landing-accent) / 0.5)' },
+        },
+        'gradient-shift': {
+          '0%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
+          '100%': { backgroundPosition: '0% 50%' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -90,6 +115,9 @@ export default {
         'fade-out': 'fade-out 0.2s ease',
         'slide-in-from-right': 'slide-in-from-right 0.3s ease-out',
         'slide-out-to-right': 'slide-out-to-right 0.3s ease-out',
+        'float': 'float 6s ease-in-out infinite',
+        'pulse-glow': 'pulse-glow 3s ease-in-out infinite',
+        'gradient-shift': 'gradient-shift 8s ease infinite',
       },
     },
   },
