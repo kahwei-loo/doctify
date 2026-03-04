@@ -222,6 +222,134 @@ export const DEMO_SECURITY_SETTINGS: SecuritySettings = {
   ],
 };
 
+export const DEMO_AI_MODEL_SETTINGS = {
+  settings: [
+    {
+      purpose: 'chat',
+      model_name: 'openai/gpt-4o',
+      display_name: 'GPT-4o',
+      description: 'Primary chat model for general conversations',
+      is_active: true,
+      source: 'database' as const,
+    },
+    {
+      purpose: 'chat_fast',
+      model_name: 'google/gemini-2.5-flash-lite',
+      display_name: 'Gemini 2.5 Flash Lite',
+      description: 'Fast lightweight model for quick responses',
+      is_active: true,
+      source: 'database' as const,
+    },
+    {
+      purpose: 'embedding',
+      model_name: 'openai/text-embedding-3-small',
+      display_name: 'text-embedding-3-small',
+      description: 'Document embedding for semantic search',
+      is_active: true,
+      source: 'database' as const,
+    },
+    {
+      purpose: 'vision',
+      model_name: 'openai/gpt-4o',
+      display_name: 'GPT-4o (Vision)',
+      description: 'Multimodal model for OCR and document analysis',
+      is_active: true,
+      source: 'database' as const,
+    },
+    {
+      purpose: 'classifier',
+      model_name: 'openai/gpt-4o-mini',
+      display_name: 'GPT-4o Mini',
+      description: 'Intent classification and routing',
+      is_active: true,
+      source: 'database' as const,
+    },
+    {
+      purpose: 'reranker',
+      model_name: 'cohere/rerank-english-v3.0',
+      display_name: 'Cohere Rerank v3',
+      description: 'RAG result reranking for improved relevance',
+      is_active: true,
+      source: 'database' as const,
+    },
+  ],
+  env_defaults: {
+    chat: 'openai/gpt-4o',
+    chat_fast: 'google/gemini-2.5-flash-lite',
+    embedding: 'openai/text-embedding-3-small',
+    vision: 'openai/gpt-4o',
+    classifier: 'openai/gpt-4o-mini',
+    reranker: 'cohere/rerank-english-v3.0',
+  },
+};
+
+export const DEMO_MODEL_CATALOG = [
+  {
+    id: 'cat-001',
+    model_id: 'openai/gpt-4o',
+    display_name: 'GPT-4o',
+    provider: 'OpenAI',
+    purposes: ['chat', 'vision', 'classifier'],
+    is_active: true,
+  },
+  {
+    id: 'cat-002',
+    model_id: 'openai/gpt-4o-mini',
+    display_name: 'GPT-4o Mini',
+    provider: 'OpenAI',
+    purposes: ['chat', 'chat_fast', 'classifier'],
+    is_active: true,
+  },
+  {
+    id: 'cat-003',
+    model_id: 'openai/text-embedding-3-small',
+    display_name: 'text-embedding-3-small',
+    provider: 'OpenAI',
+    purposes: ['embedding'],
+    is_active: true,
+  },
+  {
+    id: 'cat-004',
+    model_id: 'anthropic/claude-3-5-sonnet-20241022',
+    display_name: 'Claude 3.5 Sonnet',
+    provider: 'Anthropic',
+    purposes: ['chat', 'vision'],
+    is_active: true,
+  },
+  {
+    id: 'cat-005',
+    model_id: 'anthropic/claude-3-haiku-20240307',
+    display_name: 'Claude 3 Haiku',
+    provider: 'Anthropic',
+    purposes: ['chat', 'chat_fast', 'classifier'],
+    is_active: true,
+  },
+  {
+    id: 'cat-006',
+    model_id: 'google/gemini-2.5-flash-lite',
+    display_name: 'Gemini 2.5 Flash Lite',
+    provider: 'Google',
+    purposes: ['chat', 'chat_fast'],
+    is_active: true,
+  },
+  {
+    id: 'cat-007',
+    model_id: 'google/gemini-1.5-pro',
+    display_name: 'Gemini 1.5 Pro',
+    provider: 'Google',
+    purposes: ['chat', 'vision'],
+    is_active: true,
+  },
+  {
+    id: 'cat-008',
+    model_id: 'cohere/rerank-english-v3.0',
+    display_name: 'Cohere Rerank v3',
+    provider: 'Cohere',
+    purposes: ['reranker'],
+    is_active: true,
+  },
+];
+
 // Combined settings object for single fetch
 export const DEMO_ALL_SETTINGS = {
   profile: DEMO_USER_PROFILE,
