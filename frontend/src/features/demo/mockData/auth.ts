@@ -6,10 +6,13 @@ export const DEMO_USER = {
   id: 'demo-user-001',
   email: 'demo@doctify.ai',
   name: 'Demo User',
+  full_name: 'Demo User',
+  avatar_url: null,
   created_at: '2024-01-01T00:00:00Z',
   is_active: true,
   is_verified: true,
-  role: 'user',
+  is_superuser: true,
+  role: 'admin',
 };
 
 export const DEMO_TOKEN = {

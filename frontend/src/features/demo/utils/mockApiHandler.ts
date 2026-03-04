@@ -35,6 +35,10 @@ import {
   DEMO_BILLING_INFO,
   DEMO_SECURITY_SETTINGS,
   DEMO_ALL_SETTINGS,
+  DEMO_AI_MODEL_SETTINGS,
+  DEMO_MODEL_CATALOG,
+  // RAG
+  DEMO_RAG_RESPONSES,
   // Unified Query
   matchUnifiedQueryMock,
 } from '../mockData';
@@ -780,6 +784,206 @@ export const mockApiHandler = async (
         },
       },
     };
+  }
+
+  // ===== ADMIN: AI MODEL SETTINGS =====
+
+  // GET /admin/ai-models — full settings response
+  if (path === '/api/v1/admin/ai-models' || path.endsWith('/admin/ai-models')) {
+    return {
+      data: {
+        success: true,
+        data: DEMO_AI_MODEL_SETTINGS,
+      },
+    };
+  }
+
+  // GET /admin/ai-models/catalog — model catalog list
+  if (path === '/api/v1/admin/ai-models/catalog' || path.endsWith('/admin/ai-models/catalog')) {
+    return {
+      data: {
+        success: true,
+        data: DEMO_MODEL_CATALOG,
+      },
+    };
+  }
+
+  // PATCH /admin/ai-models/:purpose — update a model setting (read-only in demo)
+  if (path.match(/\/admin\/ai-models\/[\w-]+$/) && !path.endsWith('/catalog')) {
+    return { data: { success: true, data: DEMO_AI_MODEL_SETTINGS } };
+  }
+
+  // POST/PATCH/DELETE /admin/ai-models/catalog/:id — catalog mutations (read-only in demo)
+  if (path.match(/\/admin\/ai-models\/catalog\/[\w-]+$/)) {
+    return { data: { success: true } };
+  }
+
+  // ===== RAG: DIRECT QUERY & CONVERSATIONS =====
+
+  // POST /rag/query — direct RAG question
+  if (path === '/api/v1/rag/query' || path.endsWith('/rag/query')) {
+    const queryText: string = args?.body?.query || 'What is the vacation policy?';
+    const matchedKey = Object.keys(DEMO_RAG_RESPONSES).find((k) =>
+      DEMO_RAG_QUERIES.find((q) => q.query_id === k)?.question
+        .toLowerCase()
+        .includes(queryText.toLowerCase().split(' ')[0])
+    );
+    const response = matchedKey
+      ? DEMO_RAG_RESPONSES[matchedKey as keyof typeof DEMO_RAG_RESPONSES]
+      : DEMO_RAG_RESPONSES['rag-query-001'];
+    return {
+      data: {
+        success: true,
+        data: {
+          query_id: `rag-query-${Date.now()}`,
+          question: queryText,
+          ...response,
+        },
+      },
+    };
+  }
+
+  // GET /rag/conversations — conversation list
+  if (
+    (path === '/api/v1/rag/conversations' || path.endsWith('/rag/conversations')) &&
+    args?.method !== 'POST'
+  ) {
+    const limit = parseInt(url.searchParams.get('limit') || '50');
+    return {
+      data: {
+        success: true,
+        data: {
+          items: DEMO_RAG_QUERIES.slice(0, limit).map((q) => ({
+            conversation_id: q.query_id,
+            title: q.question,
+            kb_id: q.kb_id,
+            created_at: q.created_at,
+            message_count: 2,
+          })),
+          total: DEMO_RAG_QUERIES.length,
+        },
+      },
+    };
+  }
+
+  // POST /rag/conversations — create conversation (demo: return stub)
+  if (
+    (path === '/api/v1/rag/conversations' || path.endsWith('/rag/conversations')) &&
+    args?.method === 'POST'
+  ) {
+    return {
+      data: {
+        success: true,
+        data: {
+          conversation_id: `rag-conv-${Date.now()}`,
+          title: 'New Conversation',
+          created_at: new Date().toISOString(),
+        },
+      },
+    };
+  }
+
+  // GET /rag/evaluations — evaluation list (empty in demo)
+  if (path.includes('/rag/evaluations')) {
+    return {
+      data: {
+        success: true,
+        data: { items: [], total: 0 },
+      },
+    };
+  }
+
+  // GET /rag/feedback/:id
+  if (path.match(/\/rag\/feedback\/[\w-]+$/)) {
+    return { data: { success: true } };
+  }
+
+  // ===== SEARCH ENDPOINTS =====
+
+  // GET /documents/search
+  if (path === '/api/v1/documents/search' || path.endsWith('/documents/search')) {
+    const q = url.searchParams.get('q') || '';
+    const filtered = DEMO_DOCUMENTS.filter(
+      (d) =>
+        !q ||
+        d.filename.toLowerCase().includes(q.toLowerCase()) ||
+        (d.mime_type || '').toLowerCase().includes(q.toLowerCase())
+    );
+    return {
+      data: {
+        success: true,
+        data: { items: filtered.slice(0, 20), total: filtered.length },
+      },
+    };
+  }
+
+  // GET /projects/search
+  if (path === '/api/v1/projects/search' || path.endsWith('/projects/search')) {
+    const q = url.searchParams.get('q') || '';
+    const filtered = DEMO_PROJECTS.filter(
+      (p) =>
+        !q ||
+        p.name.toLowerCase().includes(q.toLowerCase()) ||
+        (p.description || '').toLowerCase().includes(q.toLowerCase())
+    );
+    return {
+      data: {
+        success: true,
+        data: { items: filtered.slice(0, 20), total: filtered.length },
+      },
+    };
+  }
+
+  // ===== MISC ENDPOINTS =====
+
+  // GET /dashboard/recent (alias for recent-activity)
+  if (path === '/api/v1/dashboard/recent' || path.endsWith('/dashboard/recent')) {
+    return {
+      data: {
+        success: true,
+        data: { items: DEMO_RECENT_ACTIVITY.slice(0, 10), total: DEMO_RECENT_ACTIVITY.length },
+      },
+    };
+  }
+
+  // POST /auth/change-password (demo: always succeed)
+  if (path === '/api/v1/auth/change-password' || path.endsWith('/auth/change-password')) {
+    return { data: { success: true, message: 'Password updated successfully' } };
+  }
+
+  // GET /auth/api-keys (RTK Query path via authApi)
+  if (path === '/api/v1/auth/api-keys' || path.endsWith('/auth/api-keys')) {
+    return {
+      data: {
+        success: true,
+        data: DEMO_API_KEYS,
+      },
+    };
+  }
+
+  // Edit history — return empty (feature not demoed)
+  if (path.includes('/edit-history')) {
+    return {
+      data: {
+        success: true,
+        data: { items: [], total: 0 },
+      },
+    };
+  }
+
+  // POST mutations that are no-ops in demo (delete, cancel, retry, etc.)
+  if (
+    args?.method === 'DELETE' ||
+    path.includes('/cancel') ||
+    path.includes('/retry') ||
+    path.includes('/confirm') ||
+    path.includes('/validate-quality') ||
+    path.includes('/process') ||
+    path.includes('/export') ||
+    path.includes('/invalidate-cache') ||
+    path.includes('/logout')
+  ) {
+    return { data: { success: true } };
   }
 
   // Default: endpoint not found
