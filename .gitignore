@@ -87,6 +87,7 @@ pnpm-debug.log*
 
 # Testing
 coverage/
+coverage.xml
 .nyc_output/
 test-results/
 playwright-report/
@@ -139,10 +140,22 @@ temp_*
 tmpclaude-*-cwd
 nul
 
-# Playwright MCP artifacts (screenshots, console logs)
-.playwright-mcp/page-*.png
-.playwright-mcp/console-*.log
+# Playwright MCP artifacts (all screenshots, snapshots, logs)
+.playwright-mcp/
 
 # Root-level screenshots (temporary verification artifacts)
 settings-*.png
 ai-models-*.png
+/*.png
+/*.jpg
+/*.jpeg
+
+# AI working documents — Claude Code analysis, audits, research, planning docs
+# All Claude-generated working files go here; gitignored entirely
+claudedocs/
+
+# Docker Compose alternatives and experiments
+docker-compose.prod.optimized.yml
+
+# Temporary docs generated during development
+docs/temp/
