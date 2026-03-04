@@ -146,3 +146,16 @@ nul
 # Root-level screenshots (temporary verification artifacts)
 settings-*.png
 ai-models-*.png
+/*.png
+/*.jpg
+/*.jpeg
+
+# AI working documents — Claude Code analysis, audits, research, planning docs
+# All Claude-generated working files go here; gitignored entirely
+claudedocs/
+
+# Docker Compose alternatives and experiments
+docker-compose.prod.optimized.yml
+
+# Temporary docs generated during development
+docs/temp/
