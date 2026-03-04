@@ -40,7 +40,7 @@ function renderAnswerWithSourceLinks(
   onSourceClick: (index: number) => void
 ): React.ReactNode {
   // Match (Sources 1, 2, 3), [Source 1, Source 2, Source 3], etc.
-  const pattern = /[(\[]Sources?\s+([^)\]]+)[)\]]/gi;
+  const pattern = /[([]Sources?\s+([^)\]]+)[)\]]/gi;
   const parts: React.ReactNode[] = [];
   let lastIndex = 0;
   let match;

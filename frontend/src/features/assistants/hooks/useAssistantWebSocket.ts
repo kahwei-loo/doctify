@@ -231,7 +231,6 @@ export function useAssistantWebSocket({
       shouldConnectRef.current = false;
       disconnect();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [assistantId, conversationId, token, enabled]);
 
   return {

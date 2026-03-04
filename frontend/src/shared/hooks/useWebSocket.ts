@@ -132,7 +132,6 @@ export function useWebSocket(url: string, options: UseWebSocketOptions = {}): Us
       shouldConnectRef.current = false;
       disconnect();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [url]);
 
   return {
