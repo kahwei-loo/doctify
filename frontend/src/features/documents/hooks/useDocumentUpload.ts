@@ -5,14 +5,14 @@
  * and error handling.
  */
 
-import { useState, useCallback } from 'react';
-import { documentApi } from '../services/api';
-import type { DocumentUploadResponse } from '../types';
+import { useState, useCallback } from "react";
+import { documentApi } from "../services/api";
+import type { DocumentUploadResponse } from "../types";
 
 interface UploadProgress {
   file: File;
   progress: number;
-  status: 'pending' | 'uploading' | 'completed' | 'error';
+  status: "pending" | "uploading" | "completed" | "error";
   error?: string;
   response?: DocumentUploadResponse;
 }
@@ -65,7 +65,7 @@ export const useDocumentUpload = (): UseDocumentUploadReturn => {
         newUploads.set(fileId, {
           file,
           progress: 0,
-          status: 'pending',
+          status: "pending",
         });
         return newUploads;
       });
@@ -74,7 +74,7 @@ export const useDocumentUpload = (): UseDocumentUploadReturn => {
 
       try {
         // Update to uploading status
-        updateUploadProgress(fileId, { status: 'uploading', progress: 0 });
+        updateUploadProgress(fileId, { status: "uploading", progress: 0 });
 
         // Perform upload
         const response = await documentApi.upload(file, projectId);
@@ -85,24 +85,24 @@ export const useDocumentUpload = (): UseDocumentUploadReturn => {
             await documentApi.process(response.data.document_id);
           } catch (processError) {
             // Log but don't fail the upload if processing trigger fails
-            console.warn('Failed to auto-trigger processing:', processError);
+            console.warn("Failed to auto-trigger processing:", processError);
           }
         }
 
         // Update to completed
         updateUploadProgress(fileId, {
-          status: 'completed',
+          status: "completed",
           progress: 100,
           response,
         });
 
         return response;
       } catch (err: any) {
-        const errorMessage = err.response?.data?.detail || 'Upload failed';
+        const errorMessage = err.response?.data?.detail || "Upload failed";
 
         // Update to error status
         updateUploadProgress(fileId, {
-          status: 'error',
+          status: "error",
           error: errorMessage,
         });
 
@@ -140,11 +140,11 @@ export const useDocumentUpload = (): UseDocumentUploadReturn => {
     setUploads((prev) => {
       const newUploads = new Map(prev);
       const upload = newUploads.get(fileId);
-      if (upload && upload.status === 'uploading') {
+      if (upload && upload.status === "uploading") {
         newUploads.set(fileId, {
           ...upload,
-          status: 'error',
-          error: 'Upload cancelled',
+          status: "error",
+          error: "Upload cancelled",
         });
       }
       return newUploads;
@@ -158,7 +158,7 @@ export const useDocumentUpload = (): UseDocumentUploadReturn => {
     setUploads((prev) => {
       const newUploads = new Map(prev);
       for (const [fileId, upload] of newUploads.entries()) {
-        if (upload.status === 'completed') {
+        if (upload.status === "completed") {
           newUploads.delete(fileId);
         }
       }

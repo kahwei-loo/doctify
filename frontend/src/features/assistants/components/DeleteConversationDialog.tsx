@@ -7,8 +7,8 @@
  * Week 7 Task 1.4.3: Delete Conversation Dialog
  */
 
-import React from 'react';
-import { Trash2, MessageSquare, AlertTriangle } from 'lucide-react';
+import React from "react";
+import { Trash2, MessageSquare, AlertTriangle } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,7 +18,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+} from "@/components/ui/alert-dialog";
 
 interface DeleteConversationDialogProps {
   /** Whether the dialog is open */
@@ -68,7 +68,8 @@ export const DeleteConversationDialog: React.FC<DeleteConversationDialogProps> =
                     <div className="flex items-center gap-2 text-sm">
                       <MessageSquare className="h-4 w-4 text-muted-foreground" />
                       <span>
-                        <strong>{messageCount}</strong> message{messageCount !== 1 ? 's' : ''} will be deleted
+                        <strong>{messageCount}</strong> message{messageCount !== 1 ? "s" : ""} will
+                        be deleted
                       </span>
                     </div>
                   )}
@@ -98,7 +99,7 @@ export const DeleteConversationDialog: React.FC<DeleteConversationDialogProps> =
             disabled={isDeleting}
             className="bg-destructive hover:bg-destructive/90"
           >
-            {isDeleting ? 'Deleting...' : 'Delete Conversation'}
+            {isDeleting ? "Deleting..." : "Delete Conversation"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

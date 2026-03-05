@@ -4,7 +4,7 @@
  * Displays query results with AI response, charts, insights, and SQL.
  */
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Lightbulb,
   Code2,
@@ -16,18 +16,14 @@ import {
   MessageSquare,
   ChevronDown,
   ChevronUp,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
-import { ChartRenderer } from './ChartRenderer';
-import type { QueryResponse, QueryHistoryItem, QueryStatus } from '../types';
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ChartRenderer } from "./ChartRenderer";
+import type { QueryResponse, QueryHistoryItem, QueryStatus } from "../types";
 
 // Union type for both full response and history items
 type DisplayableResult = QueryResponse | QueryHistoryItem;
@@ -44,27 +40,27 @@ const STATUS_CONFIG: Record<
 > = {
   completed: {
     icon: Check,
-    color: 'text-green-500',
-    bgColor: 'bg-green-500/10',
-    label: 'Completed',
+    color: "text-green-500",
+    bgColor: "bg-green-500/10",
+    label: "Completed",
   },
   processing: {
     icon: Loader2,
-    color: 'text-blue-500',
-    bgColor: 'bg-blue-500/10',
-    label: 'Processing',
+    color: "text-blue-500",
+    bgColor: "bg-blue-500/10",
+    label: "Processing",
   },
   pending: {
     icon: Clock,
-    color: 'text-yellow-500',
-    bgColor: 'bg-yellow-500/10',
-    label: 'Pending',
+    color: "text-yellow-500",
+    bgColor: "bg-yellow-500/10",
+    label: "Pending",
   },
   error: {
     icon: AlertCircle,
-    color: 'text-red-500',
-    bgColor: 'bg-red-500/10',
-    label: 'Error',
+    color: "text-red-500",
+    bgColor: "bg-red-500/10",
+    label: "Error",
   },
 };
 
@@ -77,9 +73,7 @@ const LoadingState: React.FC = () => (
       <div className="flex flex-col items-center justify-center py-12">
         <Loader2 className="h-10 w-10 text-primary animate-spin mb-4" />
         <p className="text-sm text-muted-foreground">Analyzing your question...</p>
-        <p className="text-xs text-muted-foreground mt-1">
-          This may take a few seconds
-        </p>
+        <p className="text-xs text-muted-foreground mt-1">This may take a few seconds</p>
       </div>
     </CardContent>
   </Card>
@@ -93,12 +87,8 @@ const EmptyState: React.FC = () => (
     <CardContent className="pt-6">
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <MessageSquare className="h-10 w-10 text-muted-foreground/30 mb-4" />
-        <p className="text-sm text-muted-foreground">
-          Ask a question about your data
-        </p>
-        <p className="text-xs text-muted-foreground mt-1">
-          Results will appear here
-        </p>
+        <p className="text-sm text-muted-foreground">Ask a question about your data</p>
+        <p className="text-xs text-muted-foreground mt-1">Results will appear here</p>
       </div>
     </CardContent>
   </Card>
@@ -116,7 +106,7 @@ const ErrorState: React.FC<{ message?: string }> = ({ message }) => (
         </div>
         <p className="font-medium text-destructive">Something went wrong</p>
         <p className="text-sm text-muted-foreground mt-1 max-w-md">
-          {message || 'Failed to process your query. Please try again.'}
+          {message || "Failed to process your query. Please try again."}
         </p>
       </div>
     </CardContent>
@@ -144,11 +134,7 @@ const SQLCodeBlock: React.FC<{ sql: string }> = ({ sql }) => {
             <Code2 className="h-4 w-4" />
             Generated SQL
           </span>
-          {isOpen ? (
-            <ChevronUp className="h-4 w-4" />
-          ) : (
-            <ChevronDown className="h-4 w-4" />
-          )}
+          {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         </Button>
       </CollapsibleTrigger>
       <CollapsibleContent>
@@ -162,11 +148,7 @@ const SQLCodeBlock: React.FC<{ sql: string }> = ({ sql }) => {
             className="absolute top-2 right-2 h-8 w-8"
             onClick={handleCopy}
           >
-            {copied ? (
-              <Check className="h-4 w-4 text-green-500" />
-            ) : (
-              <Copy className="h-4 w-4" />
-            )}
+            {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
           </Button>
         </div>
       </CollapsibleContent>
@@ -188,10 +170,7 @@ const InsightsList: React.FC<{ insights: string[] }> = ({ insights }) => {
       </h4>
       <ul className="space-y-2">
         {insights.map((insight, index) => (
-          <li
-            key={index}
-            className="flex items-start gap-2 text-sm text-muted-foreground"
-          >
+          <li key={index} className="flex items-start gap-2 text-sm text-muted-foreground">
             <span className="flex items-center justify-center h-5 w-5 rounded-full bg-primary/10 text-primary text-xs shrink-0">
               {index + 1}
             </span>
@@ -216,8 +195,8 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({
     return <EmptyState />;
   }
 
-  if (result.status === 'error') {
-    const errorMessage = 'error_message' in result ? result.error_message : undefined;
+  if (result.status === "error") {
+    const errorMessage = "error_message" in result ? result.error_message : undefined;
     return <ErrorState message={errorMessage} />;
   }
 
@@ -225,7 +204,7 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({
   const StatusIcon = statusConfig.icon;
 
   return (
-    <Card className={cn('w-full', className)}>
+    <Card className={cn("w-full", className)}>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base flex items-center gap-2">
@@ -233,7 +212,7 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({
             Query Results
           </CardTitle>
           <div className="flex items-center gap-2">
-            {'execution_time_ms' in result && result.execution_time_ms && (
+            {"execution_time_ms" in result && result.execution_time_ms && (
               <Badge variant="secondary" className="text-xs">
                 <Clock className="h-3 w-3 mr-1" />
                 {result.execution_time_ms}ms
@@ -241,10 +220,7 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({
             )}
             <Badge variant="secondary" className={cn(statusConfig.color, statusConfig.bgColor)}>
               <StatusIcon
-                className={cn(
-                  'h-3 w-3 mr-1',
-                  result.status === 'processing' && 'animate-spin'
-                )}
+                className={cn("h-3 w-3 mr-1", result.status === "processing" && "animate-spin")}
               />
               {statusConfig.label}
             </Badge>
@@ -274,12 +250,16 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({
         )}
 
         {/* Insights */}
-        {'response_insights' in result && result.response_insights && result.response_insights.length > 0 && (
-          <InsightsList insights={result.response_insights} />
-        )}
+        {"response_insights" in result &&
+          result.response_insights &&
+          result.response_insights.length > 0 && (
+            <InsightsList insights={result.response_insights} />
+          )}
 
         {/* Generated SQL */}
-        {'generated_sql' in result && result.generated_sql && <SQLCodeBlock sql={result.generated_sql} />}
+        {"generated_sql" in result && result.generated_sql && (
+          <SQLCodeBlock sql={result.generated_sql} />
+        )}
       </CardContent>
     </Card>
   );

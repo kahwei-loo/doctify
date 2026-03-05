@@ -5,19 +5,19 @@
  * Shows modifications to extraction results with user attribution.
  */
 
-import React, { useState, useMemo } from 'react';
-import { formatDistanceToNow, format } from 'date-fns';
+import React, { useState, useMemo } from "react";
+import { formatDistanceToNow, format } from "date-fns";
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from '@/components/ui/sheet';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Skeleton } from '@/components/ui/skeleton';
+} from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,14 +27,14 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+} from "@/components/ui/alert-dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 import {
   History,
   RotateCcw,
@@ -46,14 +46,13 @@ import {
   FileEdit,
   Bot,
   Layers,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
+} from "lucide-react";
 import {
   useGetEditHistoryQuery,
   useRollbackChangesMutation,
   type EditHistoryEntry,
   VALID_EDIT_TYPES,
-} from '@/store/api/editHistoryApi';
+} from "@/store/api/editHistoryApi";
 
 interface EditHistoryPanelProps {
   /** Whether the panel is open */
@@ -71,13 +70,13 @@ interface EditHistoryPanelProps {
  */
 const EditTypeIcon: React.FC<{ type: string }> = ({ type }) => {
   switch (type) {
-    case 'manual':
+    case "manual":
       return <FileEdit className="h-4 w-4 text-blue-500" />;
-    case 'bulk':
+    case "bulk":
       return <Layers className="h-4 w-4 text-purple-500" />;
-    case 'rollback':
+    case "rollback":
       return <RotateCcw className="h-4 w-4 text-orange-500" />;
-    case 'ai_correction':
+    case "ai_correction":
       return <Bot className="h-4 w-4 text-green-500" />;
     default:
       return <FileEdit className="h-4 w-4 text-muted-foreground" />;
@@ -87,14 +86,16 @@ const EditTypeIcon: React.FC<{ type: string }> = ({ type }) => {
 /**
  * Get badge variant for edit type
  */
-const getEditTypeBadgeVariant = (type: string): 'default' | 'secondary' | 'outline' | 'destructive' => {
+const getEditTypeBadgeVariant = (
+  type: string
+): "default" | "secondary" | "outline" | "destructive" => {
   switch (type) {
-    case 'rollback':
-      return 'destructive';
-    case 'ai_correction':
-      return 'default';
+    case "rollback":
+      return "destructive";
+    case "ai_correction":
+      return "default";
     default:
-      return 'secondary';
+      return "secondary";
   }
 };
 
@@ -103,28 +104,28 @@ const getEditTypeBadgeVariant = (type: string): 'default' | 'secondary' | 'outli
  */
 const formatEditType = (type: string): string => {
   return type
-    .split('_')
+    .split("_")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+    .join(" ");
 };
 
 /**
  * Format field path for display
  */
 const formatFieldPath = (path: string): string => {
-  return path.split('.').pop() || path;
+  return path.split(".").pop() || path;
 };
 
 /**
  * Format value for display
  */
 const formatValue = (value: Record<string, unknown> | null): string => {
-  if (!value) return '(empty)';
-  if ('value' in value) {
+  if (!value) return "(empty)";
+  if ("value" in value) {
     const v = value.value;
-    if (v === null || v === undefined) return '(empty)';
-    if (typeof v === 'string') return v.length > 50 ? `${v.slice(0, 50)}...` : v;
-    if (typeof v === 'number' || typeof v === 'boolean') return String(v);
+    if (v === null || v === undefined) return "(empty)";
+    if (typeof v === "string") return v.length > 50 ? `${v.slice(0, 50)}...` : v;
+    if (typeof v === "number" || typeof v === "boolean") return String(v);
     return JSON.stringify(v).slice(0, 50);
   }
   return JSON.stringify(value).slice(0, 50);
@@ -156,11 +157,7 @@ const HistoryEntry: React.FC<HistoryEntryProps> = ({
       </div>
 
       {/* Entry header */}
-      <button
-        type="button"
-        onClick={onToggle}
-        className="w-full text-left group"
-      >
+      <button type="button" onClick={onToggle} className="w-full text-left group">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
@@ -174,9 +171,9 @@ const HistoryEntry: React.FC<HistoryEntryProps> = ({
 
             <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
               <User className="h-3 w-3" />
-              <span>{entry.user_name || entry.user_email || 'System'}</span>
+              <span>{entry.user_name || entry.user_email || "System"}</span>
               <Clock className="h-3 w-3 ml-2" />
-              <span title={format(new Date(entry.created_at), 'PPpp')}>
+              <span title={format(new Date(entry.created_at), "PPpp")}>
                 {formatDistanceToNow(new Date(entry.created_at), { addSuffix: true })}
               </span>
             </div>
@@ -222,7 +219,7 @@ const HistoryEntry: React.FC<HistoryEntryProps> = ({
           </div>
 
           {/* Rollback button */}
-          {entry.edit_type !== 'rollback' && (
+          {entry.edit_type !== "rollback" && (
             <Button
               variant="outline"
               size="sm"
@@ -269,17 +266,21 @@ export const EditHistoryPanel: React.FC<EditHistoryPanelProps> = ({
   onRollback,
 }) => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [filterType, setFilterType] = useState<string>('all');
+  const [filterType, setFilterType] = useState<string>("all");
   const [page, setPage] = useState(1);
   const [rollbackEntryId, setRollbackEntryId] = useState<string | null>(null);
 
   // Fetch edit history
-  const { data: historyResponse, isLoading, isFetching } = useGetEditHistoryQuery(
+  const {
+    data: historyResponse,
+    isLoading,
+    isFetching,
+  } = useGetEditHistoryQuery(
     {
       documentId,
       page,
       page_size: 20,
-      edit_type: filterType === 'all' ? undefined : filterType,
+      edit_type: filterType === "all" ? undefined : filterType,
     },
     { skip: !open }
   );
@@ -305,7 +306,7 @@ export const EditHistoryPanel: React.FC<EditHistoryPanelProps> = ({
       setRollbackEntryId(null);
       onRollback?.();
     } catch (error) {
-      console.error('Failed to rollback:', error);
+      console.error("Failed to rollback:", error);
     }
   };
 
@@ -313,7 +314,7 @@ export const EditHistoryPanel: React.FC<EditHistoryPanelProps> = ({
   const handleOpenChange = (isOpen: boolean) => {
     if (!isOpen) {
       setExpandedId(null);
-      setFilterType('all');
+      setFilterType("all");
       setPage(1);
     }
     onOpenChange(isOpen);
@@ -364,9 +365,7 @@ export const EditHistoryPanel: React.FC<EditHistoryPanelProps> = ({
               ) : entries.length === 0 ? (
                 <div className="text-center py-12">
                   <History className="h-12 w-12 mx-auto text-muted-foreground/50" />
-                  <p className="mt-4 text-muted-foreground">
-                    No edit history found
-                  </p>
+                  <p className="mt-4 text-muted-foreground">No edit history found</p>
                   <p className="text-sm text-muted-foreground/70 mt-1">
                     Changes to extraction results will appear here
                   </p>
@@ -416,7 +415,10 @@ export const EditHistoryPanel: React.FC<EditHistoryPanelProps> = ({
       </Sheet>
 
       {/* Rollback confirmation dialog */}
-      <AlertDialog open={!!rollbackEntryId} onOpenChange={(open) => !open && setRollbackEntryId(null)}>
+      <AlertDialog
+        open={!!rollbackEntryId}
+        onOpenChange={(open) => !open && setRollbackEntryId(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirm Rollback</AlertDialogTitle>
@@ -434,7 +436,7 @@ export const EditHistoryPanel: React.FC<EditHistoryPanelProps> = ({
                   Rolling back...
                 </>
               ) : (
-                'Rollback'
+                "Rollback"
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

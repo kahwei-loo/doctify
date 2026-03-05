@@ -5,7 +5,7 @@
  * Connected to real backend API (Week 5 Phase 2).
  */
 
-import { api } from './apiSlice';
+import { api } from "./apiSlice";
 import type {
   AssistantListResponse,
   AssistantStats,
@@ -15,7 +15,7 @@ import type {
   AssistantFilters,
   AssistantAnalytics,
   ModelConfig,
-} from '../../features/assistants/types';
+} from "../../features/assistants/types";
 
 // ============================================================================
 // Response Transformation Types (Backend → Frontend)
@@ -75,8 +75,8 @@ interface BackendSuccessResponse<T> {
 
 /** Default model config for fallback */
 const DEFAULT_MODEL_CONFIG: ModelConfig = {
-  provider: 'openai',
-  model: 'gpt-4',
+  provider: "openai",
+  model: "gpt-4",
   temperature: 0.7,
   max_tokens: 2048,
 };
@@ -87,8 +87,8 @@ const DEFAULT_MODEL_CONFIG: ModelConfig = {
 const transformModelConfig = (config: Record<string, any> | null | undefined): ModelConfig => {
   if (!config) return DEFAULT_MODEL_CONFIG;
   return {
-    provider: config.provider || 'openai',
-    model: config.model || 'gpt-4',
+    provider: config.provider || "openai",
+    model: config.model || "gpt-4",
     temperature: config.temperature ?? 0.7,
     max_tokens: config.max_tokens ?? 2048,
     system_prompt: config.system_prompt || undefined,
@@ -101,7 +101,7 @@ const transformModelConfig = (config: Record<string, any> | null | undefined): M
 const transformAssistant = (backend: BackendAssistantResponse): Assistant => ({
   assistant_id: backend.id,
   name: backend.name,
-  description: backend.description || '',
+  description: backend.description || "",
   model_config: transformModelConfig(backend.model_configuration),
   is_active: backend.is_active,
   created_at: backend.created_at,
@@ -118,7 +118,7 @@ const transformAssistant = (backend: BackendAssistantResponse): Assistant => ({
 const transformAssistantWithStats = (backend: BackendAssistantWithStats): Assistant => ({
   assistant_id: backend.id,
   name: backend.name,
-  description: backend.description || '',
+  description: backend.description || "",
   model_config: transformModelConfig(backend.model_configuration),
   is_active: backend.is_active,
   created_at: backend.created_at,
@@ -164,9 +164,10 @@ export const assistantsApi = api.injectEndpoints({
   endpoints: (builder) => ({
     // Query: Get assistant stats dashboard
     getAssistantStats: builder.query<AssistantStats, void>({
-      query: () => '/assistants/stats',
-      transformResponse: (response: BackendSuccessResponse<BackendStatsResponse>) => transformStats(response.data),
-      providesTags: [{ type: 'AssistantStats', id: 'STATS' }],
+      query: () => "/assistants/stats",
+      transformResponse: (response: BackendSuccessResponse<BackendStatsResponse>) =>
+        transformStats(response.data),
+      providesTags: [{ type: "AssistantStats", id: "STATS" }],
     }),
 
     // Query: Get all assistants
@@ -176,23 +177,27 @@ export const assistantsApi = api.injectEndpoints({
         const filtersObj = filters || {};
 
         if (filtersObj.status) {
-          params.append('include_inactive', filtersObj.status === 'inactive' ? 'true' : 'false');
+          params.append("include_inactive", filtersObj.status === "inactive" ? "true" : "false");
         } else {
           // By default, include all
-          params.append('include_inactive', 'true');
+          params.append("include_inactive", "true");
         }
 
         const queryString = params.toString();
-        return `/assistants/${queryString ? `?${queryString}` : ''}`;
+        return `/assistants/${queryString ? `?${queryString}` : ""}`;
       },
-      transformResponse: (response: BackendSuccessResponse<BackendAssistantListResponse>, meta, arg): AssistantListResponse => {
+      transformResponse: (
+        response: BackendSuccessResponse<BackendAssistantListResponse>,
+        _meta,
+        arg
+      ): AssistantListResponse => {
         let assistants = response.data.assistants.map(transformAssistantWithStats);
 
         // Apply client-side filters
         const filters = arg || {};
 
         if (filters.status) {
-          const isActive = filters.status === 'active';
+          const isActive = filters.status === "active";
           assistants = assistants.filter((a) => a.is_active === isActive);
         }
 
@@ -215,28 +220,27 @@ export const assistantsApi = api.injectEndpoints({
         result
           ? [
               ...result.data.map(({ assistant_id }) => ({
-                type: 'Assistants' as const,
+                type: "Assistants" as const,
                 id: assistant_id,
               })),
-              { type: 'Assistants', id: 'LIST' },
+              { type: "Assistants", id: "LIST" },
             ]
-          : [{ type: 'Assistants', id: 'LIST' }],
+          : [{ type: "Assistants", id: "LIST" }],
     }),
 
     // Query: Get single assistant by ID
     getAssistantById: builder.query<Assistant, string>({
       query: (assistantId) => `/assistants/${assistantId}`,
-      transformResponse: (response: BackendSuccessResponse<BackendAssistantResponse>) => transformAssistant(response.data),
-      providesTags: (result, error, assistantId) => [
-        { type: 'Assistants', id: assistantId },
-      ],
+      transformResponse: (response: BackendSuccessResponse<BackendAssistantResponse>) =>
+        transformAssistant(response.data),
+      providesTags: (_result, _error, assistantId) => [{ type: "Assistants", id: assistantId }],
     }),
 
     // Mutation: Create new assistant
     createAssistant: builder.mutation<Assistant, CreateAssistantRequest>({
       query: (request) => ({
-        url: '/assistants/',
-        method: 'POST',
+        url: "/assistants/",
+        method: "POST",
         body: {
           name: request.name,
           description: request.description,
@@ -244,10 +248,11 @@ export const assistantsApi = api.injectEndpoints({
           knowledge_base_id: request.knowledge_base_id,
         },
       }),
-      transformResponse: (response: BackendSuccessResponse<BackendAssistantResponse>) => transformAssistant(response.data),
+      transformResponse: (response: BackendSuccessResponse<BackendAssistantResponse>) =>
+        transformAssistant(response.data),
       invalidatesTags: [
-        { type: 'Assistants', id: 'LIST' },
-        { type: 'AssistantStats', id: 'STATS' },
+        { type: "Assistants", id: "LIST" },
+        { type: "AssistantStats", id: "STATS" },
       ],
     }),
 
@@ -255,7 +260,7 @@ export const assistantsApi = api.injectEndpoints({
     updateAssistant: builder.mutation<Assistant, UpdateAssistantRequest>({
       query: ({ assistant_id, ...updates }) => ({
         url: `/assistants/${assistant_id}`,
-        method: 'PUT',
+        method: "PUT",
         body: {
           name: updates.name,
           description: updates.description,
@@ -264,11 +269,12 @@ export const assistantsApi = api.injectEndpoints({
           knowledge_base_id: updates.knowledge_base_id,
         },
       }),
-      transformResponse: (response: BackendSuccessResponse<BackendAssistantResponse>) => transformAssistant(response.data),
-      invalidatesTags: (result, error, { assistant_id }) => [
-        { type: 'Assistants', id: assistant_id },
-        { type: 'Assistants', id: 'LIST' },
-        { type: 'AssistantStats', id: 'STATS' },
+      transformResponse: (response: BackendSuccessResponse<BackendAssistantResponse>) =>
+        transformAssistant(response.data),
+      invalidatesTags: (_result, _error, { assistant_id }) => [
+        { type: "Assistants", id: assistant_id },
+        { type: "Assistants", id: "LIST" },
+        { type: "AssistantStats", id: "STATS" },
       ],
     }),
 
@@ -276,12 +282,12 @@ export const assistantsApi = api.injectEndpoints({
     deleteAssistant: builder.mutation<void, string>({
       query: (assistantId) => ({
         url: `/assistants/${assistantId}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
-      invalidatesTags: (result, error, assistantId) => [
-        { type: 'Assistants', id: assistantId },
-        { type: 'Assistants', id: 'LIST' },
-        { type: 'AssistantStats', id: 'STATS' },
+      invalidatesTags: (_result, _error, assistantId) => [
+        { type: "Assistants", id: assistantId },
+        { type: "Assistants", id: "LIST" },
+        { type: "AssistantStats", id: "STATS" },
       ],
     }),
 
@@ -293,15 +299,16 @@ export const assistantsApi = api.injectEndpoints({
       query: ({ assistantId, period }) => {
         // Convert period string to days
         let periodDays = 30;
-        if (period === 'day') periodDays = 1;
-        else if (period === 'week') periodDays = 7;
-        else if (period === 'month') periodDays = 30;
+        if (period === "day") periodDays = 1;
+        else if (period === "week") periodDays = 7;
+        else if (period === "month") periodDays = 30;
 
         return `/assistants/${assistantId}/analytics?period_days=${periodDays}`;
       },
-      transformResponse: (response: BackendSuccessResponse<BackendAnalyticsResponse>) => transformAnalytics(response.data),
-      providesTags: (result, error, { assistantId }) => [
-        { type: 'Assistants', id: `${assistantId}-analytics` },
+      transformResponse: (response: BackendSuccessResponse<BackendAnalyticsResponse>) =>
+        transformAnalytics(response.data),
+      providesTags: (_result, _error, { assistantId }) => [
+        { type: "Assistants", id: `${assistantId}-analytics` },
       ],
     }),
   }),

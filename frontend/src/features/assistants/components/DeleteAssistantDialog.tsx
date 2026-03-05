@@ -4,7 +4,7 @@
  * Confirmation dialog for deleting AI assistants with warning about consequences.
  */
 
-import React from 'react';
+import React from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,9 +14,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { Loader2, AlertTriangle } from 'lucide-react';
-import type { Assistant } from '../types';
+} from "@/components/ui/alert-dialog";
+import { Loader2, AlertTriangle } from "lucide-react";
+import type { Assistant } from "../types";
 
 interface DeleteAssistantDialogProps {
   open: boolean;
@@ -98,7 +98,7 @@ export const DeleteAssistantDialog: React.FC<DeleteAssistantDialogProps> = ({
                 Deleting...
               </>
             ) : (
-              'Delete Assistant'
+              "Delete Assistant"
             )}
           </AlertDialogAction>
         </AlertDialogFooter>

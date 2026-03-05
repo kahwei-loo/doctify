@@ -1,7 +1,7 @@
-import React, { useCallback } from 'react';
-import Particles from 'react-tsparticles';
-import { loadSlim } from 'tsparticles-slim';
-import type { Engine } from 'tsparticles-engine';
+import React, { useCallback } from "react";
+import Particles from "react-tsparticles";
+import { loadSlim } from "tsparticles-slim";
+import type { Engine } from "tsparticles-engine";
 
 const ParticlesBackground: React.FC = () => {
   const particlesInit = useCallback(async (engine: Engine) => {
@@ -23,9 +23,9 @@ const ParticlesBackground: React.FC = () => {
             density: { enable: true, area: 900 },
           },
           color: {
-            value: ['#7c5cfc', '#2dd4a8', '#e8548e'],
+            value: ["#7c5cfc", "#2dd4a8", "#e8548e"],
           },
-          shape: { type: 'circle' },
+          shape: { type: "circle" },
           opacity: {
             value: { min: 0.1, max: 0.4 },
             animation: {
@@ -41,24 +41,24 @@ const ParticlesBackground: React.FC = () => {
           links: {
             enable: true,
             distance: 120,
-            color: '#7c5cfc',
+            color: "#7c5cfc",
             opacity: 0.12,
             width: 1,
           },
           move: {
             enable: true,
             speed: 0.6,
-            direction: 'none',
+            direction: "none",
             random: true,
             straight: false,
-            outModes: { default: 'out' },
+            outModes: { default: "out" },
           },
         },
         interactivity: {
           events: {
             onHover: {
               enable: true,
-              mode: 'repulse',
+              mode: "repulse",
             },
           },
           modes: {

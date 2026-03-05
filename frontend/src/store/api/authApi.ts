@@ -4,7 +4,7 @@
  * RTK Query endpoints for authentication operations.
  */
 
-import { api } from './apiSlice';
+import { api } from "./apiSlice";
 import type {
   User,
   AuthResponse,
@@ -16,15 +16,15 @@ import type {
   ApiKey,
   ApiKeyCreateData,
   ApiKeyResponse,
-} from '../../features/auth/types';
+} from "../../features/auth/types";
 
 export const authApi = api.injectEndpoints({
   endpoints: (builder) => ({
     // Mutation: Register
     register: builder.mutation<AuthResponse, RegisterData>({
       query: (data) => ({
-        url: '/auth/register',
-        method: 'POST',
+        url: "/auth/register",
+        method: "POST",
         body: data,
       }),
     }),
@@ -32,26 +32,26 @@ export const authApi = api.injectEndpoints({
     // Mutation: Login
     login: builder.mutation<AuthResponse, LoginCredentials>({
       query: (credentials) => ({
-        url: '/auth/login',
-        method: 'POST',
+        url: "/auth/login",
+        method: "POST",
         body: credentials,
       }),
-      invalidatesTags: ['User'],
+      invalidatesTags: ["User"],
     }),
 
     // Mutation: Logout
     logout: builder.mutation<void, void>({
       query: () => ({
-        url: '/auth/logout',
-        method: 'POST',
+        url: "/auth/logout",
+        method: "POST",
       }),
-      invalidatesTags: ['User'],
+      invalidatesTags: ["User"],
     }),
 
     // Query: Get current user
     getCurrentUser: builder.query<{ success: boolean; data: User }, void>({
-      query: () => '/auth/me',
-      providesTags: ['User'],
+      query: () => "/auth/me",
+      providesTags: ["User"],
     }),
 
     // Mutation: Update profile
@@ -60,21 +60,18 @@ export const authApi = api.injectEndpoints({
       { full_name?: string; preferences?: Record<string, any> }
     >({
       query: (data) => ({
-        url: '/auth/me',
-        method: 'PUT',
+        url: "/auth/me",
+        method: "PUT",
         body: data,
       }),
-      invalidatesTags: ['User'],
+      invalidatesTags: ["User"],
     }),
 
     // Mutation: Change password
-    changePassword: builder.mutation<
-      { success: boolean; message: string },
-      PasswordChangeData
-    >({
+    changePassword: builder.mutation<{ success: boolean; message: string }, PasswordChangeData>({
       query: (data) => ({
-        url: '/auth/change-password',
-        method: 'POST',
+        url: "/auth/change-password",
+        method: "POST",
         body: data,
       }),
     }),
@@ -85,8 +82,8 @@ export const authApi = api.injectEndpoints({
       PasswordResetRequestData
     >({
       query: (data) => ({
-        url: '/auth/password-reset/request',
-        method: 'POST',
+        url: "/auth/password-reset/request",
+        method: "POST",
         body: data,
       }),
     }),
@@ -97,23 +94,20 @@ export const authApi = api.injectEndpoints({
       PasswordResetConfirmData
     >({
       query: (data) => ({
-        url: '/auth/password-reset/confirm',
-        method: 'POST',
+        url: "/auth/password-reset/confirm",
+        method: "POST",
         body: data,
       }),
     }),
 
     // Mutation: Verify email
-    verifyEmail: builder.mutation<
-      { success: boolean; message: string },
-      { token: string }
-    >({
+    verifyEmail: builder.mutation<{ success: boolean; message: string }, { token: string }>({
       query: ({ token }) => ({
-        url: '/auth/verify-email',
-        method: 'POST',
+        url: "/auth/verify-email",
+        method: "POST",
         body: { token },
       }),
-      invalidatesTags: ['User'],
+      invalidatesTags: ["User"],
     }),
 
     // Query: List API keys
@@ -122,40 +116,40 @@ export const authApi = api.injectEndpoints({
       { includeRevoked?: boolean }
     >({
       query: ({ includeRevoked = false }) => ({
-        url: '/auth/api-keys',
+        url: "/auth/api-keys",
         params: { include_revoked: includeRevoked },
       }),
       providesTags: (result) =>
         result
           ? [
               ...result.data.api_keys.map(({ api_key_id }) => ({
-                type: 'ApiKeys' as const,
+                type: "ApiKeys" as const,
                 id: api_key_id,
               })),
-              { type: 'ApiKeys', id: 'LIST' },
+              { type: "ApiKeys", id: "LIST" },
             ]
-          : [{ type: 'ApiKeys', id: 'LIST' }],
+          : [{ type: "ApiKeys", id: "LIST" }],
     }),
 
     // Mutation: Create API key
     createApiKey: builder.mutation<ApiKeyResponse, ApiKeyCreateData>({
       query: (data) => ({
-        url: '/auth/api-keys',
-        method: 'POST',
+        url: "/auth/api-keys",
+        method: "POST",
         body: data,
       }),
-      invalidatesTags: [{ type: 'ApiKeys', id: 'LIST' }],
+      invalidatesTags: [{ type: "ApiKeys", id: "LIST" }],
     }),
 
     // Mutation: Revoke API key
     revokeApiKey: builder.mutation<void, string>({
       query: (keyId) => ({
         url: `/auth/api-keys/${keyId}/revoke`,
-        method: 'POST',
+        method: "POST",
       }),
-      invalidatesTags: (result, error, keyId) => [
-        { type: 'ApiKeys', id: keyId },
-        { type: 'ApiKeys', id: 'LIST' },
+      invalidatesTags: (_result, _error, keyId) => [
+        { type: "ApiKeys", id: keyId },
+        { type: "ApiKeys", id: "LIST" },
       ],
     }),
 
@@ -163,11 +157,11 @@ export const authApi = api.injectEndpoints({
     rotateApiKey: builder.mutation<ApiKeyResponse, string>({
       query: (keyId) => ({
         url: `/auth/api-keys/${keyId}/rotate`,
-        method: 'POST',
+        method: "POST",
       }),
-      invalidatesTags: (result, error, keyId) => [
-        { type: 'ApiKeys', id: keyId },
-        { type: 'ApiKeys', id: 'LIST' },
+      invalidatesTags: (_result, _error, keyId) => [
+        { type: "ApiKeys", id: keyId },
+        { type: "ApiKeys", id: "LIST" },
       ],
     }),
   }),

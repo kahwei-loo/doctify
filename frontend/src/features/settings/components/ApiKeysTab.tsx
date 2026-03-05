@@ -1,22 +1,22 @@
-import React, { useState } from 'react';
-import { Loader2, Plus, Trash2 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import React, { useState } from "react";
+import { Loader2, Plus, Trash2 } from "lucide-react";
+import toast from "react-hot-toast";
 import {
   useListApiKeysQuery,
   useCreateApiKeyMutation,
   useRevokeApiKeyMutation,
-} from '@/store/api/authApi';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
-import { RevokeApiKeyDialog } from './RevokeApiKeyDialog';
+} from "@/store/api/authApi";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+import { RevokeApiKeyDialog } from "./RevokeApiKeyDialog";
 
 interface ApiKeysTabProps {
   isDemoMode: boolean;
 }
 
 export const ApiKeysTab: React.FC<ApiKeysTabProps> = ({ isDemoMode }) => {
-  const [newKeyName, setNewKeyName] = useState('');
+  const [newKeyName, setNewKeyName] = useState("");
   const { data: apiKeysData, isLoading: isLoadingApiKeys } = useListApiKeysQuery({});
   const [createApiKey, { isLoading: isCreatingKey }] = useCreateApiKeyMutation();
   const [revokeApiKey, { isLoading: isRevokingKey }] = useRevokeApiKeyMutation();
@@ -26,16 +26,16 @@ export const ApiKeysTab: React.FC<ApiKeysTabProps> = ({ isDemoMode }) => {
 
   const handleCreateApiKey = async () => {
     if (!newKeyName.trim()) {
-      toast.error('API key name is required');
+      toast.error("API key name is required");
       return;
     }
     try {
       const result = await createApiKey({ name: newKeyName }).unwrap();
       toast.success("API key created. Copy it now - it won't be shown again!");
       navigator.clipboard.writeText(result.api_key);
-      setNewKeyName('');
+      setNewKeyName("");
     } catch (error: any) {
-      toast.error(error?.data?.detail || 'Failed to create API key');
+      toast.error(error?.data?.detail || "Failed to create API key");
     }
   };
 
@@ -43,18 +43,18 @@ export const ApiKeysTab: React.FC<ApiKeysTabProps> = ({ isDemoMode }) => {
     if (!revokeDialogKey) return;
     try {
       await revokeApiKey(revokeDialogKey.id).unwrap();
-      toast.success('API key revoked');
+      toast.success("API key revoked");
       setRevokeDialogKey(null);
     } catch (error: any) {
-      toast.error(error?.data?.detail || 'Failed to revoke API key');
+      toast.error(error?.data?.detail || "Failed to revoke API key");
     }
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
     });
   };
 
@@ -73,7 +73,7 @@ export const ApiKeysTab: React.FC<ApiKeysTabProps> = ({ isDemoMode }) => {
               value={newKeyName}
               onChange={(e) => setNewKeyName(e.target.value)}
               placeholder="API key name"
-              className={cn('flex-1', isDemoMode && 'bg-muted')}
+              className={cn("flex-1", isDemoMode && "bg-muted")}
               disabled={isDemoMode}
             />
             <Button onClick={handleCreateApiKey} disabled={isCreatingKey || isDemoMode}>
@@ -100,15 +100,15 @@ export const ApiKeysTab: React.FC<ApiKeysTabProps> = ({ isDemoMode }) => {
                 <div
                   key={key.api_key_id}
                   className={cn(
-                    'flex items-center justify-between py-3',
-                    key.is_revoked && 'opacity-50'
+                    "flex items-center justify-between py-3",
+                    key.is_revoked && "opacity-50"
                   )}
                 >
                   <div>
                     <p className="font-medium">{key.name}</p>
                     <p className="text-sm text-muted-foreground">
                       Created {formatDate(key.created_at)}
-                      {key.is_revoked && ' \u2022 Revoked'}
+                      {key.is_revoked && " \u2022 Revoked"}
                     </p>
                   </div>
                   {!key.is_revoked && (
@@ -132,7 +132,7 @@ export const ApiKeysTab: React.FC<ApiKeysTabProps> = ({ isDemoMode }) => {
       <RevokeApiKeyDialog
         open={!!revokeDialogKey}
         onOpenChange={(open) => !open && setRevokeDialogKey(null)}
-        keyName={revokeDialogKey?.name || ''}
+        keyName={revokeDialogKey?.name || ""}
         onConfirm={handleConfirmRevokeApiKey}
         isRevoking={isRevokingKey}
       />

@@ -9,15 +9,15 @@
  * - Validation
  */
 
-import React, { useState } from 'react';
-import { Plus, Trash2, MessageSquare } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
-import type { QAPair } from '../../types';
+import React from "react";
+import { Plus, Trash2, MessageSquare } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import type { QAPair } from "../../types";
 
 interface QAPairsSourceProps {
   pairs?: QAPair[];
@@ -33,8 +33,8 @@ export const QAPairsSource: React.FC<QAPairsSourceProps> = ({
   const handleAddPair = () => {
     const newPair: QAPair = {
       id: `qa-${Date.now()}`,
-      question: '',
-      answer: '',
+      question: "",
+      answer: "",
     };
     onChange([...pairs, newPair]);
   };
@@ -43,16 +43,12 @@ export const QAPairsSource: React.FC<QAPairsSourceProps> = ({
     onChange(pairs.filter((pair) => pair.id !== id));
   };
 
-  const handleUpdatePair = (id: string, field: 'question' | 'answer', value: string) => {
-    onChange(
-      pairs.map((pair) =>
-        pair.id === id ? { ...pair, [field]: value } : pair
-      )
-    );
+  const handleUpdatePair = (id: string, field: "question" | "answer", value: string) => {
+    onChange(pairs.map((pair) => (pair.id === id ? { ...pair, [field]: value } : pair)));
   };
 
   return (
-    <div className={cn('space-y-4', className)}>
+    <div className={cn("space-y-4", className)}>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -103,9 +99,7 @@ export const QAPairsSource: React.FC<QAPairsSourceProps> = ({
                       id={`question-${pair.id}`}
                       placeholder="Enter the question..."
                       value={pair.question}
-                      onChange={(e) =>
-                        handleUpdatePair(pair.id, 'question', e.target.value)
-                      }
+                      onChange={(e) => handleUpdatePair(pair.id, "question", e.target.value)}
                     />
                   </div>
 
@@ -115,9 +109,7 @@ export const QAPairsSource: React.FC<QAPairsSourceProps> = ({
                       id={`answer-${pair.id}`}
                       placeholder="Enter the answer..."
                       value={pair.answer}
-                      onChange={(e) =>
-                        handleUpdatePair(pair.id, 'answer', e.target.value)
-                      }
+                      onChange={(e) => handleUpdatePair(pair.id, "answer", e.target.value)}
                       rows={3}
                     />
                   </div>

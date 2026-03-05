@@ -5,7 +5,7 @@
  * Supports: uploaded_docs, website, text, qa_pairs
  */
 
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef } from "react";
 import {
   FileStack,
   Globe,
@@ -15,10 +15,9 @@ import {
   Plus,
   Trash2,
   Loader2,
-  Upload,
   X,
   Table2,
-} from 'lucide-react';
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -26,15 +25,15 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { cn } from '@/lib/utils';
-import type { DataSourceType, DataSourceConfig, QAPair, DataSource } from '../types';
-import { UploadedDocsSource } from './sources/UploadedDocsSource';
-import { realKnowledgeBaseApi } from '../services/api';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
+import type { DataSourceType, DataSourceConfig, QAPair, DataSource } from "../types";
+import { UploadedDocsSource } from "./sources/UploadedDocsSource";
+import { realKnowledgeBaseApi } from "../services/api";
 
 interface DataSourceConfigDialogProps {
   open: boolean;
@@ -44,33 +43,34 @@ interface DataSourceConfigDialogProps {
   onSubmit: (name: string, config: DataSourceConfig) => Promise<DataSource | null>;
 }
 
-const TYPE_INFO: Record<DataSourceType, { label: string; icon: React.ReactNode; iconBg: string }> = {
-  uploaded_docs: {
-    label: 'Uploaded Documents',
-    icon: <FileStack className="h-5 w-5" />,
-    iconBg: 'bg-blue-500/10 text-blue-600',
-  },
-  website: {
-    label: 'Website Crawler',
-    icon: <Globe className="h-5 w-5" />,
-    iconBg: 'bg-green-500/10 text-green-600',
-  },
-  text: {
-    label: 'Text Input',
-    icon: <FileText className="h-5 w-5" />,
-    iconBg: 'bg-purple-500/10 text-purple-600',
-  },
-  qa_pairs: {
-    label: 'Q&A Pairs',
-    icon: <MessageSquare className="h-5 w-5" />,
-    iconBg: 'bg-orange-500/10 text-orange-600',
-  },
-  structured_data: {
-    label: 'Structured Data',
-    icon: <Database className="h-5 w-5" />,
-    iconBg: 'bg-indigo-500/10 text-indigo-600',
-  },
-};
+const TYPE_INFO: Record<DataSourceType, { label: string; icon: React.ReactNode; iconBg: string }> =
+  {
+    uploaded_docs: {
+      label: "Uploaded Documents",
+      icon: <FileStack className="h-5 w-5" />,
+      iconBg: "bg-blue-500/10 text-blue-600",
+    },
+    website: {
+      label: "Website Crawler",
+      icon: <Globe className="h-5 w-5" />,
+      iconBg: "bg-green-500/10 text-green-600",
+    },
+    text: {
+      label: "Text Input",
+      icon: <FileText className="h-5 w-5" />,
+      iconBg: "bg-purple-500/10 text-purple-600",
+    },
+    qa_pairs: {
+      label: "Q&A Pairs",
+      icon: <MessageSquare className="h-5 w-5" />,
+      iconBg: "bg-orange-500/10 text-orange-600",
+    },
+    structured_data: {
+      label: "Structured Data",
+      icon: <Database className="h-5 w-5" />,
+      iconBg: "bg-indigo-500/10 text-indigo-600",
+    },
+  };
 
 export const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
   open,
@@ -79,21 +79,21 @@ export const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
   sourceType,
   onSubmit,
 }) => {
-  const [name, setName] = useState('');
+  const [name, setName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Website config state
-  const [url, setUrl] = useState('');
+  const [url, setUrl] = useState("");
   const [maxDepth, setMaxDepth] = useState(2);
-  const [includePatterns, setIncludePatterns] = useState('');
-  const [excludePatterns, setExcludePatterns] = useState('');
+  const [includePatterns, setIncludePatterns] = useState("");
+  const [excludePatterns, setExcludePatterns] = useState("");
 
   // Text config state
-  const [textContent, setTextContent] = useState('');
+  const [textContent, setTextContent] = useState("");
 
   // Q&A pairs state
   const [qaPairs, setQaPairs] = useState<QAPair[]>([
-    { id: `qa-${Date.now()}`, question: '', answer: '' },
+    { id: `qa-${Date.now()}`, question: "", answer: "" },
   ]);
 
   // Uploaded documents state
@@ -106,13 +106,13 @@ export const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
   const typeInfo = TYPE_INFO[sourceType];
 
   const resetForm = useCallback(() => {
-    setName('');
-    setUrl('');
+    setName("");
+    setUrl("");
     setMaxDepth(2);
-    setIncludePatterns('');
-    setExcludePatterns('');
-    setTextContent('');
-    setQaPairs([{ id: `qa-${Date.now()}`, question: '', answer: '' }]);
+    setIncludePatterns("");
+    setExcludePatterns("");
+    setTextContent("");
+    setQaPairs([{ id: `qa-${Date.now()}`, question: "", answer: "" }]);
     setSelectedFiles([]);
     setStructuredFile(null);
   }, []);
@@ -125,7 +125,7 @@ export const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
   const handleAddQAPair = useCallback(() => {
     setQaPairs((prev) => [
       ...prev,
-      { id: `qa-${Date.now()}-${prev.length}`, question: '', answer: '' },
+      { id: `qa-${Date.now()}-${prev.length}`, question: "", answer: "" },
     ]);
   }, []);
 
@@ -134,7 +134,7 @@ export const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
   }, []);
 
   const handleQAPairChange = useCallback(
-    (id: string, field: 'question' | 'answer', value: string) => {
+    (id: string, field: "question" | "answer", value: string) => {
       setQaPairs((prev) =>
         prev.map((pair) => (pair.id === id ? { ...pair, [field]: value } : pair))
       );
@@ -148,54 +148,63 @@ export const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
 
   const buildConfig = useCallback((): DataSourceConfig => {
     switch (sourceType) {
-      case 'website':
+      case "website":
         return {
           url,
           max_depth: maxDepth,
           include_patterns: includePatterns
-            .split('\n')
+            .split("\n")
             .map((p) => p.trim())
             .filter(Boolean),
           exclude_patterns: excludePatterns
-            .split('\n')
+            .split("\n")
             .map((p) => p.trim())
             .filter(Boolean),
         };
-      case 'text':
+      case "text":
         return {
           content: textContent,
         };
-      case 'qa_pairs':
+      case "qa_pairs":
         return {
           qa_pairs: qaPairs.filter((p) => p.question.trim() && p.answer.trim()),
         };
-      case 'uploaded_docs':
+      case "uploaded_docs":
         // Files will be uploaded after data source creation
         // document_ids will be populated via API
         return {
-          document_ids: [],  // Will be populated after upload
+          document_ids: [], // Will be populated after upload
         };
-      case 'structured_data':
+      case "structured_data":
         // File will be uploaded via the dedicated endpoint
         return {};
       default:
         return {};
     }
-  }, [sourceType, url, maxDepth, includePatterns, excludePatterns, textContent, qaPairs, selectedFiles]);
+  }, [
+    sourceType,
+    url,
+    maxDepth,
+    includePatterns,
+    excludePatterns,
+    textContent,
+    qaPairs,
+    selectedFiles,
+  ]);
 
   const isValid = useCallback((): boolean => {
     if (!name.trim()) return false;
 
     switch (sourceType) {
-      case 'website':
+      case "website":
         return !!url.trim();
-      case 'text':
+      case "text":
         return !!textContent.trim();
-      case 'qa_pairs':
+      case "qa_pairs":
         return qaPairs.some((p) => p.question.trim() && p.answer.trim());
-      case 'uploaded_docs':
+      case "uploaded_docs":
         return selectedFiles.length > 0;
-      case 'structured_data':
+      case "structured_data":
         return structuredFile !== null;
       default:
         return false;
@@ -208,7 +217,7 @@ export const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
     setIsSubmitting(true);
     try {
       // Structured data: single-call upload endpoint (creates DS + processes file)
-      if (sourceType === 'structured_data' && structuredFile) {
+      if (sourceType === "structured_data" && structuredFile) {
         await realKnowledgeBaseApi.uploadStructuredData(
           knowledgeBaseId,
           structuredFile,
@@ -224,7 +233,7 @@ export const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
       const createdDataSource = await onSubmit(name.trim(), config);
 
       // If uploaded_docs and files selected, upload them
-      if (sourceType === 'uploaded_docs' && selectedFiles.length > 0 && createdDataSource) {
+      if (sourceType === "uploaded_docs" && selectedFiles.length > 0 && createdDataSource) {
         await realKnowledgeBaseApi.uploadDocuments(
           knowledgeBaseId,
           createdDataSource.id,
@@ -234,11 +243,21 @@ export const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
 
       handleClose();
     } catch (error) {
-      console.error('Failed to create data source:', error);
+      console.error("Failed to create data source:", error);
     } finally {
       setIsSubmitting(false);
     }
-  }, [isValid, buildConfig, name, onSubmit, handleClose, sourceType, selectedFiles, structuredFile, knowledgeBaseId]);
+  }, [
+    isValid,
+    buildConfig,
+    name,
+    onSubmit,
+    handleClose,
+    sourceType,
+    selectedFiles,
+    structuredFile,
+    knowledgeBaseId,
+  ]);
 
   const renderWebsiteForm = () => (
     <div className="space-y-4">
@@ -251,9 +270,7 @@ export const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
           value={url}
           onChange={(e) => setUrl(e.target.value)}
         />
-        <p className="text-xs text-muted-foreground">
-          The starting URL for the crawler
-        </p>
+        <p className="text-xs text-muted-foreground">The starting URL for the crawler</p>
       </div>
 
       <div className="space-y-2">
@@ -266,9 +283,7 @@ export const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
           value={maxDepth}
           onChange={(e) => setMaxDepth(parseInt(e.target.value) || 2)}
         />
-        <p className="text-xs text-muted-foreground">
-          How many levels deep to follow links (1-5)
-        </p>
+        <p className="text-xs text-muted-foreground">How many levels deep to follow links (1-5)</p>
       </div>
 
       <div className="space-y-2">
@@ -280,9 +295,7 @@ export const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
           onChange={(e) => setIncludePatterns(e.target.value)}
           rows={3}
         />
-        <p className="text-xs text-muted-foreground">
-          URL patterns to include (one per line)
-        </p>
+        <p className="text-xs text-muted-foreground">URL patterns to include (one per line)</p>
       </div>
 
       <div className="space-y-2">
@@ -294,9 +307,7 @@ export const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
           onChange={(e) => setExcludePatterns(e.target.value)}
           rows={3}
         />
-        <p className="text-xs text-muted-foreground">
-          URL patterns to exclude (one per line)
-        </p>
+        <p className="text-xs text-muted-foreground">URL patterns to exclude (one per line)</p>
       </div>
     </div>
   );
@@ -323,10 +334,7 @@ export const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
     <div className="space-y-4">
       <div className="space-y-3">
         {qaPairs.map((pair, index) => (
-          <div
-            key={pair.id}
-            className="border rounded-lg p-4 space-y-3 bg-muted/30"
-          >
+          <div key={pair.id} className="border rounded-lg p-4 space-y-3 bg-muted/30">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">Q&A Pair {index + 1}</span>
               {qaPairs.length > 1 && (
@@ -346,9 +354,7 @@ export const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
                 id={`question-${pair.id}`}
                 placeholder="What is...?"
                 value={pair.question}
-                onChange={(e) =>
-                  handleQAPairChange(pair.id, 'question', e.target.value)
-                }
+                onChange={(e) => handleQAPairChange(pair.id, "question", e.target.value)}
               />
             </div>
             <div className="space-y-2">
@@ -357,9 +363,7 @@ export const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
                 id={`answer-${pair.id}`}
                 placeholder="The answer is..."
                 value={pair.answer}
-                onChange={(e) =>
-                  handleQAPairChange(pair.id, 'answer', e.target.value)
-                }
+                onChange={(e) => handleQAPairChange(pair.id, "answer", e.target.value)}
                 rows={3}
               />
             </div>
@@ -390,8 +394,8 @@ export const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
     e.preventDefault();
     const file = e.dataTransfer.files?.[0];
     if (file) {
-      const ext = file.name.split('.').pop()?.toLowerCase();
-      if (['csv', 'xlsx', 'xls'].includes(ext || '')) {
+      const ext = file.name.split(".").pop()?.toLowerCase();
+      if (["csv", "xlsx", "xls"].includes(ext || "")) {
         setStructuredFile(file);
       }
     }
@@ -410,20 +414,16 @@ export const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
         {!structuredFile ? (
           <div
             className={cn(
-              'border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors',
-              'hover:border-primary/50 hover:bg-primary/5'
+              "border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors",
+              "hover:border-primary/50 hover:bg-primary/5"
             )}
             onClick={() => structuredFileInputRef.current?.click()}
             onDragOver={(e) => e.preventDefault()}
             onDrop={handleStructuredFileDrop}
           >
             <Table2 className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
-            <p className="text-sm font-medium">
-              Drop your CSV or Excel file here
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              or click to browse
-            </p>
+            <p className="text-sm font-medium">Drop your CSV or Excel file here</p>
+            <p className="text-xs text-muted-foreground mt-1">or click to browse</p>
             <p className="text-xs text-muted-foreground mt-3">
               Supports .csv, .xlsx, .xls (max 50MB)
             </p>
@@ -435,9 +435,7 @@ export const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
                 <Table2 className="h-5 w-5 text-indigo-600" />
               </div>
               <div>
-                <p className="text-sm font-medium truncate max-w-[300px]">
-                  {structuredFile.name}
-                </p>
+                <p className="text-sm font-medium truncate max-w-[300px]">{structuredFile.name}</p>
                 <p className="text-xs text-muted-foreground">
                   {formatFileSize(structuredFile.size)}
                 </p>
@@ -450,7 +448,7 @@ export const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
               onClick={() => {
                 setStructuredFile(null);
                 if (structuredFileInputRef.current) {
-                  structuredFileInputRef.current.value = '';
+                  structuredFileInputRef.current.value = "";
                 }
               }}
             >
@@ -474,15 +472,15 @@ export const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
 
   const renderConfigForm = () => {
     switch (sourceType) {
-      case 'website':
+      case "website":
         return renderWebsiteForm();
-      case 'text':
+      case "text":
         return renderTextForm();
-      case 'qa_pairs':
+      case "qa_pairs":
         return renderQAPairsForm();
-      case 'uploaded_docs':
+      case "uploaded_docs":
         return renderUploadedDocsForm();
-      case 'structured_data':
+      case "structured_data":
         return renderStructuredDataForm();
       default:
         return null;
@@ -494,14 +492,10 @@ export const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
       <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3">
-            <div className={cn('rounded-lg p-2', typeInfo.iconBg)}>
-              {typeInfo.icon}
-            </div>
+            <div className={cn("rounded-lg p-2", typeInfo.iconBg)}>{typeInfo.icon}</div>
             Configure {typeInfo.label}
           </DialogTitle>
-          <DialogDescription>
-            Set up your data source configuration
-          </DialogDescription>
+          <DialogDescription>Set up your data source configuration</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
@@ -531,7 +525,7 @@ export const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
                 Creating...
               </>
             ) : (
-              'Create Data Source'
+              "Create Data Source"
             )}
           </Button>
         </DialogFooter>

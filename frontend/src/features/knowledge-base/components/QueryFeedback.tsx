@@ -7,23 +7,19 @@
  * Part of Unified Knowledge & Insights integration.
  */
 
-import React, { useState } from 'react';
-import { ThumbsUp, ThumbsDown, Check } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { useSubmitUnifiedFeedbackMutation } from '@/store/api/ragApi';
+import React, { useState } from "react";
+import { ThumbsUp, ThumbsDown, Check } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { useSubmitUnifiedFeedbackMutation } from "@/store/api/ragApi";
 
 interface QueryFeedbackProps {
   queryId: string;
-  intentType: 'rag' | 'analytics';
+  intentType: "rag" | "analytics";
   className?: string;
 }
 
-export const QueryFeedback: React.FC<QueryFeedbackProps> = ({
-  queryId,
-  intentType,
-  className,
-}) => {
+export const QueryFeedback: React.FC<QueryFeedbackProps> = ({ queryId, intentType, className }) => {
   const [rating, setRating] = useState<number | null>(null);
   const [showIntentCorrection, setShowIntentCorrection] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -44,7 +40,7 @@ export const QueryFeedback: React.FC<QueryFeedbackProps> = ({
     }
   };
 
-  const handleIntentCorrection = async (correctIntent?: 'rag' | 'analytics') => {
+  const handleIntentCorrection = async (correctIntent?: "rag" | "analytics") => {
     await submitFeedback({
       queryId,
       feedback: {
@@ -58,28 +54,25 @@ export const QueryFeedback: React.FC<QueryFeedbackProps> = ({
 
   if (submitted) {
     return (
-      <div className={cn('flex items-center gap-1.5 text-xs text-muted-foreground', className)}>
+      <div className={cn("flex items-center gap-1.5 text-xs text-muted-foreground", className)}>
         <Check className="h-3.5 w-3.5 text-green-500" />
         Thanks for your feedback
       </div>
     );
   }
 
-  const oppositeIntent = intentType === 'rag' ? 'analytics' : 'rag';
-  const oppositeLabel = oppositeIntent === 'rag' ? 'Document Q&A' : 'Data Analytics';
+  const oppositeIntent = intentType === "rag" ? "analytics" : "rag";
+  const oppositeLabel = oppositeIntent === "rag" ? "Document Q&A" : "Data Analytics";
 
   return (
-    <div className={cn('space-y-2', className)}>
+    <div className={cn("space-y-2", className)}>
       <div className="flex items-center gap-2">
         <span className="text-xs text-muted-foreground">Was this helpful?</span>
         <div className="flex gap-1">
           <Button
             variant="ghost"
             size="icon"
-            className={cn(
-              'h-7 w-7',
-              rating === 5 && 'bg-green-50 text-green-600'
-            )}
+            className={cn("h-7 w-7", rating === 5 && "bg-green-50 text-green-600")}
             onClick={() => handleRating(5)}
             disabled={isLoading}
           >
@@ -88,10 +81,7 @@ export const QueryFeedback: React.FC<QueryFeedbackProps> = ({
           <Button
             variant="ghost"
             size="icon"
-            className={cn(
-              'h-7 w-7',
-              rating !== null && rating <= 2 && 'bg-red-50 text-red-600'
-            )}
+            className={cn("h-7 w-7", rating !== null && rating <= 2 && "bg-red-50 text-red-600")}
             onClick={() => handleRating(1)}
             disabled={isLoading}
           >

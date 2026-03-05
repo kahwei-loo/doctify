@@ -4,7 +4,7 @@
  * Barrel export for all assistants feature hooks.
  */
 
-export { usePublicChatSession } from './usePublicChatSession';
+export { usePublicChatSession } from "./usePublicChatSession";
 export {
   useAssistantWebSocket,
   type AssistantWebSocketEvent,
@@ -12,4 +12,4 @@ export {
   type ConversationUpdatedEvent,
   type MessageCreatedEvent,
   type WebSocketEventUnion,
-} from './useAssistantWebSocket';
+} from "./useAssistantWebSocket";

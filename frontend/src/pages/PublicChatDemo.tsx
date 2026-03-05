@@ -6,31 +6,37 @@
  * Supports ?assistantId= query param to pre-select an assistant.
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { PublicChatWidget } from '@/features/assistants';
-import { useGetAssistantsQuery } from '@/store/api/assistantsApi';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { AlertCircle, Bot } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
+import { PublicChatWidget } from "@/features/assistants";
+import { useGetAssistantsQuery } from "@/store/api/assistantsApi";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { AlertCircle, Bot } from "lucide-react";
 
 const PublicChatDemo: React.FC = () => {
   const [searchParams] = useSearchParams();
-  const queryAssistantId = searchParams.get('assistantId');
+  const queryAssistantId = searchParams.get("assistantId");
 
   // Fetch real assistants
-  const { data: assistantsResponse, isLoading } = useGetAssistantsQuery({ status: 'active' });
+  const { data: assistantsResponse, isLoading } = useGetAssistantsQuery({ status: "active" });
   const assistants = useMemo(() => assistantsResponse?.data || [], [assistantsResponse]);
 
   // Widget configuration state
   const [config, setConfig] = useState({
-    assistantId: '',
-    assistantName: 'Doctify Support',
-    position: 'bottom-right' as 'bottom-right' | 'bottom-left',
-    primaryColor: '#3b82f6',
+    assistantId: "",
+    assistantName: "Doctify Support",
+    position: "bottom-right" as "bottom-right" | "bottom-left",
+    primaryColor: "#3b82f6",
     welcomeMessage: "Hi! I'm the Doctify assistant. How can I help you today?",
   });
 
@@ -122,9 +128,7 @@ const PublicChatDemo: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle>Widget Configuration</CardTitle>
-              <CardDescription>
-                Customize the chat widget appearance and behavior
-              </CardDescription>
+              <CardDescription>Customize the chat widget appearance and behavior</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -136,12 +140,11 @@ const PublicChatDemo: React.FC = () => {
                       Assistant
                     </span>
                   </Label>
-                  <Select
-                    value={config.assistantId}
-                    onValueChange={handleAssistantChange}
-                  >
+                  <Select value={config.assistantId} onValueChange={handleAssistantChange}>
                     <SelectTrigger>
-                      <SelectValue placeholder={isLoading ? 'Loading assistants...' : 'Select an assistant'} />
+                      <SelectValue
+                        placeholder={isLoading ? "Loading assistants..." : "Select an assistant"}
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       {assistants.map((a) => (
@@ -158,9 +161,7 @@ const PublicChatDemo: React.FC = () => {
                   <Input
                     id="assistantName"
                     value={config.assistantName}
-                    onChange={(e) =>
-                      setConfig({ ...config, assistantName: e.target.value })
-                    }
+                    onChange={(e) => setConfig({ ...config, assistantName: e.target.value })}
                   />
                 </div>
 
@@ -168,7 +169,7 @@ const PublicChatDemo: React.FC = () => {
                   <Label htmlFor="position">Position</Label>
                   <Select
                     value={config.position}
-                    onValueChange={(value: 'bottom-right' | 'bottom-left') =>
+                    onValueChange={(value: "bottom-right" | "bottom-left") =>
                       setConfig({ ...config, position: value })
                     }
                   >
@@ -189,16 +190,12 @@ const PublicChatDemo: React.FC = () => {
                       id="primaryColor"
                       type="color"
                       value={config.primaryColor}
-                      onChange={(e) =>
-                        setConfig({ ...config, primaryColor: e.target.value })
-                      }
+                      onChange={(e) => setConfig({ ...config, primaryColor: e.target.value })}
                       className="w-12 h-10 p-1 cursor-pointer"
                     />
                     <Input
                       value={config.primaryColor}
-                      onChange={(e) =>
-                        setConfig({ ...config, primaryColor: e.target.value })
-                      }
+                      onChange={(e) => setConfig({ ...config, primaryColor: e.target.value })}
                       className="flex-1"
                     />
                   </div>
@@ -209,9 +206,7 @@ const PublicChatDemo: React.FC = () => {
                   <Input
                     id="welcomeMessage"
                     value={config.welcomeMessage}
-                    onChange={(e) =>
-                      setConfig({ ...config, welcomeMessage: e.target.value })
-                    }
+                    onChange={(e) => setConfig({ ...config, welcomeMessage: e.target.value })}
                   />
                 </div>
               </div>
@@ -222,9 +217,7 @@ const PublicChatDemo: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle>Embed Code</CardTitle>
-              <CardDescription>
-                Copy this code to add the widget to your website
-              </CardDescription>
+              <CardDescription>Copy this code to add the widget to your website</CardDescription>
             </CardHeader>
             <CardContent>
               <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm">
@@ -270,10 +263,9 @@ const PublicChatDemo: React.FC = () => {
             <CardContent className="prose dark:prose-invert max-w-none">
               <h2>Welcome to Our Website</h2>
               <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-                ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-                aliquip ex ea commodo consequat.
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor
+                incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
+                exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
               </p>
               <h3>Our Services</h3>
               <ul>
@@ -282,10 +274,7 @@ const PublicChatDemo: React.FC = () => {
                 <li>AI Analysis - Get insights from your documents</li>
                 <li>Cloud Storage - Secure document storage</li>
               </ul>
-              <p>
-                Have questions? Use the chat widget in the corner to talk to our AI
-                assistant!
-              </p>
+              <p>Have questions? Use the chat widget in the corner to talk to our AI assistant!</p>
             </CardContent>
           </Card>
         </div>

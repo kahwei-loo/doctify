@@ -5,15 +5,15 @@
  * pagination, and basic CRUD operations.
  */
 
-import { useState, useCallback, useEffect } from 'react';
-import { documentApi } from '../services/api';
+import { useState, useCallback, useEffect } from "react";
+import { documentApi } from "../services/api";
 import type {
   DocumentListItem,
   DocumentFilters,
   PaginationParams,
   PaginationMeta,
   DocumentDetail,
-} from '../types';
+} from "../types";
 
 interface UseDocumentsReturn {
   documents: DocumentListItem[];
@@ -53,7 +53,7 @@ export const useDocuments = (autoFetch = true): UseDocumentsReturn => {
         setDocuments(response.data);
         setPagination(response.pagination);
       } catch (err: any) {
-        const errorMessage = err.response?.data?.detail || 'Failed to fetch documents';
+        const errorMessage = err.response?.data?.detail || "Failed to fetch documents";
         setError(errorMessage);
       } finally {
         setIsLoading(false);
@@ -73,7 +73,7 @@ export const useDocuments = (autoFetch = true): UseDocumentsReturn => {
       const response = await documentApi.getById(documentId);
       setCurrentDocument(response.data);
     } catch (err: any) {
-      const errorMessage = err.response?.data?.detail || 'Failed to fetch document';
+      const errorMessage = err.response?.data?.detail || "Failed to fetch document";
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -97,7 +97,7 @@ export const useDocuments = (autoFetch = true): UseDocumentsReturn => {
         // Refresh list
         await fetchDocuments();
       } catch (err: any) {
-        const errorMessage = err.response?.data?.detail || 'Failed to delete document';
+        const errorMessage = err.response?.data?.detail || "Failed to delete document";
         setError(errorMessage);
         throw err;
       } finally {

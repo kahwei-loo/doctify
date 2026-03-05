@@ -5,8 +5,8 @@
  * Matches the exact layout and structure of the document table.
  */
 
-import React from 'react';
-import { Skeleton } from '@/components/ui/skeleton';
+import React from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -14,8 +14,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 
 interface DocumentTableSkeletonProps {
   /** Number of rows to display */
@@ -29,7 +29,7 @@ export const DocumentTableSkeleton: React.FC<DocumentTableSkeletonProps> = ({
   className,
 }) => {
   return (
-    <div className={cn('rounded-lg border', className)}>
+    <div className={cn("rounded-lg border", className)}>
       <Table>
         <TableHeader>
           <TableRow>

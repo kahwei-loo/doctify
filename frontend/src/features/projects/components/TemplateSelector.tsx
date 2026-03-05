@@ -11,26 +11,26 @@
  * - Apply template to project
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Skeleton } from '@/components/ui/skeleton';
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Search,
   FileText,
@@ -41,14 +41,14 @@ import {
   ChevronRight,
   Check,
   Loader2,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 import {
   useGetTemplatesQuery,
   useApplyTemplateMutation,
   type TemplateListItem,
   VALID_DOCUMENT_TYPES,
-} from '@/store/api/templatesApi';
+} from "@/store/api/templatesApi";
 
 interface TemplateSelectorProps {
   /** Whether the selector is open */
@@ -65,7 +65,7 @@ interface TemplateSelectorProps {
  * Format document type for display
  */
 const formatDocumentType = (type: string | null): string => {
-  if (!type) return 'Custom';
+  if (!type) return "Custom";
   return type.charAt(0).toUpperCase() + type.slice(1);
 };
 
@@ -74,9 +74,9 @@ const formatDocumentType = (type: string | null): string => {
  */
 const VisibilityIcon: React.FC<{ visibility: string }> = ({ visibility }) => {
   switch (visibility) {
-    case 'public':
+    case "public":
       return <Globe className="h-3.5 w-3.5 text-green-500" />;
-    case 'organization':
+    case "organization":
       return <Users className="h-3.5 w-3.5 text-blue-500" />;
     default:
       return <Lock className="h-3.5 w-3.5 text-muted-foreground" />;
@@ -92,20 +92,16 @@ interface TemplateCardProps {
   onClick: () => void;
 }
 
-const TemplateCard: React.FC<TemplateCardProps> = ({
-  template,
-  isSelected,
-  onClick,
-}) => {
+const TemplateCard: React.FC<TemplateCardProps> = ({ template, isSelected, onClick }) => {
   return (
     <button
       type="button"
       onClick={onClick}
       className={cn(
-        'w-full text-left p-4 rounded-lg border transition-all duration-200',
-        'hover:border-primary/50 hover:shadow-sm',
-        'focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2',
-        isSelected && 'border-primary bg-primary/5'
+        "w-full text-left p-4 rounded-lg border transition-all duration-200",
+        "hover:border-primary/50 hover:shadow-sm",
+        "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
+        isSelected && "border-primary bg-primary/5"
       )}
     >
       <div className="flex items-start justify-between gap-3">
@@ -196,16 +192,16 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
   projectId,
   onTemplateApplied,
 }) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [documentTypeFilter, setDocumentTypeFilter] = useState<string>('all');
-  const [visibilityFilter, setVisibilityFilter] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [documentTypeFilter, setDocumentTypeFilter] = useState<string>("all");
+  const [visibilityFilter, setVisibilityFilter] = useState<string>("all");
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
 
   // Fetch templates
   const { data: templatesResponse, isLoading } = useGetTemplatesQuery(
     {
-      visibility: visibilityFilter === 'all' ? undefined : visibilityFilter as 'mine' | 'public',
-      document_type: documentTypeFilter === 'all' ? undefined : documentTypeFilter,
+      visibility: visibilityFilter === "all" ? undefined : (visibilityFilter as "mine" | "public"),
+      document_type: documentTypeFilter === "all" ? undefined : documentTypeFilter,
       search: searchQuery || undefined,
       page_size: 50,
     },
@@ -222,9 +218,7 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
 
     const query = searchQuery.toLowerCase();
     return templates.filter(
-      (t) =>
-        t.name.toLowerCase().includes(query) ||
-        t.description?.toLowerCase().includes(query)
+      (t) => t.name.toLowerCase().includes(query) || t.description?.toLowerCase().includes(query)
     );
   }, [templatesResponse?.data, searchQuery]);
 
@@ -242,16 +236,16 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
       onOpenChange(false);
     } catch (error) {
       // Error is handled by RTK Query
-      console.error('Failed to apply template:', error);
+      console.error("Failed to apply template:", error);
     }
   };
 
   // Reset state when closing
   const handleOpenChange = (isOpen: boolean) => {
     if (!isOpen) {
-      setSearchQuery('');
-      setDocumentTypeFilter('all');
-      setVisibilityFilter('all');
+      setSearchQuery("");
+      setDocumentTypeFilter("all");
+      setVisibilityFilter("all");
       setSelectedTemplateId(null);
     }
     onOpenChange(isOpen);
@@ -322,14 +316,12 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
               <div className="text-center py-12">
                 <FileText className="h-12 w-12 mx-auto text-muted-foreground/50" />
                 <p className="mt-4 text-muted-foreground">
-                  {searchQuery
-                    ? 'No templates match your search'
-                    : 'No templates available'}
+                  {searchQuery ? "No templates match your search" : "No templates available"}
                 </p>
                 <p className="text-sm text-muted-foreground/70 mt-1">
                   {searchQuery
-                    ? 'Try a different search term'
-                    : 'Create your first template to get started'}
+                    ? "Try a different search term"
+                    : "Create your first template to get started"}
                 </p>
               </div>
             ) : (
@@ -348,23 +340,20 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
         {/* Footer */}
         <div className="flex items-center justify-between pt-4 border-t">
           <p className="text-sm text-muted-foreground">
-            {filteredTemplates.length} template{filteredTemplates.length !== 1 ? 's' : ''} available
+            {filteredTemplates.length} template{filteredTemplates.length !== 1 ? "s" : ""} available
           </p>
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={() => handleOpenChange(false)}>
               Cancel
             </Button>
-            <Button
-              onClick={handleApply}
-              disabled={!selectedTemplateId || isApplying}
-            >
+            <Button onClick={handleApply} disabled={!selectedTemplateId || isApplying}>
               {isApplying ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Applying...
                 </>
               ) : (
-                'Apply Template'
+                "Apply Template"
               )}
             </Button>
           </div>

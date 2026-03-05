@@ -1,25 +1,25 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import type { RootState } from '../index';
+import { createSlice } from "@reduxjs/toolkit";
+import type { RootState } from "../index";
 
 interface DemoState {
   isActive: boolean;
   enteredAt: string | null;
 }
 
-const DEMO_MODE_KEY = 'demo_mode';
-const DEMO_ENTERED_AT_KEY = 'demo_entered_at';
+const DEMO_MODE_KEY = "demo_mode";
+const DEMO_ENTERED_AT_KEY = "demo_entered_at";
 
 // Load initial state from localStorage
 const loadDemoStateFromStorage = (): DemoState => {
   try {
-    const isActive = localStorage.getItem(DEMO_MODE_KEY) === 'true';
+    const isActive = localStorage.getItem(DEMO_MODE_KEY) === "true";
     const enteredAt = localStorage.getItem(DEMO_ENTERED_AT_KEY);
     return {
       isActive,
       enteredAt: isActive ? enteredAt : null,
     };
   } catch (error) {
-    console.warn('[Demo] Failed to load state from localStorage:', error);
+    console.warn("[Demo] Failed to load state from localStorage:", error);
     return {
       isActive: false,
       enteredAt: null,
@@ -30,7 +30,7 @@ const loadDemoStateFromStorage = (): DemoState => {
 const initialState: DemoState = loadDemoStateFromStorage();
 
 const demoSlice = createSlice({
-  name: 'demo',
+  name: "demo",
   initialState,
   reducers: {
     enterDemoMode: (state) => {
@@ -39,10 +39,10 @@ const demoSlice = createSlice({
 
       // Sync to localStorage
       try {
-        localStorage.setItem(DEMO_MODE_KEY, 'true');
+        localStorage.setItem(DEMO_MODE_KEY, "true");
         localStorage.setItem(DEMO_ENTERED_AT_KEY, state.enteredAt);
       } catch (error) {
-        console.warn('[Demo] Failed to save state to localStorage:', error);
+        console.warn("[Demo] Failed to save state to localStorage:", error);
       }
     },
     exitDemoMode: (state) => {
@@ -53,9 +53,9 @@ const demoSlice = createSlice({
       try {
         localStorage.removeItem(DEMO_MODE_KEY);
         localStorage.removeItem(DEMO_ENTERED_AT_KEY);
-        localStorage.removeItem('doctify_onboarding_completed');
+        localStorage.removeItem("doctify_onboarding_completed");
       } catch (error) {
-        console.warn('[Demo] Failed to clear localStorage:', error);
+        console.warn("[Demo] Failed to clear localStorage:", error);
       }
     },
   },

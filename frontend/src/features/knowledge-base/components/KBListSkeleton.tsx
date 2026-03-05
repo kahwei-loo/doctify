@@ -9,26 +9,20 @@
  * - Responsive design
  */
 
-import React from 'react';
-import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
+import React from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 interface KBListSkeletonProps {
   count?: number;
   className?: string;
 }
 
-export const KBListSkeleton: React.FC<KBListSkeletonProps> = ({
-  count = 3,
-  className,
-}) => {
+export const KBListSkeleton: React.FC<KBListSkeletonProps> = ({ count = 3, className }) => {
   return (
-    <div className={cn('space-y-2', className)}>
+    <div className={cn("space-y-2", className)}>
       {Array.from({ length: count }).map((_, index) => (
-        <div
-          key={index}
-          className="flex items-center gap-3 p-3 rounded-lg border bg-card"
-        >
+        <div key={index} className="flex items-center gap-3 p-3 rounded-lg border bg-card">
           {/* Icon skeleton */}
           <Skeleton className="h-10 w-10 rounded-lg shrink-0" />
 

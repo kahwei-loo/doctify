@@ -4,16 +4,16 @@
  * Configures Redux store with Redux Toolkit and RTK Query.
  */
 
-import { configureStore } from '@reduxjs/toolkit';
-import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
-import { setupListeners } from '@reduxjs/toolkit/query';
+import { configureStore } from "@reduxjs/toolkit";
+import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
+import { setupListeners } from "@reduxjs/toolkit/query";
 
-import authReducer from './slices/authSlice';
-import documentsReducer from './slices/documentsSlice';
-import uiReducer from './slices/uiSlice';
-import demoReducer from './slices/demoSlice';
-import { api } from './api/apiSlice';
-import { publicChatApi } from './api/publicChatApi';
+import authReducer from "./slices/authSlice";
+import documentsReducer from "./slices/documentsSlice";
+import uiReducer from "./slices/uiSlice";
+import demoReducer from "./slices/demoSlice";
+import { api } from "./api/apiSlice";
+import { publicChatApi } from "./api/publicChatApi";
 
 export const store = configureStore({
   reducer: {
@@ -28,7 +28,7 @@ export const store = configureStore({
     getDefaultMiddleware({
       serializableCheck: {
         // Ignore these action types for serialization check
-        ignoredActions: ['api/executeQuery/fulfilled', 'api/executeMutation/fulfilled'],
+        ignoredActions: ["api/executeQuery/fulfilled", "api/executeMutation/fulfilled"],
       },
     }).concat(api.middleware, publicChatApi.middleware),
   devTools: import.meta.env.DEV,

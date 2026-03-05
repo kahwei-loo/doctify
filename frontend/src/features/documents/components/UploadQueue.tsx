@@ -11,7 +11,7 @@
  * - Collapsible design
  */
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   FileText,
   Image,
@@ -22,20 +22,16 @@ import {
   ChevronDown,
   ChevronUp,
   Trash2,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface UploadProgress {
   file: File;
   progress: number;
-  status: 'pending' | 'uploading' | 'completed' | 'error';
+  status: "pending" | "uploading" | "completed" | "error";
   error?: string;
 }
 
@@ -52,10 +48,10 @@ interface UploadQueueProps {
  * Get file icon based on MIME type
  */
 const getFileIcon = (file: File) => {
-  if (file.type === 'application/pdf') {
+  if (file.type === "application/pdf") {
     return <FileText className="h-4 w-4 text-red-500" />;
   }
-  if (file.type.startsWith('image/')) {
+  if (file.type.startsWith("image/")) {
     return <Image className="h-4 w-4 text-blue-500" />;
   }
   return <FileText className="h-4 w-4 text-muted-foreground" />;
@@ -65,9 +61,9 @@ const getFileIcon = (file: File) => {
  * Format file size to human readable
  */
 const formatFileSize = (bytes: number): string => {
-  if (bytes === 0) return '0 B';
+  if (bytes === 0) return "0 B";
   const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const sizes = ["B", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
 };
@@ -75,15 +71,15 @@ const formatFileSize = (bytes: number): string => {
 /**
  * Get status icon based on upload status
  */
-const StatusIcon: React.FC<{ status: UploadProgress['status'] }> = ({ status }) => {
+const StatusIcon: React.FC<{ status: UploadProgress["status"] }> = ({ status }) => {
   switch (status) {
-    case 'pending':
+    case "pending":
       return <div className="h-4 w-4 rounded-full bg-muted-foreground/30" />;
-    case 'uploading':
+    case "uploading":
       return <Loader2 className="h-4 w-4 animate-spin text-primary" />;
-    case 'completed':
+    case "completed":
       return <Check className="h-4 w-4 text-green-500" />;
-    case 'error':
+    case "error":
       return <AlertCircle className="h-4 w-4 text-destructive" />;
     default:
       return null;
@@ -104,10 +100,10 @@ const UploadQueueItem: React.FC<{
   return (
     <div
       className={cn(
-        'flex items-center gap-3 p-3 rounded-lg border transition-colors',
-        status === 'error' && 'border-destructive/50 bg-destructive/5',
-        status === 'completed' && 'border-green-500/50 bg-green-500/5',
-        (status === 'pending' || status === 'uploading') && 'border-border'
+        "flex items-center gap-3 p-3 rounded-lg border transition-colors",
+        status === "error" && "border-destructive/50 bg-destructive/5",
+        status === "completed" && "border-green-500/50 bg-green-500/5",
+        (status === "pending" || status === "uploading") && "border-border"
       )}
     >
       {/* File Icon */}
@@ -121,35 +117,31 @@ const UploadQueueItem: React.FC<{
         </div>
 
         {/* Progress bar for uploading state */}
-        {status === 'uploading' && (
-          <Progress value={progress} className="h-1.5 mt-2" />
-        )}
+        {status === "uploading" && <Progress value={progress} className="h-1.5 mt-2" />}
 
         {/* Status text */}
         <div className="flex items-center justify-between mt-1">
-          <span className="text-xs text-muted-foreground">
-            {formatFileSize(file.size)}
-          </span>
+          <span className="text-xs text-muted-foreground">{formatFileSize(file.size)}</span>
           <span
             className={cn(
-              'text-xs',
-              status === 'error' && 'text-destructive',
-              status === 'completed' && 'text-green-600',
-              status === 'uploading' && 'text-primary',
-              status === 'pending' && 'text-muted-foreground'
+              "text-xs",
+              status === "error" && "text-destructive",
+              status === "completed" && "text-green-600",
+              status === "uploading" && "text-primary",
+              status === "pending" && "text-muted-foreground"
             )}
           >
-            {status === 'uploading' && `${progress}%`}
-            {status === 'completed' && 'Uploaded'}
-            {status === 'pending' && 'Waiting...'}
-            {status === 'error' && (error || 'Failed')}
+            {status === "uploading" && `${progress}%`}
+            {status === "completed" && "Uploaded"}
+            {status === "pending" && "Waiting..."}
+            {status === "error" && (error || "Failed")}
           </span>
         </div>
       </div>
 
       {/* Actions */}
       <div className="flex-shrink-0">
-        {(status === 'pending' || status === 'uploading') && onCancel && (
+        {(status === "pending" || status === "uploading") && onCancel && (
           <Button
             variant="ghost"
             size="icon"
@@ -160,7 +152,7 @@ const UploadQueueItem: React.FC<{
             <X className="h-4 w-4" />
           </Button>
         )}
-        {status === 'error' && onRetry && (
+        {status === "error" && onRetry && (
           <Button
             variant="ghost"
             size="sm"
@@ -191,10 +183,10 @@ export const UploadQueue: React.FC<UploadQueueProps> = ({
   // Count by status
   const counts = {
     total: uploadsList.length,
-    pending: uploadsList.filter(([, u]) => u.status === 'pending').length,
-    uploading: uploadsList.filter(([, u]) => u.status === 'uploading').length,
-    completed: uploadsList.filter(([, u]) => u.status === 'completed').length,
-    error: uploadsList.filter(([, u]) => u.status === 'error').length,
+    pending: uploadsList.filter(([, u]) => u.status === "pending").length,
+    uploading: uploadsList.filter(([, u]) => u.status === "uploading").length,
+    completed: uploadsList.filter(([, u]) => u.status === "completed").length,
+    error: uploadsList.filter(([, u]) => u.status === "error").length,
   };
 
   const hasActiveUploads = counts.pending > 0 || counts.uploading > 0;
@@ -209,14 +201,8 @@ export const UploadQueue: React.FC<UploadQueueProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between p-3 bg-muted/50 rounded-t-lg border border-b-0">
         <CollapsibleTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-auto p-0 hover:bg-transparent"
-          >
-            <span className="font-medium text-sm">
-              Upload Queue ({counts.total})
-            </span>
+          <Button variant="ghost" size="sm" className="h-auto p-0 hover:bg-transparent">
+            <span className="font-medium text-sm">Upload Queue ({counts.total})</span>
             {isOpen ? (
               <ChevronUp className="h-4 w-4 ml-2" />
             ) : (
@@ -250,12 +236,7 @@ export const UploadQueue: React.FC<UploadQueueProps> = ({
         {/* Actions */}
         <div className="flex items-center gap-1">
           {hasCompletedUploads && onClearCompleted && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 text-xs"
-              onClick={onClearCompleted}
-            >
+            <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={onClearCompleted}>
               Clear completed
             </Button>
           )}

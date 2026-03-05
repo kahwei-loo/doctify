@@ -5,8 +5,8 @@
  * Supports both create and edit modes with Zod schema validation.
  */
 
-import React, { useState, useEffect } from 'react';
-import { z } from 'zod';
+import React, { useState, useEffect } from "react";
+import { z } from "zod";
 import {
   Dialog,
   DialogContent,
@@ -14,47 +14,51 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { Loader2, X } from 'lucide-react';
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Loader2, X } from "lucide-react";
 import type {
   Template,
   CreateTemplateRequest,
   UpdateTemplateRequest,
-} from '@/store/api/templatesApi';
-import { VALID_VISIBILITIES, VALID_DOCUMENT_TYPES } from '@/store/api/templatesApi';
+} from "@/store/api/templatesApi";
+import { VALID_DOCUMENT_TYPES } from "@/store/api/templatesApi";
 
 // Form validation schema
 const templateFormSchema = z.object({
   name: z
     .string()
-    .min(3, 'Name must be at least 3 characters')
-    .max(100, 'Name must not exceed 100 characters'),
+    .min(3, "Name must be at least 3 characters")
+    .max(100, "Name must not exceed 100 characters"),
   description: z
     .string()
-    .min(10, 'Description must be at least 10 characters')
-    .max(500, 'Description must not exceed 500 characters')
+    .min(10, "Description must be at least 10 characters")
+    .max(500, "Description must not exceed 500 characters")
     .optional()
-    .or(z.literal('')),
+    .or(z.literal("")),
   document_type: z
-    .enum(['invoice', 'receipt', 'contract', 'form', 'report', 'custom'])
+    .enum(["invoice", "receipt", "contract", "form", "report", "custom"])
     .optional()
-    .or(z.literal('')),
-  visibility: z.enum(['private', 'public', 'organization'], {
-    errorMap: () => ({ message: 'Please select a valid visibility' }),
+    .or(z.literal("")),
+  visibility: z.enum(["private", "public", "organization"], {
+    errorMap: () => ({ message: "Please select a valid visibility" }),
   }),
-  category: z.string().max(50, 'Category must not exceed 50 characters').optional().or(z.literal('')),
+  category: z
+    .string()
+    .max(50, "Category must not exceed 50 characters")
+    .optional()
+    .or(z.literal("")),
   tags: z.array(z.string()).optional(),
 });
 
@@ -79,16 +83,16 @@ export const TemplateFormModal: React.FC<TemplateFormModalProps> = ({
 
   // Form state
   const [formData, setFormData] = useState<TemplateFormData>({
-    name: '',
-    description: '',
-    document_type: '',
-    visibility: 'private',
-    category: '',
+    name: "",
+    description: "",
+    document_type: "",
+    visibility: "private",
+    category: "",
     tags: [],
   });
 
   // Tag input state
-  const [tagInput, setTagInput] = useState('');
+  const [tagInput, setTagInput] = useState("");
 
   // Validation errors
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -98,25 +102,25 @@ export const TemplateFormModal: React.FC<TemplateFormModalProps> = ({
     if (template) {
       setFormData({
         name: template.name,
-        description: template.description || '',
-        document_type: template.document_type || '',
+        description: template.description || "",
+        document_type: template.document_type || "",
         visibility: template.visibility,
-        category: template.category || '',
+        category: template.category || "",
         tags: template.tags || [],
       });
     } else {
       // Reset form for create mode
       setFormData({
-        name: '',
-        description: '',
-        document_type: '',
-        visibility: 'private',
-        category: '',
+        name: "",
+        description: "",
+        document_type: "",
+        visibility: "private",
+        category: "",
         tags: [],
       });
     }
     setErrors({});
-    setTagInput('');
+    setTagInput("");
   }, [template, open]);
 
   // Handle tag addition
@@ -127,7 +131,7 @@ export const TemplateFormModal: React.FC<TemplateFormModalProps> = ({
         ...prev,
         tags: [...(prev.tags || []), trimmedTag],
       }));
-      setTagInput('');
+      setTagInput("");
     }
   };
 
@@ -151,7 +155,7 @@ export const TemplateFormModal: React.FC<TemplateFormModalProps> = ({
       // Extract validation errors
       const validationErrors: Record<string, string> = {};
       result.error.errors.forEach((err) => {
-        const path = err.path.join('.');
+        const path = err.path.join(".");
         validationErrors[path] = err.message;
       });
       setErrors(validationErrors);
@@ -174,7 +178,7 @@ export const TemplateFormModal: React.FC<TemplateFormModalProps> = ({
   // Handle close (reset form)
   const handleClose = () => {
     setErrors({});
-    setTagInput('');
+    setTagInput("");
     onClose();
   };
 
@@ -183,13 +187,11 @@ export const TemplateFormModal: React.FC<TemplateFormModalProps> = ({
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>
-              {isEditMode ? 'Edit Template' : 'Create New Template'}
-            </DialogTitle>
+            <DialogTitle>{isEditMode ? "Edit Template" : "Create New Template"}</DialogTitle>
             <DialogDescription>
               {isEditMode
-                ? 'Update template configuration.'
-                : 'Create a new extraction template for document processing.'}
+                ? "Update template configuration."
+                : "Create a new extraction template for document processing."}
             </DialogDescription>
           </DialogHeader>
 
@@ -203,14 +205,10 @@ export const TemplateFormModal: React.FC<TemplateFormModalProps> = ({
                 id="name"
                 placeholder="e.g., Invoice Template"
                 value={formData.name}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, name: e.target.value }))
-                }
-                className={errors.name ? 'border-destructive' : ''}
+                onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+                className={errors.name ? "border-destructive" : ""}
               />
-              {errors.name && (
-                <p className="text-sm text-destructive">{errors.name}</p>
-              )}
+              {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
             </div>
 
             {/* Description Field */}
@@ -227,7 +225,7 @@ export const TemplateFormModal: React.FC<TemplateFormModalProps> = ({
                     description: e.target.value,
                   }))
                 }
-                className={errors.description ? 'border-destructive' : ''}
+                className={errors.description ? "border-destructive" : ""}
               />
               {errors.description && (
                 <p className="text-sm text-destructive">{errors.description}</p>
@@ -238,9 +236,13 @@ export const TemplateFormModal: React.FC<TemplateFormModalProps> = ({
             <div className="grid gap-2">
               <Label htmlFor="document_type">Document Type</Label>
               <Select
-                value={formData.document_type || 'none'}
+                value={formData.document_type || "none"}
                 onValueChange={(value) =>
-                  setFormData((prev) => ({ ...prev, document_type: value === 'none' ? '' : value as TemplateFormData['document_type'] }))
+                  setFormData((prev) => ({
+                    ...prev,
+                    document_type:
+                      value === "none" ? "" : (value as TemplateFormData["document_type"]),
+                  }))
                 }
               >
                 <SelectTrigger>
@@ -267,7 +269,7 @@ export const TemplateFormModal: React.FC<TemplateFormModalProps> = ({
                 onValueChange={(value) =>
                   setFormData((prev) => ({
                     ...prev,
-                    visibility: value as 'private' | 'public' | 'organization',
+                    visibility: value as "private" | "public" | "organization",
                   }))
                 }
               >
@@ -289,14 +291,10 @@ export const TemplateFormModal: React.FC<TemplateFormModalProps> = ({
                 id="category"
                 placeholder="e.g., Financial, Legal, HR"
                 value={formData.category}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, category: e.target.value }))
-                }
-                className={errors.category ? 'border-destructive' : ''}
+                onChange={(e) => setFormData((prev) => ({ ...prev, category: e.target.value }))}
+                className={errors.category ? "border-destructive" : ""}
               />
-              {errors.category && (
-                <p className="text-sm text-destructive">{errors.category}</p>
-              )}
+              {errors.category && <p className="text-sm text-destructive">{errors.category}</p>}
             </div>
 
             {/* Tags Field */}
@@ -309,7 +307,7 @@ export const TemplateFormModal: React.FC<TemplateFormModalProps> = ({
                   value={tagInput}
                   onChange={(e) => setTagInput(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
+                    if (e.key === "Enter") {
                       e.preventDefault();
                       handleAddTag();
                     }
@@ -344,22 +342,17 @@ export const TemplateFormModal: React.FC<TemplateFormModalProps> = ({
           </div>
 
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-              disabled={isSubmitting}
-            >
+            <Button type="button" variant="outline" onClick={handleClose} disabled={isSubmitting}>
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {isEditMode ? 'Updating...' : 'Creating...'}
+                  {isEditMode ? "Updating..." : "Creating..."}
                 </>
               ) : (
-                <>{isEditMode ? 'Update Template' : 'Create Template'}</>
+                <>{isEditMode ? "Update Template" : "Create Template"}</>
               )}
             </Button>
           </DialogFooter>

@@ -6,20 +6,20 @@
  * Reuses ProjectSettingsTab content for consistency.
  */
 
-import React from 'react';
-import { Settings, ExternalLink } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { Settings, ExternalLink } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from '@/components/ui/sheet';
-import { Button } from '@/components/ui/button';
-import { ProjectSettingsTab } from '@/features/projects/components/ProjectSettingsTab';
-import type { Project } from '@/store/api/projectsApi';
-import type { ExtractionConfig } from '@/features/projects/types';
+} from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { ProjectSettingsTab } from "@/features/projects/components/ProjectSettingsTab";
+import type { Project } from "@/store/api/projectsApi";
+import type { ExtractionConfig } from "@/features/projects/types";
 
 interface ProjectSettingsDrawerProps {
   /** Whether the drawer is open */
@@ -55,16 +55,13 @@ export const ProjectSettingsDrawer: React.FC<ProjectSettingsDrawerProps> = ({
             Project Settings
           </SheetTitle>
           <SheetDescription>
-            Configure extraction schema and processing settings for{' '}
+            Configure extraction schema and processing settings for{" "}
             <span className="font-medium text-foreground">{project.name}</span>
           </SheetDescription>
         </SheetHeader>
 
         <div className="py-6">
-          <ProjectSettingsTab
-            projectId={project.project_id}
-            initialConfig={extractionConfig}
-          />
+          <ProjectSettingsTab projectId={project.project_id} initialConfig={extractionConfig} />
         </div>
 
         {/* Footer with link to full project page */}

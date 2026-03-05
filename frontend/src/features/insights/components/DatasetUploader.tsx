@@ -4,13 +4,13 @@
  * Drag-and-drop upload zone for datasets (CSV, XLSX).
  */
 
-import React, { useCallback, useState } from 'react';
-import { useDropzone, type FileRejection } from 'react-dropzone';
-import { Upload, FileSpreadsheet, AlertCircle, Loader2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import React, { useCallback, useState } from "react";
+import { useDropzone, type FileRejection } from "react-dropzone";
+import { Upload, FileSpreadsheet, AlertCircle, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -18,14 +18,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { useUploadDatasetMutation } from '@/store/api/insightsApi';
+} from "@/components/ui/dialog";
+import { useUploadDatasetMutation } from "@/store/api/insightsApi";
 
 // Supported file types
 const ACCEPTED_FILE_TYPES = {
-  'text/csv': ['.csv'],
-  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
-  'application/vnd.ms-excel': ['.xls'],
+  "text/csv": [".csv"],
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
+  "application/vnd.ms-excel": [".xls"],
 };
 
 // Max file size: 50MB
@@ -43,37 +43,34 @@ export const DatasetUploader: React.FC<DatasetUploaderProps> = ({
   className,
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [datasetName, setDatasetName] = useState('');
-  const [description, setDescription] = useState('');
+  const [datasetName, setDatasetName] = useState("");
+  const [description, setDescription] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const [uploadDataset, { isLoading }] = useUploadDatasetMutation();
 
-  const onDrop = useCallback((acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
-    if (rejectedFiles.length > 0) {
-      const rejection = rejectedFiles[0];
-      const errorMsg = rejection.errors.map(e => e.message).join(', ');
-      onError?.(errorMsg);
-      return;
-    }
+  const onDrop = useCallback(
+    (acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
+      if (rejectedFiles.length > 0) {
+        const rejection = rejectedFiles[0];
+        const errorMsg = rejection.errors.map((e) => e.message).join(", ");
+        onError?.(errorMsg);
+        return;
+      }
 
-    if (acceptedFiles.length > 0) {
-      const file = acceptedFiles[0];
-      setSelectedFile(file);
-      // Auto-fill name from filename (without extension)
-      const nameWithoutExt = file.name.replace(/\.[^/.]+$/, '');
-      setDatasetName(nameWithoutExt);
-      setIsDialogOpen(true);
-    }
-  }, [onError]);
+      if (acceptedFiles.length > 0) {
+        const file = acceptedFiles[0];
+        setSelectedFile(file);
+        // Auto-fill name from filename (without extension)
+        const nameWithoutExt = file.name.replace(/\.[^/.]+$/, "");
+        setDatasetName(nameWithoutExt);
+        setIsDialogOpen(true);
+      }
+    },
+    [onError]
+  );
 
-  const {
-    getRootProps,
-    getInputProps,
-    isDragActive,
-    isDragAccept,
-    isDragReject,
-  } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive, isDragAccept, isDragReject } = useDropzone({
     onDrop,
     accept: ACCEPTED_FILE_TYPES,
     maxSize: MAX_FILE_SIZE,
@@ -93,11 +90,11 @@ export const DatasetUploader: React.FC<DatasetUploaderProps> = ({
 
       setIsDialogOpen(false);
       setSelectedFile(null);
-      setDatasetName('');
-      setDescription('');
+      setDatasetName("");
+      setDescription("");
       onSuccess?.(result.dataset_id);
     } catch (err: any) {
-      const errorMsg = err?.data?.detail || 'Failed to upload dataset';
+      const errorMsg = err?.data?.detail || "Failed to upload dataset";
       onError?.(errorMsg);
     }
   };
@@ -105,24 +102,24 @@ export const DatasetUploader: React.FC<DatasetUploaderProps> = ({
   const handleCancel = () => {
     setIsDialogOpen(false);
     setSelectedFile(null);
-    setDatasetName('');
-    setDescription('');
+    setDatasetName("");
+    setDescription("");
   };
 
   const getStateStyles = () => {
     if (isLoading) {
-      return 'border-muted-foreground/20 bg-muted/50 cursor-not-allowed';
+      return "border-muted-foreground/20 bg-muted/50 cursor-not-allowed";
     }
     if (isDragReject) {
-      return 'border-destructive bg-destructive/5 cursor-not-allowed';
+      return "border-destructive bg-destructive/5 cursor-not-allowed";
     }
     if (isDragAccept) {
-      return 'border-primary bg-primary/5 cursor-copy';
+      return "border-primary bg-primary/5 cursor-copy";
     }
     if (isDragActive) {
-      return 'border-primary/50 bg-primary/5 cursor-copy';
+      return "border-primary/50 bg-primary/5 cursor-copy";
     }
-    return 'border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50 cursor-pointer';
+    return "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50 cursor-pointer";
   };
 
   return (
@@ -130,7 +127,7 @@ export const DatasetUploader: React.FC<DatasetUploaderProps> = ({
       <div
         {...getRootProps()}
         className={cn(
-          'flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-xl transition-all min-h-[200px]',
+          "flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-xl transition-all min-h-[200px]",
           getStateStyles(),
           className
         )}
@@ -139,12 +136,8 @@ export const DatasetUploader: React.FC<DatasetUploaderProps> = ({
 
         <div
           className={cn(
-            'flex items-center justify-center h-16 w-16 rounded-full mb-4 transition-colors',
-            isDragActive
-              ? isDragReject
-                ? 'bg-destructive/10'
-                : 'bg-primary/10'
-              : 'bg-muted'
+            "flex items-center justify-center h-16 w-16 rounded-full mb-4 transition-colors",
+            isDragActive ? (isDragReject ? "bg-destructive/10" : "bg-primary/10") : "bg-muted"
           )}
         >
           {isLoading ? (
@@ -154,8 +147,8 @@ export const DatasetUploader: React.FC<DatasetUploaderProps> = ({
           ) : (
             <Upload
               className={cn(
-                'h-8 w-8 transition-colors',
-                isDragActive ? 'text-primary' : 'text-muted-foreground'
+                "h-8 w-8 transition-colors",
+                isDragActive ? "text-primary" : "text-muted-foreground"
               )}
             />
           )}
@@ -163,17 +156,15 @@ export const DatasetUploader: React.FC<DatasetUploaderProps> = ({
 
         <p className="text-lg font-medium mb-1">
           {isLoading
-            ? 'Uploading...'
+            ? "Uploading..."
             : isDragActive
-            ? isDragReject
-              ? 'Invalid file type'
-              : 'Drop file to upload'
-            : 'Drag & drop dataset here'}
+              ? isDragReject
+                ? "Invalid file type"
+                : "Drop file to upload"
+              : "Drag & drop dataset here"}
         </p>
 
-        <p className="text-sm text-muted-foreground mb-4">
-          or click to browse your files
-        </p>
+        <p className="text-sm text-muted-foreground mb-4">or click to browse your files</p>
 
         <div className="flex items-center gap-4 mb-4">
           <div className="flex items-center gap-1.5 text-muted-foreground">
@@ -186,9 +177,7 @@ export const DatasetUploader: React.FC<DatasetUploaderProps> = ({
           </div>
         </div>
 
-        <p className="text-xs text-muted-foreground">
-          Maximum file size: 50MB
-        </p>
+        <p className="text-xs text-muted-foreground">Maximum file size: 50MB</p>
       </div>
 
       {/* Dataset Details Dialog */}
@@ -234,17 +223,14 @@ export const DatasetUploader: React.FC<DatasetUploaderProps> = ({
             <Button variant="outline" onClick={handleCancel} disabled={isLoading}>
               Cancel
             </Button>
-            <Button
-              onClick={handleUpload}
-              disabled={isLoading || !datasetName.trim()}
-            >
+            <Button onClick={handleUpload} disabled={isLoading || !datasetName.trim()}>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Uploading...
                 </>
               ) : (
-                'Upload'
+                "Upload"
               )}
             </Button>
           </DialogFooter>

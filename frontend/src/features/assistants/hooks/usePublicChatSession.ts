@@ -7,10 +7,10 @@
  * - Handles session lifecycle
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import { useState, useEffect, useCallback } from "react";
+import { v4 as uuidv4 } from "uuid";
 
-const STORAGE_KEY_PREFIX = 'doctify_public_chat_';
+const STORAGE_KEY_PREFIX = "doctify_public_chat_";
 const RATE_LIMIT_WARNING_THRESHOLD = 15; // Warn at 15 messages
 const RATE_LIMIT_MAX = 20; // Block at 20 messages per minute
 
@@ -50,7 +50,7 @@ export const usePublicChatSession = ({
 
   // Initialize session from localStorage or create new
   const [sessionData, setSessionData] = useState<SessionData>(() => {
-    if (typeof window === 'undefined') {
+    if (typeof window === "undefined") {
       return createNewSession(assistantId);
     }
 
@@ -67,7 +67,7 @@ export const usePublicChatSession = ({
         return parsed;
       }
     } catch (e) {
-      console.error('Failed to parse session data:', e);
+      console.error("Failed to parse session data:", e);
     }
 
     return createNewSession(assistantId);
@@ -78,7 +78,7 @@ export const usePublicChatSession = ({
     try {
       localStorage.setItem(storageKey, JSON.stringify(sessionData));
     } catch (e) {
-      console.error('Failed to persist session data:', e);
+      console.error("Failed to persist session data:", e);
     }
   }, [sessionData, storageKey]);
 
@@ -133,7 +133,12 @@ export const usePublicChatSession = ({
         sessionData.messages_this_minute >= RATE_LIMIT_MAX - 1);
 
     return !wouldBlock;
-  }, [sessionData.messages_this_minute, sessionData.minute_start, onRateLimitWarning, onRateLimitExceeded]);
+  }, [
+    sessionData.messages_this_minute,
+    sessionData.minute_start,
+    onRateLimitWarning,
+    onRateLimitExceeded,
+  ]);
 
   // Reset session (for testing or user request)
   const resetSession = useCallback(() => {

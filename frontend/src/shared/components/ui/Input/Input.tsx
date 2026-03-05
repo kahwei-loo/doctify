@@ -4,8 +4,8 @@
  * Reusable input component with label, error, and helper text support.
  */
 
-import React, { forwardRef } from 'react';
-import './Input.css';
+import React, { forwardRef } from "react";
+import "./Input.css";
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -25,7 +25,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       fullWidth = false,
       startIcon,
       endIcon,
-      className = '',
+      className = "",
       id,
       ...props
     },
@@ -36,52 +36,64 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     const messageId = `${inputId}-message`;
 
     const containerClassNames = [
-      'input-container',
-      fullWidth && 'input-container--full-width',
+      "input-container",
+      fullWidth && "input-container--full-width",
       className,
     ]
       .filter(Boolean)
-      .join(' ');
+      .join(" ");
 
     const wrapperClassNames = [
-      'input-wrapper',
-      hasError && 'input-wrapper--error',
-      startIcon && 'input-wrapper--with-start-icon',
-      endIcon && 'input-wrapper--with-end-icon',
+      "input-wrapper",
+      hasError && "input-wrapper--error",
+      startIcon && "input-wrapper--with-start-icon",
+      endIcon && "input-wrapper--with-end-icon",
     ]
       .filter(Boolean)
-      .join(' ');
+      .join(" ");
 
     return (
       <div className={containerClassNames}>
         {label && (
           <label htmlFor={inputId} className="input-label">
             {label}
-            {props.required && <span className="input-label__required" aria-hidden="true">*</span>}
+            {props.required && (
+              <span className="input-label__required" aria-hidden="true">
+                *
+              </span>
+            )}
           </label>
         )}
 
         <div className={wrapperClassNames}>
-          {startIcon && <span className="input-icon input-icon--start" aria-hidden="true">{startIcon}</span>}
+          {startIcon && (
+            <span className="input-icon input-icon--start" aria-hidden="true">
+              {startIcon}
+            </span>
+          )}
 
           <input
             ref={ref}
             id={inputId}
             className="input"
-            aria-invalid={hasError ? 'true' : undefined}
-            aria-describedby={(error || helperText) ? messageId : undefined}
+            aria-invalid={hasError ? "true" : undefined}
+            aria-describedby={error || helperText ? messageId : undefined}
             {...props}
           />
 
-          {endIcon && <span className="input-icon input-icon--end" aria-hidden="true">{endIcon}</span>}
+          {endIcon && (
+            <span className="input-icon input-icon--end" aria-hidden="true">
+              {endIcon}
+            </span>
+          )}
         </div>
 
         {(error || helperText) && (
           <p
             id={messageId}
-            className={`input-message ${hasError ? 'input-message--error' : ''}`}
-            role={hasError ? 'alert' : undefined}
-            aria-live={hasError ? 'polite' : undefined}
+            className={`input-message ${hasError ? "input-message--error" : ""}`}
+            role={hasError ? "alert" : undefined}
+            aria-live={hasError ? "polite" : undefined}
           >
             {error || helperText}
           </p>
@@ -91,4 +103,4 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
   }
 );
 
-Input.displayName = 'Input';
+Input.displayName = "Input";

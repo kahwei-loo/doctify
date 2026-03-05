@@ -12,8 +12,8 @@
  * - Keyboard navigation
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
-import { Document, Page, pdfjs } from 'react-pdf';
+import React, { useState, useCallback, useEffect } from "react";
+import { Document, Page, pdfjs } from "react-pdf";
 import {
   ZoomIn,
   ZoomOut,
@@ -21,25 +21,18 @@ import {
   ChevronLeft,
   ChevronRight,
   Download,
-  Maximize2,
   Loader2,
   FileText,
-  Image as ImageIcon,
   AlertCircle,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 // Import PDF.js worker
-import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
-import 'react-pdf/dist/esm/Page/TextLayer.css';
+import "react-pdf/dist/esm/Page/AnnotationLayer.css";
+import "react-pdf/dist/esm/Page/TextLayer.css";
 
 // Configure PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
@@ -67,15 +60,15 @@ interface DocumentPreviewProps {
   showToolbar?: boolean;
 }
 
-type PreviewType = 'pdf' | 'image' | 'unsupported';
+type PreviewType = "pdf" | "image" | "unsupported";
 
 /**
  * Determine preview type from MIME type
  */
 const getPreviewType = (mimeType: string): PreviewType => {
-  if (mimeType === 'application/pdf') return 'pdf';
-  if (mimeType.startsWith('image/')) return 'image';
-  return 'unsupported';
+  if (mimeType === "application/pdf") return "pdf";
+  if (mimeType.startsWith("image/")) return "image";
+  return "unsupported";
 };
 
 /**
@@ -92,7 +85,7 @@ const PDFPreview: React.FC<{
   const [rotation, setRotation] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [pageInputValue, setPageInputValue] = useState('1');
+  const [pageInputValue, setPageInputValue] = useState("1");
 
   const onDocumentLoadSuccess = useCallback(({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
@@ -101,17 +94,20 @@ const PDFPreview: React.FC<{
   }, []);
 
   const onDocumentLoadError = useCallback((err: Error) => {
-    setError(err.message || 'Failed to load PDF');
+    setError(err.message || "Failed to load PDF");
     setIsLoading(false);
   }, []);
 
   // Page navigation
-  const goToPage = useCallback((page: number) => {
-    if (numPages && page >= 1 && page <= numPages) {
-      setPageNumber(page);
-      setPageInputValue(String(page));
-    }
-  }, [numPages]);
+  const goToPage = useCallback(
+    (page: number) => {
+      if (numPages && page >= 1 && page <= numPages) {
+        setPageNumber(page);
+        setPageInputValue(String(page));
+      }
+    },
+    [numPages]
+  );
 
   const prevPage = useCallback(() => goToPage(pageNumber - 1), [pageNumber, goToPage]);
   const nextPage = useCallback(() => goToPage(pageNumber + 1), [pageNumber, goToPage]);
@@ -131,7 +127,7 @@ const PDFPreview: React.FC<{
   };
 
   const handlePageInputKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       handlePageInputBlur();
     }
   };
@@ -150,30 +146,30 @@ const PDFPreview: React.FC<{
       if (e.target instanceof HTMLInputElement) return;
 
       switch (e.key) {
-        case 'ArrowLeft':
+        case "ArrowLeft":
           prevPage();
           break;
-        case 'ArrowRight':
+        case "ArrowRight":
           nextPage();
           break;
-        case '+':
-        case '=':
+        case "+":
+        case "=":
           zoomIn();
           break;
-        case '-':
+        case "-":
           zoomOut();
           break;
-        case 'r':
+        case "r":
           rotate();
           break;
-        case '0':
+        case "0":
           resetZoom();
           break;
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [prevPage, nextPage]);
 
   if (error) {
@@ -217,9 +213,7 @@ const PDFPreview: React.FC<{
                 onKeyDown={handlePageInputKeyDown}
                 className="h-8 w-12 text-center text-sm"
               />
-              <span className="text-sm text-muted-foreground">
-                / {numPages || '?'}
-              </span>
+              <span className="text-sm text-muted-foreground">/ {numPages || "?"}</span>
             </div>
             <Button
               variant="ghost"
@@ -277,12 +271,7 @@ const PDFPreview: React.FC<{
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={rotate}
-                  >
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={rotate}>
                     <RotateCw className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
@@ -294,12 +283,7 @@ const PDFPreview: React.FC<{
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={onDownload}
-                    >
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onDownload}>
                       <Download className="h-4 w-4" />
                     </Button>
                   </TooltipTrigger>
@@ -324,7 +308,7 @@ const PDFPreview: React.FC<{
           onLoadError={onDocumentLoadError}
           loading={null}
           options={PDF_OPTIONS}
-          className={cn(isLoading && 'invisible')}
+          className={cn(isLoading && "invisible")}
         >
           <Page
             pageNumber={pageNumber}
@@ -362,7 +346,7 @@ const ImagePreview: React.FC<{
 
   const handleImageLoad = () => setIsLoading(false);
   const handleImageError = () => {
-    setError('Failed to load image');
+    setError("Failed to load image");
     setIsLoading(false);
   };
 
@@ -372,24 +356,24 @@ const ImagePreview: React.FC<{
       if (e.target instanceof HTMLInputElement) return;
 
       switch (e.key) {
-        case '+':
-        case '=':
+        case "+":
+        case "=":
           zoomIn();
           break;
-        case '-':
+        case "-":
           zoomOut();
           break;
-        case 'r':
+        case "r":
           rotate();
           break;
-        case '0':
+        case "0":
           resetZoom();
           break;
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   if (error) {
@@ -413,9 +397,7 @@ const ImagePreview: React.FC<{
       {/* Toolbar */}
       {showToolbar && (
         <div className="flex items-center justify-between px-4 py-2 border-b bg-muted/30 flex-shrink-0">
-          <span className="text-sm text-muted-foreground truncate max-w-[200px]">
-            {filename}
-          </span>
+          <span className="text-sm text-muted-foreground truncate max-w-[200px]">{filename}</span>
 
           <div className="flex items-center gap-1">
             <TooltipProvider>
@@ -461,12 +443,7 @@ const ImagePreview: React.FC<{
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={rotate}
-                  >
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={rotate}>
                     <RotateCw className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
@@ -478,12 +455,7 @@ const ImagePreview: React.FC<{
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={onDownload}
-                    >
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onDownload}>
                       <Download className="h-4 w-4" />
                     </Button>
                   </TooltipTrigger>
@@ -508,8 +480,8 @@ const ImagePreview: React.FC<{
           onLoad={handleImageLoad}
           onError={handleImageError}
           className={cn(
-            'max-w-full max-h-full object-contain transition-transform duration-200 shadow-lg',
-            isLoading && 'invisible'
+            "max-w-full max-h-full object-contain transition-transform duration-200 shadow-lg",
+            isLoading && "invisible"
           )}
           style={{
             transform: `scale(${scale}) rotate(${rotation}deg)`,
@@ -532,12 +504,8 @@ const UnsupportedPreview: React.FC<{
     <div className="flex flex-col items-center justify-center h-full p-8 text-center">
       <FileText className="h-16 w-16 text-muted-foreground/50 mb-4" />
       <p className="text-lg font-medium">Preview not available</p>
-      <p className="text-sm text-muted-foreground mt-2">
-        {filename}
-      </p>
-      <p className="text-xs text-muted-foreground mt-1">
-        Format: {mimeType}
-      </p>
+      <p className="text-sm text-muted-foreground mt-2">{filename}</p>
+      <p className="text-xs text-muted-foreground mt-1">Format: {mimeType}</p>
       {onDownload && (
         <Button variant="outline" className="mt-4" onClick={onDownload}>
           <Download className="mr-2 h-4 w-4" />
@@ -591,11 +559,11 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
   onDownload,
   showToolbar = true,
 }) => {
-  const isDemoMode = localStorage.getItem('demo_mode') === 'true';
+  const isDemoMode = localStorage.getItem("demo_mode") === "true";
 
   if (!url) {
     return (
-      <div className={cn('h-full', className)}>
+      <div className={cn("h-full", className)}>
         <NoDocumentPlaceholder />
       </div>
     );
@@ -603,7 +571,7 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
 
   if (isDemoMode) {
     return (
-      <div className={cn('h-full', className)}>
+      <div className={cn("h-full", className)}>
         <DemoPreviewPlaceholder filename={filename} mimeType={mimeType} />
       </div>
     );
@@ -612,15 +580,11 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
   const previewType = getPreviewType(mimeType);
 
   return (
-    <div className={cn('h-full', className)}>
-      {previewType === 'pdf' && (
-        <PDFPreview
-          url={url}
-          showToolbar={showToolbar}
-          onDownload={onDownload}
-        />
+    <div className={cn("h-full", className)}>
+      {previewType === "pdf" && (
+        <PDFPreview url={url} showToolbar={showToolbar} onDownload={onDownload} />
       )}
-      {previewType === 'image' && (
+      {previewType === "image" && (
         <ImagePreview
           url={url}
           filename={filename}
@@ -628,12 +592,8 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
           onDownload={onDownload}
         />
       )}
-      {previewType === 'unsupported' && (
-        <UnsupportedPreview
-          mimeType={mimeType}
-          filename={filename}
-          onDownload={onDownload}
-        />
+      {previewType === "unsupported" && (
+        <UnsupportedPreview mimeType={mimeType} filename={filename} onDownload={onDownload} />
       )}
     </div>
   );

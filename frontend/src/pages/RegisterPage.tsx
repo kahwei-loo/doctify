@@ -1,14 +1,8 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { FileText } from 'lucide-react';
-import RegisterForm from '@/features/auth/components/RegisterForm';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import React from "react";
+import { Link } from "react-router-dom";
+import { FileText } from "lucide-react";
+import RegisterForm from "@/features/auth/components/RegisterForm";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const RegisterPage: React.FC = () => {
   return (
@@ -28,9 +22,7 @@ const RegisterPage: React.FC = () => {
         <Card className="shadow-xl border-border/50">
           <CardHeader className="text-center pb-2">
             <CardTitle className="text-2xl">Create an account</CardTitle>
-            <CardDescription>
-              Get started with intelligent document processing
-            </CardDescription>
+            <CardDescription>Get started with intelligent document processing</CardDescription>
           </CardHeader>
           <CardContent className="pt-4">
             <RegisterForm />

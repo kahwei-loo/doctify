@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { Loader2, Plus } from 'lucide-react';
-import toast from 'react-hot-toast';
-import { useAddCatalogEntryMutation } from '@/store/api/aiModelSettingsApi';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
+import React, { useState } from "react";
+import { Loader2, Plus } from "lucide-react";
+import toast from "react-hot-toast";
+import { useAddCatalogEntryMutation } from "@/store/api/aiModelSettingsApi";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -14,36 +14,34 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { ProviderSelect } from './ProviderSelect';
+} from "@/components/ui/dialog";
+import { ProviderSelect } from "./ProviderSelect";
 
 const ALL_PURPOSES = [
-  { value: 'chat', label: 'Chat' },
-  { value: 'chat_fast', label: 'Fast Chat' },
-  { value: 'embedding', label: 'Embedding' },
-  { value: 'vision', label: 'Vision' },
-  { value: 'classifier', label: 'Classifier' },
-  { value: 'reranker', label: 'Reranker' },
+  { value: "chat", label: "Chat" },
+  { value: "chat_fast", label: "Fast Chat" },
+  { value: "embedding", label: "Embedding" },
+  { value: "vision", label: "Vision" },
+  { value: "classifier", label: "Classifier" },
+  { value: "reranker", label: "Reranker" },
 ];
 
 interface AddModelDialogProps {
   existingProviders: string[];
 }
 
-export const AddModelDialog: React.FC<AddModelDialogProps> = ({
-  existingProviders,
-}) => {
+export const AddModelDialog: React.FC<AddModelDialogProps> = ({ existingProviders }) => {
   const [open, setOpen] = useState(false);
-  const [modelId, setModelId] = useState('');
-  const [displayName, setDisplayName] = useState('');
-  const [provider, setProvider] = useState('');
+  const [modelId, setModelId] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [provider, setProvider] = useState("");
   const [purposes, setPurposes] = useState<string[]>([]);
   const [addEntry, { isLoading }] = useAddCatalogEntryMutation();
 
   const resetForm = () => {
-    setModelId('');
-    setDisplayName('');
-    setProvider('');
+    setModelId("");
+    setDisplayName("");
+    setProvider("");
     setPurposes([]);
   };
 
@@ -56,7 +54,7 @@ export const AddModelDialog: React.FC<AddModelDialogProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!modelId || !displayName || !provider || purposes.length === 0) {
-      toast.error('All fields are required and at least one purpose must be selected.');
+      toast.error("All fields are required and at least one purpose must be selected.");
       return;
     }
     try {
@@ -71,15 +69,21 @@ export const AddModelDialog: React.FC<AddModelDialogProps> = ({
       setOpen(false);
     } catch (error: unknown) {
       const msg =
-        error && typeof error === 'object' && 'data' in error
+        error && typeof error === "object" && "data" in error
           ? (error as { data?: { detail?: string } }).data?.detail
           : undefined;
-      toast.error(msg || 'Failed to add model.');
+      toast.error(msg || "Failed to add model.");
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        setOpen(v);
+        if (!v) resetForm();
+      }}
+    >
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <Plus className="mr-2 h-4 w-4" />
@@ -128,10 +132,7 @@ export const AddModelDialog: React.FC<AddModelDialogProps> = ({
               <Label>Purposes</Label>
               <div className="grid grid-cols-3 gap-3">
                 {ALL_PURPOSES.map(({ value, label }) => (
-                  <label
-                    key={value}
-                    className="flex items-center gap-2 text-sm cursor-pointer"
-                  >
+                  <label key={value} className="flex items-center gap-2 text-sm cursor-pointer">
                     <Checkbox
                       checked={purposes.includes(value)}
                       onCheckedChange={() => togglePurpose(value)}

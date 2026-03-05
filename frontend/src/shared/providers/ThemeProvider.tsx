@@ -9,18 +9,11 @@
  * Syncs theme preference with backend settings.
  */
 
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  useMemo,
-  useCallback,
-} from 'react';
-import { useGetSettingsQuery, useUpdateSettingsMutation } from '@/store/api/settingsApi';
+import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from "react";
+import { useGetSettingsQuery, useUpdateSettingsMutation } from "@/store/api/settingsApi";
 
-export type Theme = 'light' | 'dark' | 'system';
-type ResolvedTheme = 'light' | 'dark';
+export type Theme = "light" | "dark" | "system";
+type ResolvedTheme = "light" | "dark";
 
 interface ThemeContextType {
   theme: Theme;
@@ -32,16 +25,16 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 // Local storage key for theme (fallback when not logged in)
-const THEME_STORAGE_KEY = 'doctify-theme';
+const THEME_STORAGE_KEY = "doctify-theme";
 
 function getSystemTheme(): ResolvedTheme {
-  if (typeof window === 'undefined') return 'light';
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  if (typeof window === "undefined") return "light";
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
 function applyThemeToDOM(resolvedTheme: ResolvedTheme) {
   const root = document.documentElement;
-  root.classList.remove('light', 'dark');
+  root.classList.remove("light", "dark");
   root.classList.add(resolvedTheme);
 }
 
@@ -52,12 +45,12 @@ interface ThemeProviderProps {
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   children,
-  defaultTheme = 'system',
+  defaultTheme = "system",
 }) => {
   // Fetch settings from backend (if logged in)
   const { data: settingsResponse, isLoading: isLoadingSettings } = useGetSettingsQuery(undefined, {
     // Skip if not logged in (no token)
-    skip: !localStorage.getItem('access_token'),
+    skip: !localStorage.getItem("access_token"),
   });
 
   const [updateSettings] = useUpdateSettingsMutation();
@@ -70,7 +63,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
     }
     // Otherwise check localStorage
     const stored = localStorage.getItem(THEME_STORAGE_KEY);
-    if (stored && ['light', 'dark', 'system'].includes(stored)) {
+    if (stored && ["light", "dark", "system"].includes(stored)) {
       return stored as Theme;
     }
     return defaultTheme;
@@ -81,7 +74,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
 
   // Calculate resolved theme
   const resolvedTheme = useMemo<ResolvedTheme>(() => {
-    if (theme === 'system') {
+    if (theme === "system") {
       return systemTheme;
     }
     return theme;
@@ -104,14 +97,14 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
 
   // Listen for system theme changes
   useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
     const handleChange = (e: MediaQueryListEvent) => {
-      setSystemTheme(e.matches ? 'dark' : 'light');
+      setSystemTheme(e.matches ? "dark" : "light");
     };
 
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
 
   // Set theme function
@@ -121,11 +114,11 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
       localStorage.setItem(THEME_STORAGE_KEY, newTheme);
 
       // If logged in, sync to backend
-      if (localStorage.getItem('access_token')) {
+      if (localStorage.getItem("access_token")) {
         try {
           await updateSettings({ theme: newTheme });
         } catch (error) {
-          console.error('Failed to sync theme to backend:', error);
+          console.error("Failed to sync theme to backend:", error);
         }
       }
     },
@@ -142,11 +135,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
     [theme, resolvedTheme, setTheme, isLoadingSettings]
   );
 
-  return (
-    <ThemeContext.Provider value={contextValue}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={contextValue}>{children}</ThemeContext.Provider>;
 };
 
 /**
@@ -155,7 +144,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
 export function useTheme(): ThemeContextType {
   const context = useContext(ThemeContext);
   if (!context) {
-    throw new Error('useTheme must be used within a ThemeProvider');
+    throw new Error("useTheme must be used within a ThemeProvider");
   }
   return context;
 }

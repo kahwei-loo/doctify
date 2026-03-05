@@ -5,13 +5,13 @@
  */
 
 // Types
-export * from './types';
+export * from "./types";
 
 // Components
-export * from './components';
+export * from "./components";
 
 // Hooks
-export * from './hooks';
+export * from "./hooks";
 
 // Services
-export * as mockAssistantsService from './services/mockAssistantsService';
+export * as mockAssistantsService from "./services/mockAssistantsService";

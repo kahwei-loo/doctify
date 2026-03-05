@@ -10,8 +10,8 @@
  * - Destructive styling
  */
 
-import React from 'react';
-import { AlertTriangle, Trash2 } from 'lucide-react';
+import React from "react";
+import { AlertTriangle, Trash2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -19,9 +19,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface ConfirmDeleteDialogProps {
   open: boolean;
@@ -84,7 +84,7 @@ export const ConfirmDeleteDialog: React.FC<ConfirmDeleteDialogProps> = ({
                   {impact.map((item, index) => (
                     <li key={index}>
                       {item.count} {item.label}
-                      {item.count !== 1 ? 's' : ''}
+                      {item.count !== 1 ? "s" : ""}
                     </li>
                   ))}
                 </ul>
@@ -99,11 +99,7 @@ export const ConfirmDeleteDialog: React.FC<ConfirmDeleteDialogProps> = ({
         </div>
 
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isDeleting}
-          >
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isDeleting}>
             Cancel
           </Button>
           <Button
@@ -113,7 +109,7 @@ export const ConfirmDeleteDialog: React.FC<ConfirmDeleteDialogProps> = ({
             className="gap-2"
           >
             <Trash2 className="h-4 w-4" />
-            {isDeleting ? 'Deleting...' : 'Delete'}
+            {isDeleting ? "Deleting..." : "Delete"}
           </Button>
         </DialogFooter>
       </DialogContent>

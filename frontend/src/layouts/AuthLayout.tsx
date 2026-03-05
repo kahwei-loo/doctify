@@ -1,5 +1,5 @@
-import React from 'react';
-import { Outlet } from 'react-router-dom';
+import React from "react";
+import { Outlet } from "react-router-dom";
 
 /**
  * AuthLayout - Layout for authentication pages (login, register)

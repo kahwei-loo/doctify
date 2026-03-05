@@ -20,9 +20,11 @@ export const formatConfidence = (confidence: number | null | undefined): string 
  * @example formatTokens(5551) => "5,551"
  * @example formatTokens({total_tokens: 15000}) => "15,000"
  */
-export const formatTokens = (tokens: number | { total_tokens?: number } | null | undefined): string => {
+export const formatTokens = (
+  tokens: number | { total_tokens?: number } | null | undefined
+): string => {
   if (!tokens) return "N/A";
-  const count = typeof tokens === 'number' ? tokens : tokens?.total_tokens;
+  const count = typeof tokens === "number" ? tokens : tokens?.total_tokens;
   return count?.toLocaleString() || "N/A";
 };
 
@@ -33,9 +35,11 @@ export const formatTokens = (tokens: number | { total_tokens?: number } | null |
  * @example estimateCost(5551) => "~RM0.28"
  * @example estimateCost({total_tokens: 15000}) => "~RM0.75"
  */
-export const estimateCost = (tokens: number | { total_tokens?: number } | null | undefined): string => {
+export const estimateCost = (
+  tokens: number | { total_tokens?: number } | null | undefined
+): string => {
   if (!tokens) return "N/A";
-  const count = typeof tokens === 'number' ? tokens : tokens?.total_tokens;
+  const count = typeof tokens === "number" ? tokens : tokens?.total_tokens;
   if (!count) return "N/A";
 
   const cost = count * 0.00005; // RM0.00005 per token
@@ -83,7 +87,7 @@ export const formatDuration = (seconds: number | null | undefined): string => {
   if (minutes > 0) parts.push(`${minutes}m`);
   if (secs > 0) parts.push(`${secs}s`);
 
-  return parts.join(' ');
+  return parts.join(" ");
 };
 
 /**
@@ -99,22 +103,22 @@ export const formatDate = (
 
   try {
     const date = new Date(dateString);
-    const locale = options.locale || 'en-GB';
+    const locale = options.locale || "en-GB";
 
     if (options.dateOnly) {
       return date.toLocaleDateString(locale, {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
       });
     }
 
     return date.toLocaleString(locale, {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   } catch (error) {
     return "Invalid date";
@@ -134,22 +138,22 @@ export const formatCurrency = (
 ): string => {
   if (amount === null || amount === undefined) return "N/A";
 
-  const { currency = 'MYR', decimals = 2 } = options;
+  const { currency = "MYR", decimals = 2 } = options;
 
   // Currency symbol mapping
   const currencySymbols: Record<string, string> = {
-    MYR: 'RM',
-    USD: '$',
-    EUR: '€',
-    SGD: 'S$',
-    THB: '฿',
-    IDR: 'Rp',
-    PHP: '₱',
-    RM: 'RM', // Backward compatibility
+    MYR: "RM",
+    USD: "$",
+    EUR: "€",
+    SGD: "S$",
+    THB: "฿",
+    IDR: "Rp",
+    PHP: "₱",
+    RM: "RM", // Backward compatibility
   };
 
   const symbol = currencySymbols[currency.toUpperCase()] || currency.toUpperCase();
-  return `${symbol} ${amount.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}`;
+  return `${symbol} ${amount.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}`;
 };
 
 /**
@@ -169,7 +173,7 @@ export const truncateText = (text: string | null | undefined, maxLength: number)
  */
 export const getFileExtension = (filename: string | null | undefined): string => {
   if (!filename) return "";
-  const parts = filename.split('.');
+  const parts = filename.split(".");
   return parts.length > 1 ? parts[parts.length - 1].toLowerCase() : "";
 };
 
@@ -178,8 +182,8 @@ export const getFileExtension = (filename: string | null | undefined): string =>
  */
 export const isEmpty = (value: any): boolean => {
   if (value === null || value === undefined) return true;
-  if (typeof value === 'string') return value.trim() === '';
+  if (typeof value === "string") return value.trim() === "";
   if (Array.isArray(value)) return value.length === 0;
-  if (typeof value === 'object') return Object.keys(value).length === 0;
+  if (typeof value === "object") return Object.keys(value).length === 0;
   return false;
 };

@@ -10,8 +10,8 @@
  * - Loading state during creation
  */
 
-import React, { useState } from 'react';
-import { Loader2 } from 'lucide-react';
+import React, { useState } from "react";
+import { Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -19,13 +19,13 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { knowledgeBaseApi } from '../services/mockData';
-import type { KnowledgeBase } from '../types';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { knowledgeBaseApi } from "../services/mockData";
+import type { KnowledgeBase } from "../types";
 
 interface CreateKBDialogProps {
   open: boolean;
@@ -38,8 +38,8 @@ export const CreateKBDialog: React.FC<CreateKBDialogProps> = ({
   onOpenChange,
   onSuccess,
 }) => {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -47,7 +47,7 @@ export const CreateKBDialog: React.FC<CreateKBDialogProps> = ({
     e.preventDefault();
 
     if (!name.trim()) {
-      setError('Name is required');
+      setError("Name is required");
       return;
     }
 
@@ -61,8 +61,8 @@ export const CreateKBDialog: React.FC<CreateKBDialogProps> = ({
       });
 
       // Reset form
-      setName('');
-      setDescription('');
+      setName("");
+      setDescription("");
 
       // Call success callback
       onSuccess(response.data);
@@ -70,7 +70,7 @@ export const CreateKBDialog: React.FC<CreateKBDialogProps> = ({
       // Close dialog
       onOpenChange(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create knowledge base');
+      setError(err instanceof Error ? err.message : "Failed to create knowledge base");
     } finally {
       setIsLoading(false);
     }
@@ -78,8 +78,8 @@ export const CreateKBDialog: React.FC<CreateKBDialogProps> = ({
 
   const handleClose = () => {
     if (!isLoading) {
-      setName('');
-      setDescription('');
+      setName("");
+      setDescription("");
       setError(null);
       onOpenChange(false);
     }
@@ -139,12 +139,7 @@ export const CreateKBDialog: React.FC<CreateKBDialogProps> = ({
           </div>
 
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-              disabled={isLoading}
-            >
+            <Button type="button" variant="outline" onClick={handleClose} disabled={isLoading}>
               Cancel
             </Button>
             <Button type="submit" disabled={isLoading || !name.trim()}>

@@ -4,17 +4,17 @@
  * Skeleton loaders and loading indicators for the Assistants feature.
  */
 
-import React from 'react';
-import { Loader2 } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
+import React from "react";
+import { Loader2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 /**
  * AssistantsPanel Loading Skeleton
  */
 export const AssistantsPanelSkeleton: React.FC<{ className?: string }> = ({ className }) => {
   return (
-    <div className={cn('flex flex-col h-full border-r bg-muted/30', className)}>
+    <div className={cn("flex flex-col h-full border-r bg-muted/30", className)}>
       <div className="p-4 border-b bg-background space-y-4">
         <div className="flex items-center justify-between">
           <Skeleton className="h-6 w-32" />
@@ -75,7 +75,7 @@ export const AssistantCardSkeleton: React.FC = () => {
  */
 export const ConversationsListSkeleton: React.FC<{ className?: string }> = ({ className }) => {
   return (
-    <div className={cn('flex flex-col h-full bg-muted/30', className)}>
+    <div className={cn("flex flex-col h-full bg-muted/30", className)}>
       <div className="p-4 border-b bg-background space-y-3">
         <Skeleton className="h-5 w-32" />
         <Skeleton className="h-9 w-full" />
@@ -117,7 +117,7 @@ export const ConversationItemSkeleton: React.FC = () => {
  */
 export const ConversationChatSkeleton: React.FC<{ className?: string }> = ({ className }) => {
   return (
-    <div className={cn('flex flex-col h-full bg-background', className)}>
+    <div className={cn("flex flex-col h-full bg-background", className)}>
       {/* Header */}
       <div className="p-4 border-b">
         <div className="flex items-center justify-between">
@@ -150,9 +150,9 @@ export const ConversationChatSkeleton: React.FC<{ className?: string }> = ({ cla
  */
 export const MessageBubbleSkeleton: React.FC<{ isUser?: boolean }> = ({ isUser = false }) => {
   return (
-    <div className={cn('flex gap-3', isUser ? '' : 'flex-row-reverse')}>
+    <div className={cn("flex gap-3", isUser ? "" : "flex-row-reverse")}>
       <Skeleton className="h-8 w-8 rounded-full flex-shrink-0" />
-      <div className={cn('max-w-[70%]', isUser ? '' : 'ml-auto')}>
+      <div className={cn("max-w-[70%]", isUser ? "" : "ml-auto")}>
         <Skeleton className="h-16 w-48 rounded-lg" />
       </div>
     </div>
@@ -197,23 +197,23 @@ export const PublicChatWidgetSkeleton: React.FC = () => {
 interface InlineLoadingProps {
   message?: string;
   className?: string;
-  size?: 'sm' | 'md' | 'lg';
+  size?: "sm" | "md" | "lg";
 }
 
 export const InlineLoading: React.FC<InlineLoadingProps> = ({
-  message = 'Loading...',
+  message = "Loading...",
   className,
-  size = 'md',
+  size = "md",
 }) => {
   const sizeClasses = {
-    sm: 'h-4 w-4',
-    md: 'h-5 w-5',
-    lg: 'h-6 w-6',
+    sm: "h-4 w-4",
+    md: "h-5 w-5",
+    lg: "h-6 w-6",
   };
 
   return (
-    <div className={cn('flex items-center justify-center gap-2 text-muted-foreground', className)}>
-      <Loader2 className={cn('animate-spin', sizeClasses[size])} />
+    <div className={cn("flex items-center justify-center gap-2 text-muted-foreground", className)}>
+      <Loader2 className={cn("animate-spin", sizeClasses[size])} />
       {message && <span className="text-sm">{message}</span>}
     </div>
   );
@@ -222,7 +222,7 @@ export const InlineLoading: React.FC<InlineLoadingProps> = ({
 /**
  * Full Page Loading State
  */
-export const FullPageLoading: React.FC<{ message?: string }> = ({ message = 'Loading...' }) => {
+export const FullPageLoading: React.FC<{ message?: string }> = ({ message = "Loading..." }) => {
   return (
     <div className="flex flex-col items-center justify-center h-full min-h-[400px]">
       <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />

@@ -4,7 +4,7 @@
  * RTK Query endpoints for dashboard statistics and analytics.
  */
 
-import { api } from './apiSlice';
+import { api } from "./apiSlice";
 
 // Types for dashboard data
 export interface DashboardStats {
@@ -77,7 +77,7 @@ export interface UnifiedStats extends DashboardStats {
 
 export interface RecentActivity {
   activity_id: string;
-  activity_type: 'document' | 'conversation';
+  activity_type: "document" | "conversation";
   title: string;
   subtitle: string | null;
   status: string;
@@ -126,10 +126,10 @@ export const dashboardApi = api.injectEndpoints({
     // Query: Get dashboard statistics
     getDashboardStats: builder.query<StatsResponse, { noCache?: boolean } | void>({
       query: (params) => ({
-        url: '/dashboard/stats',
+        url: "/dashboard/stats",
         params: params && params.noCache ? { no_cache: true } : undefined,
       }),
-      providesTags: ['Dashboard'],
+      providesTags: ["Dashboard"],
       // Keep data fresh for 5 minutes (matches backend cache TTL)
       keepUnusedDataFor: 300,
     }),
@@ -137,13 +137,13 @@ export const dashboardApi = api.injectEndpoints({
     // Query: Get trends data
     getDashboardTrends: builder.query<TrendsResponse, { days?: number; noCache?: boolean }>({
       query: ({ days = 30, noCache = false }) => ({
-        url: '/dashboard/trends',
+        url: "/dashboard/trends",
         params: {
           days,
           ...(noCache ? { no_cache: true } : {}),
         },
       }),
-      providesTags: ['Dashboard'],
+      providesTags: ["Dashboard"],
       // Keep data fresh for 10 minutes (matches backend cache TTL)
       keepUnusedDataFor: 600,
     }),
@@ -151,34 +151,34 @@ export const dashboardApi = api.injectEndpoints({
     // Query: Get recent documents
     getRecentDocuments: builder.query<RecentDocumentsResponse, { limit?: number }>({
       query: ({ limit = 5 }) => ({
-        url: '/dashboard/recent',
+        url: "/dashboard/recent",
         params: { limit },
       }),
-      providesTags: ['Dashboard', 'Documents'],
+      providesTags: ["Dashboard", "Documents"],
     }),
 
     // Query: Get project distribution
     getProjectDistribution: builder.query<DistributionResponse, void>({
-      query: () => '/dashboard/distribution',
-      providesTags: ['Dashboard', 'Projects'],
+      query: () => "/dashboard/distribution",
+      providesTags: ["Dashboard", "Projects"],
     }),
 
     // Mutation: Invalidate dashboard cache
     invalidateDashboardCache: builder.mutation<{ success: boolean; message: string }, void>({
       query: () => ({
-        url: '/dashboard/invalidate-cache',
-        method: 'POST',
+        url: "/dashboard/invalidate-cache",
+        method: "POST",
       }),
-      invalidatesTags: ['Dashboard'],
+      invalidatesTags: ["Dashboard"],
     }),
 
     // Week 6 Optimization: Unified stats endpoint
     getUnifiedStats: builder.query<UnifiedStatsResponse, { noCache?: boolean } | void>({
       query: (params) => ({
-        url: '/dashboard/unified-stats',
+        url: "/dashboard/unified-stats",
         params: params && params.noCache ? { no_cache: true } : undefined,
       }),
-      providesTags: ['Dashboard'],
+      providesTags: ["Dashboard"],
       // Keep data fresh for 5 minutes (matches backend cache TTL)
       keepUnusedDataFor: 300,
     }),
@@ -186,10 +186,10 @@ export const dashboardApi = api.injectEndpoints({
     // Week 6 Optimization: Recent activity endpoint
     getRecentActivity: builder.query<RecentActivityResponse, { limit?: number }>({
       query: ({ limit = 5 }) => ({
-        url: '/dashboard/recent-activity',
+        url: "/dashboard/recent-activity",
         params: { limit },
       }),
-      providesTags: ['Dashboard', 'Documents'],
+      providesTags: ["Dashboard", "Documents"],
     }),
   }),
 });

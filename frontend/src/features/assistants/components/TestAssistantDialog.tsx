@@ -5,18 +5,13 @@
  * Uses the same public chat endpoint as the embeddable widget.
  */
 
-import React, { useState, useRef, useEffect } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Bot, Send, Trash2, User, Loader2 } from 'lucide-react';
-import { useSendPublicMessageMutation } from '@/store/api/publicChatApi';
-import { cn } from '@/lib/utils';
-import type { Assistant, Message } from '../types';
+import React, { useState, useRef, useEffect } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Bot, Send, Trash2, User, Loader2 } from "lucide-react";
+import { useSendPublicMessageMutation } from "@/store/api/publicChatApi";
+import { cn } from "@/lib/utils";
+import type { Assistant, Message } from "../types";
 
 interface TestAssistantDialogProps {
   open: boolean;
@@ -32,7 +27,7 @@ export const TestAssistantDialog: React.FC<TestAssistantDialogProps> = ({
   onMessageSent,
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const [sessionId] = useState(() => crypto.randomUUID());
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -41,7 +36,7 @@ export const TestAssistantDialog: React.FC<TestAssistantDialogProps> = ({
 
   // Auto-scroll on new messages
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   // Focus input when dialog opens
@@ -55,13 +50,13 @@ export const TestAssistantDialog: React.FC<TestAssistantDialogProps> = ({
     const content = input.trim();
     if (!content || isSending) return;
 
-    setInput('');
+    setInput("");
 
     // Add user message
     const userMsg: Message = {
       message_id: `user-${Date.now()}`,
-      conversation_id: 'test',
-      role: 'user',
+      conversation_id: "test",
+      role: "user",
       content,
       created_at: new Date().toISOString(),
     };
@@ -72,7 +67,7 @@ export const TestAssistantDialog: React.FC<TestAssistantDialogProps> = ({
         assistant_id: assistant.assistant_id,
         session_id: sessionId,
         content,
-        context: { source: 'test_dialog' },
+        context: { source: "test_dialog" },
       }).unwrap();
 
       // Add assistant response
@@ -84,9 +79,10 @@ export const TestAssistantDialog: React.FC<TestAssistantDialogProps> = ({
       // Show error as assistant message
       const errorMsg: Message = {
         message_id: `error-${Date.now()}`,
-        conversation_id: 'test',
-        role: 'assistant',
-        content: 'Failed to get a response. The assistant may not be configured with a valid AI provider.',
+        conversation_id: "test",
+        role: "assistant",
+        content:
+          "Failed to get a response. The assistant may not be configured with a valid AI provider.",
         created_at: new Date().toISOString(),
       };
       setMessages((prev) => [...prev, errorMsg]);
@@ -94,7 +90,7 @@ export const TestAssistantDialog: React.FC<TestAssistantDialogProps> = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
@@ -112,12 +108,8 @@ export const TestAssistantDialog: React.FC<TestAssistantDialogProps> = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Bot className="h-5 w-5 text-primary" />
-              <DialogTitle className="text-base">
-                Test: {assistant.name}
-              </DialogTitle>
-              <span className="text-xs text-muted-foreground">
-                {assistant.model_config.model}
-              </span>
+              <DialogTitle className="text-base">Test: {assistant.name}</DialogTitle>
+              <span className="text-xs text-muted-foreground">{assistant.model_config.model}</span>
             </div>
             <Button
               variant="ghost"
@@ -151,27 +143,22 @@ export const TestAssistantDialog: React.FC<TestAssistantDialogProps> = ({
           {messages.map((msg) => (
             <div
               key={msg.message_id}
-              className={cn(
-                'flex gap-2',
-                msg.role === 'user' ? 'justify-end' : 'justify-start'
-              )}
+              className={cn("flex gap-2", msg.role === "user" ? "justify-end" : "justify-start")}
             >
-              {msg.role === 'assistant' && (
+              {msg.role === "assistant" && (
                 <div className="flex-shrink-0 w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
                   <Bot className="h-4 w-4 text-primary" />
                 </div>
               )}
               <div
                 className={cn(
-                  'rounded-lg px-3 py-2 max-w-[80%] text-sm whitespace-pre-wrap',
-                  msg.role === 'user'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted'
+                  "rounded-lg px-3 py-2 max-w-[80%] text-sm whitespace-pre-wrap",
+                  msg.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
                 )}
               >
                 {msg.content}
               </div>
-              {msg.role === 'user' && (
+              {msg.role === "user" && (
                 <div className="flex-shrink-0 w-7 h-7 rounded-full bg-muted flex items-center justify-center">
                   <User className="h-4 w-4 text-muted-foreground" />
                 </div>
@@ -206,11 +193,7 @@ export const TestAssistantDialog: React.FC<TestAssistantDialogProps> = ({
               className="flex-1 resize-none rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               disabled={isSending}
             />
-            <Button
-              onClick={handleSend}
-              disabled={!input.trim() || isSending}
-              size="icon"
-            >
+            <Button onClick={handleSend} disabled={!input.trim() || isSending} size="icon">
               <Send className="h-4 w-4" />
             </Button>
           </div>

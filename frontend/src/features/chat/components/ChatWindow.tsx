@@ -5,14 +5,14 @@
  * Phase 13 - Chatbot Implementation
  */
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Send, Loader2 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { useChatWebSocket, StreamChunk } from '../hooks/useChatWebSocket';
-import { ChatMessage } from './ChatMessage';
-import type { ChatMessage as ChatMessageType } from '@/store/api/chatApi';
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { Send, Loader2 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { useChatWebSocket, StreamChunk } from "../hooks/useChatWebSocket";
+import { ChatMessage } from "./ChatMessage";
+import type { ChatMessage as ChatMessageType } from "@/store/api/chatApi";
 
 interface ChatWindowProps {
   conversationId: string;
@@ -21,38 +21,41 @@ interface ChatWindowProps {
 
 export function ChatWindow({ conversationId, initialMessages = [] }: ChatWindowProps) {
   const [messages, setMessages] = useState<ChatMessageType[]>(initialMessages);
-  const [input, setInput] = useState('');
-  const [streamingMessage, setStreamingMessage] = useState('');
+  const [input, setInput] = useState("");
+  const [streamingMessage, setStreamingMessage] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
-  const isDemoMode = localStorage.getItem('demo_mode') === 'true';
+  const isDemoMode = localStorage.getItem("demo_mode") === "true";
 
   // Sync messages when initialMessages prop changes (e.g., switching conversations)
   useEffect(() => {
     setMessages(initialMessages);
   }, [initialMessages]);
 
-  const handleChunk = useCallback((chunk: StreamChunk) => {
-    if (chunk.type === 'intent') {
-      console.log('Intent:', chunk.data);
-    } else if (chunk.type === 'tool_start') {
-      console.log('Tool started:', chunk.data);
-    } else if (chunk.type === 'chunk') {
-      setStreamingMessage((prev) => prev + chunk.data);
-    } else if (chunk.type === 'complete') {
-      // Finalize message
-      const assistantMessage: ChatMessageType = {
-        id: chunk.data as string,
-        role: 'assistant',
-        content: streamingMessage,
-        created_at: new Date().toISOString(),
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
-      setStreamingMessage('');
-    } else if (chunk.type === 'error') {
-      console.error('Chat error:', chunk.data);
-      setStreamingMessage('');
-    }
-  }, [streamingMessage]); // Include streamingMessage as it's used in the 'complete' handler
+  const handleChunk = useCallback(
+    (chunk: StreamChunk) => {
+      if (chunk.type === "intent") {
+        console.log("Intent:", chunk.data);
+      } else if (chunk.type === "tool_start") {
+        console.log("Tool started:", chunk.data);
+      } else if (chunk.type === "chunk") {
+        setStreamingMessage((prev) => prev + chunk.data);
+      } else if (chunk.type === "complete") {
+        // Finalize message
+        const assistantMessage: ChatMessageType = {
+          id: chunk.data as string,
+          role: "assistant",
+          content: streamingMessage,
+          created_at: new Date().toISOString(),
+        };
+        setMessages((prev) => [...prev, assistantMessage]);
+        setStreamingMessage("");
+      } else if (chunk.type === "error") {
+        console.error("Chat error:", chunk.data);
+        setStreamingMessage("");
+      }
+    },
+    [streamingMessage]
+  ); // Include streamingMessage as it's used in the 'complete' handler
 
   const { isConnected, isSending, sendMessage } = useChatWebSocket({
     conversationId,
@@ -74,7 +77,7 @@ export function ChatWindow({ conversationId, initialMessages = [] }: ChatWindowP
     // Add user message to UI
     const userMessage: ChatMessageType = {
       id: `temp-${Date.now()}`,
-      role: 'user',
+      role: "user",
       content: input,
       created_at: new Date().toISOString(),
     };
@@ -82,7 +85,7 @@ export function ChatWindow({ conversationId, initialMessages = [] }: ChatWindowP
 
     // Send via WebSocket
     sendMessage(input);
-    setInput('');
+    setInput("");
   };
 
   return (
@@ -90,8 +93,10 @@ export function ChatWindow({ conversationId, initialMessages = [] }: ChatWindowP
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span>Chat Assistant</span>
-          <span className={`text-xs ${isConnected || isDemoMode ? 'text-green-500' : 'text-red-500'}`}>
-            {isDemoMode ? '● Demo Mode' : isConnected ? '● Connected' : '○ Disconnected'}
+          <span
+            className={`text-xs ${isConnected || isDemoMode ? "text-green-500" : "text-red-500"}`}
+          >
+            {isDemoMode ? "● Demo Mode" : isConnected ? "● Connected" : "○ Disconnected"}
           </span>
         </CardTitle>
       </CardHeader>
@@ -105,8 +110,8 @@ export function ChatWindow({ conversationId, initialMessages = [] }: ChatWindowP
             {streamingMessage && (
               <ChatMessage
                 message={{
-                  id: 'streaming',
-                  role: 'assistant',
+                  id: "streaming",
+                  role: "assistant",
                   content: streamingMessage,
                   created_at: new Date().toISOString(),
                 }}
@@ -126,7 +131,7 @@ export function ChatWindow({ conversationId, initialMessages = [] }: ChatWindowP
               className="min-h-[60px] max-h-[120px]"
               disabled={isSending || (!isConnected && !isDemoMode)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
+                if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
                   handleSubmit(e);
                 }

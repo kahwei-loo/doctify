@@ -12,27 +12,14 @@
  * - Copy to clipboard
  */
 
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import {
-  Code,
-  Copy,
-  Check,
-  Wand2,
-  AlertCircle,
-  FileJson,
-  Sparkles,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import type { FieldDefinition, TableDefinition } from '../types';
+import React, { useState, useCallback, useEffect, useMemo } from "react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Code, Copy, Check, Wand2, AlertCircle, FileJson, Sparkles } from "lucide-react";
+import { cn } from "@/lib/utils";
+import type { FieldDefinition, TableDefinition } from "../types";
 
 interface SampleOutputEditorProps {
   fields: FieldDefinition[];
@@ -46,20 +33,20 @@ interface SampleOutputEditorProps {
  */
 function generateSampleValue(type: string): unknown {
   switch (type) {
-    case 'text':
-      return 'Sample text';
-    case 'number':
+    case "text":
+      return "Sample text";
+    case "number":
       return 100;
-    case 'date':
-      return '2024-01-15';
-    case 'boolean':
+    case "date":
+      return "2024-01-15";
+    case "boolean":
       return true;
-    case 'array':
+    case "array":
       return [];
-    case 'object':
+    case "object":
       return {};
     default:
-      return '';
+      return "";
   }
 }
 
@@ -107,7 +94,7 @@ export const SampleOutputEditor: React.FC<SampleOutputEditorProps> = ({
   value,
   onChange,
 }) => {
-  const [jsonText, setJsonText] = useState('');
+  const [jsonText, setJsonText] = useState("");
   const [parseError, setParseError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -117,33 +104,36 @@ export const SampleOutputEditor: React.FC<SampleOutputEditorProps> = ({
       setJsonText(JSON.stringify(value, null, 2));
       setParseError(null);
     } else {
-      setJsonText('');
+      setJsonText("");
     }
   }, [value]);
 
   // Handle text change
-  const handleTextChange = useCallback((text: string) => {
-    setJsonText(text);
-    setCopied(false);
+  const handleTextChange = useCallback(
+    (text: string) => {
+      setJsonText(text);
+      setCopied(false);
 
-    if (!text.trim()) {
-      setParseError(null);
-      onChange(null);
-      return;
-    }
-
-    try {
-      const parsed = JSON.parse(text);
-      if (typeof parsed !== 'object' || Array.isArray(parsed)) {
-        setParseError('Sample output must be a JSON object');
+      if (!text.trim()) {
+        setParseError(null);
+        onChange(null);
         return;
       }
-      setParseError(null);
-      onChange(parsed);
-    } catch (e) {
-      setParseError(`Invalid JSON: ${(e as Error).message}`);
-    }
-  }, [onChange]);
+
+      try {
+        const parsed = JSON.parse(text);
+        if (typeof parsed !== "object" || Array.isArray(parsed)) {
+          setParseError("Sample output must be a JSON object");
+          return;
+        }
+        setParseError(null);
+        onChange(parsed);
+      } catch (e) {
+        setParseError(`Invalid JSON: ${(e as Error).message}`);
+      }
+    },
+    [onChange]
+  );
 
   // Format JSON
   const handleFormat = useCallback(() => {
@@ -174,7 +164,7 @@ export const SampleOutputEditor: React.FC<SampleOutputEditorProps> = ({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (e) {
-      console.error('Failed to copy:', e);
+      console.error("Failed to copy:", e);
     }
   }, [jsonText]);
 
@@ -183,7 +173,7 @@ export const SampleOutputEditor: React.FC<SampleOutputEditorProps> = ({
 
   // Calculate line count for textarea height
   const lineCount = useMemo(() => {
-    return Math.max(10, jsonText.split('\n').length + 2);
+    return Math.max(10, jsonText.split("\n").length + 2);
   }, [jsonText]);
 
   return (
@@ -246,15 +236,11 @@ export const SampleOutputEditor: React.FC<SampleOutputEditorProps> = ({
                   onClick={handleCopy}
                   disabled={!jsonText.trim()}
                 >
-                  {copied ? (
-                    <Check className="h-4 w-4" />
-                  ) : (
-                    <Copy className="h-4 w-4" />
-                  )}
+                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>{copied ? 'Copied!' : 'Copy to clipboard'}</p>
+                <p>{copied ? "Copied!" : "Copy to clipboard"}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -287,8 +273,8 @@ export const SampleOutputEditor: React.FC<SampleOutputEditorProps> = ({
   ]
 }`}
           className={cn(
-            'font-mono text-sm min-h-[200px] resize-y',
-            parseError && 'border-destructive focus-visible:ring-destructive'
+            "font-mono text-sm min-h-[200px] resize-y",
+            parseError && "border-destructive focus-visible:ring-destructive"
           )}
           style={{ height: `${Math.min(lineCount * 24, 400)}px` }}
         />

@@ -6,20 +6,15 @@
  * - Expanded mode: full source detail with content + chunks
  */
 
-import React, { useState, useMemo } from 'react';
-import {
-  Plus,
-  Search,
-  ArrowLeft,
-  Zap,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { cn } from '@/lib/utils';
-import { SourceCard } from './SourceCard';
-import { SourceExpandedView } from './SourceExpandedView';
-import type { DataSource, Embedding } from '../types';
+import React, { useState, useMemo } from "react";
+import { Plus, Search, Zap } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
+import { SourceCard } from "./SourceCard";
+import { SourceExpandedView } from "./SourceExpandedView";
+import type { DataSource, Embedding } from "../types";
 
 interface SourcesPanelProps {
   dataSources: DataSource[];
@@ -34,7 +29,7 @@ interface SourcesPanelProps {
   className?: string;
 }
 
-export type SourceAction = 'view' | 'edit' | 'regenerate' | 'delete';
+export type SourceAction = "view" | "edit" | "regenerate" | "delete";
 
 export const SourcesPanel: React.FC<SourcesPanelProps> = ({
   dataSources,
@@ -43,13 +38,13 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
   onAddSource,
   onDeleteSource,
   onEditSource,
-  onViewSource,
+  onViewSource: _onViewSource,
   onRegenerateEmbeddings,
   knowledgeBaseId,
   className,
 }) => {
   const [selectedSourceId, setSelectedSourceId] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
   const selectedSource = useMemo(
     () => dataSources.find((ds) => ds.id === selectedSourceId) || null,
@@ -57,10 +52,7 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
   );
 
   const sourceEmbeddings = useMemo(
-    () =>
-      selectedSourceId
-        ? embeddings.filter((e) => e.data_source_id === selectedSourceId)
-        : [],
+    () => (selectedSourceId ? embeddings.filter((e) => e.data_source_id === selectedSourceId) : []),
     [embeddings, selectedSourceId]
   );
 
@@ -68,16 +60,12 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
     if (!searchQuery.trim()) return dataSources;
     const query = searchQuery.toLowerCase();
     return dataSources.filter(
-      (ds) =>
-        ds.name.toLowerCase().includes(query) ||
-        ds.type.toLowerCase().includes(query)
+      (ds) => ds.name.toLowerCase().includes(query) || ds.type.toLowerCase().includes(query)
     );
   }, [dataSources, searchQuery]);
 
-  const embeddableSources = dataSources.filter((ds) => ds.type !== 'structured_data');
-  const embeddedCount = embeddableSources.filter(
-    (ds) => (ds.embedding_count || 0) > 0
-  ).length;
+  const embeddableSources = dataSources.filter((ds) => ds.type !== "structured_data");
+  const embeddedCount = embeddableSources.filter((ds) => (ds.embedding_count || 0) > 0).length;
 
   const handleSourceClick = (source: DataSource) => {
     setSelectedSourceId(source.id);
@@ -85,16 +73,16 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
 
   const handleSourceAction = (source: DataSource, action: SourceAction) => {
     switch (action) {
-      case 'view':
+      case "view":
         setSelectedSourceId(source.id);
         break;
-      case 'edit':
+      case "edit":
         onEditSource(source);
         break;
-      case 'regenerate':
+      case "regenerate":
         onRegenerateEmbeddings(source);
         break;
-      case 'delete':
+      case "delete":
         onDeleteSource(source);
         break;
     }
@@ -107,7 +95,7 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
   // Expanded view for a selected source
   if (selectedSource) {
     return (
-      <div className={cn('flex flex-col h-full', className)}>
+      <div className={cn("flex flex-col h-full", className)}>
         <SourceExpandedView
           source={selectedSource}
           embeddings={sourceEmbeddings}
@@ -121,7 +109,7 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
 
   // List view
   return (
-    <div className={cn('flex flex-col h-full', className)}>
+    <div className={cn("flex flex-col h-full", className)}>
       {/* Panel Header */}
       <div className="px-4 py-3 border-b bg-muted/30 shrink-0">
         <div className="flex items-center justify-between mb-2">
@@ -174,9 +162,7 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
               ) : (
                 <>
                   <Search className="h-8 w-8 text-muted-foreground/50 mb-2" />
-                  <p className="text-sm text-muted-foreground">
-                    No sources match "{searchQuery}"
-                  </p>
+                  <p className="text-sm text-muted-foreground">No sources match "{searchQuery}"</p>
                 </>
               )}
             </div>

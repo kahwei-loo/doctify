@@ -5,17 +5,17 @@
  * Showcases product value, features, and CTAs for demo/sign-up.
  */
 
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAppDispatch } from '@/store';
-import { enterDemoMode } from '@/store/slices/demoSlice';
-import Navbar from './Navbar';
-import HeroSection from './HeroSection';
-import FeaturesSection from './FeaturesSection';
-import HowItWorksSection from './HowItWorksSection';
-import SocialProofSection from './SocialProofSection';
-import CTASection from './CTASection';
-import Footer from './Footer';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { useAppDispatch } from "@/store";
+import { enterDemoMode } from "@/store/slices/demoSlice";
+import Navbar from "./Navbar";
+import HeroSection from "./HeroSection";
+import FeaturesSection from "./FeaturesSection";
+import HowItWorksSection from "./HowItWorksSection";
+import SocialProofSection from "./SocialProofSection";
+import CTASection from "./CTASection";
+import Footer from "./Footer";
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -23,7 +23,7 @@ const LandingPage: React.FC = () => {
 
   const handleTryDemo = () => {
     dispatch(enterDemoMode());
-    navigate('/dashboard');
+    navigate("/dashboard");
   };
 
   return (

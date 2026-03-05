@@ -5,9 +5,9 @@
  * keyboard accessibility.
  */
 
-import React, { useEffect, useRef } from 'react';
-import { createPortal } from 'react-dom';
-import './Modal.css';
+import React, { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
+import "./Modal.css";
 
 export interface ModalProps {
   isOpen: boolean;
@@ -15,7 +15,7 @@ export interface ModalProps {
   title?: string;
   children: React.ReactNode;
   footer?: React.ReactNode;
-  size?: 'small' | 'medium' | 'large' | 'full';
+  size?: "small" | "medium" | "large" | "full";
   closeOnBackdropClick?: boolean;
   closeOnEscape?: boolean;
   showCloseButton?: boolean;
@@ -27,7 +27,7 @@ export const Modal: React.FC<ModalProps> = ({
   title,
   children,
   footer,
-  size = 'medium',
+  size = "medium",
   closeOnBackdropClick = true,
   closeOnEscape = true,
   showCloseButton = true,
@@ -42,13 +42,13 @@ export const Modal: React.FC<ModalProps> = ({
     if (!isOpen || !closeOnEscape) return;
 
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         onClose();
       }
     };
 
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
   }, [isOpen, closeOnEscape, onClose]);
 
   /**
@@ -56,13 +56,13 @@ export const Modal: React.FC<ModalProps> = ({
    */
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
     }
 
     return () => {
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
     };
   }, [isOpen]);
 
@@ -82,7 +82,7 @@ export const Modal: React.FC<ModalProps> = ({
     firstElement?.focus();
 
     const handleTabKey = (event: KeyboardEvent) => {
-      if (event.key !== 'Tab') return;
+      if (event.key !== "Tab") return;
 
       if (event.shiftKey) {
         if (document.activeElement === firstElement) {
@@ -97,8 +97,8 @@ export const Modal: React.FC<ModalProps> = ({
       }
     };
 
-    document.addEventListener('keydown', handleTabKey);
-    return () => document.removeEventListener('keydown', handleTabKey);
+    document.addEventListener("keydown", handleTabKey);
+    return () => document.removeEventListener("keydown", handleTabKey);
   }, [isOpen]);
 
   /**
@@ -124,7 +124,11 @@ export const Modal: React.FC<ModalProps> = ({
         {/* Header */}
         {(title || showCloseButton) && (
           <div className="modal__header">
-            {title && <h2 id={titleId} className="modal__title">{title}</h2>}
+            {title && (
+              <h2 id={titleId} className="modal__title">
+                {title}
+              </h2>
+            )}
             {showCloseButton && (
               <button
                 type="button"

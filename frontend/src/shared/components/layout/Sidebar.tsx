@@ -1,5 +1,5 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React from "react";
+import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   FileText,
@@ -10,15 +10,10 @@ import {
   ChevronsRight,
   Database,
   Layout,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface NavItem {
   key: string;
@@ -34,50 +29,50 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
   const location = useLocation();
-  const selectedKey = location.pathname.split('/')[1] || 'dashboard';
+  const selectedKey = location.pathname.split("/")[1] || "dashboard";
 
   const navItems: NavItem[] = [
     {
-      key: 'dashboard',
+      key: "dashboard",
       icon: <LayoutDashboard className="h-5 w-5" />,
-      label: 'Dashboard',
-      path: '/dashboard',
+      label: "Dashboard",
+      path: "/dashboard",
     },
     {
-      key: 'documents',
+      key: "documents",
       icon: <FileText className="h-5 w-5" />,
-      label: 'Documents',
-      path: '/documents',
+      label: "Documents",
+      path: "/documents",
     },
     {
-      key: 'knowledge-base',
+      key: "knowledge-base",
       icon: <Database className="h-5 w-5" />,
-      label: 'Knowledge Base',
-      path: '/knowledge-base',
+      label: "Knowledge Base",
+      path: "/knowledge-base",
     },
     {
-      key: 'chat',
+      key: "chat",
       icon: <MessagesSquare className="h-5 w-5" />,
-      label: 'Chat',
-      path: '/chat',
+      label: "Chat",
+      path: "/chat",
     },
     {
-      key: 'assistants',
+      key: "assistants",
       icon: <Bot className="h-5 w-5" />,
-      label: 'AI Assistants',
-      path: '/assistants',
+      label: "AI Assistants",
+      path: "/assistants",
     },
     {
-      key: 'templates',
+      key: "templates",
       icon: <Layout className="h-5 w-5" />,
-      label: 'Templates',
-      path: '/templates',
+      label: "Templates",
+      path: "/templates",
     },
     {
-      key: 'settings',
+      key: "settings",
       icon: <Settings className="h-5 w-5" />,
-      label: 'Settings',
-      path: '/settings',
+      label: "Settings",
+      path: "/settings",
     },
   ];
 
@@ -85,29 +80,27 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
     <TooltipProvider delayDuration={0}>
       <aside
         className={cn(
-          'fixed top-0 left-0 bottom-0 z-40',
-          'bg-card border-r border-border shadow-sm',
-          'flex flex-col',
-          'transition-all duration-300 ease-in-out',
-          collapsed ? 'w-[68px]' : 'w-[240px]'
+          "fixed top-0 left-0 bottom-0 z-40",
+          "bg-card border-r border-border shadow-sm",
+          "flex flex-col",
+          "transition-all duration-300 ease-in-out",
+          collapsed ? "w-[68px]" : "w-[240px]"
         )}
       >
         {/* Logo Header with Toggle */}
         <div
           className={cn(
-            'flex items-center h-16 border-b border-border',
-            'transition-all duration-300',
-            collapsed ? 'justify-center px-2' : 'px-4 justify-between'
+            "flex items-center h-16 border-b border-border",
+            "transition-all duration-300",
+            collapsed ? "justify-center px-2" : "px-4 justify-between"
           )}
         >
-          <div className={cn('flex items-center', collapsed ? '' : 'gap-3')}>
+          <div className={cn("flex items-center", collapsed ? "" : "gap-3")}>
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
               <FileText className="h-5 w-5" />
             </div>
             {!collapsed && (
-              <span className="text-lg font-semibold text-foreground truncate">
-                Doctify
-              </span>
+              <span className="text-lg font-semibold text-foreground truncate">Doctify</span>
             )}
           </div>
           {/* Toggle button in header */}
@@ -154,10 +147,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
         {/* Navigation */}
         <nav
           aria-label="Main navigation"
-          className={cn(
-            'flex-1 px-3 space-y-1 overflow-y-auto',
-            collapsed ? 'py-2' : 'py-4'
-          )}
+          className={cn("flex-1 px-3 space-y-1 overflow-y-auto", collapsed ? "py-2" : "py-4")}
         >
           {navItems.map((item) => {
             const isActive = selectedKey === item.key;
@@ -166,29 +156,25 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
                 key={item.key}
                 to={item.path}
                 aria-label={collapsed ? item.label : undefined}
-                aria-current={isActive ? 'page' : undefined}
+                aria-current={isActive ? "page" : undefined}
                 className={cn(
-                  'group flex items-center gap-3 rounded-lg transition-all duration-200',
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                  collapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5',
+                  "group flex items-center gap-3 rounded-lg transition-all duration-200",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  collapsed ? "justify-center px-2 py-2.5" : "px-3 py-2.5",
                   isActive
-                    ? 'bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:text-primary-foreground'
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                    ? "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:text-primary-foreground"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
               >
                 <span
                   className={cn(
-                    'shrink-0 transition-transform duration-200',
-                    !isActive && 'group-hover:scale-110'
+                    "shrink-0 transition-transform duration-200",
+                    !isActive && "group-hover:scale-110"
                   )}
                 >
                   {item.icon}
                 </span>
-                {!collapsed && (
-                  <span className="text-sm font-medium truncate">
-                    {item.label}
-                  </span>
-                )}
+                {!collapsed && <span className="text-sm font-medium truncate">{item.label}</span>}
               </Link>
             );
 

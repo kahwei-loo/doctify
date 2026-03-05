@@ -5,14 +5,14 @@
  * Week 6 Dashboard Optimization
  */
 
-import React from 'react';
-import { LucideIcon, TrendingUp, TrendingDown, Minus } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
+import React from "react";
+import { LucideIcon, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 export interface TrendData {
   percent: number;
-  direction: 'up' | 'down' | 'neutral';
+  direction: "up" | "down" | "neutral";
 }
 
 export interface StatCardWithTrendProps {
@@ -21,7 +21,7 @@ export interface StatCardWithTrendProps {
   icon: LucideIcon;
   description?: string;
   trend?: TrendData;
-  variant?: 'default' | 'primary' | 'success' | 'warning' | 'danger';
+  variant?: "default" | "primary" | "success" | "warning" | "danger";
   isLoading?: boolean;
 }
 
@@ -31,24 +31,24 @@ const StatCardWithTrend: React.FC<StatCardWithTrendProps> = ({
   icon: Icon,
   description,
   trend,
-  variant = 'default',
+  variant = "default",
   isLoading = false,
 }) => {
   const variantStyles = {
-    default: 'bg-muted/50',
-    primary: 'bg-primary/10 text-primary',
-    success: 'bg-green-500/10 text-green-600',
-    warning: 'bg-yellow-500/10 text-yellow-600',
-    danger: 'bg-red-500/10 text-red-600',
+    default: "bg-muted/50",
+    primary: "bg-primary/10 text-primary",
+    success: "bg-green-500/10 text-green-600",
+    warning: "bg-yellow-500/10 text-yellow-600",
+    danger: "bg-red-500/10 text-red-600",
   };
 
   const getTrendIcon = () => {
     if (!trend) return null;
 
     switch (trend.direction) {
-      case 'up':
+      case "up":
         return <TrendingUp className="h-3 w-3" />;
-      case 'down':
+      case "down":
         return <TrendingDown className="h-3 w-3" />;
       default:
         return <Minus className="h-3 w-3" />;
@@ -56,21 +56,21 @@ const StatCardWithTrend: React.FC<StatCardWithTrendProps> = ({
   };
 
   const getTrendStyles = () => {
-    if (!trend) return '';
+    if (!trend) return "";
 
     switch (trend.direction) {
-      case 'up':
-        return 'text-green-600 bg-green-500/10';
-      case 'down':
-        return 'text-red-600 bg-red-500/10';
+      case "up":
+        return "text-green-600 bg-green-500/10";
+      case "down":
+        return "text-red-600 bg-red-500/10";
       default:
-        return 'text-muted-foreground bg-muted/50';
+        return "text-muted-foreground bg-muted/50";
     }
   };
 
   const formatTrendPercent = () => {
-    if (!trend) return '';
-    const sign = trend.direction === 'up' ? '+' : trend.direction === 'down' ? '' : '';
+    if (!trend) return "";
+    const sign = trend.direction === "up" ? "+" : trend.direction === "down" ? "" : "";
     return `${sign}${Math.abs(trend.percent).toFixed(0)}%`;
   };
 
@@ -88,7 +88,7 @@ const StatCardWithTrend: React.FC<StatCardWithTrendProps> = ({
                 {trend && trend.percent !== 0 && (
                   <span
                     className={cn(
-                      'inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs font-medium',
+                      "inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs font-medium",
                       getTrendStyles()
                     )}
                   >
@@ -98,11 +98,9 @@ const StatCardWithTrend: React.FC<StatCardWithTrendProps> = ({
                 )}
               </div>
             )}
-            {description && (
-              <p className="text-xs text-muted-foreground mt-1">{description}</p>
-            )}
+            {description && <p className="text-xs text-muted-foreground mt-1">{description}</p>}
           </div>
-          <div className={cn('p-3 rounded-lg', variantStyles[variant])}>
+          <div className={cn("p-3 rounded-lg", variantStyles[variant])}>
             <Icon className="h-6 w-6" />
           </div>
         </div>

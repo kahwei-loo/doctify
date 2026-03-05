@@ -4,11 +4,11 @@
  * Modal form for adding or editing extraction fields.
  */
 
-import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
+import React, { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Dialog,
   DialogContent,
@@ -16,26 +16,26 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import type { ExtractionField, FieldType } from '../types';
-import { FIELD_TYPE_LABELS, normalizeFieldType } from '../types';
+} from "@/components/ui/select";
+import type { ExtractionField, FieldType } from "../types";
+import { FIELD_TYPE_LABELS, normalizeFieldType } from "../types";
 
 interface FieldFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   field?: ExtractionField | null;
-  onSave: (field: Omit<ExtractionField, 'id'> & { id?: string }) => void;
+  onSave: (field: Omit<ExtractionField, "id"> & { id?: string }) => void;
   existingFieldNames: string[];
 }
 
-const FIELD_TYPES: FieldType[] = ['text', 'number', 'date', 'boolean', 'array', 'object'];
+const FIELD_TYPES: FieldType[] = ["text", "number", "date", "boolean", "array", "object"];
 
 export const FieldForm: React.FC<FieldFormProps> = ({
   open,
@@ -44,10 +44,10 @@ export const FieldForm: React.FC<FieldFormProps> = ({
   onSave,
   existingFieldNames,
 }) => {
-  const [name, setName] = useState('');
-  const [type, setType] = useState<FieldType>('text');
+  const [name, setName] = useState("");
+  const [type, setType] = useState<FieldType>("text");
   const [required, setRequired] = useState(false);
-  const [description, setDescription] = useState('');
+  const [description, setDescription] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const isEditing = !!field;
@@ -58,12 +58,12 @@ export const FieldForm: React.FC<FieldFormProps> = ({
       setName(field.name);
       setType(normalizeFieldType(field.type));
       setRequired(field.required);
-      setDescription(field.description || '');
+      setDescription(field.description || "");
     } else {
-      setName('');
-      setType('text');
+      setName("");
+      setType("text");
       setRequired(false);
-      setDescription('');
+      setDescription("");
     }
     setError(null);
   }, [field, open]);
@@ -71,23 +71,23 @@ export const FieldForm: React.FC<FieldFormProps> = ({
   const validateFieldName = (value: string): boolean => {
     // Check for empty
     if (!value.trim()) {
-      setError('Field name is required');
+      setError("Field name is required");
       return false;
     }
 
     // Check for valid characters (alphanumeric, underscore, no spaces at start/end)
     const validNameRegex = /^[a-zA-Z][a-zA-Z0-9_]*$/;
     if (!validNameRegex.test(value)) {
-      setError('Field name must start with a letter and contain only letters, numbers, and underscores');
+      setError(
+        "Field name must start with a letter and contain only letters, numbers, and underscores"
+      );
       return false;
     }
 
     // Check for duplicates (excluding current field when editing)
-    const otherFieldNames = existingFieldNames.filter(
-      (n) => !field || n !== field.name
-    );
+    const otherFieldNames = existingFieldNames.filter((n) => !field || n !== field.name);
     if (otherFieldNames.includes(value)) {
-      setError('A field with this name already exists');
+      setError("A field with this name already exists");
       return false;
     }
 
@@ -118,13 +118,11 @@ export const FieldForm: React.FC<FieldFormProps> = ({
       <DialogContent className="sm:max-w-[425px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>
-              {isEditing ? 'Edit Field' : 'Add Extraction Field'}
-            </DialogTitle>
+            <DialogTitle>{isEditing ? "Edit Field" : "Add Extraction Field"}</DialogTitle>
             <DialogDescription>
               {isEditing
-                ? 'Modify the extraction field properties.'
-                : 'Define a new field to extract from documents.'}
+                ? "Modify the extraction field properties."
+                : "Define a new field to extract from documents."}
             </DialogDescription>
           </DialogHeader>
 
@@ -140,11 +138,9 @@ export const FieldForm: React.FC<FieldFormProps> = ({
                   if (error) validateFieldName(e.target.value);
                 }}
                 placeholder="e.g., invoice_number"
-                className={error ? 'border-destructive' : ''}
+                className={error ? "border-destructive" : ""}
               />
-              {error && (
-                <p className="text-sm text-destructive">{error}</p>
-              )}
+              {error && <p className="text-sm text-destructive">{error}</p>}
               <p className="text-xs text-muted-foreground">
                 Use snake_case for field names (e.g., po_number, total_amount)
               </p>
@@ -171,15 +167,9 @@ export const FieldForm: React.FC<FieldFormProps> = ({
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label htmlFor="fieldRequired">Required</Label>
-                <p className="text-xs text-muted-foreground">
-                  Mark this field as mandatory
-                </p>
+                <p className="text-xs text-muted-foreground">Mark this field as mandatory</p>
               </div>
-              <Switch
-                id="fieldRequired"
-                checked={required}
-                onCheckedChange={setRequired}
-              />
+              <Switch id="fieldRequired" checked={required} onCheckedChange={setRequired} />
             </div>
 
             {/* Description */}
@@ -198,9 +188,7 @@ export const FieldForm: React.FC<FieldFormProps> = ({
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit">
-              {isEditing ? 'Save Changes' : 'Add Field'}
-            </Button>
+            <Button type="submit">{isEditing ? "Save Changes" : "Add Field"}</Button>
           </DialogFooter>
         </form>
       </DialogContent>

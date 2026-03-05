@@ -5,8 +5,8 @@
  * password management, and API key operations.
  */
 
-import axios from 'axios';
-import { apiClient } from '@/services/api/client';
+import axios from "axios";
+import { apiClient } from "@/services/api/client";
 import type {
   AuthResponse,
   LoginCredentials,
@@ -18,11 +18,11 @@ import type {
   ApiKey,
   ApiKeyCreateData,
   ApiKeyResponse,
-} from '../types';
+} from "../types";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 const AUTH_BASE_URL = `${API_BASE_URL}/api/v1/auth`;
-const AUTH_BASE_PATH = '/auth';
+const AUTH_BASE_PATH = "/auth";
 
 // =============================================================================
 // Authentication API
@@ -61,8 +61,8 @@ export const authApi = {
   logout: async (): Promise<void> => {
     await apiClient.post(`${AUTH_BASE_PATH}/logout`);
     // Clear tokens from storage
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
   },
 
   /**
@@ -93,7 +93,9 @@ export const passwordApi = {
   /**
    * Change user password (requires authentication)
    */
-  changePassword: async (data: PasswordChangeData): Promise<{ success: boolean; message: string }> => {
+  changePassword: async (
+    data: PasswordChangeData
+  ): Promise<{ success: boolean; message: string }> => {
     const response = await apiClient.post(`${AUTH_BASE_PATH}/password/change`, data);
     return response.data;
   },
@@ -101,7 +103,9 @@ export const passwordApi = {
   /**
    * Request password reset (send reset token to email)
    */
-  requestReset: async (data: PasswordResetRequestData): Promise<{ success: boolean; message: string }> => {
+  requestReset: async (
+    data: PasswordResetRequestData
+  ): Promise<{ success: boolean; message: string }> => {
     const response = await axios.post(`${AUTH_BASE_URL}/password/reset/request`, data);
     return response.data;
   },
@@ -109,7 +113,9 @@ export const passwordApi = {
   /**
    * Confirm password reset with token
    */
-  confirmReset: async (data: PasswordResetConfirmData): Promise<{ success: boolean; message: string }> => {
+  confirmReset: async (
+    data: PasswordResetConfirmData
+  ): Promise<{ success: boolean; message: string }> => {
     const response = await axios.post(`${AUTH_BASE_URL}/password/reset/confirm`, data);
     return response.data;
   },
@@ -123,7 +129,9 @@ export const emailApi = {
   /**
    * Verify email address with token
    */
-  verifyEmail: async (verificationToken: string): Promise<{ success: boolean; message: string }> => {
+  verifyEmail: async (
+    verificationToken: string
+  ): Promise<{ success: boolean; message: string }> => {
     const response = await axios.post(`${AUTH_BASE_URL}/verify-email`, {
       verification_token: verificationToken,
     });
@@ -139,7 +147,9 @@ export const apiKeyApi = {
   /**
    * Create a new API key (requires authentication)
    */
-  create: async (data: ApiKeyCreateData): Promise<{ success: boolean; data: ApiKeyResponse; message: string }> => {
+  create: async (
+    data: ApiKeyCreateData
+  ): Promise<{ success: boolean; data: ApiKeyResponse; message: string }> => {
     const response = await apiClient.post(`${AUTH_BASE_PATH}/api-keys`, data);
     return response.data;
   },
@@ -147,7 +157,9 @@ export const apiKeyApi = {
   /**
    * List user's API keys (requires authentication)
    */
-  list: async (includeRevoked = false): Promise<{ success: boolean; data: { api_keys: ApiKey[]; total: number } }> => {
+  list: async (
+    includeRevoked = false
+  ): Promise<{ success: boolean; data: { api_keys: ApiKey[]; total: number } }> => {
     const response = await apiClient.get(`${AUTH_BASE_PATH}/api-keys`, {
       params: { include_revoked: includeRevoked },
     });
@@ -164,7 +176,9 @@ export const apiKeyApi = {
   /**
    * Rotate an API key (revoke old, create new) (requires authentication)
    */
-  rotate: async (keyId: string): Promise<{ success: boolean; data: ApiKeyResponse; message: string }> => {
+  rotate: async (
+    keyId: string
+  ): Promise<{ success: boolean; data: ApiKeyResponse; message: string }> => {
     const response = await apiClient.post(`${AUTH_BASE_PATH}/api-keys/${keyId}/rotate`);
     return response.data;
   },
@@ -179,36 +193,36 @@ export const tokenStorage = {
    * Save authentication tokens to localStorage
    */
   saveTokens: (accessToken: string, refreshToken: string): void => {
-    localStorage.setItem('access_token', accessToken);
-    localStorage.setItem('refresh_token', refreshToken);
+    localStorage.setItem("access_token", accessToken);
+    localStorage.setItem("refresh_token", refreshToken);
   },
 
   /**
    * Get access token from localStorage
    */
   getAccessToken: (): string | null => {
-    return localStorage.getItem('access_token');
+    return localStorage.getItem("access_token");
   },
 
   /**
    * Get refresh token from localStorage
    */
   getRefreshToken: (): string | null => {
-    return localStorage.getItem('refresh_token');
+    return localStorage.getItem("refresh_token");
   },
 
   /**
    * Clear all tokens from localStorage
    */
   clearTokens: (): void => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
   },
 
   /**
    * Check if user is authenticated (has valid access token)
    */
   isAuthenticated: (): boolean => {
-    return !!localStorage.getItem('access_token');
+    return !!localStorage.getItem("access_token");
   },
 };

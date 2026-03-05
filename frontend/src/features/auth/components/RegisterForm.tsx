@@ -1,28 +1,30 @@
-import React, { useState, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { z } from 'zod';
-import { Eye, EyeOff, Mail, Lock, User, Loader2 } from 'lucide-react';
-import toast from 'react-hot-toast';
-import { useRegisterMutation } from '@/store/api/authApi';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { cn } from '@/lib/utils';
+import React, { useState, useMemo } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { z } from "zod";
+import { Eye, EyeOff, Mail, Lock, User, Loader2 } from "lucide-react";
+import toast from "react-hot-toast";
+import { useRegisterMutation } from "@/store/api/authApi";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
-const registerSchema = z.object({
-  full_name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Please enter a valid email address'),
-  password: z
-    .string()
-    .min(8, 'Password must be at least 8 characters')
-    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-    .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-    .regex(/[0-9]/, 'Password must contain at least one number'),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ['confirmPassword'],
-});
+const registerSchema = z
+  .object({
+    full_name: z.string().min(2, "Name must be at least 2 characters"),
+    email: z.string().email("Please enter a valid email address"),
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters")
+      .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+      .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+      .regex(/[0-9]/, "Password must contain at least one number"),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
@@ -37,10 +39,10 @@ const RegisterForm: React.FC = () => {
   const [register, { isLoading }] = useRegisterMutation();
 
   const [formData, setFormData] = useState<RegisterFormData>({
-    full_name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
+    full_name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -49,7 +51,7 @@ const RegisterForm: React.FC = () => {
   // Calculate password strength
   const passwordStrength = useMemo((): PasswordStrength => {
     const { password } = formData;
-    if (!password) return { score: 0, label: '', color: '' };
+    if (!password) return { score: 0, label: "", color: "" };
 
     let score = 0;
     if (password.length >= 8) score++;
@@ -59,10 +61,10 @@ const RegisterForm: React.FC = () => {
     if (/[0-9]/.test(password)) score++;
     if (/[^A-Za-z0-9]/.test(password)) score++;
 
-    if (score <= 2) return { score: 1, label: 'Weak', color: 'bg-destructive' };
-    if (score <= 4) return { score: 2, label: 'Fair', color: 'bg-yellow-500' };
-    if (score <= 5) return { score: 3, label: 'Good', color: 'bg-blue-500' };
-    return { score: 4, label: 'Strong', color: 'bg-green-500' };
+    if (score <= 2) return { score: 1, label: "Weak", color: "bg-destructive" };
+    if (score <= 4) return { score: 2, label: "Fair", color: "bg-yellow-500" };
+    if (score <= 5) return { score: 3, label: "Good", color: "bg-blue-500" };
+    return { score: 4, label: "Strong", color: "bg-green-500" };
   }, [formData.password]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -99,14 +101,15 @@ const RegisterForm: React.FC = () => {
         full_name: formData.full_name,
       }).unwrap();
 
-      toast.success('Account created successfully!');
-      navigate('/dashboard', { replace: true });
+      toast.success("Account created successfully!");
+      navigate("/dashboard", { replace: true });
     } catch (error: any) {
-      const message = error?.data?.detail || error?.data?.message || 'Registration failed. Please try again.';
+      const message =
+        error?.data?.detail || error?.data?.message || "Registration failed. Please try again.";
       toast.error(message);
 
       // Handle specific errors
-      if (message.toLowerCase().includes('email')) {
+      if (message.toLowerCase().includes("email")) {
         setErrors({ email: message });
       }
     }
@@ -126,13 +129,15 @@ const RegisterForm: React.FC = () => {
             placeholder="John Doe"
             value={formData.full_name}
             onChange={handleChange}
-            className={cn('pl-10', errors.full_name && 'border-destructive')}
+            className={cn("pl-10", errors.full_name && "border-destructive")}
             disabled={isLoading}
             autoComplete="name"
           />
         </div>
         {errors.full_name && (
-          <p className="text-sm text-destructive" role="alert" aria-live="polite">{errors.full_name}</p>
+          <p className="text-sm text-destructive" role="alert" aria-live="polite">
+            {errors.full_name}
+          </p>
         )}
       </div>
 
@@ -148,13 +153,15 @@ const RegisterForm: React.FC = () => {
             placeholder="name@example.com"
             value={formData.email}
             onChange={handleChange}
-            className={cn('pl-10', errors.email && 'border-destructive')}
+            className={cn("pl-10", errors.email && "border-destructive")}
             disabled={isLoading}
             autoComplete="email"
           />
         </div>
         {errors.email && (
-          <p className="text-sm text-destructive" role="alert" aria-live="polite">{errors.email}</p>
+          <p className="text-sm text-destructive" role="alert" aria-live="polite">
+            {errors.email}
+          </p>
         )}
       </div>
 
@@ -162,15 +169,18 @@ const RegisterForm: React.FC = () => {
       <div className="space-y-2">
         <Label htmlFor="password">Password</Label>
         <div className="relative">
-          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+          <Lock
+            className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
+            aria-hidden="true"
+          />
           <Input
             id="password"
             name="password"
-            type={showPassword ? 'text' : 'password'}
+            type={showPassword ? "text" : "password"}
             placeholder="Create a password"
             value={formData.password}
             onChange={handleChange}
-            className={cn('pl-10 pr-10', errors.password && 'border-destructive')}
+            className={cn("pl-10 pr-10", errors.password && "border-destructive")}
             disabled={isLoading}
             autoComplete="new-password"
           />
@@ -178,14 +188,20 @@ const RegisterForm: React.FC = () => {
             type="button"
             onClick={() => setShowPassword(!showPassword)}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-            aria-label={showPassword ? 'Hide password' : 'Show password'}
+            aria-label={showPassword ? "Hide password" : "Show password"}
             aria-pressed={showPassword}
           >
-            {showPassword ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
+            {showPassword ? (
+              <EyeOff className="h-4 w-4" aria-hidden="true" />
+            ) : (
+              <Eye className="h-4 w-4" aria-hidden="true" />
+            )}
           </button>
         </div>
         {errors.password && (
-          <p className="text-sm text-destructive" role="alert" aria-live="polite">{errors.password}</p>
+          <p className="text-sm text-destructive" role="alert" aria-live="polite">
+            {errors.password}
+          </p>
         )}
 
         {/* Password Strength Indicator */}
@@ -196,10 +212,8 @@ const RegisterForm: React.FC = () => {
                 <div
                   key={level}
                   className={cn(
-                    'h-1.5 flex-1 rounded-full transition-colors',
-                    level <= passwordStrength.score
-                      ? passwordStrength.color
-                      : 'bg-muted'
+                    "h-1.5 flex-1 rounded-full transition-colors",
+                    level <= passwordStrength.score ? passwordStrength.color : "bg-muted"
                   )}
                 />
               ))}
@@ -215,15 +229,18 @@ const RegisterForm: React.FC = () => {
       <div className="space-y-2">
         <Label htmlFor="confirmPassword">Confirm Password</Label>
         <div className="relative">
-          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+          <Lock
+            className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
+            aria-hidden="true"
+          />
           <Input
             id="confirmPassword"
             name="confirmPassword"
-            type={showConfirmPassword ? 'text' : 'password'}
+            type={showConfirmPassword ? "text" : "password"}
             placeholder="Confirm your password"
             value={formData.confirmPassword}
             onChange={handleChange}
-            className={cn('pl-10 pr-10', errors.confirmPassword && 'border-destructive')}
+            className={cn("pl-10 pr-10", errors.confirmPassword && "border-destructive")}
             disabled={isLoading}
             autoComplete="new-password"
           />
@@ -231,24 +248,30 @@ const RegisterForm: React.FC = () => {
             type="button"
             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-            aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+            aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
             aria-pressed={showConfirmPassword}
           >
-            {showConfirmPassword ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
+            {showConfirmPassword ? (
+              <EyeOff className="h-4 w-4" aria-hidden="true" />
+            ) : (
+              <Eye className="h-4 w-4" aria-hidden="true" />
+            )}
           </button>
         </div>
         {errors.confirmPassword && (
-          <p className="text-sm text-destructive" role="alert" aria-live="polite">{errors.confirmPassword}</p>
+          <p className="text-sm text-destructive" role="alert" aria-live="polite">
+            {errors.confirmPassword}
+          </p>
         )}
       </div>
 
       {/* Terms Notice */}
       <p className="text-xs text-muted-foreground">
-        By creating an account, you agree to our{' '}
+        By creating an account, you agree to our{" "}
         <Link to="/terms" className="text-primary hover:underline">
           Terms of Service
-        </Link>{' '}
-        and{' '}
+        </Link>{" "}
+        and{" "}
         <Link to="/privacy" className="text-primary hover:underline">
           Privacy Policy
         </Link>
@@ -263,13 +286,13 @@ const RegisterForm: React.FC = () => {
             Creating account...
           </>
         ) : (
-          'Create account'
+          "Create account"
         )}
       </Button>
 
       {/* Login Link */}
       <p className="text-center text-sm text-muted-foreground">
-        Already have an account?{' '}
+        Already have an account?{" "}
         <Link to="/auth/login" className="text-primary hover:underline font-medium">
           Sign in
         </Link>

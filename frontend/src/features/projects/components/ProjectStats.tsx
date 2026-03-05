@@ -11,7 +11,7 @@
  * - Responsive grid layout
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo } from "react";
 import {
   FileText,
   CheckCircle2,
@@ -23,10 +23,10 @@ import {
   XCircle,
   Loader2,
   AlertCircle,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Card, CardContent } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 
 /**
  * Project statistics data structure
@@ -85,9 +85,9 @@ const formatNumber = (value: number): string => {
  * Format currency
  */
 const formatCurrency = (value: number): string => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(value);
@@ -109,12 +109,12 @@ const TrendIndicator: React.FC<{ value: number; inverse?: boolean }> = ({
 }) => {
   const isPositive = inverse ? value < 0 : value > 0;
   const Icon = isPositive ? TrendingUp : TrendingDown;
-  const colorClass = isPositive ? 'text-green-500' : 'text-red-500';
+  const colorClass = isPositive ? "text-green-500" : "text-red-500";
 
   if (value === 0) return null;
 
   return (
-    <div className={cn('flex items-center gap-0.5 text-xs', colorClass)}>
+    <div className={cn("flex items-center gap-0.5 text-xs", colorClass)}>
       <Icon className="h-3 w-3" />
       <span>{Math.abs(value).toFixed(1)}%</span>
     </div>
@@ -153,22 +153,11 @@ const StatCard: React.FC<StatCardProps> = ({
             <p className="text-sm font-medium text-muted-foreground">{title}</p>
             <div className="flex items-baseline gap-2">
               <p className="text-2xl font-bold">{value}</p>
-              {trend !== undefined && (
-                <TrendIndicator value={trend} inverse={trendInverse} />
-              )}
+              {trend !== undefined && <TrendIndicator value={trend} inverse={trendInverse} />}
             </div>
-            {subtitle && (
-              <p className="text-xs text-muted-foreground">{subtitle}</p>
-            )}
+            {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
           </div>
-          <div
-            className={cn(
-              'rounded-full p-3 bg-primary/10',
-              iconClassName
-            )}
-          >
-            {icon}
-          </div>
+          <div className={cn("rounded-full p-3 bg-primary/10", iconClassName)}>{icon}</div>
         </div>
         {children}
       </CardContent>
@@ -200,52 +189,53 @@ const StatCardSkeleton: React.FC = () => {
  * Status breakdown component
  */
 const StatusBreakdown: React.FC<{
-  breakdown: ProjectStatsData['statusBreakdown'];
+  breakdown: ProjectStatsData["statusBreakdown"];
   total: number;
-}> = ({ breakdown, total }) => {
+}> = ({ breakdown, total: _total }) => {
   const items = useMemo(() => {
-    const totalItems = breakdown.completed + breakdown.processing + breakdown.failed + (breakdown.pending || 0);
+    const totalItems =
+      breakdown.completed + breakdown.processing + breakdown.failed + (breakdown.pending || 0);
 
     return [
       {
-        label: 'Completed',
+        label: "Completed",
         value: breakdown.completed,
         percentage: totalItems > 0 ? (breakdown.completed / totalItems) * 100 : 0,
         icon: <CheckCircle2 className="h-3 w-3" />,
-        colorClass: 'text-green-500 bg-green-500',
+        colorClass: "text-green-500 bg-green-500",
       },
       {
-        label: 'Processing',
+        label: "Processing",
         value: breakdown.processing,
         percentage: totalItems > 0 ? (breakdown.processing / totalItems) * 100 : 0,
         icon: <Loader2 className="h-3 w-3" />,
-        colorClass: 'text-blue-500 bg-blue-500',
+        colorClass: "text-blue-500 bg-blue-500",
       },
       {
-        label: 'Pending',
+        label: "Pending",
         value: breakdown.pending || 0,
         percentage: totalItems > 0 ? ((breakdown.pending || 0) / totalItems) * 100 : 0,
         icon: <Clock className="h-3 w-3" />,
-        colorClass: 'text-yellow-500 bg-yellow-500',
+        colorClass: "text-yellow-500 bg-yellow-500",
       },
       {
-        label: 'Failed',
+        label: "Failed",
         value: breakdown.failed,
         percentage: totalItems > 0 ? (breakdown.failed / totalItems) * 100 : 0,
         icon: <XCircle className="h-3 w-3" />,
-        colorClass: 'text-red-500 bg-red-500',
+        colorClass: "text-red-500 bg-red-500",
       },
-    ].filter(item => item.value > 0);
+    ].filter((item) => item.value > 0);
   }, [breakdown]);
 
   return (
     <div className="mt-4 space-y-3">
       {/* Stacked bar */}
       <div className="flex h-2 overflow-hidden rounded-full bg-muted">
-        {items.map((item, index) => (
+        {items.map((item, _index) => (
           <div
             key={item.label}
-            className={cn('transition-all', item.colorClass.split(' ')[1])}
+            className={cn("transition-all", item.colorClass.split(" ")[1])}
             style={{ width: `${item.percentage}%` }}
           />
         ))}
@@ -255,7 +245,7 @@ const StatusBreakdown: React.FC<{
       <div className="flex flex-wrap gap-x-4 gap-y-1">
         {items.map((item) => (
           <div key={item.label} className="flex items-center gap-1.5 text-xs">
-            <div className={cn('h-2 w-2 rounded-full', item.colorClass.split(' ')[1])} />
+            <div className={cn("h-2 w-2 rounded-full", item.colorClass.split(" ")[1])} />
             <span className="text-muted-foreground">{item.label}</span>
             <span className="font-medium">{item.value}</span>
           </div>
@@ -306,7 +296,13 @@ export const ProjectStats: React.FC<ProjectStatsProps> = ({
   // Loading state
   if (isLoading) {
     return (
-      <div className={cn('grid gap-4', compact ? 'grid-cols-2' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4', className)}>
+      <div
+        className={cn(
+          "grid gap-4",
+          compact ? "grid-cols-2" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
+          className
+        )}
+      >
         {[1, 2, 3, 4].map((i) => (
           <StatCardSkeleton key={i} />
         ))}
@@ -317,7 +313,7 @@ export const ProjectStats: React.FC<ProjectStatsProps> = ({
   // Error state
   if (error) {
     return (
-      <div className={cn('grid gap-4 grid-cols-1', className)}>
+      <div className={cn("grid gap-4 grid-cols-1", className)}>
         <ErrorState message={error} />
       </div>
     );
@@ -326,14 +322,20 @@ export const ProjectStats: React.FC<ProjectStatsProps> = ({
   // Empty state
   if (!data || data.totalDocuments === 0) {
     return (
-      <div className={cn('grid gap-4 grid-cols-1', className)}>
+      <div className={cn("grid gap-4 grid-cols-1", className)}>
         <EmptyState />
       </div>
     );
   }
 
   return (
-    <div className={cn('grid gap-4', compact ? 'grid-cols-2' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4', className)}>
+    <div
+      className={cn(
+        "grid gap-4",
+        compact ? "grid-cols-2" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
+        className
+      )}
+    >
       {/* Total Documents */}
       <StatCard
         title="Total Documents"
@@ -342,10 +344,7 @@ export const ProjectStats: React.FC<ProjectStatsProps> = ({
         icon={<FileText className="h-5 w-5 text-primary" />}
         trend={data.trend?.documents}
       >
-        <StatusBreakdown
-          breakdown={data.statusBreakdown}
-          total={data.totalDocuments}
-        />
+        <StatusBreakdown breakdown={data.statusBreakdown} total={data.totalDocuments} />
       </StatCard>
 
       {/* Success Rate */}
@@ -358,10 +357,7 @@ export const ProjectStats: React.FC<ProjectStatsProps> = ({
         trend={data.trend?.successRate}
       >
         <div className="mt-4">
-          <Progress
-            value={data.successRate}
-            className="h-2"
-          />
+          <Progress value={data.successRate} className="h-2" />
         </div>
       </StatCard>
 

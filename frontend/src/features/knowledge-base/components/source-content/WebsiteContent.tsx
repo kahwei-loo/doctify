@@ -2,10 +2,10 @@
  * WebsiteContent — expanded view for website crawler data sources.
  */
 
-import React from 'react';
-import { Globe, ExternalLink, Loader2 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import type { DataSource } from '../../types';
+import React from "react";
+import { Globe, ExternalLink, Loader2 } from "lucide-react";
+
+import type { DataSource } from "../../types";
 
 interface WebsiteContentProps {
   source: DataSource;
@@ -48,7 +48,7 @@ export const WebsiteContent: React.FC<WebsiteContentProps> = ({ source }) => {
       </div>
 
       {/* Crawl Status */}
-      {source.status === 'syncing' && (
+      {source.status === "syncing" && (
         <div className="flex items-center gap-2 text-sm text-blue-600">
           <Loader2 className="h-4 w-4 animate-spin" />
           Crawling in progress...

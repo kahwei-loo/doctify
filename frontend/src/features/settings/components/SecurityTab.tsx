@@ -1,35 +1,35 @@
-import React, { useState } from 'react';
-import { Loader2, Shield, Eye, EyeOff } from 'lucide-react';
-import toast from 'react-hot-toast';
-import { useChangePasswordMutation } from '@/store/api/authApi';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { cn } from '@/lib/utils';
+import React, { useState } from "react";
+import { Loader2, Shield, Eye, EyeOff } from "lucide-react";
+import toast from "react-hot-toast";
+import { useChangePasswordMutation } from "@/store/api/authApi";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 interface SecurityTabProps {
   isDemoMode: boolean;
 }
 
 export const SecurityTab: React.FC<SecurityTabProps> = ({ isDemoMode }) => {
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [changePassword, { isLoading: isChangingPassword }] = useChangePasswordMutation();
 
   const handleChangePassword = async () => {
     if (!currentPassword || !newPassword || !confirmPassword) {
-      toast.error('All password fields are required');
+      toast.error("All password fields are required");
       return;
     }
     if (newPassword !== confirmPassword) {
-      toast.error('New passwords do not match');
+      toast.error("New passwords do not match");
       return;
     }
     if (newPassword.length < 8) {
-      toast.error('Password must be at least 8 characters');
+      toast.error("Password must be at least 8 characters");
       return;
     }
     try {
@@ -37,12 +37,12 @@ export const SecurityTab: React.FC<SecurityTabProps> = ({ isDemoMode }) => {
         current_password: currentPassword,
         new_password: newPassword,
       }).unwrap();
-      toast.success('Password changed successfully');
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
+      toast.success("Password changed successfully");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
     } catch (error: any) {
-      toast.error(error?.data?.detail || 'Failed to change password');
+      toast.error(error?.data?.detail || "Failed to change password");
     }
   };
 
@@ -50,9 +50,7 @@ export const SecurityTab: React.FC<SecurityTabProps> = ({ isDemoMode }) => {
     <div>
       <div className="mb-6">
         <h2 className="text-lg font-semibold">Security</h2>
-        <p className="text-sm text-muted-foreground mt-1">
-          Change your password
-        </p>
+        <p className="text-sm text-muted-foreground mt-1">Change your password</p>
       </div>
       <div className="space-y-6">
         <div className="space-y-2">
@@ -60,12 +58,12 @@ export const SecurityTab: React.FC<SecurityTabProps> = ({ isDemoMode }) => {
           <div className="relative">
             <Input
               id="currentPassword"
-              type={showCurrentPassword ? 'text' : 'password'}
+              type={showCurrentPassword ? "text" : "password"}
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
               placeholder="Enter current password"
               disabled={isDemoMode}
-              className={cn(isDemoMode && 'bg-muted')}
+              className={cn(isDemoMode && "bg-muted")}
             />
             <button
               type="button"
@@ -81,12 +79,12 @@ export const SecurityTab: React.FC<SecurityTabProps> = ({ isDemoMode }) => {
           <div className="relative">
             <Input
               id="newPassword"
-              type={showNewPassword ? 'text' : 'password'}
+              type={showNewPassword ? "text" : "password"}
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               placeholder="Enter new password"
               disabled={isDemoMode}
-              className={cn(isDemoMode && 'bg-muted')}
+              className={cn(isDemoMode && "bg-muted")}
             />
             <button
               type="button"
@@ -106,7 +104,7 @@ export const SecurityTab: React.FC<SecurityTabProps> = ({ isDemoMode }) => {
             onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="Confirm new password"
             disabled={isDemoMode}
-            className={cn(isDemoMode && 'bg-muted')}
+            className={cn(isDemoMode && "bg-muted")}
           />
         </div>
       </div>

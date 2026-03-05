@@ -4,9 +4,9 @@
  * Reusable empty state displays for various scenarios in the RAG feature.
  */
 
-import React from 'react';
-import { MessageSquare, History, TrendingUp, Search } from 'lucide-react';
-import { EmptyState } from '@/shared/components/common/EmptyState';
+import React from "react";
+import { MessageSquare, History, TrendingUp, Search } from "lucide-react";
+import { EmptyState } from "@/shared/components/common/EmptyState";
 
 /**
  * Empty state for when no questions have been asked in the current session
@@ -61,9 +61,9 @@ export const NoSearchResultsState: React.FC<{
       action={
         onClearSearch
           ? {
-              label: 'Clear Search',
+              label: "Clear Search",
               onClick: onClearSearch,
-              variant: 'outline',
+              variant: "outline",
             }
           : undefined
       }
@@ -85,7 +85,7 @@ export const NoIndexedDocumentsState: React.FC<{
       action={
         onNavigateToDocuments
           ? {
-              label: 'Go to Documents',
+              label: "Go to Documents",
               onClick: onNavigateToDocuments,
             }
           : undefined

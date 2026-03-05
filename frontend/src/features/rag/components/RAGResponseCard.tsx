@@ -5,16 +5,27 @@
  * Phase 11 - RAG Implementation
  */
 
-import React, { useState } from 'react';
-import { FileText, ThumbsUp, ThumbsDown, ExternalLink, ChevronDown, ChevronUp, ShieldCheck, ShieldAlert, AlertTriangle, Zap } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { useSubmitRAGFeedbackMutation } from '@/store/api/ragApi';
-import type { RAGQueryResponse, RAGSource } from '@/store/api/ragApi';
-import { formatConfidence, formatSimilarity, formatQueryDate } from '@/store/api/ragApi';
+import { useState } from "react";
+import {
+  FileText,
+  ThumbsUp,
+  ThumbsDown,
+  ExternalLink,
+  ChevronDown,
+  ChevronUp,
+  ShieldCheck,
+  ShieldAlert,
+  AlertTriangle,
+  Zap,
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { useSubmitRAGFeedbackMutation } from "@/store/api/ragApi";
+import type { RAGQueryResponse, RAGSource } from "@/store/api/ragApi";
+import { formatConfidence, formatSimilarity, formatQueryDate } from "@/store/api/ragApi";
 
 interface RAGResponseCardProps {
   response: RAGQueryResponse;
@@ -29,24 +40,41 @@ export function RAGResponseCard({ response }: RAGResponseCardProps) {
     try {
       await submitFeedback({
         queryId: response.id,
-        feedback: { rating }
+        feedback: { rating },
       }).unwrap();
       setFeedbackGiven(true);
     } catch (error) {
-      console.error('Failed to submit feedback:', error);
+      console.error("Failed to submit feedback:", error);
     }
   };
 
   const getConfidenceBadgeVariant = (score: number) => {
-    if (score >= 0.8) return 'default';
-    if (score >= 0.6) return 'secondary';
-    return 'outline';
+    if (score >= 0.8) return "default";
+    if (score >= 0.6) return "secondary";
+    return "outline";
   };
 
   const getGroundednessInfo = (score: number) => {
-    if (score >= 0.8) return { label: 'High Confidence', variant: 'default' as const, icon: ShieldCheck, className: 'text-green-600' };
-    if (score >= 0.5) return { label: 'Moderate', variant: 'secondary' as const, icon: ShieldAlert, className: 'text-yellow-600' };
-    return { label: 'Low Confidence', variant: 'destructive' as const, icon: AlertTriangle, className: 'text-red-600' };
+    if (score >= 0.8)
+      return {
+        label: "High Confidence",
+        variant: "default" as const,
+        icon: ShieldCheck,
+        className: "text-green-600",
+      };
+    if (score >= 0.5)
+      return {
+        label: "Moderate",
+        variant: "secondary" as const,
+        icon: ShieldAlert,
+        className: "text-yellow-600",
+      };
+    return {
+      label: "Low Confidence",
+      variant: "destructive" as const,
+      icon: AlertTriangle,
+      className: "text-red-600",
+    };
   };
 
   return (
@@ -55,7 +83,10 @@ export function RAGResponseCard({ response }: RAGResponseCardProps) {
         <div className="flex items-center justify-between">
           <CardTitle className="text-base">Answer</CardTitle>
           <div className="flex items-center gap-2 flex-wrap">
-            <Badge variant={getConfidenceBadgeVariant(response.confidence_score)} className="text-xs">
+            <Badge
+              variant={getConfidenceBadgeVariant(response.confidence_score)}
+              className="text-xs"
+            >
               {formatConfidence(response.confidence_score)} confidence
             </Badge>
             {response.cached && (
@@ -64,16 +95,17 @@ export function RAGResponseCard({ response }: RAGResponseCardProps) {
                 Cached
               </Badge>
             )}
-            {response.groundedness_score != null && (() => {
-              const info = getGroundednessInfo(response.groundedness_score);
-              const Icon = info.icon;
-              return (
-                <Badge variant={info.variant} className="text-xs">
-                  <Icon className={`mr-1 h-3 w-3 ${info.className}`} />
-                  {info.label}
-                </Badge>
-              );
-            })()}
+            {response.groundedness_score != null &&
+              (() => {
+                const info = getGroundednessInfo(response.groundedness_score);
+                const Icon = info.icon;
+                return (
+                  <Badge variant={info.variant} className="text-xs">
+                    <Icon className={`mr-1 h-3 w-3 ${info.className}`} />
+                    {info.label}
+                  </Badge>
+                );
+              })()}
             <Badge variant="secondary" className="text-xs">
               {response.model_used}
             </Badge>
@@ -82,9 +114,7 @@ export function RAGResponseCard({ response }: RAGResponseCardProps) {
             </Badge>
           </div>
         </div>
-        <p className="text-xs text-muted-foreground mt-1">
-          {formatQueryDate(response.created_at)}
-        </p>
+        <p className="text-xs text-muted-foreground mt-1">{formatQueryDate(response.created_at)}</p>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Question */}
@@ -165,10 +195,10 @@ export function RAGResponseCard({ response }: RAGResponseCardProps) {
                           highlight: String(source.chunk_index),
                         });
                         if (source.metadata?.start_char != null) {
-                          params.set('start', String(source.metadata.start_char));
+                          params.set("start", String(source.metadata.start_char));
                         }
                         if (source.metadata?.end_char != null) {
-                          params.set('end', String(source.metadata.end_char));
+                          params.set("end", String(source.metadata.end_char));
                         }
                         window.location.href = `/documents/${source.document_id}?${params.toString()}`;
                       }}

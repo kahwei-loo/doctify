@@ -5,8 +5,8 @@
  * Supports both create and edit modes with Zod schema validation.
  */
 
-import React, { useState, useEffect } from 'react';
-import { z } from 'zod';
+import React, { useState, useEffect } from "react";
+import { z } from "zod";
 import {
   Dialog,
   DialogContent,
@@ -14,40 +14,40 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
-import { Loader2, Database } from 'lucide-react';
-import { realKnowledgeBaseApi } from '@/features/knowledge-base/services/api';
-import type { KnowledgeBase } from '@/features/knowledge-base/types';
-import type { Assistant, AIProvider, CreateAssistantRequest } from '../types';
+} from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
+import { Loader2, Database } from "lucide-react";
+import { realKnowledgeBaseApi } from "@/features/knowledge-base/services/api";
+import type { KnowledgeBase } from "@/features/knowledge-base/types";
+import type { Assistant, AIProvider, CreateAssistantRequest } from "../types";
 
 // Form validation schema
 const assistantFormSchema = z.object({
   name: z
     .string()
-    .min(3, 'Name must be at least 3 characters')
-    .max(100, 'Name must not exceed 100 characters'),
+    .min(3, "Name must be at least 3 characters")
+    .max(100, "Name must not exceed 100 characters"),
   description: z
     .string()
-    .min(10, 'Description must be at least 10 characters')
-    .max(500, 'Description must not exceed 500 characters'),
-  system_prompt: z.string().max(10000, 'System prompt must not exceed 10000 characters').optional(),
+    .min(10, "Description must be at least 10 characters")
+    .max(500, "Description must not exceed 500 characters"),
+  system_prompt: z.string().max(10000, "System prompt must not exceed 10000 characters").optional(),
   knowledge_base_id: z.string().nullable().optional(),
   model_config: z.object({
-    provider: z.enum(['openai', 'anthropic', 'google'], {
-      errorMap: () => ({ message: 'Please select a valid AI provider' }),
+    provider: z.enum(["openai", "anthropic", "google"], {
+      errorMap: () => ({ message: "Please select a valid AI provider" }),
     }),
-    model: z.string().min(1, 'Model is required'),
+    model: z.string().min(1, "Model is required"),
     temperature: z.number().min(0).max(2),
     max_tokens: z.number().min(100).max(10000).optional(),
   }),
@@ -58,18 +58,18 @@ type AssistantFormData = z.infer<typeof assistantFormSchema>;
 // Model options by provider
 const modelOptions: Record<AIProvider, { value: string; label: string }[]> = {
   openai: [
-    { value: 'gpt-4', label: 'GPT-4' },
-    { value: 'gpt-4-turbo', label: 'GPT-4 Turbo' },
-    { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo' },
+    { value: "gpt-4", label: "GPT-4" },
+    { value: "gpt-4-turbo", label: "GPT-4 Turbo" },
+    { value: "gpt-3.5-turbo", label: "GPT-3.5 Turbo" },
   ],
   anthropic: [
-    { value: 'claude-3-opus', label: 'Claude 3 Opus' },
-    { value: 'claude-3-sonnet', label: 'Claude 3 Sonnet' },
-    { value: 'claude-3-haiku', label: 'Claude 3 Haiku' },
+    { value: "claude-3-opus", label: "Claude 3 Opus" },
+    { value: "claude-3-sonnet", label: "Claude 3 Sonnet" },
+    { value: "claude-3-haiku", label: "Claude 3 Haiku" },
   ],
   google: [
-    { value: 'gemini-pro', label: 'Gemini Pro' },
-    { value: 'gemini-ultra', label: 'Gemini Ultra' },
+    { value: "gemini-pro", label: "Gemini Pro" },
+    { value: "gemini-ultra", label: "Gemini Ultra" },
   ],
 };
 
@@ -92,13 +92,13 @@ export const AssistantFormModal: React.FC<AssistantFormModalProps> = ({
 
   // Form state
   const [formData, setFormData] = useState<AssistantFormData>({
-    name: '',
-    description: '',
-    system_prompt: '',
+    name: "",
+    description: "",
+    system_prompt: "",
     knowledge_base_id: null,
     model_config: {
-      provider: 'openai',
-      model: 'gpt-4',
+      provider: "openai",
+      model: "gpt-4",
       temperature: 0.7,
       max_tokens: 2000,
     },
@@ -136,7 +136,7 @@ export const AssistantFormModal: React.FC<AssistantFormModalProps> = ({
       setFormData({
         name: assistant.name,
         description: assistant.description,
-        system_prompt: assistant.model_config.system_prompt || '',
+        system_prompt: assistant.model_config.system_prompt || "",
         knowledge_base_id: assistant.knowledge_base_id || null,
         model_config: {
           provider: assistant.model_config.provider,
@@ -148,13 +148,13 @@ export const AssistantFormModal: React.FC<AssistantFormModalProps> = ({
     } else {
       // Reset form for create mode
       setFormData({
-        name: '',
-        description: '',
-        system_prompt: '',
+        name: "",
+        description: "",
+        system_prompt: "",
         knowledge_base_id: null,
         model_config: {
-          provider: 'openai',
-          model: 'gpt-4',
+          provider: "openai",
+          model: "gpt-4",
           temperature: 0.7,
           max_tokens: 2000,
         },
@@ -187,7 +187,7 @@ export const AssistantFormModal: React.FC<AssistantFormModalProps> = ({
       // Extract validation errors
       const validationErrors: Record<string, string> = {};
       result.error.errors.forEach((err) => {
-        const path = err.path.join('.');
+        const path = err.path.join(".");
         validationErrors[path] = err.message;
       });
       setErrors(validationErrors);
@@ -201,7 +201,7 @@ export const AssistantFormModal: React.FC<AssistantFormModalProps> = ({
       model_config: {
         ...formData.model_config,
         system_prompt: formData.system_prompt || undefined,
-      } as CreateAssistantRequest['model_config'],
+      } as CreateAssistantRequest["model_config"],
       knowledge_base_id: formData.knowledge_base_id || null,
     };
 
@@ -219,13 +219,11 @@ export const AssistantFormModal: React.FC<AssistantFormModalProps> = ({
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>
-              {isEditMode ? 'Edit Assistant' : 'Create New Assistant'}
-            </DialogTitle>
+            <DialogTitle>{isEditMode ? "Edit Assistant" : "Create New Assistant"}</DialogTitle>
             <DialogDescription>
               {isEditMode
-                ? 'Update your AI assistant configuration.'
-                : 'Configure a new AI assistant to handle customer conversations.'}
+                ? "Update your AI assistant configuration."
+                : "Configure a new AI assistant to handle customer conversations."}
             </DialogDescription>
           </DialogHeader>
 
@@ -239,14 +237,10 @@ export const AssistantFormModal: React.FC<AssistantFormModalProps> = ({
                 id="name"
                 placeholder="e.g., Customer Support Assistant"
                 value={formData.name}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, name: e.target.value }))
-                }
-                className={errors.name ? 'border-destructive' : ''}
+                onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+                className={errors.name ? "border-destructive" : ""}
               />
-              {errors.name && (
-                <p className="text-sm text-destructive">{errors.name}</p>
-              )}
+              {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
             </div>
 
             {/* Description Field */}
@@ -266,7 +260,7 @@ export const AssistantFormModal: React.FC<AssistantFormModalProps> = ({
                   }))
                 }
                 className={`flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
-                  errors.description ? 'border-destructive' : ''
+                  errors.description ? "border-destructive" : ""
                 }`}
               />
               {errors.description && (
@@ -281,7 +275,7 @@ export const AssistantFormModal: React.FC<AssistantFormModalProps> = ({
                 id="system_prompt"
                 placeholder="You are a helpful assistant that..."
                 rows={5}
-                value={formData.system_prompt || ''}
+                value={formData.system_prompt || ""}
                 onChange={(e) =>
                   setFormData((prev) => ({
                     ...prev,
@@ -289,7 +283,7 @@ export const AssistantFormModal: React.FC<AssistantFormModalProps> = ({
                   }))
                 }
                 className={`flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
-                  errors.system_prompt ? 'border-destructive' : ''
+                  errors.system_prompt ? "border-destructive" : ""
                 }`}
               />
               <p className="text-xs text-muted-foreground">
@@ -369,8 +363,8 @@ export const AssistantFormModal: React.FC<AssistantFormModalProps> = ({
                 }
               />
               <p className="text-xs text-muted-foreground">
-                Lower values make output more focused and deterministic. Higher values
-                increase creativity.
+                Lower values make output more focused and deterministic. Higher values increase
+                creativity.
               </p>
             </div>
 
@@ -383,7 +377,7 @@ export const AssistantFormModal: React.FC<AssistantFormModalProps> = ({
                 min={100}
                 max={10000}
                 placeholder="2000"
-                value={formData.model_config.max_tokens || ''}
+                value={formData.model_config.max_tokens || ""}
                 onChange={(e) =>
                   setFormData((prev) => ({
                     ...prev,
@@ -393,12 +387,10 @@ export const AssistantFormModal: React.FC<AssistantFormModalProps> = ({
                     },
                   }))
                 }
-                className={errors['model_config.max_tokens'] ? 'border-destructive' : ''}
+                className={errors["model_config.max_tokens"] ? "border-destructive" : ""}
               />
-              {errors['model_config.max_tokens'] && (
-                <p className="text-sm text-destructive">
-                  {errors['model_config.max_tokens']}
-                </p>
+              {errors["model_config.max_tokens"] && (
+                <p className="text-sm text-destructive">{errors["model_config.max_tokens"]}</p>
               )}
             </div>
 
@@ -411,16 +403,16 @@ export const AssistantFormModal: React.FC<AssistantFormModalProps> = ({
                 </span>
               </Label>
               <Select
-                value={formData.knowledge_base_id || '_none_'}
+                value={formData.knowledge_base_id || "_none_"}
                 onValueChange={(value) =>
                   setFormData((prev) => ({
                     ...prev,
-                    knowledge_base_id: value === '_none_' ? null : value,
+                    knowledge_base_id: value === "_none_" ? null : value,
                   }))
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={kbLoading ? 'Loading...' : 'Select a knowledge base'} />
+                  <SelectValue placeholder={kbLoading ? "Loading..." : "Select a knowledge base"} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="_none_">None</SelectItem>
@@ -445,10 +437,10 @@ export const AssistantFormModal: React.FC<AssistantFormModalProps> = ({
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {isEditMode ? 'Updating...' : 'Creating...'}
+                  {isEditMode ? "Updating..." : "Creating..."}
                 </>
               ) : (
-                <>{isEditMode ? 'Update Assistant' : 'Create Assistant'}</>
+                <>{isEditMode ? "Update Assistant" : "Create Assistant"}</>
               )}
             </Button>
           </DialogFooter>

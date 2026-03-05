@@ -4,9 +4,9 @@
  * Redux slice for authentication state management.
  */
 
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import type { User, AuthTokens } from '../../features/auth/types';
-import { authApi } from '../api/authApi';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import type { User, AuthTokens } from "../../features/auth/types";
+import { authApi } from "../api/authApi";
 
 interface AuthState {
   user: User | null;
@@ -25,7 +25,7 @@ const initialState: AuthState = {
 };
 
 const authSlice = createSlice({
-  name: 'auth',
+  name: "auth",
   initialState,
   reducers: {
     setCredentials: (state, action: PayloadAction<{ user: User; tokens: AuthTokens }>) => {
@@ -35,8 +35,8 @@ const authSlice = createSlice({
       state.error = null;
 
       // Persist tokens to localStorage
-      localStorage.setItem('access_token', action.payload.tokens.access_token);
-      localStorage.setItem('refresh_token', action.payload.tokens.refresh_token);
+      localStorage.setItem("access_token", action.payload.tokens.access_token);
+      localStorage.setItem("refresh_token", action.payload.tokens.refresh_token);
     },
 
     logout: (state) => {
@@ -46,8 +46,8 @@ const authSlice = createSlice({
       state.error = null;
 
       // Clear localStorage
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
     },
 
     updateUser: (state, action: PayloadAction<User>) => {
@@ -80,12 +80,12 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
 
         // Persist tokens
-        localStorage.setItem('access_token', action.payload.data.access_token);
-        localStorage.setItem('refresh_token', action.payload.data.refresh_token);
+        localStorage.setItem("access_token", action.payload.data.access_token);
+        localStorage.setItem("refresh_token", action.payload.data.refresh_token);
       })
       .addMatcher(authApi.endpoints.login.matchRejected, (state, action) => {
         state.isLoading = false;
-        state.error = (action.payload as any)?.data?.detail || 'Login failed';
+        state.error = (action.payload as any)?.data?.detail || "Login failed";
       });
 
     // Handle register
@@ -105,12 +105,12 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
 
         // Persist tokens
-        localStorage.setItem('access_token', action.payload.data.access_token);
-        localStorage.setItem('refresh_token', action.payload.data.refresh_token);
+        localStorage.setItem("access_token", action.payload.data.access_token);
+        localStorage.setItem("refresh_token", action.payload.data.refresh_token);
       })
       .addMatcher(authApi.endpoints.register.matchRejected, (state, action) => {
         state.isLoading = false;
-        state.error = (action.payload as any)?.data?.detail || 'Registration failed';
+        state.error = (action.payload as any)?.data?.detail || "Registration failed";
       });
 
     // Handle logout
@@ -121,8 +121,8 @@ const authSlice = createSlice({
       state.error = null;
 
       // Clear localStorage
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
     });
 
     // Handle getCurrentUser
@@ -137,8 +137,8 @@ const authSlice = createSlice({
         state.tokens = null;
 
         // Clear localStorage on auth failure
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
       });
 
     // Handle updateProfile

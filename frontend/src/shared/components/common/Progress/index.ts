@@ -4,9 +4,4 @@
  * Progress indicators for multi-step operations.
  */
 
-export {
-  MultiStepProgress,
-  SimpleProgress,
-  type Step,
-  type StepStatus,
-} from './MultiStepProgress';
+export { MultiStepProgress, SimpleProgress, type Step, type StepStatus } from "./MultiStepProgress";

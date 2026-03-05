@@ -5,7 +5,7 @@
  * Supports: metric_card, bar, line, pie, table
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo } from "react";
 import {
   BarChart,
   Bar,
@@ -20,10 +20,10 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-} from 'recharts';
-import { TrendingUp, TrendingDown, Minus, BarChart3 } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Card, CardContent } from '@/components/ui/card';
+} from "recharts";
+import { TrendingUp, TrendingDown, Minus, BarChart3 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -31,8 +31,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import type { ChartConfig, ChartType } from '../types';
+} from "@/components/ui/table";
+import type { ChartConfig } from "../types";
 
 interface ChartRendererProps {
   chart: ChartConfig;
@@ -42,14 +42,14 @@ interface ChartRendererProps {
 
 // Color palette for charts
 const CHART_COLORS = [
-  '#3b82f6', // blue-500
-  '#22c55e', // green-500
-  '#eab308', // yellow-500
-  '#ef4444', // red-500
-  '#a855f7', // purple-500
-  '#ec4899', // pink-500
-  '#14b8a6', // teal-500
-  '#f97316', // orange-500
+  "#3b82f6", // blue-500
+  "#22c55e", // green-500
+  "#eab308", // yellow-500
+  "#ef4444", // red-500
+  "#a855f7", // purple-500
+  "#ec4899", // pink-500
+  "#14b8a6", // teal-500
+  "#f97316", // orange-500
 ];
 
 /**
@@ -66,15 +66,10 @@ const CustomTooltip: React.FC<{
         {label && <p className="font-medium text-sm mb-1">{label}</p>}
         {payload.map((entry, index) => (
           <div key={index} className="flex items-center gap-2 text-sm">
-            <div
-              className="w-2.5 h-2.5 rounded-full"
-              style={{ backgroundColor: entry.color }}
-            />
+            <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
             <span className="text-muted-foreground">{entry.name}:</span>
             <span className="font-medium">
-              {typeof entry.value === 'number'
-                ? entry.value.toLocaleString()
-                : entry.value}
+              {typeof entry.value === "number" ? entry.value.toLocaleString() : entry.value}
             </span>
           </div>
         ))}
@@ -92,27 +87,25 @@ const MetricCard: React.FC<{
   data?: Record<string, any>[];
 }> = ({ config, data }) => {
   const value = data?.[0]?.value ?? config.value ?? 0;
-  const label = config.label || 'Value';
+  const label = config.label || "Value";
   const previousValue = config.previousValue;
-  const format = config.format || 'number';
+  const format = config.format || "number";
 
   const formattedValue = useMemo(() => {
-    if (format === 'currency') {
-      return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: config.currency || 'USD',
+    if (format === "currency") {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: config.currency || "USD",
         maximumFractionDigits: 0,
       }).format(value);
     }
-    if (format === 'percentage') {
+    if (format === "percentage") {
       return `${(value * 100).toFixed(1)}%`;
     }
     return value.toLocaleString();
   }, [value, format, config.currency]);
 
-  const change = previousValue
-    ? ((value - previousValue) / previousValue) * 100
-    : null;
+  const change = previousValue ? ((value - previousValue) / previousValue) * 100 : null;
 
   return (
     <Card className="bg-gradient-to-br from-primary/5 to-primary/10">
@@ -123,10 +116,10 @@ const MetricCard: React.FC<{
           {change !== null && (
             <div
               className={cn(
-                'flex items-center justify-center gap-1 mt-2 text-sm',
-                change > 0 && 'text-green-500',
-                change < 0 && 'text-red-500',
-                change === 0 && 'text-muted-foreground'
+                "flex items-center justify-center gap-1 mt-2 text-sm",
+                change > 0 && "text-green-500",
+                change < 0 && "text-red-500",
+                change === 0 && "text-muted-foreground"
               )}
             >
               {change > 0 ? (
@@ -137,7 +130,7 @@ const MetricCard: React.FC<{
                 <Minus className="h-4 w-4" />
               )}
               <span>
-                {change > 0 ? '+' : ''}
+                {change > 0 ? "+" : ""}
                 {change.toFixed(1)}%
               </span>
             </div>
@@ -156,8 +149,8 @@ const BarChartRenderer: React.FC<{
   data?: Record<string, any>[];
   height: number;
 }> = ({ config, data, height }) => {
-  const xKey = config.xAxis || config.dimension || 'name';
-  const yKey = config.yAxis || config.metric || 'value';
+  const xKey = config.xAxis || config.dimension || "name";
+  const yKey = config.yAxis || config.metric || "value";
   const stacked = config.stacked || false;
 
   // Handle multiple metrics
@@ -181,7 +174,7 @@ const BarChartRenderer: React.FC<{
             key={metric}
             dataKey={metric}
             fill={CHART_COLORS[index % CHART_COLORS.length]}
-            stackId={stacked ? 'stack' : undefined}
+            stackId={stacked ? "stack" : undefined}
             radius={[4, 4, 0, 0]}
           />
         ))}
@@ -198,8 +191,8 @@ const LineChartRenderer: React.FC<{
   data?: Record<string, any>[];
   height: number;
 }> = ({ config, data, height }) => {
-  const xKey = config.xAxis || config.dimension || 'name';
-  const metrics = config.metrics || [config.yAxis || config.metric || 'value'];
+  const xKey = config.xAxis || config.dimension || "name";
+  const metrics = config.metrics || [config.yAxis || config.metric || "value"];
 
   return (
     <ResponsiveContainer width="100%" height={height}>
@@ -238,8 +231,8 @@ const PieChartRenderer: React.FC<{
   data?: Record<string, any>[];
   height: number;
 }> = ({ config, data, height }) => {
-  const nameKey = config.nameKey || config.dimension || 'name';
-  const valueKey = config.valueKey || config.metric || 'value';
+  const nameKey = config.nameKey || config.dimension || "name";
+  const valueKey = config.valueKey || config.metric || "value";
 
   return (
     <ResponsiveContainer width="100%" height={height}>
@@ -291,7 +284,7 @@ const TableRenderer: React.FC<{
           <TableRow>
             {columns.map((col: string) => (
               <TableHead key={col} className="font-medium">
-                {col.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}
+                {col.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}
               </TableHead>
             ))}
           </TableRow>
@@ -301,9 +294,7 @@ const TableRenderer: React.FC<{
             <TableRow key={rowIndex}>
               {columns.map((col: string) => (
                 <TableCell key={col}>
-                  {typeof row[col] === 'number'
-                    ? row[col].toLocaleString()
-                    : row[col] ?? '-'}
+                  {typeof row[col] === "number" ? row[col].toLocaleString() : (row[col] ?? "-")}
                 </TableCell>
               ))}
             </TableRow>
@@ -318,37 +309,30 @@ const TableRenderer: React.FC<{
  * Empty State
  */
 const EmptyState: React.FC<{ height: number }> = ({ height }) => (
-  <div
-    className="flex flex-col items-center justify-center text-center"
-    style={{ height }}
-  >
+  <div className="flex flex-col items-center justify-center text-center" style={{ height }}>
     <BarChart3 className="h-12 w-12 text-muted-foreground/30 mb-2" />
     <p className="text-sm text-muted-foreground">No chart data available</p>
   </div>
 );
 
-export const ChartRenderer: React.FC<ChartRendererProps> = ({
-  chart,
-  className,
-  height = 300,
-}) => {
+export const ChartRenderer: React.FC<ChartRendererProps> = ({ chart, className, height = 300 }) => {
   const { type, config, data } = chart;
 
   const renderChart = () => {
     switch (type) {
-      case 'metric_card':
+      case "metric_card":
         return <MetricCard config={config} data={data} />;
 
-      case 'bar':
+      case "bar":
         return <BarChartRenderer config={config} data={data} height={height} />;
 
-      case 'line':
+      case "line":
         return <LineChartRenderer config={config} data={data} height={height} />;
 
-      case 'pie':
+      case "pie":
         return <PieChartRenderer config={config} data={data} height={height} />;
 
-      case 'table':
+      case "table":
         return <TableRenderer config={config} data={data} />;
 
       default:
@@ -356,7 +340,7 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
     }
   };
 
-  return <div className={cn('w-full', className)}>{renderChart()}</div>;
+  return <div className={cn("w-full", className)}>{renderChart()}</div>;
 };
 
 export default ChartRenderer;

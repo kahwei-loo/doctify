@@ -5,9 +5,9 @@
  * Provides clear CTAs based on context.
  */
 
-import React from 'react';
-import { FolderKanban, Plus, Archive, Search } from 'lucide-react';
-import { EmptyState } from '@/shared/components/common/EmptyState';
+import React from "react";
+import { FolderKanban, Plus, Archive, Search } from "lucide-react";
+import { EmptyState } from "@/shared/components/common/EmptyState";
 
 interface EmptyProjectsStateProps {
   /** Called when user clicks create project button */
@@ -15,7 +15,7 @@ interface EmptyProjectsStateProps {
   /** Whether there's an active search query */
   hasSearchQuery?: boolean;
   /** Current filter option */
-  filterOption?: 'all' | 'active' | 'archived';
+  filterOption?: "all" | "active" | "archived";
   /** Called when user clicks to clear search */
   onClearSearch?: () => void;
   /** Additional class names */
@@ -25,7 +25,7 @@ interface EmptyProjectsStateProps {
 export const EmptyProjectsState: React.FC<EmptyProjectsStateProps> = ({
   onCreateProject,
   hasSearchQuery = false,
-  filterOption = 'active',
+  filterOption = "active",
   onClearSearch,
   className,
 }) => {
@@ -39,9 +39,9 @@ export const EmptyProjectsState: React.FC<EmptyProjectsStateProps> = ({
         action={
           onClearSearch
             ? {
-                label: 'Clear Search',
+                label: "Clear Search",
                 onClick: onClearSearch,
-                variant: 'outline',
+                variant: "outline",
               }
             : undefined
         }
@@ -51,7 +51,7 @@ export const EmptyProjectsState: React.FC<EmptyProjectsStateProps> = ({
   }
 
   // Archived filter empty state
-  if (filterOption === 'archived') {
+  if (filterOption === "archived") {
     return (
       <EmptyState
         icon={Archive}
@@ -71,7 +71,7 @@ export const EmptyProjectsState: React.FC<EmptyProjectsStateProps> = ({
       action={
         onCreateProject
           ? {
-              label: 'Create Your First Project',
+              label: "Create Your First Project",
               onClick: onCreateProject,
               icon: Plus,
             }

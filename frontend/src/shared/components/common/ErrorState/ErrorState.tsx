@@ -21,7 +21,7 @@
  * />
  */
 
-import React from 'react';
+import React from "react";
 import {
   AlertCircle,
   RefreshCw,
@@ -30,19 +30,13 @@ import {
   FileWarning,
   ShieldAlert,
   Clock,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Card, CardContent } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
-export type ErrorType =
-  | 'network'
-  | 'server'
-  | 'not-found'
-  | 'unauthorized'
-  | 'timeout'
-  | 'unknown';
+export type ErrorType = "network" | "server" | "not-found" | "unauthorized" | "timeout" | "unknown";
 
 export interface ErrorStateProps {
   /** Type of error - determines icon and default messaging */
@@ -60,7 +54,7 @@ export interface ErrorStateProps {
   /** Show retry button (default: true if onRetry provided) */
   showRetry?: boolean;
   /** Display variant */
-  variant?: 'card' | 'alert' | 'inline' | 'compact';
+  variant?: "card" | "alert" | "inline" | "compact";
   /** Additional class names */
   className?: string;
 }
@@ -74,48 +68,46 @@ interface ErrorConfig {
 const ERROR_CONFIGS: Record<ErrorType, ErrorConfig> = {
   network: {
     icon: WifiOff,
-    defaultTitle: 'Network Error',
-    defaultMessage:
-      'Unable to connect to the server. Please check your internet connection.',
+    defaultTitle: "Network Error",
+    defaultMessage: "Unable to connect to the server. Please check your internet connection.",
   },
   server: {
     icon: ServerCrash,
-    defaultTitle: 'Server Error',
-    defaultMessage: 'The server encountered an error. Please try again later.',
+    defaultTitle: "Server Error",
+    defaultMessage: "The server encountered an error. Please try again later.",
   },
-  'not-found': {
+  "not-found": {
     icon: FileWarning,
-    defaultTitle: 'Not Found',
-    defaultMessage: 'The requested resource could not be found.',
+    defaultTitle: "Not Found",
+    defaultMessage: "The requested resource could not be found.",
   },
   unauthorized: {
     icon: ShieldAlert,
-    defaultTitle: 'Access Denied',
+    defaultTitle: "Access Denied",
     defaultMessage:
-      'You do not have permission to access this resource. Please sign in or contact support.',
+      "You do not have permission to access this resource. Please sign in or contact support.",
   },
   timeout: {
     icon: Clock,
-    defaultTitle: 'Request Timeout',
-    defaultMessage:
-      'The request took too long to complete. Please try again.',
+    defaultTitle: "Request Timeout",
+    defaultMessage: "The request took too long to complete. Please try again.",
   },
   unknown: {
     icon: AlertCircle,
-    defaultTitle: 'Something Went Wrong',
-    defaultMessage: 'An unexpected error occurred. Please try again.',
+    defaultTitle: "Something Went Wrong",
+    defaultMessage: "An unexpected error occurred. Please try again.",
   },
 };
 
 export const ErrorState: React.FC<ErrorStateProps> = ({
-  type = 'unknown',
+  type = "unknown",
   title,
   message,
   details,
   onRetry,
   isRetrying = false,
   showRetry = true,
-  variant = 'card',
+  variant = "card",
   className,
 }) => {
   const config = ERROR_CONFIGS[type];
@@ -125,18 +117,11 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
   const shouldShowRetry = showRetry && onRetry;
 
   // Compact variant - minimal inline display
-  if (variant === 'compact') {
+  if (variant === "compact") {
     return (
-      <div
-        className={cn(
-          'flex flex-col items-center justify-center p-4 text-center',
-          className
-        )}
-      >
+      <div className={cn("flex flex-col items-center justify-center p-4 text-center", className)}>
         <Icon className="h-6 w-6 text-destructive mb-2" />
-        <p className="text-sm font-medium text-destructive mb-1">
-          {displayTitle}
-        </p>
+        <p className="text-sm font-medium text-destructive mb-1">{displayTitle}</p>
         <p className="text-xs text-muted-foreground mb-3">{displayMessage}</p>
         {shouldShowRetry && (
           <Button
@@ -146,10 +131,8 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
             disabled={isRetrying}
             className="gap-2"
           >
-            <RefreshCw
-              className={cn('h-3 w-3', isRetrying && 'animate-spin')}
-            />
-            {isRetrying ? 'Retrying...' : 'Retry'}
+            <RefreshCw className={cn("h-3 w-3", isRetrying && "animate-spin")} />
+            {isRetrying ? "Retrying..." : "Retry"}
           </Button>
         )}
       </div>
@@ -157,7 +140,7 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
   }
 
   // Alert variant - uses shadcn Alert component
-  if (variant === 'alert') {
+  if (variant === "alert") {
     return (
       <Alert variant="destructive" className={className}>
         <AlertCircle className="h-4 w-4" />
@@ -165,9 +148,7 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
         <AlertDescription>
           <p>{displayMessage}</p>
           {details && (
-            <div className="mt-2 p-2 bg-background/50 rounded text-xs font-mono">
-              {details}
-            </div>
+            <div className="mt-2 p-2 bg-background/50 rounded text-xs font-mono">{details}</div>
           )}
           {shouldShowRetry && (
             <Button
@@ -177,10 +158,8 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
               size="sm"
               className="mt-3 gap-2"
             >
-              <RefreshCw
-                className={cn('h-4 w-4', isRetrying && 'animate-spin')}
-              />
-              {isRetrying ? 'Retrying...' : 'Try Again'}
+              <RefreshCw className={cn("h-4 w-4", isRetrying && "animate-spin")} />
+              {isRetrying ? "Retrying..." : "Try Again"}
             </Button>
           )}
         </AlertDescription>
@@ -210,10 +189,8 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
             size="sm"
             className="mt-4 gap-2"
           >
-            <RefreshCw
-              className={cn('h-4 w-4', isRetrying && 'animate-spin')}
-            />
-            {isRetrying ? 'Retrying...' : 'Try Again'}
+            <RefreshCw className={cn("h-4 w-4", isRetrying && "animate-spin")} />
+            {isRetrying ? "Retrying..." : "Try Again"}
           </Button>
         )}
       </div>
@@ -221,13 +198,13 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
   );
 
   // Inline variant - no card wrapper
-  if (variant === 'inline') {
-    return <div className={cn('py-8', className)}>{content}</div>;
+  if (variant === "inline") {
+    return <div className={cn("py-8", className)}>{content}</div>;
   }
 
   // Card variant (default)
   return (
-    <Card className={cn('border-destructive/50', className)}>
+    <Card className={cn("border-destructive/50", className)}>
       <CardContent className="py-8">{content}</CardContent>
     </Card>
   );
@@ -247,16 +224,12 @@ export interface InlineErrorProps {
   className?: string;
 }
 
-export const InlineError: React.FC<InlineErrorProps> = ({
-  message,
-  onRetry,
-  className,
-}) => {
+export const InlineError: React.FC<InlineErrorProps> = ({ message, onRetry, className }) => {
   return (
     <div
       className={cn(
-        'flex items-center justify-between p-3 rounded-lg',
-        'bg-destructive/10 border border-destructive/20',
+        "flex items-center justify-between p-3 rounded-lg",
+        "bg-destructive/10 border border-destructive/20",
         className
       )}
     >

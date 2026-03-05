@@ -1,13 +1,9 @@
-import React, { useState, useMemo } from 'react';
-import { Check, ChevronsUpDown } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
+import React, { useState, useMemo } from "react";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 interface ProviderSelectProps {
   value: string;
@@ -21,7 +17,7 @@ export const ProviderSelect: React.FC<ProviderSelectProps> = ({
   existingProviders,
 }) => {
   const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
 
   const providers = useMemo(() => {
     const unique = Array.from(new Set(existingProviders)).sort();
@@ -31,7 +27,7 @@ export const ProviderSelect: React.FC<ProviderSelectProps> = ({
   }, [existingProviders, search]);
 
   const showCustomOption =
-    search.trim() !== '' && !providers.some((p) => p.toLowerCase() === search.toLowerCase());
+    search.trim() !== "" && !providers.some((p) => p.toLowerCase() === search.toLowerCase());
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -42,7 +38,7 @@ export const ProviderSelect: React.FC<ProviderSelectProps> = ({
           aria-expanded={open}
           className="w-full justify-between font-normal"
         >
-          {value || 'Select provider...'}
+          {value || "Select provider..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -61,20 +57,17 @@ export const ProviderSelect: React.FC<ProviderSelectProps> = ({
               key={provider}
               type="button"
               className={cn(
-                'flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-muted transition-colors',
-                value === provider && 'bg-muted'
+                "flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-muted transition-colors",
+                value === provider && "bg-muted"
               )}
               onClick={() => {
                 onChange(provider);
                 setOpen(false);
-                setSearch('');
+                setSearch("");
               }}
             >
               <Check
-                className={cn(
-                  'h-4 w-4 shrink-0',
-                  value === provider ? 'opacity-100' : 'opacity-0'
-                )}
+                className={cn("h-4 w-4 shrink-0", value === provider ? "opacity-100" : "opacity-0")}
               />
               {provider}
             </button>
@@ -86,7 +79,7 @@ export const ProviderSelect: React.FC<ProviderSelectProps> = ({
               onClick={() => {
                 onChange(search.trim());
                 setOpen(false);
-                setSearch('');
+                setSearch("");
               }}
             >
               <Check className="h-4 w-4 shrink-0 opacity-0" />
@@ -94,9 +87,7 @@ export const ProviderSelect: React.FC<ProviderSelectProps> = ({
             </button>
           )}
           {providers.length === 0 && !showCustomOption && (
-            <p className="px-3 py-2 text-sm text-muted-foreground">
-              No providers found
-            </p>
+            <p className="px-3 py-2 text-sm text-muted-foreground">No providers found</p>
           )}
         </div>
       </PopoverContent>

@@ -5,10 +5,10 @@
  * Phase 13 - Chatbot Implementation
  */
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from "react";
 
 export interface StreamChunk {
-  type: 'intent' | 'tool_start' | 'chunk' | 'tool_result' | 'complete' | 'error';
+  type: "intent" | "tool_start" | "chunk" | "tool_result" | "complete" | "error";
   data: unknown;
 }
 
@@ -33,8 +33,8 @@ export function useChatWebSocket({ conversationId, onChunk, token }: UseChatWebS
 
   useEffect(() => {
     // Use environment variable for WebSocket URL
-    const wsBaseUrl = import.meta.env.VITE_WS_BASE_URL || 'ws://localhost:50080';
-    const wsUrl = `${wsBaseUrl}/api/v1/chat/ws/${conversationId}${token ? `?token=${token}` : ''}`;
+    const wsBaseUrl = import.meta.env.VITE_WS_BASE_URL || "ws://localhost:50080";
+    const wsUrl = `${wsBaseUrl}/api/v1/chat/ws/${conversationId}${token ? `?token=${token}` : ""}`;
 
     // Cancel flag for StrictMode cleanup
     let cancelled = false;
@@ -43,7 +43,7 @@ export function useChatWebSocket({ conversationId, onChunk, token }: UseChatWebS
 
     ws.current.onopen = () => {
       if (cancelled) return; // Ignore if connection was cancelled
-      console.log('Chat WebSocket connected');
+      console.log("Chat WebSocket connected");
       setIsConnected(true);
     };
 
@@ -54,23 +54,23 @@ export function useChatWebSocket({ conversationId, onChunk, token }: UseChatWebS
         // Use ref to get latest onChunk without dependency issues
         onChunkRef.current(chunk);
 
-        if (chunk.type === 'complete' || chunk.type === 'error') {
+        if (chunk.type === "complete" || chunk.type === "error") {
           setIsSending(false);
         }
       } catch (error) {
-        console.error('Failed to parse WebSocket message:', error);
+        console.error("Failed to parse WebSocket message:", error);
       }
     };
 
     ws.current.onerror = (error) => {
       if (cancelled) return; // Ignore if connection was cancelled
-      console.error('WebSocket error:', error);
+      console.error("WebSocket error:", error);
       setIsConnected(false);
     };
 
     ws.current.onclose = () => {
       if (cancelled) return; // Ignore if connection was cancelled
-      console.log('Chat WebSocket disconnected');
+      console.log("Chat WebSocket disconnected");
       setIsConnected(false);
     };
 

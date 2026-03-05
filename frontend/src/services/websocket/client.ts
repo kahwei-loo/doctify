@@ -5,14 +5,14 @@
  * automatic reconnection, and event handling.
  */
 
-const WS_BASE_URL = import.meta.env.VITE_WS_BASE_URL || 'ws://localhost:50080';
+const WS_BASE_URL = import.meta.env.VITE_WS_BASE_URL || "ws://localhost:50080";
 
 export type WebSocketEventType =
-  | 'document.status_change'
-  | 'document.completed'
-  | 'document.failed'
-  | 'project.updated'
-  | 'notification';
+  | "document.status_change"
+  | "document.completed"
+  | "document.failed"
+  | "project.updated"
+  | "notification";
 
 export interface WebSocketMessage {
   type: WebSocketEventType;
@@ -50,7 +50,7 @@ export class WebSocketClient {
 
     try {
       // Add authentication token to URL
-      const token = localStorage.getItem('access_token');
+      const token = localStorage.getItem("access_token");
       const urlWithAuth = token ? `${this.url}?token=${token}` : this.url;
 
       this.ws = new WebSocket(urlWithAuth);
@@ -60,7 +60,7 @@ export class WebSocketClient {
       this.ws.onerror = this.handleError.bind(this);
       this.ws.onmessage = this.handleMessage.bind(this);
     } catch (error) {
-      console.error('[WebSocket] Connection error:', error);
+      console.error("[WebSocket] Connection error:", error);
       this.scheduleReconnect();
     }
   }
@@ -94,7 +94,7 @@ export class WebSocketClient {
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(message));
     } else {
-      console.warn('[WebSocket] Cannot send message - not connected');
+      console.warn("[WebSocket] Cannot send message - not connected");
     }
   }
 
@@ -135,7 +135,7 @@ export class WebSocketClient {
    * Handle WebSocket open event
    */
   private handleOpen(): void {
-    console.log('[WebSocket] Connected');
+    console.log("[WebSocket] Connected");
     this.reconnectAttempts = 0;
 
     // Start heartbeat
@@ -146,7 +146,7 @@ export class WebSocketClient {
    * Handle WebSocket close event
    */
   private handleClose(): void {
-    console.log('[WebSocket] Disconnected');
+    console.log("[WebSocket] Disconnected");
 
     if (this.heartbeatInterval) {
       clearInterval(this.heartbeatInterval);
@@ -163,7 +163,7 @@ export class WebSocketClient {
    * Handle WebSocket error event
    */
   private handleError(event: Event): void {
-    console.error('[WebSocket] Error:', event);
+    console.error("[WebSocket] Error:", event);
   }
 
   /**
@@ -180,12 +180,12 @@ export class WebSocketClient {
           try {
             handler(message);
           } catch (error) {
-            console.error('[WebSocket] Handler error:', error);
+            console.error("[WebSocket] Handler error:", error);
           }
         });
       }
     } catch (error) {
-      console.error('[WebSocket] Failed to parse message:', error);
+      console.error("[WebSocket] Failed to parse message:", error);
     }
   }
 
@@ -194,7 +194,7 @@ export class WebSocketClient {
    */
   private scheduleReconnect(): void {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.error('[WebSocket] Max reconnection attempts reached');
+      console.error("[WebSocket] Max reconnection attempts reached");
       return;
     }
 
@@ -214,7 +214,7 @@ export class WebSocketClient {
   private startHeartbeat(): void {
     this.heartbeatInterval = setInterval(() => {
       if (this.ws?.readyState === WebSocket.OPEN) {
-        this.send({ type: 'ping' });
+        this.send({ type: "ping" });
       }
     }, this.heartbeatIntervalTime);
   }

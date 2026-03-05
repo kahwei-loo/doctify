@@ -19,8 +19,8 @@
  * setHasUnsavedChanges(false);
  */
 
-import { useEffect, useState, useCallback } from 'react';
-import { useBlocker } from 'react-router-dom';
+import { useEffect, useState, useCallback } from "react";
+import { useBlocker } from "react-router-dom";
 
 interface UseUnsavedChangesWarningOptions {
   /** Whether the warning is enabled */
@@ -42,7 +42,7 @@ interface UseUnsavedChangesWarningReturn {
   blocker: ReturnType<typeof useBlocker>;
 }
 
-const DEFAULT_MESSAGE = 'You have unsaved changes. Are you sure you want to leave?';
+const DEFAULT_MESSAGE = "You have unsaved changes. Are you sure you want to leave?";
 
 export function useUnsavedChangesWarning({
   enabled = true,
@@ -54,9 +54,7 @@ export function useUnsavedChangesWarning({
   // Block navigation when there are unsaved changes
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
-      enabled &&
-      hasUnsavedChanges &&
-      currentLocation.pathname !== nextLocation.pathname
+      enabled && hasUnsavedChanges && currentLocation.pathname !== nextLocation.pathname
   );
 
   // Handle browser close/refresh with beforeunload
@@ -72,8 +70,8 @@ export function useUnsavedChangesWarning({
       return message;
     };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [enabled, hasUnsavedChanges, message]);
 
   // Reset function
@@ -108,8 +106,8 @@ export function useBeforeUnloadWarning(
       return message;
     };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [hasUnsavedChanges, message]);
 }
 

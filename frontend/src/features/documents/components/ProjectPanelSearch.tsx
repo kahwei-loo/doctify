@@ -4,11 +4,11 @@
  * Search input for filtering projects in the project panel.
  */
 
-import React from 'react';
-import { Search, X } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import React from "react";
+import { Search, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface ProjectPanelSearchProps {
   value: string;
@@ -22,7 +22,7 @@ export const ProjectPanelSearch: React.FC<ProjectPanelSearchProps> = ({
   className,
 }) => {
   return (
-    <div className={cn('relative', className)}>
+    <div className={cn("relative", className)}>
       <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
       <Input
         type="text"
@@ -36,7 +36,7 @@ export const ProjectPanelSearch: React.FC<ProjectPanelSearchProps> = ({
           variant="ghost"
           size="icon"
           className="absolute right-0.5 top-1/2 -translate-y-1/2 h-7 w-7"
-          onClick={() => onChange('')}
+          onClick={() => onChange("")}
         >
           <X className="h-3 w-3" />
           <span className="sr-only">Clear search</span>

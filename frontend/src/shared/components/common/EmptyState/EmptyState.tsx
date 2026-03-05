@@ -23,16 +23,16 @@
  * />
  */
 
-import React from 'react';
-import type { LucideIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
+import React from "react";
+import type { LucideIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 export interface EmptyStateAction {
   label: string;
   onClick: () => void;
-  variant?: 'default' | 'outline' | 'secondary' | 'ghost';
+  variant?: "default" | "outline" | "secondary" | "ghost";
   icon?: LucideIcon;
 }
 
@@ -50,30 +50,28 @@ export interface EmptyStateProps {
   /** Optional tip text displayed below the action */
   tip?: string;
   /** Visual variant of the empty state */
-  variant?: 'card' | 'inline' | 'full-page';
+  variant?: "card" | "inline" | "full-page";
   /** Additional class names */
   className?: string;
   /** Icon container class names for custom styling */
   iconClassName?: string;
   /** Size of the icon */
-  iconSize?: 'sm' | 'md' | 'lg';
+  iconSize?: "sm" | "md" | "lg";
 }
 
 const iconSizes = {
-  sm: 'h-6 w-6',
-  md: 'h-8 w-8',
-  lg: 'h-12 w-12',
+  sm: "h-6 w-6",
+  md: "h-8 w-8",
+  lg: "h-12 w-12",
 };
 
 const iconContainerSizes = {
-  sm: 'p-2',
-  md: 'p-3',
-  lg: 'p-4',
+  sm: "p-2",
+  md: "p-3",
+  lg: "p-4",
 };
 
-const EmptyStateContent: React.FC<
-  Omit<EmptyStateProps, 'variant' | 'className'>
-> = ({
+const EmptyStateContent: React.FC<Omit<EmptyStateProps, "variant" | "className">> = ({
   icon: Icon,
   title,
   description,
@@ -81,31 +79,21 @@ const EmptyStateContent: React.FC<
   secondaryAction,
   tip,
   iconClassName,
-  iconSize = 'lg',
+  iconSize = "lg",
 }) => {
   return (
     <>
       <div
-        className={cn(
-          'rounded-full bg-muted mb-4',
-          iconContainerSizes[iconSize],
-          iconClassName
-        )}
+        className={cn("rounded-full bg-muted mb-4", iconContainerSizes[iconSize], iconClassName)}
       >
-        <Icon className={cn('text-muted-foreground', iconSizes[iconSize])} />
+        <Icon className={cn("text-muted-foreground", iconSizes[iconSize])} />
       </div>
       <h3 className="text-lg font-semibold mb-2">{title}</h3>
-      <p className="text-sm text-muted-foreground max-w-md mb-6 text-center">
-        {description}
-      </p>
+      <p className="text-sm text-muted-foreground max-w-md mb-6 text-center">{description}</p>
       {(action || secondaryAction) && (
         <div className="flex items-center gap-3">
           {action && (
-            <Button
-              onClick={action.onClick}
-              variant={action.variant || 'default'}
-              size="lg"
-            >
+            <Button onClick={action.onClick} variant={action.variant || "default"} size="lg">
               {action.icon && <action.icon className="mr-2 h-4 w-4" />}
               {action.label}
             </Button>
@@ -113,35 +101,30 @@ const EmptyStateContent: React.FC<
           {secondaryAction && (
             <Button
               onClick={secondaryAction.onClick}
-              variant={secondaryAction.variant || 'outline'}
+              variant={secondaryAction.variant || "outline"}
               size="lg"
             >
-              {secondaryAction.icon && (
-                <secondaryAction.icon className="mr-2 h-4 w-4" />
-              )}
+              {secondaryAction.icon && <secondaryAction.icon className="mr-2 h-4 w-4" />}
               {secondaryAction.label}
             </Button>
           )}
         </div>
       )}
-      {tip && (
-        <p className="text-xs text-muted-foreground mt-4 text-center">{tip}</p>
-      )}
+      {tip && <p className="text-xs text-muted-foreground mt-4 text-center">{tip}</p>}
     </>
   );
 };
 
 export const EmptyState: React.FC<EmptyStateProps> = ({
-  variant = 'card',
+  variant = "card",
   className,
   ...props
 }) => {
-  const contentClassName =
-    'flex flex-col items-center justify-center py-12 px-6 text-center';
+  const contentClassName = "flex flex-col items-center justify-center py-12 px-6 text-center";
 
-  if (variant === 'card') {
+  if (variant === "card") {
     return (
-      <Card className={cn('border-dashed', className)}>
+      <Card className={cn("border-dashed", className)}>
         <CardContent className={contentClassName}>
           <EmptyStateContent {...props} />
         </CardContent>
@@ -149,9 +132,9 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
     );
   }
 
-  if (variant === 'inline') {
+  if (variant === "inline") {
     return (
-      <div className={cn(contentClassName, 'py-8', className)}>
+      <div className={cn(contentClassName, "py-8", className)}>
         <EmptyStateContent {...props} iconSize="md" />
       </div>
     );
@@ -159,9 +142,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 
   // full-page variant
   return (
-    <div
-      className={cn(contentClassName, 'min-h-[50vh]', className)}
-    >
+    <div className={cn(contentClassName, "min-h-[50vh]", className)}>
       <EmptyStateContent {...props} />
     </div>
   );

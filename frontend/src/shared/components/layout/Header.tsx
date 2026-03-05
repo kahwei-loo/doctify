@@ -1,37 +1,23 @@
-import React, { useState } from 'react';
-import {
-  User,
-  Settings,
-  LogOut,
-  Bell,
-  Sun,
-  Moon,
-  Globe,
-  Search,
-} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
-import { useAppDispatch, useAppSelector } from '@/store';
-import { logout } from '@/store/slices/authSlice';
-import { selectUser } from '@/store/selectors/authSelectors';
-import { selectIsDemoMode } from '@/store/slices/demoSlice';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Switch } from '@/components/ui/switch';
+import React, { useState } from "react";
+import { User, Settings, LogOut, Bell, Sun, Moon, Globe, Search } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { useAppDispatch, useAppSelector } from "@/store";
+import { logout } from "@/store/slices/authSlice";
+import { selectUser } from "@/store/selectors/authSelectors";
+import { selectIsDemoMode } from "@/store/slices/demoSlice";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 interface HeaderProps {
   sidebarWidth: number;
@@ -45,45 +31,43 @@ const Header: React.FC<HeaderProps> = ({ sidebarWidth, topOffset = 0 }) => {
   const isDemoMode = useAppSelector(selectIsDemoMode);
 
   const [darkMode, setDarkMode] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return window.localStorage.getItem('theme') === 'dark';
+    if (typeof window !== "undefined") {
+      return window.localStorage.getItem("theme") === "dark";
     }
     return false;
   });
 
-  const [language, setLanguage] = useState<'en' | 'zh'>(() => {
-    if (typeof window !== 'undefined') {
-      return (window.localStorage.getItem('language') as 'en' | 'zh') || 'en';
+  const [language, setLanguage] = useState<"en" | "zh">(() => {
+    if (typeof window !== "undefined") {
+      return (window.localStorage.getItem("language") as "en" | "zh") || "en";
     }
-    return 'en';
+    return "en";
   });
 
   const handleLogout = async () => {
     try {
       dispatch(logout());
-      toast.success('Logged out successfully');
-      navigate('/login');
+      toast.success("Logged out successfully");
+      navigate("/login");
     } catch {
-      toast.error('Logout failed');
+      toast.error("Logout failed");
     }
   };
 
-  const handleLanguageChange = (lang: 'en' | 'zh') => {
+  const handleLanguageChange = (lang: "en" | "zh") => {
     setLanguage(lang);
-    window.localStorage.setItem('language', lang);
-    toast.success(
-      lang === 'en' ? 'Language set to English' : 'Language set to Chinese'
-    );
+    window.localStorage.setItem("language", lang);
+    toast.success(lang === "en" ? "Language set to English" : "Language set to Chinese");
   };
 
   const handleThemeChange = (checked: boolean) => {
     setDarkMode(checked);
-    document.documentElement.classList.toggle('dark', checked);
-    window.localStorage.setItem('theme', checked ? 'dark' : 'light');
+    document.documentElement.classList.toggle("dark", checked);
+    window.localStorage.setItem("theme", checked ? "dark" : "light");
   };
 
   React.useEffect(() => {
-    document.documentElement.classList.toggle('dark', darkMode);
+    document.documentElement.classList.toggle("dark", darkMode);
   }, [darkMode]);
 
   const notificationCount = 3;
@@ -93,10 +77,10 @@ const Header: React.FC<HeaderProps> = ({ sidebarWidth, topOffset = 0 }) => {
       <header
         role="banner"
         className={cn(
-          'fixed right-0 z-30',
-          'h-16 flex items-center justify-between px-6',
-          'bg-background border-b border-border',
-          'transition-all duration-300 ease-in-out'
+          "fixed right-0 z-30",
+          "h-16 flex items-center justify-between px-6",
+          "bg-background border-b border-border",
+          "transition-all duration-300 ease-in-out"
         )}
         style={{
           top: topOffset,
@@ -107,7 +91,10 @@ const Header: React.FC<HeaderProps> = ({ sidebarWidth, topOffset = 0 }) => {
         {/* Left side - Search */}
         <div className="flex items-center gap-4" role="search">
           <div className="relative group">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" aria-hidden="true" />
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors"
+              aria-hidden="true"
+            />
             <Input
               type="search"
               placeholder="Search documents..."
@@ -124,21 +111,24 @@ const Header: React.FC<HeaderProps> = ({ sidebarWidth, topOffset = 0 }) => {
             <Tooltip>
               <TooltipTrigger asChild>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="gap-1.5" aria-label={`Language: ${language === 'en' ? 'English' : 'Chinese'}`}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="gap-1.5"
+                    aria-label={`Language: ${language === "en" ? "English" : "Chinese"}`}
+                  >
                     <Globe className="h-4 w-4" aria-hidden="true" />
-                    <span className="text-sm font-medium">
-                      {language.toUpperCase()}
-                    </span>
+                    <span className="text-sm font-medium">{language.toUpperCase()}</span>
                   </Button>
                 </DropdownMenuTrigger>
               </TooltipTrigger>
               <TooltipContent>Language</TooltipContent>
             </Tooltip>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => handleLanguageChange('en')}>
+              <DropdownMenuItem onClick={() => handleLanguageChange("en")}>
                 English
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleLanguageChange('zh')}>
+              <DropdownMenuItem onClick={() => handleLanguageChange("zh")}>
                 Chinese
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -149,10 +139,18 @@ const Header: React.FC<HeaderProps> = ({ sidebarWidth, topOffset = 0 }) => {
             <Tooltip>
               <TooltipTrigger asChild>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="relative" aria-label={`Notifications${notificationCount > 0 ? `, ${notificationCount} unread` : ''}`}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="relative"
+                    aria-label={`Notifications${notificationCount > 0 ? `, ${notificationCount} unread` : ""}`}
+                  >
                     <Bell className="h-4 w-4" aria-hidden="true" />
                     {notificationCount > 0 && (
-                      <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-destructive text-destructive-foreground text-[10px] font-medium flex items-center justify-center" aria-hidden="true">
+                      <span
+                        className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-destructive text-destructive-foreground text-[10px] font-medium flex items-center justify-center"
+                        aria-hidden="true"
+                      >
                         {notificationCount}
                       </span>
                     )}
@@ -162,30 +160,24 @@ const Header: React.FC<HeaderProps> = ({ sidebarWidth, topOffset = 0 }) => {
               <TooltipContent>Notifications</TooltipContent>
             </Tooltip>
             <DropdownMenuContent align="end" className="w-72">
-              <div className="px-2 py-1.5 text-sm font-semibold">
-                Notifications
-              </div>
+              <div className="px-2 py-1.5 text-sm font-semibold">Notifications</div>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
                 <div className="py-1">
                   <div className="text-sm">New document processed</div>
-                  <div className="text-xs text-muted-foreground">
-                    2 minutes ago
-                  </div>
+                  <div className="text-xs text-muted-foreground">2 minutes ago</div>
                 </div>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <div className="py-1">
                   <div className="text-sm">Export completed</div>
-                  <div className="text-xs text-muted-foreground">
-                    5 minutes ago
-                  </div>
+                  <div className="text-xs text-muted-foreground">5 minutes ago</div>
                 </div>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 className="text-primary cursor-pointer"
-                onClick={() => navigate('/notifications')}
+                onClick={() => navigate("/notifications")}
               >
                 View all notifications
               </DropdownMenuItem>
@@ -200,14 +192,12 @@ const Header: React.FC<HeaderProps> = ({ sidebarWidth, topOffset = 0 }) => {
                 <Switch
                   checked={darkMode}
                   onCheckedChange={handleThemeChange}
-                  aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+                  aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
                 />
                 <Moon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
               </div>
             </TooltipTrigger>
-            <TooltipContent>
-              {darkMode ? 'Light mode' : 'Dark mode'}
-            </TooltipContent>
+            <TooltipContent>{darkMode ? "Light mode" : "Dark mode"}</TooltipContent>
           </Tooltip>
 
           {/* Divider */}
@@ -216,39 +206,44 @@ const Header: React.FC<HeaderProps> = ({ sidebarWidth, topOffset = 0 }) => {
           {/* User menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="gap-2 px-2 relative" aria-label={`User menu for ${user?.full_name || 'User'}`}>
+              <Button
+                variant="ghost"
+                className="gap-2 px-2 relative"
+                aria-label={`User menu for ${user?.full_name || "User"}`}
+              >
                 {isDemoMode && (
-                  <span className="absolute -top-1 -right-1 px-1.5 py-0.5 text-[10px] font-bold bg-yellow-400 text-gray-900 rounded" aria-label="Demo mode active">
+                  <span
+                    className="absolute -top-1 -right-1 px-1.5 py-0.5 text-[10px] font-bold bg-yellow-400 text-gray-900 rounded"
+                    aria-label="Demo mode active"
+                  >
                     DEMO
                   </span>
                 )}
-                <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground" aria-hidden="true">
+                <div
+                  className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground"
+                  aria-hidden="true"
+                >
                   <User className="h-4 w-4" />
                 </div>
                 <div className="hidden sm:block text-left">
-                  <div className="text-sm font-medium">
-                    {user?.full_name || 'User'}
-                  </div>
+                  <div className="text-sm font-medium">{user?.full_name || "User"}</div>
                   <div className="text-xs text-muted-foreground">
-                    {user?.email || 'user@doctify.io'}
+                    {user?.email || "user@doctify.io"}
                   </div>
                 </div>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem onClick={() => navigate('/settings')}>
+              <DropdownMenuItem onClick={() => navigate("/settings")}>
                 <User className="h-4 w-4 mr-2" aria-hidden="true" />
                 Profile
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/settings')}>
+              <DropdownMenuItem onClick={() => navigate("/settings")}>
                 <Settings className="h-4 w-4 mr-2" aria-hidden="true" />
                 Settings
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={handleLogout}
-                className="text-destructive"
-              >
+              <DropdownMenuItem onClick={handleLogout} className="text-destructive">
                 <LogOut className="h-4 w-4 mr-2" aria-hidden="true" />
                 Logout
               </DropdownMenuItem>

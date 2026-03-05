@@ -5,7 +5,7 @@
  * Phase 13 - Chatbot Implementation
  */
 
-import { api } from './apiSlice';
+import { api } from "./apiSlice";
 
 export interface ChatConversation {
   id: string;
@@ -16,7 +16,7 @@ export interface ChatConversation {
 
 export interface ChatMessage {
   id: string;
-  role: 'user' | 'assistant' | 'system';
+  role: "user" | "assistant" | "system";
   content: string;
   tool_used?: string;
   created_at: string;
@@ -30,26 +30,29 @@ export const chatApi = api.injectEndpoints({
   endpoints: (builder) => ({
     createConversation: builder.mutation<ChatConversation, CreateConversationRequest>({
       query: (body) => ({
-        url: '/chat/conversations',
-        method: 'POST',
+        url: "/chat/conversations",
+        method: "POST",
         body,
       }),
-      invalidatesTags: ['ChatConversations'],
+      invalidatesTags: ["ChatConversations"],
     }),
 
     getConversations: builder.query<ChatConversation[], { limit?: number }>({
       query: ({ limit = 50 }) => ({
         url: `/chat/conversations?limit=${limit}`,
       }),
-      providesTags: ['ChatConversations'],
+      providesTags: ["ChatConversations"],
     }),
 
-    getConversationMessages: builder.query<ChatMessage[], { conversationId: string; limit?: number }>({
+    getConversationMessages: builder.query<
+      ChatMessage[],
+      { conversationId: string; limit?: number }
+    >({
       query: ({ conversationId, limit = 100 }) => ({
         url: `/chat/conversations/${conversationId}/messages?limit=${limit}`,
       }),
-      providesTags: (result, error, { conversationId }) => [
-        { type: 'ChatMessages', id: conversationId }
+      providesTags: (_result, _error, { conversationId }) => [
+        { type: "ChatMessages", id: conversationId },
       ],
     }),
   }),

@@ -6,15 +6,11 @@
  * - /knowledge-base/{id} (with kbId) → KBSplitLayout (Sources + Chat side-by-side)
  */
 
-import React, { useState, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
-import {
-  KBListPanel,
-  OverallViewPage,
-  KBSplitLayout,
-} from '@/features/knowledge-base/components';
-import { useAppSelector } from '@/store';
-import { selectIsDemoMode } from '@/store/slices/demoSlice';
+import React, { useState, useCallback } from "react";
+import { useParams } from "react-router-dom";
+import { KBListPanel, OverallViewPage, KBSplitLayout } from "@/features/knowledge-base/components";
+import { useAppSelector } from "@/store";
+import { selectIsDemoMode } from "@/store/slices/demoSlice";
 
 const HEADER_HEIGHT = 64;
 const DEMO_BANNER_HEIGHT = 48;
@@ -25,7 +21,7 @@ const KnowledgeBasePage: React.FC = () => {
 
   // UI State
   const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
-  const [selectedKbId, setSelectedKbId] = useState<string | null>(kbId || null);
+  const [_selectedKbId, setSelectedKbId] = useState<string | null>(kbId || null);
 
   // Handler for KB selection from panel
   const handleSelectKb = useCallback((selectedId: string | null) => {
@@ -47,7 +43,9 @@ const KnowledgeBasePage: React.FC = () => {
   return (
     <div
       className="flex -m-6 overflow-hidden"
-      style={{ height: `calc(100vh - ${isDemoMode ? HEADER_HEIGHT + DEMO_BANNER_HEIGHT : HEADER_HEIGHT}px)` }}
+      style={{
+        height: `calc(100vh - ${isDemoMode ? HEADER_HEIGHT + DEMO_BANNER_HEIGHT : HEADER_HEIGHT}px)`,
+      }}
     >
       {/* L2 Panel: Knowledge Base List (always visible) */}
       <KBListPanel

@@ -5,21 +5,21 @@
  * Handles saving extraction configuration to the API.
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, Save, AlertCircle } from 'lucide-react';
-import { useUpdateExtractionConfigMutation } from '@/store/api/projectsApi';
-import { FieldEditor } from './FieldEditor';
-import { ProcessingSettings } from './ProcessingSettings';
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Loader2, Save, AlertCircle } from "lucide-react";
+import { useUpdateExtractionConfigMutation } from "@/store/api/projectsApi";
+import { FieldEditor } from "./FieldEditor";
+import { ProcessingSettings } from "./ProcessingSettings";
 import type {
   ExtractionField,
   ExtractionConfig,
   AIModel,
   OCRLanguage,
   OutputFormat,
-} from '../types';
-import { DEFAULT_EXTRACTION_CONFIG } from '../types';
+} from "../types";
+import { DEFAULT_EXTRACTION_CONFIG } from "../types";
 
 interface ProjectSettingsTabProps {
   projectId: string;
@@ -102,7 +102,7 @@ export const ProjectSettingsTab: React.FC<ProjectSettingsTabProps> = ({
       }).unwrap();
       setHasChanges(false);
     } catch (err) {
-      console.error('Failed to save extraction config:', err);
+      console.error("Failed to save extraction config:", err);
     }
   };
 
@@ -124,10 +124,12 @@ export const ProjectSettingsTab: React.FC<ProjectSettingsTabProps> = ({
         <div className="flex items-center gap-2 rounded-lg border border-destructive bg-destructive/10 p-4 text-destructive">
           <AlertCircle className="h-5 w-5" />
           <span>
-            Failed to save settings.{' '}
-            {error && 'data' in error
-              ? String((error as { data?: { message?: string } }).data?.message || 'Please try again.')
-              : 'Please try again.'}
+            Failed to save settings.{" "}
+            {error && "data" in error
+              ? String(
+                  (error as { data?: { message?: string } }).data?.message || "Please try again."
+                )
+              : "Please try again."}
           </span>
         </div>
       )}
@@ -159,17 +161,11 @@ export const ProjectSettingsTab: React.FC<ProjectSettingsTabProps> = ({
       <div className="flex items-center justify-between border-t pt-4">
         <div>
           {hasChanges && (
-            <span className="text-sm text-muted-foreground">
-              You have unsaved changes
-            </span>
+            <span className="text-sm text-muted-foreground">You have unsaved changes</span>
           )}
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={handleReset}
-            disabled={!hasChanges || isSaving}
-          >
+          <Button variant="outline" onClick={handleReset} disabled={!hasChanges || isSaving}>
             Reset
           </Button>
           <Button onClick={handleSave} disabled={!hasChanges || isSaving}>

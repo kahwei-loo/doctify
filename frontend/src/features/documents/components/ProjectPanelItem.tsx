@@ -8,18 +8,18 @@
  * - Settings dropdown menu
  */
 
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Settings, MoreVertical, FileText } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { Settings, MoreVertical } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { cn } from '@/lib/utils';
-import { ProjectAvatar } from '@/components/ui/project-avatar';
+} from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
+import { ProjectAvatar } from "@/components/ui/project-avatar";
 
 interface ProjectPanelItemProps {
   projectId: string;
@@ -56,40 +56,26 @@ export const ProjectPanelItem: React.FC<ProjectPanelItemProps> = ({
     <div
       onClick={() => onSelect(projectId)}
       className={cn(
-        'group flex items-center gap-3 px-3 py-2.5 rounded-2xl cursor-pointer transition-all',
-        isSelected
-          ? 'bg-primary/10 text-primary shadow-sm'
-          : 'hover:bg-muted/50 text-foreground'
+        "group flex items-center gap-3 px-3 py-2.5 rounded-2xl cursor-pointer transition-all",
+        isSelected ? "bg-primary/10 text-primary shadow-sm" : "hover:bg-muted/50 text-foreground"
       )}
     >
       {/* Project Avatar */}
-      <ProjectAvatar
-        name={name}
-        size="md"
-        selected={isSelected}
-        className="flex-shrink-0"
-      />
+      <ProjectAvatar name={name} size="md" selected={isSelected} className="flex-shrink-0" />
 
       {/* Project Info - Two Line Layout */}
       <div className="flex-1 min-w-0">
-        <p className={cn(
-          'text-sm font-semibold truncate',
-          isSelected && 'text-primary'
-        )}>
-          {name}
-        </p>
+        <p className={cn("text-sm font-semibold truncate", isSelected && "text-primary")}>{name}</p>
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           {documentCount !== undefined && (
             <span className="tabular-nums">
-              {documentCount} {documentCount === 1 ? 'document' : 'documents'}
+              {documentCount} {documentCount === 1 ? "document" : "documents"}
             </span>
           )}
           {description && documentCount !== undefined && (
             <span className="text-muted-foreground/50">•</span>
           )}
-          {description && (
-            <span className="truncate">{description}</span>
-          )}
+          {description && <span className="truncate">{description}</span>}
         </div>
       </div>
 
@@ -100,8 +86,8 @@ export const ProjectPanelItem: React.FC<ProjectPanelItemProps> = ({
             variant="ghost"
             size="icon"
             className={cn(
-              'h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity',
-              isSelected && 'opacity-100'
+              "h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity",
+              isSelected && "opacity-100"
             )}
           >
             <MoreVertical className="h-4 w-4" />

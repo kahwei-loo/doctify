@@ -8,13 +8,11 @@
  * Features real-time updates via WebSocket connection.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Bot,
   MessageSquare,
   ArrowLeft,
-  Wifi,
-  WifiOff,
   Sparkles,
   Settings,
   Code,
@@ -22,24 +20,20 @@ import {
   Circle,
   Loader2,
   RefreshCw,
-} from 'lucide-react';
-import {
-  ResizablePanelGroup,
-  ResizablePanel,
-  ResizableHandle,
-} from '@/components/ui/resizable';
-import { useGetConversationsQuery } from '@/store/api/conversationsApi';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { ConversationsList } from './ConversationsList';
-import { ConversationChat } from './ConversationChat';
-import { NoConversationsState, NoMessagesState } from './EmptyStates';
-import { useAssistantWebSocket, type WebSocketEventUnion } from '../hooks';
-import { WidgetEmbedDialog } from './WidgetEmbedDialog';
-import { TestAssistantDialog } from './TestAssistantDialog';
-import { AssistantAnalyticsDialog } from './AssistantAnalyticsDialog';
-import type { Assistant, Conversation } from '../types';
-import { cn } from '@/lib/utils';
+} from "lucide-react";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
+import { useGetConversationsQuery } from "@/store/api/conversationsApi";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ConversationsList } from "./ConversationsList";
+import { ConversationChat } from "./ConversationChat";
+import { NoMessagesState } from "./EmptyStates";
+import { useAssistantWebSocket, type WebSocketEventUnion } from "../hooks";
+import { WidgetEmbedDialog } from "./WidgetEmbedDialog";
+import { TestAssistantDialog } from "./TestAssistantDialog";
+import { AssistantAnalyticsDialog } from "./AssistantAnalyticsDialog";
+import type { Assistant } from "../types";
+import { cn } from "@/lib/utils";
 
 interface AssistantHeaderProps {
   assistant: Assistant;
@@ -70,11 +64,11 @@ const AssistantHeader: React.FC<AssistantHeaderProps> = ({
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <Circle
               className={cn(
-                'h-2 w-2 fill-current',
-                assistant.is_active ? 'text-green-500' : 'text-gray-400'
+                "h-2 w-2 fill-current",
+                assistant.is_active ? "text-green-500" : "text-gray-400"
               )}
             />
-            <span>{assistant.is_active ? 'Active' : 'Inactive'}</span>
+            <span>{assistant.is_active ? "Active" : "Inactive"}</span>
           </div>
         </div>
 
@@ -92,39 +86,19 @@ const AssistantHeader: React.FC<AssistantHeaderProps> = ({
           </div>
 
           {/* Action Buttons */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onTest}
-            className="hidden sm:flex"
-          >
+          <Button variant="outline" size="sm" onClick={onTest} className="hidden sm:flex">
             <Sparkles className="h-4 w-4 mr-1" />
             Test
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onEdit}
-            className="hidden md:flex"
-          >
+          <Button variant="outline" size="sm" onClick={onEdit} className="hidden md:flex">
             <Settings className="h-4 w-4 mr-1" />
             Edit
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onGetWidget}
-            className="hidden lg:flex"
-          >
+          <Button variant="outline" size="sm" onClick={onGetWidget} className="hidden lg:flex">
             <Code className="h-4 w-4 mr-1" />
             Widget
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onViewAnalytics}
-            className="hidden xl:flex"
-          >
+          <Button variant="outline" size="sm" onClick={onViewAnalytics} className="hidden xl:flex">
             <BarChart3 className="h-4 w-4 mr-1" />
             Analytics
           </Button>
@@ -153,19 +127,21 @@ export const ConversationsInbox: React.FC<ConversationsInboxProps> = ({
   const [analyticsDialogOpen, setAnalyticsDialogOpen] = useState(false);
 
   // Fetch conversations for the selected assistant (poll every 10s for real-time updates)
-  const { data: response, refetch, isLoading, isError } = useGetConversationsQuery(
+  const {
+    data: response,
+    refetch,
+    isLoading,
+    isError,
+  } = useGetConversationsQuery(
     { filters: { assistant_id: assistant.assistant_id } },
-    { pollingInterval: 10000 },
+    { pollingInterval: 10000 }
   );
   const conversations = response?.data || [];
 
   // WebSocket event handler - refetch conversations on updates
   const handleWebSocketEvent = useCallback(
     (event: WebSocketEventUnion) => {
-      if (
-        event.type === 'conversation.created' ||
-        event.type === 'conversation.updated'
-      ) {
+      if (event.type === "conversation.created" || event.type === "conversation.updated") {
         // Refetch conversation list to get latest data
         refetch();
       }
@@ -174,7 +150,7 @@ export const ConversationsInbox: React.FC<ConversationsInboxProps> = ({
   );
 
   // Connect to WebSocket for real-time assistant updates
-  const { isConnected: wsConnected } = useAssistantWebSocket({
+  const { isConnected: _wsConnected } = useAssistantWebSocket({
     assistantId: assistant.assistant_id,
     onEvent: handleWebSocketEvent,
     enabled: true,
@@ -191,8 +167,8 @@ export const ConversationsInbox: React.FC<ConversationsInboxProps> = ({
       setIsMobileView(window.innerWidth < 768);
     };
     checkMobileView();
-    window.addEventListener('resize', checkMobileView);
-    return () => window.removeEventListener('resize', checkMobileView);
+    window.addEventListener("resize", checkMobileView);
+    return () => window.removeEventListener("resize", checkMobileView);
   }, []);
 
   // Handle conversation selection
@@ -237,7 +213,7 @@ export const ConversationsInbox: React.FC<ConversationsInboxProps> = ({
   // Loading state
   if (isLoading && conversations.length === 0) {
     return (
-      <div className={cn('flex-1 flex flex-col h-full', className)}>
+      <div className={cn("flex-1 flex flex-col h-full", className)}>
         <AssistantHeader
           assistant={assistant}
           conversationsCount={0}
@@ -259,7 +235,7 @@ export const ConversationsInbox: React.FC<ConversationsInboxProps> = ({
   // Error state
   if (isError && conversations.length === 0) {
     return (
-      <div className={cn('flex-1 flex flex-col h-full', className)}>
+      <div className={cn("flex-1 flex flex-col h-full", className)}>
         <AssistantHeader
           assistant={assistant}
           conversationsCount={0}
@@ -298,7 +274,7 @@ export const ConversationsInbox: React.FC<ConversationsInboxProps> = ({
   // Empty state: No conversations at all (only when query succeeded)
   if (!isLoading && !isError && conversations.length === 0) {
     return (
-      <div className={cn('flex-1 flex flex-col h-full', className)}>
+      <div className={cn("flex-1 flex flex-col h-full", className)}>
         {/* Assistant Header */}
         <AssistantHeader
           assistant={assistant}
@@ -317,16 +293,13 @@ export const ConversationsInbox: React.FC<ConversationsInboxProps> = ({
             </div>
             <h3 className="text-lg font-semibold mb-2">No Conversations Yet</h3>
             <p className="text-sm text-muted-foreground mb-6">
-              {assistant.name} hasn't received any conversations yet.
-              Get started by testing the assistant or embedding it on your website.
+              {assistant.name} hasn't received any conversations yet. Get started by testing the
+              assistant or embedding it on your website.
             </p>
 
             {/* Action Cards */}
             <div className="grid gap-3">
-              <Card
-                className="cursor-pointer hover:shadow-md transition-all"
-                onClick={handleTest}
-              >
+              <Card className="cursor-pointer hover:shadow-md transition-all" onClick={handleTest}>
                 <CardContent className="flex items-center gap-3 p-4">
                   <div className="rounded-full bg-primary/10 p-2">
                     <Sparkles className="h-5 w-5 text-primary" />
@@ -388,7 +361,7 @@ export const ConversationsInbox: React.FC<ConversationsInboxProps> = ({
   // Mobile Layout: Stack views with navigation
   if (isMobileView) {
     return (
-      <div className={cn('flex-1 flex flex-col h-full', className)}>
+      <div className={cn("flex-1 flex flex-col h-full", className)}>
         {/* Assistant Header */}
         <AssistantHeader
           assistant={assistant}
@@ -402,20 +375,12 @@ export const ConversationsInbox: React.FC<ConversationsInboxProps> = ({
         {showChatOnMobile && selectedConversation ? (
           <div className="flex-1 flex flex-col">
             <div className="p-2 border-b bg-background">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleBackToList}
-                className="gap-2"
-              >
+              <Button variant="ghost" size="sm" onClick={handleBackToList} className="gap-2">
                 <ArrowLeft className="h-4 w-4" />
                 Back to conversations
               </Button>
             </div>
-            <ConversationChat
-              conversation={selectedConversation}
-              className="flex-1"
-            />
+            <ConversationChat conversation={selectedConversation} className="flex-1" />
           </div>
         ) : (
           <ConversationsList
@@ -454,7 +419,7 @@ export const ConversationsInbox: React.FC<ConversationsInboxProps> = ({
 
   // Desktop Layout: Resizable split panels
   return (
-    <div className={cn('flex-1 flex flex-col h-full', className)}>
+    <div className={cn("flex-1 flex flex-col h-full", className)}>
       {/* Assistant Header */}
       <AssistantHeader
         assistant={assistant}
@@ -468,12 +433,7 @@ export const ConversationsInbox: React.FC<ConversationsInboxProps> = ({
       {/* Conversations Split View */}
       <ResizablePanelGroup direction="horizontal" className="flex-1">
         {/* Left Panel: Conversations List - prioritize list visibility */}
-        <ResizablePanel
-          defaultSize={50}
-          minSize={35}
-          maxSize={85}
-          className="border-r"
-        >
+        <ResizablePanel defaultSize={50} minSize={35} maxSize={85} className="border-r">
           <ConversationsList
             assistantId={assistant.assistant_id}
             assistantName={assistant.name}

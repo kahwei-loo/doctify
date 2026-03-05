@@ -5,9 +5,8 @@
  * listing, and export operations.
  */
 
-import { apiClient } from '@/services/api/client';
+import { apiClient } from "@/services/api/client";
 import type {
-  Document,
   DocumentListResponse,
   DocumentUploadResponse,
   DocumentDetail,
@@ -15,9 +14,9 @@ import type {
   DocumentFilters,
   QualityValidation,
   ExportFormat,
-} from '../types';
+} from "../types";
 
-const DOC_BASE_URL = '/documents';
+const DOC_BASE_URL = "/documents";
 
 // =============================================================================
 // Document Upload API
@@ -29,7 +28,7 @@ export const documentUploadApi = {
    */
   upload: async (file: File, projectId: string): Promise<DocumentUploadResponse> => {
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append("file", file);
 
     const response = await apiClient.post<DocumentUploadResponse>(
       `${DOC_BASE_URL}/upload`,
@@ -37,7 +36,7 @@ export const documentUploadApi = {
       {
         params: { project_id: projectId },
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
       }
     );
@@ -149,7 +148,7 @@ export const documentExportApi = {
    */
   export: async (
     documentId: string,
-    format: ExportFormat = 'json',
+    format: ExportFormat = "json",
     includeMetadata = true
   ): Promise<Blob> => {
     const response = await apiClient.get(`${DOC_BASE_URL}/${documentId}/export`, {
@@ -157,7 +156,7 @@ export const documentExportApi = {
         export_format: format,
         include_metadata: includeMetadata,
       },
-      responseType: 'blob',
+      responseType: "blob",
     });
 
     return response.data;
@@ -168,14 +167,14 @@ export const documentExportApi = {
    */
   download: async (
     documentId: string,
-    format: ExportFormat = 'json',
+    format: ExportFormat = "json",
     includeMetadata = true
   ): Promise<void> => {
     const blob = await documentExportApi.export(documentId, format, includeMetadata);
 
     // Create download link
     const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
     link.download = `document_${documentId}.${format}`;
     document.body.appendChild(link);
@@ -195,7 +194,7 @@ export const documentFileApi = {
    */
   getPreviewBlob: async (documentId: string): Promise<Blob> => {
     const response = await apiClient.get(`${DOC_BASE_URL}/${documentId}/file/preview`, {
-      responseType: 'blob',
+      responseType: "blob",
     });
     return response.data;
   },
@@ -205,12 +204,12 @@ export const documentFileApi = {
    */
   downloadFile: async (documentId: string, filename: string): Promise<void> => {
     const response = await apiClient.get(`${DOC_BASE_URL}/${documentId}/file/download`, {
-      responseType: 'blob',
+      responseType: "blob",
     });
 
     const blob = response.data;
     const url = window.URL.createObjectURL(blob);
-    const link = window.document.createElement('a');
+    const link = window.document.createElement("a");
     link.href = url;
     link.download = filename;
     window.document.body.appendChild(link);

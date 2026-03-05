@@ -5,9 +5,13 @@
  * and password reset workflows.
  */
 
-import { useState, useCallback } from 'react';
-import { passwordApi } from '../services/api';
-import type { PasswordChangeData, PasswordResetRequestData, PasswordResetConfirmData } from '../types';
+import { useState, useCallback } from "react";
+import { passwordApi } from "../services/api";
+import type {
+  PasswordChangeData,
+  PasswordResetRequestData,
+  PasswordResetConfirmData,
+} from "../types";
 
 interface UsePasswordReturn {
   isLoading: boolean;
@@ -34,9 +38,9 @@ export const usePassword = (): UsePasswordReturn => {
 
     try {
       const response = await passwordApi.changePassword(data);
-      setSuccess(response.message || 'Password changed successfully');
+      setSuccess(response.message || "Password changed successfully");
     } catch (err: any) {
-      const errorMessage = err.response?.data?.detail || 'Failed to change password';
+      const errorMessage = err.response?.data?.detail || "Failed to change password";
       setError(errorMessage);
       throw err;
     } finally {
@@ -54,9 +58,9 @@ export const usePassword = (): UsePasswordReturn => {
 
     try {
       const response = await passwordApi.requestReset(data);
-      setSuccess(response.message || 'Password reset email sent');
+      setSuccess(response.message || "Password reset email sent");
     } catch (err: any) {
-      const errorMessage = err.response?.data?.detail || 'Failed to request password reset';
+      const errorMessage = err.response?.data?.detail || "Failed to request password reset";
       setError(errorMessage);
       throw err;
     } finally {
@@ -74,9 +78,9 @@ export const usePassword = (): UsePasswordReturn => {
 
     try {
       const response = await passwordApi.confirmReset(data);
-      setSuccess(response.message || 'Password reset successfully');
+      setSuccess(response.message || "Password reset successfully");
     } catch (err: any) {
-      const errorMessage = err.response?.data?.detail || 'Failed to reset password';
+      const errorMessage = err.response?.data?.detail || "Failed to reset password";
       setError(errorMessage);
       throw err;
     } finally {

@@ -15,8 +15,8 @@
  * />
  */
 
-import React, { useRef, useState, useCallback, useEffect, useMemo } from 'react';
-import { cn } from '@/lib/utils';
+import React, { useRef, useState, useCallback, useEffect, useMemo } from "react";
+import { cn } from "@/lib/utils";
 
 interface VirtualListProps<T> {
   /** Array of items to render */
@@ -24,7 +24,7 @@ interface VirtualListProps<T> {
   /** Height of each item in pixels */
   itemHeight: number;
   /** Height of the container in pixels (or 'auto' for parent height) */
-  containerHeight: number | 'auto';
+  containerHeight: number | "auto";
   /** Render function for each item */
   renderItem: (item: T, index: number) => React.ReactNode;
   /** Number of items to render above/below visible area */
@@ -70,12 +70,12 @@ export function VirtualList<T>({
   const containerRef = useRef<HTMLDivElement>(null);
   const [state, setState] = useState<VirtualListState>({
     scrollTop: 0,
-    containerHeight: typeof containerHeight === 'number' ? containerHeight : 0,
+    containerHeight: typeof containerHeight === "number" ? containerHeight : 0,
   });
 
   // Update container height if using 'auto'
   useEffect(() => {
-    if (containerHeight === 'auto' && containerRef.current) {
+    if (containerHeight === "auto" && containerRef.current) {
       const resizeObserver = new ResizeObserver((entries) => {
         const entry = entries[0];
         if (entry) {
@@ -88,7 +88,7 @@ export function VirtualList<T>({
 
       resizeObserver.observe(containerRef.current);
       return () => resizeObserver.disconnect();
-    } else if (typeof containerHeight === 'number') {
+    } else if (typeof containerHeight === "number") {
       setState((prev) => ({
         ...prev,
         containerHeight,
@@ -97,9 +97,12 @@ export function VirtualList<T>({
   }, [containerHeight]);
 
   // Calculate visible range
-  const { startIndex, endIndex, visibleItems } = useMemo(() => {
+  const {
+    startIndex,
+    endIndex: _endIndex,
+    visibleItems,
+  } = useMemo(() => {
     const effectiveHeight = state.containerHeight;
-    const totalHeight = items.length * itemHeight;
 
     if (effectiveHeight === 0 || items.length === 0) {
       return { startIndex: 0, endIndex: 0, visibleItems: [] };
@@ -155,9 +158,9 @@ export function VirtualList<T>({
   return (
     <div
       ref={containerRef}
-      className={cn('overflow-auto', wrapperClassName)}
+      className={cn("overflow-auto", wrapperClassName)}
       style={{
-        height: typeof containerHeight === 'number' ? containerHeight : '100%',
+        height: typeof containerHeight === "number" ? containerHeight : "100%",
       }}
       onScroll={handleScroll}
     >
@@ -165,14 +168,14 @@ export function VirtualList<T>({
       <div
         style={{
           height: totalHeight,
-          position: 'relative',
+          position: "relative",
         }}
       >
         {/* Visible items container */}
         <div
           className={className}
           style={{
-            position: 'absolute',
+            position: "absolute",
             top: 0,
             left: 0,
             right: 0,
@@ -182,10 +185,7 @@ export function VirtualList<T>({
           {visibleItems.map((item, localIndex) => {
             const globalIndex = startIndex + localIndex;
             return (
-              <div
-                key={keyExtractor(item, globalIndex)}
-                style={{ height: itemHeight }}
-              >
+              <div key={keyExtractor(item, globalIndex)} style={{ height: itemHeight }}>
                 {renderItem(item, globalIndex)}
               </div>
             );
@@ -195,9 +195,7 @@ export function VirtualList<T>({
 
       {/* Loading indicator for infinite scroll */}
       {isLoading && loadingComponent && (
-        <div className="flex items-center justify-center py-4">
-          {loadingComponent}
-        </div>
+        <div className="flex items-center justify-center py-4">{loadingComponent}</div>
       )}
     </div>
   );
@@ -237,7 +235,7 @@ export function SimpleVirtualList<T>({
   maxHeight,
   renderItem,
   className,
-  emptyMessage = 'No items',
+  emptyMessage = "No items",
 }: {
   items: T[];
   itemHeight: number;

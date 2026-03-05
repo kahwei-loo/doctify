@@ -5,7 +5,7 @@
  * Full table viewing happens in a near-full-screen Dialog — outside the panel.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Database,
   Rows3,
@@ -15,16 +15,11 @@ import {
   ChevronLeft,
   ChevronRight,
   AlertCircle,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { knowledgeBaseApi } from '../../services/mockData';
-import type { DataSource } from '../../types';
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { knowledgeBaseApi } from "../../services/mockData";
+import type { DataSource } from "../../types";
 
 interface StructuredDataContentProps {
   source: DataSource;
@@ -68,7 +63,7 @@ const DataTableDialog: React.FC<{
         setData(result);
         setPage(pageNum);
       } catch {
-        setError('Failed to load data');
+        setError("Failed to load data");
       } finally {
         setIsLoading(false);
       }
@@ -122,10 +117,7 @@ const DataTableDialog: React.FC<{
                     #
                   </th>
                   {data.columns.map((col) => (
-                    <th
-                      key={col}
-                      className="text-left px-3 py-2 font-medium whitespace-nowrap"
-                    >
+                    <th key={col} className="text-left px-3 py-2 font-medium whitespace-nowrap">
                       {col}
                     </th>
                   ))}
@@ -138,10 +130,7 @@ const DataTableDialog: React.FC<{
                       {page * DIALOG_PAGE_SIZE + rowIdx + 1}
                     </td>
                     {row.map((cell, colIdx) => (
-                      <td
-                        key={colIdx}
-                        className="px-3 py-1.5 max-w-[400px]"
-                      >
+                      <td key={colIdx} className="px-3 py-1.5 max-w-[400px]">
                         {cell === null || cell === undefined ? (
                           <span className="text-muted-foreground/50 italic text-xs">null</span>
                         ) : (
@@ -163,7 +152,7 @@ const DataTableDialog: React.FC<{
               {totalPages > 1 ? (
                 <>
                   Showing {page * DIALOG_PAGE_SIZE + 1}–
-                  {Math.min((page + 1) * DIALOG_PAGE_SIZE, data.total_rows)} of{' '}
+                  {Math.min((page + 1) * DIALOG_PAGE_SIZE, data.total_rows)} of{" "}
                   {data.total_rows.toLocaleString()} rows
                 </>
               ) : (

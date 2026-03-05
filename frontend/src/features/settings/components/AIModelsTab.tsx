@@ -1,44 +1,56 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Loader2, Save, Trash2 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import React, { useState, useEffect, useMemo } from "react";
+import { Loader2, Save, Trash2 } from "lucide-react";
+import toast from "react-hot-toast";
 import {
   useGetAIModelSettingsQuery,
   useGetModelCatalogQuery,
   useUpdateAIModelSettingMutation,
   useDeleteCatalogEntryMutation,
-} from '@/store/api/aiModelSettingsApi';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
+} from "@/store/api/aiModelSettingsApi";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { AddModelDialog } from './AddModelDialog';
-import { EditModelDialog } from './EditModelDialog';
-import { DeleteModelDialog } from './DeleteModelDialog';
-import type { ModelCatalogEntry } from '../types';
+} from "@/components/ui/select";
+import { AddModelDialog } from "./AddModelDialog";
+import { EditModelDialog } from "./EditModelDialog";
+import { DeleteModelDialog } from "./DeleteModelDialog";
+import type { ModelCatalogEntry } from "../types";
 
 const PURPOSE_LABELS: Record<string, { label: string; description: string }> = {
-  chat: { label: 'Chat Model', description: 'Primary model for RAG answers and general chat' },
-  chat_fast: { label: 'Fast Chat Model', description: 'Lightweight model for classifiers, evaluation, and judges' },
-  embedding: { label: 'Embedding Model', description: 'Generates vector embeddings for document search' },
-  vision: { label: 'Vision Model', description: 'Primary model for OCR and document image processing' },
-  classifier: { label: 'Classifier Model', description: 'Intent classification and routing decisions' },
-  reranker: { label: 'Reranker Model', description: 'Re-ranks search results for relevance' },
+  chat: { label: "Chat Model", description: "Primary model for RAG answers and general chat" },
+  chat_fast: {
+    label: "Fast Chat Model",
+    description: "Lightweight model for classifiers, evaluation, and judges",
+  },
+  embedding: {
+    label: "Embedding Model",
+    description: "Generates vector embeddings for document search",
+  },
+  vision: {
+    label: "Vision Model",
+    description: "Primary model for OCR and document image processing",
+  },
+  classifier: {
+    label: "Classifier Model",
+    description: "Intent classification and routing decisions",
+  },
+  reranker: { label: "Reranker Model", description: "Re-ranks search results for relevance" },
 };
 
 /** Map raw purpose key to friendly label for badges. */
 const PURPOSE_SHORT_LABELS: Record<string, string> = {
-  chat: 'Chat',
-  chat_fast: 'Fast Chat',
-  embedding: 'Embedding',
-  vision: 'Vision',
-  classifier: 'Classifier',
-  reranker: 'Reranker',
+  chat: "Chat",
+  chat_fast: "Fast Chat",
+  embedding: "Embedding",
+  vision: "Vision",
+  classifier: "Classifier",
+  reranker: "Reranker",
 };
 
 export const AIModelsTab: React.FC = () => {
@@ -101,14 +113,14 @@ export const AIModelsTab: React.FC = () => {
           body: { model_name: draft[purpose] },
         }).unwrap();
       }
-      toast.success(`Updated ${toSave.length} model${toSave.length > 1 ? 's' : ''}`);
+      toast.success(`Updated ${toSave.length} model${toSave.length > 1 ? "s" : ""}`);
       setChanged(new Set());
     } catch (error: unknown) {
       const msg =
-        error && typeof error === 'object' && 'data' in error
+        error && typeof error === "object" && "data" in error
           ? (error as { data?: { detail?: string } }).data?.detail
           : undefined;
-      toast.error(msg || 'Failed to update model settings');
+      toast.error(msg || "Failed to update model settings");
     }
   };
 
@@ -120,10 +132,10 @@ export const AIModelsTab: React.FC = () => {
       setDeleteTarget(null);
     } catch (error: unknown) {
       const msg =
-        error && typeof error === 'object' && 'data' in error
+        error && typeof error === "object" && "data" in error
           ? (error as { data?: { detail?: string } }).data?.detail
           : undefined;
-      toast.error(msg || 'Failed to delete model.');
+      toast.error(msg || "Failed to delete model.");
     }
   };
 
@@ -154,17 +166,14 @@ export const AIModelsTab: React.FC = () => {
       </div>
       <div className="divide-y divide-border">
         {Object.entries(PURPOSE_LABELS).map(([purpose, { label, description }]) => {
-          const currentValue = draft[purpose] || '';
-          const envDefault = envDefaults[purpose] || '';
+          const currentValue = draft[purpose] || "";
+          const envDefault = envDefaults[purpose] || "";
           const compatibleModels = catalog.filter((m) => m.purposes.includes(purpose));
 
           return (
             <div key={purpose} className="py-5 space-y-2">
               <Label className="font-medium">{label}</Label>
-              <Select
-                value={currentValue}
-                onValueChange={(val) => handleChange(purpose, val)}
-              >
+              <Select value={currentValue} onValueChange={(val) => handleChange(purpose, val)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a model" />
                 </SelectTrigger>
@@ -180,9 +189,7 @@ export const AIModelsTab: React.FC = () => {
                     </SelectItem>
                   ))}
                   {currentValue && !compatibleModels.some((m) => m.model_id === currentValue) && (
-                    <SelectItem value={currentValue}>
-                      {currentValue} (custom)
-                    </SelectItem>
+                    <SelectItem value={currentValue}>{currentValue} (custom)</SelectItem>
                   )}
                 </SelectContent>
               </Select>
@@ -199,9 +206,7 @@ export const AIModelsTab: React.FC = () => {
         })}
       </div>
       <div className="border-t border-border mt-6 pt-6 flex justify-end items-center gap-3">
-        {changed.size > 0 && (
-          <Badge variant="secondary">{changed.size} changed</Badge>
-        )}
+        {changed.size > 0 && <Badge variant="secondary">{changed.size} changed</Badge>}
         <Button onClick={handleSave} disabled={isSaving || changed.size === 0}>
           {isSaving ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -237,16 +242,12 @@ export const AIModelsTab: React.FC = () => {
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-sm truncate">
-                      {entry.display_name}
-                    </span>
+                    <span className="font-medium text-sm truncate">{entry.display_name}</span>
                     <Badge variant="outline" className="text-xs shrink-0">
                       {entry.provider}
                     </Badge>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                    {entry.model_id}
-                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5 truncate">{entry.model_id}</p>
                   <div className="flex flex-wrap gap-1 mt-1.5">
                     {entry.purposes.map((p) => (
                       <Badge key={p} variant="secondary" className="text-xs">
@@ -257,10 +258,7 @@ export const AIModelsTab: React.FC = () => {
                 </div>
                 {entry.id && (
                   <div className="flex items-center gap-1 shrink-0 ml-2">
-                    <EditModelDialog
-                      entry={entry}
-                      existingProviders={existingProviders}
-                    />
+                    <EditModelDialog entry={entry} existingProviders={existingProviders} />
                     <Button
                       variant="ghost"
                       size="icon"
@@ -280,7 +278,7 @@ export const AIModelsTab: React.FC = () => {
       <DeleteModelDialog
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
-        modelName={deleteTarget?.display_name || ''}
+        modelName={deleteTarget?.display_name || ""}
         onConfirm={handleConfirmDelete}
         isDeleting={isDeleting}
       />

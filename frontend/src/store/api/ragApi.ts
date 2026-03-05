@@ -5,13 +5,13 @@
  * Phase 11 - RAG Implementation
  */
 
-import { api } from './apiSlice';
+import { api } from "./apiSlice";
 
 // ===========================
 // Types
 // ===========================
 
-export type SearchMode = 'semantic' | 'keyword' | 'hybrid';
+export type SearchMode = "semantic" | "keyword" | "hybrid";
 
 export interface RAGQueryRequest {
   question: string;
@@ -149,7 +149,7 @@ export interface AnalyticsResponseData {
 
 export interface UnifiedQueryResponse {
   id: string;
-  intent_type: 'rag' | 'analytics';
+  intent_type: "rag" | "analytics";
   confidence: number;
   rag_response?: RAGQueryResponse;
   analytics_response?: AnalyticsResponseData;
@@ -157,7 +157,7 @@ export interface UnifiedQueryResponse {
 }
 
 export interface UnifiedQueryFeedbackRequest {
-  correct_intent?: 'rag' | 'analytics';
+  correct_intent?: "rag" | "analytics";
   rating: number;
 }
 
@@ -170,60 +170,54 @@ export const ragApi = api.injectEndpoints({
     // Query documents using RAG
     queryDocuments: builder.mutation<RAGQueryResponse, RAGQueryRequest>({
       query: (body) => ({
-        url: '/rag/query',
-        method: 'POST',
+        url: "/rag/query",
+        method: "POST",
         body,
       }),
-      invalidatesTags: ['RAGHistory', 'RAGStats'],
+      invalidatesTags: ["RAGHistory", "RAGStats"],
     }),
 
     // Get query history with pagination
-    getRAGHistory: builder.query<
-      RAGHistoryResponse,
-      { limit?: number; offset?: number }
-    >({
+    getRAGHistory: builder.query<RAGHistoryResponse, { limit?: number; offset?: number }>({
       query: ({ limit = 50, offset = 0 }) => ({
         url: `/rag/history?limit=${limit}&offset=${offset}`,
       }),
-      providesTags: ['RAGHistory'],
+      providesTags: ["RAGHistory"],
     }),
 
     // Submit feedback for a query
-    submitRAGFeedback: builder.mutation<
-      void,
-      { queryId: string; feedback: RAGFeedbackRequest }
-    >({
+    submitRAGFeedback: builder.mutation<void, { queryId: string; feedback: RAGFeedbackRequest }>({
       query: ({ queryId, feedback }) => ({
         url: `/rag/feedback/${queryId}`,
-        method: 'POST',
+        method: "POST",
         body: feedback,
       }),
-      invalidatesTags: ['RAGHistory', 'RAGStats'],
+      invalidatesTags: ["RAGHistory", "RAGStats"],
     }),
 
     // Get RAG usage statistics
     getRAGStats: builder.query<RAGStatsResponse, void>({
-      query: () => '/rag/stats',
-      providesTags: ['RAGStats'],
+      query: () => "/rag/stats",
+      providesTags: ["RAGStats"],
     }),
 
     // Delete query from history
     deleteQuery: builder.mutation<void, string>({
       query: (queryId) => ({
         url: `/rag/history/${queryId}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
-      invalidatesTags: ['RAGHistory', 'RAGStats'],
+      invalidatesTags: ["RAGHistory", "RAGStats"],
     }),
 
     // Conversations (P1.3)
     createConversation: builder.mutation<RAGConversation, { title?: string }>({
       query: (body) => ({
-        url: '/rag/conversations',
-        method: 'POST',
+        url: "/rag/conversations",
+        method: "POST",
         body,
       }),
-      invalidatesTags: ['RAGConversations'],
+      invalidatesTags: ["RAGConversations"],
     }),
 
     getConversations: builder.query<
@@ -231,37 +225,34 @@ export const ragApi = api.injectEndpoints({
       { limit?: number; offset?: number }
     >({
       query: ({ limit = 50, offset = 0 }) => `/rag/conversations?limit=${limit}&offset=${offset}`,
-      providesTags: ['RAGConversations'],
+      providesTags: ["RAGConversations"],
     }),
 
     getConversation: builder.query<RAGConversationDetail, string>({
       query: (id) => `/rag/conversations/${id}`,
-      providesTags: (_result, _err, id) => [{ type: 'RAGConversations', id }],
+      providesTags: (_result, _err, id) => [{ type: "RAGConversations", id }],
     }),
 
     deleteConversation: builder.mutation<void, string>({
       query: (id) => ({
         url: `/rag/conversations/${id}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
-      invalidatesTags: ['RAGConversations'],
+      invalidatesTags: ["RAGConversations"],
     }),
 
     // Evaluations (P3.2)
-    getEvaluations: builder.query<
-      RAGEvaluationListResponse,
-      { limit?: number; offset?: number }
-    >({
+    getEvaluations: builder.query<RAGEvaluationListResponse, { limit?: number; offset?: number }>({
       query: ({ limit = 20, offset = 0 }) => `/rag/evaluations?limit=${limit}&offset=${offset}`,
-      providesTags: ['RAGEvaluations'],
+      providesTags: ["RAGEvaluations"],
     }),
 
     triggerEvaluation: builder.mutation<RAGEvaluationTriggerResponse, { sample_size?: number }>({
       query: ({ sample_size = 20 }) => ({
         url: `/rag/evaluations/run?sample_size=${sample_size}`,
-        method: 'POST',
+        method: "POST",
       }),
-      invalidatesTags: ['RAGEvaluations'],
+      invalidatesTags: ["RAGEvaluations"],
     }),
 
     // Unified Knowledge Query (RAG + Analytics)
@@ -271,10 +262,10 @@ export const ragApi = api.injectEndpoints({
     >({
       query: ({ kbId, request }) => ({
         url: `/rag/knowledge-bases/${kbId}/unified-query`,
-        method: 'POST',
+        method: "POST",
         body: request,
       }),
-      invalidatesTags: ['UnifiedQuery', 'RAGHistory', 'RAGStats'],
+      invalidatesTags: ["UnifiedQuery", "RAGHistory", "RAGStats"],
     }),
 
     // Submit feedback for a unified query
@@ -284,10 +275,10 @@ export const ragApi = api.injectEndpoints({
     >({
       query: ({ queryId, feedback }) => ({
         url: `/rag/queries/${queryId}/feedback`,
-        method: 'POST',
+        method: "POST",
         body: feedback,
       }),
-      invalidatesTags: ['UnifiedQuery', 'RAGHistory'],
+      invalidatesTags: ["UnifiedQuery", "RAGHistory"],
     }),
   }),
 });
@@ -330,10 +321,10 @@ export const formatSimilarity = (score: number): string => {
 /**
  * Get confidence level label
  */
-export const getConfidenceLevel = (score: number): 'high' | 'medium' | 'low' => {
-  if (score >= 0.8) return 'high';
-  if (score >= 0.6) return 'medium';
-  return 'low';
+export const getConfidenceLevel = (score: number): "high" | "medium" | "low" => {
+  if (score >= 0.8) return "high";
+  if (score >= 0.6) return "medium";
+  return "low";
 };
 
 /**
@@ -355,7 +346,7 @@ export const formatQueryDate = (dateString: string): string => {
   const diffHours = Math.floor(diffMs / 3600000);
   const diffDays = Math.floor(diffMs / 86400000);
 
-  if (diffMins < 1) return 'Just now';
+  if (diffMins < 1) return "Just now";
   if (diffMins < 60) return `${diffMins}m ago`;
   if (diffHours < 24) return `${diffHours}h ago`;
   if (diffDays < 7) return `${diffDays}d ago`;
@@ -367,10 +358,10 @@ export const formatQueryDate = (dateString: string): string => {
 // Streaming RAG Query (P1.2)
 // ===========================
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
 export interface StreamEvent {
-  type: 'sources' | 'token' | 'done' | 'error';
+  type: "sources" | "token" | "done" | "error";
   data: unknown;
 }
 
@@ -392,14 +383,14 @@ export interface StreamDoneData {
 export async function streamRAGQuery(
   request: RAGQueryRequest,
   onEvent: (event: StreamEvent) => void,
-  signal?: AbortSignal,
+  signal?: AbortSignal
 ): Promise<void> {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
 
   const response = await fetch(`${API_BASE_URL}/api/v1/rag/query/stream`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
     body: JSON.stringify(request),
@@ -413,18 +404,18 @@ export async function streamRAGQuery(
 
   const reader = response.body!.getReader();
   const decoder = new TextDecoder();
-  let buffer = '';
+  let buffer = "";
 
   while (true) {
     const { done, value } = await reader.read();
     if (done) break;
 
     buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split('\n');
-    buffer = lines.pop() || '';
+    const lines = buffer.split("\n");
+    buffer = lines.pop() || "";
 
     for (const line of lines) {
-      if (line.startsWith('data: ')) {
+      if (line.startsWith("data: ")) {
         try {
           const parsed = JSON.parse(line.slice(6)) as StreamEvent;
           onEvent(parsed);
@@ -441,7 +432,7 @@ export async function streamRAGQuery(
 // ===========================
 
 export interface UnifiedStreamEvent {
-  type: 'intent' | 'chunk' | 'sources' | 'analytics_result' | 'done' | 'error';
+  type: "intent" | "chunk" | "sources" | "analytics_result" | "done" | "error";
   data: unknown;
 }
 
@@ -454,21 +445,21 @@ export async function streamUnifiedQuery(
   kbId: string,
   request: UnifiedQueryRequest,
   onEvent: (event: UnifiedStreamEvent) => void,
-  signal?: AbortSignal,
+  signal?: AbortSignal
 ): Promise<void> {
-  const token = localStorage.getItem('access_token') || localStorage.getItem('token');
+  const token = localStorage.getItem("access_token") || localStorage.getItem("token");
 
   const response = await fetch(
     `${API_BASE_URL}/api/v1/rag/knowledge-bases/${kbId}/unified-query/stream`,
     {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
       body: JSON.stringify(request),
       signal,
-    },
+    }
   );
 
   if (!response.ok) {
@@ -478,26 +469,30 @@ export async function streamUnifiedQuery(
 
   const reader = response.body!.getReader();
   const decoder = new TextDecoder();
-  let buffer = '';
+  let buffer = "";
 
   while (true) {
     const { done, value } = await reader.read();
     if (done) break;
 
     buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split('\n');
-    buffer = lines.pop() || '';
+    const lines = buffer.split("\n");
+    buffer = lines.pop() || "";
 
     for (const line of lines) {
-      if (line.startsWith('data: ')) {
+      if (line.startsWith("data: ")) {
         try {
           const parsed = JSON.parse(line.slice(6));
           // Map BE event format to FE UnifiedStreamEvent
-          const eventType = parsed.event as UnifiedStreamEvent['type'];
-          const eventData = eventType === 'chunk' ? parsed.text
-            : eventType === 'sources' ? parsed.sources
-            : eventType === 'analytics_result' ? parsed.data
-            : parsed;
+          const eventType = parsed.event as UnifiedStreamEvent["type"];
+          const eventData =
+            eventType === "chunk"
+              ? parsed.text
+              : eventType === "sources"
+                ? parsed.sources
+                : eventType === "analytics_result"
+                  ? parsed.data
+                  : parsed;
           onEvent({ type: eventType, data: eventData });
         } catch {
           // skip malformed events

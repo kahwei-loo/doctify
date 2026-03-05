@@ -7,8 +7,8 @@
  * Week 1 Task 1.2.2: Confirmation Dialogs
  */
 
-import React from 'react';
-import { AlertTriangle, Trash2 } from 'lucide-react';
+import React from "react";
+import { AlertTriangle, Trash2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,7 +18,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+} from "@/components/ui/alert-dialog";
 
 interface DeleteDocumentsDialogProps {
   documentIds: string[];
@@ -47,14 +47,14 @@ export const DeleteDocumentsDialog: React.FC<DeleteDocumentsDialogProps> = ({
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
             <Trash2 className="h-5 w-5 text-destructive" />
-            Delete {count} {isSingle ? 'document' : 'documents'}?
+            Delete {count} {isSingle ? "document" : "documents"}?
           </AlertDialogTitle>
           <AlertDialogDescription asChild>
             <div className="space-y-4">
               {/* Main warning message */}
               <p className="text-foreground">
-                {isSingle ? 'This document' : 'These documents'} will be permanently
-                deleted along with all extracted data and processing history.
+                {isSingle ? "This document" : "These documents"} will be permanently deleted along
+                with all extracted data and processing history.
               </p>
 
               {/* Show document names for small batches */}
@@ -80,8 +80,8 @@ export const DeleteDocumentsDialog: React.FC<DeleteDocumentsDialogProps> = ({
                       Large Batch Operation
                     </p>
                     <p className="text-xs text-orange-700 dark:text-orange-300 mt-1">
-                      You are about to delete {count} documents. This operation may take
-                      a few moments to complete.
+                      You are about to delete {count} documents. This operation may take a few
+                      moments to complete.
                     </p>
                   </div>
                 </div>
@@ -96,7 +96,7 @@ export const DeleteDocumentsDialog: React.FC<DeleteDocumentsDialogProps> = ({
                   </p>
                   <p className="text-xs text-destructive/80 mt-1">
                     {isSingle
-                      ? 'The document and all its data will be permanently removed from our servers.'
+                      ? "The document and all its data will be permanently removed from our servers."
                       : `All ${count} documents and their data will be permanently removed from our servers.`}
                   </p>
                 </div>
@@ -105,8 +105,8 @@ export const DeleteDocumentsDialog: React.FC<DeleteDocumentsDialogProps> = ({
               {/* Export suggestion for large batches */}
               {count > 10 && (
                 <p className="text-xs text-muted-foreground">
-                  💡 Tip: Consider exporting your data before deletion if you might need
-                  it in the future.
+                  💡 Tip: Consider exporting your data before deletion if you might need it in the
+                  future.
                 </p>
               )}
             </div>
@@ -131,7 +131,7 @@ export const DeleteDocumentsDialog: React.FC<DeleteDocumentsDialogProps> = ({
             ) : (
               <>
                 <Trash2 className="mr-2 h-4 w-4" />
-                Delete {isSingle ? 'Document' : `${count} Documents`}
+                Delete {isSingle ? "Document" : `${count} Documents`}
               </>
             )}
           </AlertDialogAction>

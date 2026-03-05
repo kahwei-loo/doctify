@@ -12,26 +12,12 @@
  * - Persistent panel sizes via localStorage
  */
 
-import React, { useState, useEffect } from 'react';
-import {
-  ResizablePanelGroup,
-  ResizablePanel,
-  ResizableHandle,
-} from '@/components/ui/resizable';
-import {
-  Maximize2,
-  Minimize2,
-  PanelLeftClose,
-  PanelRightClose,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import React, { useState, useEffect } from "react";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
+import { Maximize2, PanelLeftClose, PanelRightClose } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface DocumentSplitViewProps {
   /** Content for the left panel (document preview) */
@@ -51,7 +37,7 @@ interface DocumentSplitViewProps {
   /** Custom class name */
   className?: string;
   /** Direction of the panels */
-  direction?: 'horizontal' | 'vertical';
+  direction?: "horizontal" | "vertical";
   /** Show panel headers with titles and collapse buttons */
   showPanelHeaders?: boolean;
   /** Callback when panel size changes */
@@ -63,13 +49,13 @@ interface DocumentSplitViewProps {
 export const DocumentSplitView: React.FC<DocumentSplitViewProps> = ({
   leftPanel,
   rightPanel,
-  leftTitle = 'Document Preview',
-  rightTitle = 'Extracted Data',
+  leftTitle = "Document Preview",
+  rightTitle = "Extracted Data",
   defaultLeftSize = 40,
   minSize = 20,
-  storageKey = 'document-split-view',
+  storageKey: _storageKey = "document-split-view",
   className,
-  direction = 'horizontal',
+  direction = "horizontal",
   showPanelHeaders = false,
   onPanelResize,
 }) => {
@@ -83,8 +69,8 @@ export const DocumentSplitView: React.FC<DocumentSplitViewProps> = ({
       setIsMobile(window.innerWidth < 768);
     };
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   // Panel collapse handlers
@@ -105,7 +91,7 @@ export const DocumentSplitView: React.FC<DocumentSplitViewProps> = ({
   // Mobile layout - stacked vertically
   if (isMobile) {
     return (
-      <div className={cn('flex flex-col gap-4', className)}>
+      <div className={cn("flex flex-col gap-4", className)}>
         {/* Left panel (preview) */}
         <div className="flex-1 min-h-[40vh] border rounded-lg overflow-hidden bg-card">
           {showPanelHeaders && (
@@ -132,11 +118,8 @@ export const DocumentSplitView: React.FC<DocumentSplitViewProps> = ({
   // Desktop layout - resizable panels
   return (
     <TooltipProvider>
-      <div className={cn('h-full', className)}>
-        <ResizablePanelGroup
-          direction={direction}
-          className="h-full"
-        >
+      <div className={cn("h-full", className)}>
+        <ResizablePanelGroup direction={direction} className="h-full">
           {/* Left Panel */}
           <ResizablePanel
             id="left-panel"
@@ -145,11 +128,11 @@ export const DocumentSplitView: React.FC<DocumentSplitViewProps> = ({
             collapsible
             collapsedSize={0}
             onResize={(size) => {
-              console.log('🔄 Panel Resize:', {
+              console.log("🔄 Panel Resize:", {
                 rawSize: size,
                 sizeType: typeof size,
-                sizeKeys: typeof size === 'object' ? Object.keys(size) : 'N/A',
-                sizeValues: typeof size === 'object' ? Object.values(size) : 'N/A',
+                sizeKeys: typeof size === "object" ? Object.keys(size) : "N/A",
+                sizeValues: typeof size === "object" ? Object.values(size) : "N/A",
                 stringified: JSON.stringify(size),
                 isLeftCollapsed,
                 isRightCollapsed,
@@ -157,19 +140,18 @@ export const DocumentSplitView: React.FC<DocumentSplitViewProps> = ({
               });
               if (onPanelResize && !isLeftCollapsed && !isRightCollapsed) {
                 // ResizablePanel passes size as object with asPercentage property
-                const numericSize = typeof size === 'number' ? size : (
-                  // Extract asPercentage from the size object
-                  typeof size === 'object' && size !== null
-                    ? (size as any).asPercentage || (size as any).percentage || Number(size)
-                    : Number(size)
-                );
-                console.log('✅ Calling onPanelResize with:', numericSize);
+                const numericSize =
+                  typeof size === "number"
+                    ? size
+                    : // Extract asPercentage from the size object
+                      typeof size === "object" && size !== null
+                      ? (size as any).asPercentage || (size as any).percentage || Number(size)
+                      : Number(size);
+                console.log("✅ Calling onPanelResize with:", numericSize);
                 onPanelResize(numericSize);
               }
             }}
-            className={cn(
-              'transition-all duration-200'
-            )}
+            className={cn("transition-all duration-200")}
           >
             <div className="flex flex-col h-full border rounded-lg overflow-hidden bg-card">
               {/* Panel header - Optional */}
@@ -189,9 +171,7 @@ export const DocumentSplitView: React.FC<DocumentSplitViewProps> = ({
                             <PanelLeftClose className="h-4 w-4" />
                           </Button>
                         </TooltipTrigger>
-                        <TooltipContent side="bottom">
-                          Collapse panel
-                        </TooltipContent>
+                        <TooltipContent side="bottom">Collapse panel</TooltipContent>
                       </Tooltip>
                     </div>
                   )}
@@ -208,9 +188,7 @@ export const DocumentSplitView: React.FC<DocumentSplitViewProps> = ({
                             <Maximize2 className="h-4 w-4" />
                           </Button>
                         </TooltipTrigger>
-                        <TooltipContent side="bottom">
-                          Expand panel
-                        </TooltipContent>
+                        <TooltipContent side="bottom">Expand panel</TooltipContent>
                       </Tooltip>
                     </div>
                   )}
@@ -231,9 +209,7 @@ export const DocumentSplitView: React.FC<DocumentSplitViewProps> = ({
             minSize={isRightCollapsed ? 0 : minSize}
             collapsible
             collapsedSize={0}
-            className={cn(
-              'transition-all duration-200'
-            )}
+            className={cn("transition-all duration-200")}
           >
             <div className="flex flex-col h-full border rounded-lg overflow-hidden bg-card">
               {/* Panel header - Optional */}
@@ -253,9 +229,7 @@ export const DocumentSplitView: React.FC<DocumentSplitViewProps> = ({
                             <PanelRightClose className="h-4 w-4" />
                           </Button>
                         </TooltipTrigger>
-                        <TooltipContent side="bottom">
-                          Collapse panel
-                        </TooltipContent>
+                        <TooltipContent side="bottom">Collapse panel</TooltipContent>
                       </Tooltip>
                     </div>
                   )}
@@ -272,9 +246,7 @@ export const DocumentSplitView: React.FC<DocumentSplitViewProps> = ({
                             <Maximize2 className="h-4 w-4" />
                           </Button>
                         </TooltipTrigger>
-                        <TooltipContent side="bottom">
-                          Expand panel
-                        </TooltipContent>
+                        <TooltipContent side="bottom">Expand panel</TooltipContent>
                       </Tooltip>
                     </div>
                   )}

@@ -11,18 +11,10 @@
  * - Loading and empty states
  */
 
-import React, { useMemo } from 'react';
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Legend,
-  Tooltip,
-} from 'recharts';
-import { cn } from '@/lib/utils';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { PieChart as PieChartIcon } from 'lucide-react';
+import React, { useMemo } from "react";
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PieChart as PieChartIcon } from "lucide-react";
 
 export interface ProcessingChartData {
   completed: number;
@@ -48,17 +40,17 @@ interface ProcessingChartProps {
 
 // Chart colors
 const COLORS = {
-  completed: '#22c55e', // green-500
-  processing: '#3b82f6', // blue-500
-  pending: '#eab308', // yellow-500
-  failed: '#ef4444', // red-500
+  completed: "#22c55e", // green-500
+  processing: "#3b82f6", // blue-500
+  pending: "#eab308", // yellow-500
+  failed: "#ef4444", // red-500
 };
 
 const LABELS = {
-  completed: 'Completed',
-  processing: 'Processing',
-  pending: 'Pending',
-  failed: 'Failed',
+  completed: "Completed",
+  processing: "Processing",
+  pending: "Pending",
+  failed: "Failed",
 };
 
 /**
@@ -73,15 +65,10 @@ const CustomTooltip: React.FC<{
     return (
       <div className="bg-popover border rounded-lg shadow-lg px-3 py-2">
         <div className="flex items-center gap-2">
-          <div
-            className="w-3 h-3 rounded-full"
-            style={{ backgroundColor: data.payload.fill }}
-          />
+          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: data.payload.fill }} />
           <span className="font-medium">{data.name}</span>
         </div>
-        <p className="text-sm text-muted-foreground mt-1">
-          {data.value} documents
-        </p>
+        <p className="text-sm text-muted-foreground mt-1">{data.value} documents</p>
       </div>
     );
   }
@@ -100,10 +87,7 @@ const CustomLegend: React.FC<{
     <div className="flex flex-wrap justify-center gap-4 mt-4">
       {payload.map((entry, index) => (
         <div key={`legend-${index}`} className="flex items-center gap-1.5">
-          <div
-            className="w-2.5 h-2.5 rounded-full"
-            style={{ backgroundColor: entry.color }}
-          />
+          <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
           <span className="text-sm text-muted-foreground">{entry.value}</span>
           <span className="text-sm font-medium">({entry.payload.value})</span>
         </div>
@@ -131,10 +115,7 @@ const ChartSkeleton: React.FC<{ height: number }> = ({ height }) => {
  */
 const EmptyState: React.FC<{ height: number }> = ({ height }) => {
   return (
-    <div
-      className="flex flex-col items-center justify-center text-center"
-      style={{ height }}
-    >
+    <div className="flex flex-col items-center justify-center text-center" style={{ height }}>
       <PieChartIcon className="h-12 w-12 text-muted-foreground/30 mb-2" />
       <p className="text-sm text-muted-foreground">No data available</p>
     </div>
@@ -213,7 +194,7 @@ const ChartContent: React.FC<{
 export const ProcessingChart: React.FC<ProcessingChartProps> = ({
   data,
   isLoading = false,
-  title = 'Processing Status',
+  title = "Processing Status",
   className,
   showCard = true,
   height = 250,

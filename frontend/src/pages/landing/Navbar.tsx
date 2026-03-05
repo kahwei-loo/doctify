@@ -1,14 +1,9 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Zap, Sun, Moon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import {
-  motion,
-  useScroll,
-  useMotionValueEvent,
-  AnimatePresence,
-} from 'framer-motion';
-import { useTheme } from '@/shared/providers/ThemeProvider';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Zap, Sun, Moon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { motion, useScroll, useMotionValueEvent, AnimatePresence } from "framer-motion";
+import { useTheme } from "@/shared/providers/ThemeProvider";
 
 interface NavbarProps {
   onTryDemo: () => void;
@@ -21,7 +16,7 @@ const Navbar: React.FC<NavbarProps> = ({ onTryDemo }) => {
 
   const { scrollY, scrollYProgress } = useScroll();
 
-  useMotionValueEvent(scrollY, 'change', (latest) => {
+  useMotionValueEvent(scrollY, "change", (latest) => {
     setIsScrolled(latest > 50);
   });
 
@@ -29,23 +24,23 @@ const Navbar: React.FC<NavbarProps> = ({ onTryDemo }) => {
   const progressScaleX = scrollYProgress;
 
   const toggleTheme = () => {
-    setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
+    setTheme(resolvedTheme === "dark" ? "light" : "dark");
   };
 
-  const isDark = resolvedTheme === 'dark';
+  const isDark = resolvedTheme === "dark";
 
   return (
     <motion.nav
       className={`sticky top-0 z-50 transition-all duration-300 ${
         isScrolled
-          ? 'bg-background/80 backdrop-blur-2xl shadow-sm border-b border-transparent'
-          : 'bg-background/60 backdrop-blur-xl border-b border-white/10'
+          ? "bg-background/80 backdrop-blur-2xl shadow-sm border-b border-transparent"
+          : "bg-background/60 backdrop-blur-xl border-b border-white/10"
       }`}
     >
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div
           className={`flex items-center justify-between transition-all duration-300 ${
-            isScrolled ? 'h-14' : 'h-16'
+            isScrolled ? "h-14" : "h-16"
           }`}
         >
           {/* Logo */}
@@ -62,11 +57,11 @@ const Navbar: React.FC<NavbarProps> = ({ onTryDemo }) => {
             <button
               onClick={toggleTheme}
               className="relative flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-              aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+              aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
             >
               <AnimatePresence mode="wait">
                 <motion.div
-                  key={isDark ? 'moon' : 'sun'}
+                  key={isDark ? "moon" : "sun"}
                   initial={{ rotate: -90, scale: 0, opacity: 0 }}
                   animate={{ rotate: 0, scale: 1, opacity: 1 }}
                   exit={{ rotate: 90, scale: 0, opacity: 0 }}
@@ -82,10 +77,7 @@ const Navbar: React.FC<NavbarProps> = ({ onTryDemo }) => {
               </AnimatePresence>
             </button>
 
-            <Button
-              variant="ghost"
-              onClick={() => navigate('/auth/login')}
-            >
+            <Button variant="ghost" onClick={() => navigate("/auth/login")}>
               Sign In
             </Button>
             <Button

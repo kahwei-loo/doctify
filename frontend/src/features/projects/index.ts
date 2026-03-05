@@ -19,7 +19,7 @@ export type {
   ProcessingSettings,
   ProjectConfig,
   ExtractionConfig,
-} from './types';
+} from "./types";
 
 export {
   DEFAULT_PROJECT_CONFIG,
@@ -33,7 +33,7 @@ export {
   toExtractionField,
   toExtractionConfig,
   toProjectConfig,
-} from './types';
+} from "./types";
 
 // Components
 export {
@@ -59,4 +59,4 @@ export {
   DeleteProjectDialog,
   // Empty States
   EmptyProjectsState,
-} from './components';
+} from "./components";

@@ -6,24 +6,30 @@
  * Enhanced: P0.2 search modes, P1.1 reranking, P1.2 streaming
  */
 
-import React, { useState, useRef } from 'react';
-import { Send, Loader2, AlertCircle } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Label } from '@/components/ui/label';
+import React, { useState, useRef } from "react";
+import { Send, Loader2, AlertCircle } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { useQueryDocumentsMutation } from '@/store/api/ragApi';
-import { streamRAGQuery } from '@/store/api/ragApi';
-import type { RAGQueryResponse, SearchMode, StreamEvent, StreamDoneData, RAGSource } from '@/store/api/ragApi';
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { useQueryDocumentsMutation } from "@/store/api/ragApi";
+import { streamRAGQuery } from "@/store/api/ragApi";
+import type {
+  RAGQueryResponse,
+  SearchMode,
+  StreamEvent,
+  StreamDoneData,
+  RAGSource,
+} from "@/store/api/ragApi";
 
 interface RAGQueryPanelProps {
   conversationId?: string;
@@ -40,8 +46,8 @@ export function RAGQueryPanel({
   onStreamingSources,
   onStreamingDone,
 }: RAGQueryPanelProps) {
-  const [question, setQuestion] = useState('');
-  const [searchMode, setSearchMode] = useState<SearchMode>('hybrid');
+  const [question, setQuestion] = useState("");
+  const [searchMode, setSearchMode] = useState<SearchMode>("hybrid");
   const [useReranking, setUseReranking] = useState(false);
   const [useStreaming, setUseStreaming] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
@@ -71,26 +77,26 @@ export function RAGQueryPanel({
           requestBody,
           (event: StreamEvent) => {
             switch (event.type) {
-              case 'sources':
+              case "sources":
                 onStreamingSources?.(event.data as RAGSource[]);
                 break;
-              case 'token':
+              case "token":
                 onStreamingToken?.(event.data as string);
                 break;
-              case 'done':
+              case "done":
                 onStreamingDone?.(event.data as StreamDoneData);
                 break;
-              case 'error':
+              case "error":
                 setStreamError(event.data as string);
                 break;
             }
           },
-          abortRef.current.signal,
+          abortRef.current.signal
         );
-        setQuestion('');
+        setQuestion("");
       } catch (err) {
-        if ((err as Error).name !== 'AbortError') {
-          setStreamError((err as Error).message || 'Streaming failed');
+        if ((err as Error).name !== "AbortError") {
+          setStreamError((err as Error).message || "Streaming failed");
         }
       } finally {
         setIsStreaming(false);
@@ -101,9 +107,9 @@ export function RAGQueryPanel({
       try {
         const response = await queryDocuments(requestBody).unwrap();
         onQueryComplete?.(response);
-        setQuestion('');
+        setQuestion("");
       } catch (err) {
-        console.error('RAG query failed:', err);
+        console.error("RAG query failed:", err);
       }
     }
   };
@@ -113,11 +119,13 @@ export function RAGQueryPanel({
   };
 
   const isBusy = isLoading || isStreaming;
-  const displayError = streamError || (error
-    ? (error && typeof error === 'object' && 'data' in error
-        ? ((error as { data?: { detail?: string } }).data?.detail || 'Failed to process query')
-        : 'Failed to process query')
-    : null);
+  const displayError =
+    streamError ||
+    (error
+      ? error && typeof error === "object" && "data" in error
+        ? (error as { data?: { detail?: string } }).data?.detail || "Failed to process query"
+        : "Failed to process query"
+      : null);
 
   return (
     <Card>
@@ -188,15 +196,11 @@ export function RAGQueryPanel({
           )}
 
           <div className="flex gap-2">
-            <Button
-              type="submit"
-              disabled={isBusy || !question.trim()}
-              className="flex-1"
-            >
+            <Button type="submit" disabled={isBusy || !question.trim()} className="flex-1">
               {isBusy ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {isStreaming ? 'Streaming...' : 'Processing...'}
+                  {isStreaming ? "Streaming..." : "Processing..."}
                 </>
               ) : (
                 <>

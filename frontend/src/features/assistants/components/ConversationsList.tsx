@@ -5,30 +5,28 @@
  * Supports status filtering: All, Unresolved, In Progress, Resolved
  */
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Search,
   MessageSquare,
   Clock,
   CheckCircle2,
   AlertCircle,
-  Loader2,
   Inbox,
   FlaskConical,
   Globe,
   Code,
-} from 'lucide-react';
-import { useGetConversationsQuery } from '@/store/api/conversationsApi';
-import type { Conversation, ConversationStatus } from '../types';
-import { ErrorState } from './ErrorState';
-import { ConversationsListSkeleton } from './LoadingStates';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
-import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
+} from "lucide-react";
+import { useGetConversationsQuery } from "@/store/api/conversationsApi";
+import type { Conversation, ConversationStatus } from "../types";
+import { ErrorState } from "./ErrorState";
+import { ConversationsListSkeleton } from "./LoadingStates";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 
 // Enable relative time plugin
 dayjs.extend(relativeTime);
@@ -48,14 +46,19 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
   onSelectConversation,
   className,
 }) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<ConversationStatus | 'all'>('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<ConversationStatus | "all">("all");
 
   // Fetch conversations
-  const { data: response, isLoading, isError, refetch } = useGetConversationsQuery({
+  const {
+    data: response,
+    isLoading,
+    isError,
+    refetch,
+  } = useGetConversationsQuery({
     filters: {
       assistant_id: assistantId,
-      status: statusFilter === 'all' ? undefined : statusFilter,
+      status: statusFilter === "all" ? undefined : statusFilter,
       search: searchQuery || undefined,
     },
   });
@@ -63,11 +66,15 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
   const conversations = response?.data || [];
 
   // Status filter buttons config
-  const statusFilters: { value: ConversationStatus | 'all'; label: string; icon: React.ElementType }[] = [
-    { value: 'all', label: 'All', icon: Inbox },
-    { value: 'unresolved', label: 'Unresolved', icon: AlertCircle },
-    { value: 'in_progress', label: 'In Progress', icon: Clock },
-    { value: 'resolved', label: 'Resolved', icon: CheckCircle2 },
+  const statusFilters: {
+    value: ConversationStatus | "all";
+    label: string;
+    icon: React.ElementType;
+  }[] = [
+    { value: "all", label: "All", icon: Inbox },
+    { value: "unresolved", label: "Unresolved", icon: AlertCircle },
+    { value: "in_progress", label: "In Progress", icon: Clock },
+    { value: "resolved", label: "Resolved", icon: CheckCircle2 },
   ];
 
   // Loading state
@@ -78,7 +85,7 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
   // Error state
   if (isError) {
     return (
-      <div className={cn('flex flex-col h-full bg-muted/30', className)}>
+      <div className={cn("flex flex-col h-full bg-muted/30", className)}>
         <div className="p-4 border-b bg-background">
           <h3 className="font-semibold text-sm flex items-center gap-2">
             <MessageSquare className="h-4 w-4" />
@@ -99,7 +106,7 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
   }
 
   return (
-    <div className={cn('flex flex-col h-full bg-muted/30', className)}>
+    <div className={cn("flex flex-col h-full bg-muted/30", className)}>
       {/* Header */}
       <div className="p-4 border-b bg-background space-y-3">
         <div className="flex items-center justify-between">
@@ -130,7 +137,7 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
           {statusFilters.map(({ value, label, icon: Icon }) => (
             <Button
               key={value}
-              variant={statusFilter === value ? 'default' : 'outline'}
+              variant={statusFilter === value ? "default" : "outline"}
               size="sm"
               onClick={() => setStatusFilter(value)}
               className="h-7 text-xs"
@@ -151,11 +158,11 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
             </div>
             <h4 className="text-sm font-semibold mb-1">No Conversations</h4>
             <p className="text-xs text-muted-foreground max-w-[200px]">
-              {statusFilter !== 'all'
-                ? `No ${statusFilter.replace('_', ' ')} conversations found.`
+              {statusFilter !== "all"
+                ? `No ${statusFilter.replace("_", " ")} conversations found.`
                 : assistantName
                   ? `${assistantName} hasn't received any conversations yet.`
-                  : 'No conversations to display.'}
+                  : "No conversations to display."}
             </p>
           </div>
         ) : (
@@ -176,30 +183,31 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
 };
 
 // Source Badge Component
-const sourceConfig: Record<string, { icon: React.ElementType; label: string; className: string }> = {
-  test_dialog: {
-    icon: FlaskConical,
-    label: 'Test',
-    className: 'text-purple-600 dark:text-purple-400',
-  },
-  widget: {
-    icon: Globe,
-    label: 'Widget',
-    className: 'text-blue-600 dark:text-blue-400',
-  },
-  api: {
-    icon: Code,
-    label: 'API',
-    className: 'text-green-600 dark:text-green-400',
-  },
-};
+const sourceConfig: Record<string, { icon: React.ElementType; label: string; className: string }> =
+  {
+    test_dialog: {
+      icon: FlaskConical,
+      label: "Test",
+      className: "text-purple-600 dark:text-purple-400",
+    },
+    widget: {
+      icon: Globe,
+      label: "Widget",
+      className: "text-blue-600 dark:text-blue-400",
+    },
+    api: {
+      icon: Code,
+      label: "API",
+      className: "text-green-600 dark:text-green-400",
+    },
+  };
 
 const SourceBadge: React.FC<{ source: string }> = ({ source }) => {
   const config = sourceConfig[source];
   if (!config) return null;
   const Icon = config.icon;
   return (
-    <div className={cn('flex items-center gap-1', config.className)}>
+    <div className={cn("flex items-center gap-1", config.className)}>
       <Icon className="h-3 w-3" />
       <span>{config.label}</span>
     </div>
@@ -220,19 +228,19 @@ const ConversationItem: React.FC<ConversationItemProps> = ({
 }) => {
   const statusConfig = {
     unresolved: {
-      color: 'text-orange-600 dark:text-orange-400',
-      bg: 'bg-orange-100 dark:bg-orange-900/20',
-      label: 'Unresolved',
+      color: "text-orange-600 dark:text-orange-400",
+      bg: "bg-orange-100 dark:bg-orange-900/20",
+      label: "Unresolved",
     },
     in_progress: {
-      color: 'text-blue-600 dark:text-blue-400',
-      bg: 'bg-blue-100 dark:bg-blue-900/20',
-      label: 'In Progress',
+      color: "text-blue-600 dark:text-blue-400",
+      bg: "bg-blue-100 dark:bg-blue-900/20",
+      label: "In Progress",
     },
     resolved: {
-      color: 'text-green-600 dark:text-green-400',
-      bg: 'bg-green-100 dark:bg-green-900/20',
-      label: 'Resolved',
+      color: "text-green-600 dark:text-green-400",
+      bg: "bg-green-100 dark:bg-green-900/20",
+      label: "Resolved",
     },
   };
 
@@ -241,19 +249,16 @@ const ConversationItem: React.FC<ConversationItemProps> = ({
   return (
     <div
       className={cn(
-        'p-3 rounded-lg cursor-pointer transition-all',
-        'hover:bg-accent hover:shadow-sm',
-        'border border-transparent',
-        isSelected && 'bg-accent border-primary/20 shadow-sm'
+        "p-3 rounded-lg cursor-pointer transition-all",
+        "hover:bg-accent hover:shadow-sm",
+        "border border-transparent",
+        isSelected && "bg-accent border-primary/20 shadow-sm"
       )}
       onClick={onClick}
     >
       {/* Status Badge & Time */}
       <div className="flex items-center justify-between mb-2">
-        <Badge
-          variant="outline"
-          className={cn('text-xs h-5', status.color, status.bg, 'border-0')}
-        >
+        <Badge variant="outline" className={cn("text-xs h-5", status.color, status.bg, "border-0")}>
           {status.label}
         </Badge>
         <span className="text-xs text-muted-foreground">
@@ -266,9 +271,7 @@ const ConversationItem: React.FC<ConversationItemProps> = ({
 
       {/* Source & Message Count */}
       <div className="flex items-center gap-3 text-xs text-muted-foreground">
-        {conversation.context?.source && (
-          <SourceBadge source={conversation.context.source} />
-        )}
+        {conversation.context?.source && <SourceBadge source={conversation.context.source} />}
         <div className="flex items-center gap-1">
           <MessageSquare className="h-3 w-3" />
           <span>{conversation.message_count} messages</span>

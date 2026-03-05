@@ -1,5 +1,5 @@
-import React from 'react';
-import { Loader2, Trash2, AlertTriangle } from 'lucide-react';
+import React from "react";
+import { Loader2, Trash2, AlertTriangle } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -9,7 +9,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+} from "@/components/ui/alert-dialog";
 
 interface DeleteModelDialogProps {
   open: boolean;
@@ -37,18 +37,15 @@ export const DeleteModelDialog: React.FC<DeleteModelDialogProps> = ({
             <AlertDialogTitle>Remove Model</AlertDialogTitle>
           </div>
           <AlertDialogDescription className="pt-2">
-            Are you sure you want to remove{' '}
-            <span className="font-medium text-foreground">"{modelName}"</span>{' '}
-            from the catalog?
+            Are you sure you want to remove{" "}
+            <span className="font-medium text-foreground">"{modelName}"</span> from the catalog?
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         <div className="rounded-lg bg-amber-500/5 border border-amber-500/20 p-3 text-sm">
           <div className="flex items-center gap-2">
             <AlertTriangle className="h-4 w-4 text-amber-600 flex-shrink-0" />
-            <p className="font-medium text-amber-700 dark:text-amber-500">
-              Note:
-            </p>
+            <p className="font-medium text-amber-700 dark:text-amber-500">Note:</p>
           </div>
           <ul className="mt-1 text-muted-foreground space-y-1 list-disc list-inside ml-6">
             <li>This model will no longer appear in purpose dropdowns</li>
@@ -69,7 +66,7 @@ export const DeleteModelDialog: React.FC<DeleteModelDialogProps> = ({
                 Removing...
               </>
             ) : (
-              'Remove Model'
+              "Remove Model"
             )}
           </AlertDialogAction>
         </AlertDialogFooter>

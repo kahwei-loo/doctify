@@ -5,9 +5,9 @@
  * cancel, retry, and quality validation.
  */
 
-import { useState, useCallback } from 'react';
-import { documentApi } from '../services/api';
-import type { QualityValidation } from '../types';
+import { useState, useCallback } from "react";
+import { documentApi } from "../services/api";
+import type { QualityValidation } from "../types";
 
 interface UseDocumentProcessingReturn {
   isProcessing: boolean;
@@ -37,10 +37,10 @@ export const useDocumentProcessing = (): UseDocumentProcessingReturn => {
         const response = await documentApi.process(documentId, extractionConfig);
 
         if (!response.success) {
-          throw new Error(response.message || 'Processing failed');
+          throw new Error(response.message || "Processing failed");
         }
       } catch (err: any) {
-        const errorMessage = err.response?.data?.detail || 'Failed to start processing';
+        const errorMessage = err.response?.data?.detail || "Failed to start processing";
         setError(errorMessage);
         throw err;
       } finally {
@@ -61,10 +61,10 @@ export const useDocumentProcessing = (): UseDocumentProcessingReturn => {
       const response = await documentApi.cancel(documentId);
 
       if (!response.success) {
-        throw new Error(response.message || 'Cancellation failed');
+        throw new Error(response.message || "Cancellation failed");
       }
     } catch (err: any) {
-      const errorMessage = err.response?.data?.detail || 'Failed to cancel processing';
+      const errorMessage = err.response?.data?.detail || "Failed to cancel processing";
       setError(errorMessage);
       throw err;
     } finally {
@@ -83,10 +83,10 @@ export const useDocumentProcessing = (): UseDocumentProcessingReturn => {
       const response = await documentApi.retry(documentId);
 
       if (!response.success) {
-        throw new Error(response.message || 'Retry failed');
+        throw new Error(response.message || "Retry failed");
       }
     } catch (err: any) {
-      const errorMessage = err.response?.data?.detail || 'Failed to retry processing';
+      const errorMessage = err.response?.data?.detail || "Failed to retry processing";
       setError(errorMessage);
       throw err;
     } finally {
@@ -106,13 +106,13 @@ export const useDocumentProcessing = (): UseDocumentProcessingReturn => {
         const response = await documentApi.validateQuality(documentId, minimumConfidence);
 
         if (!response.success) {
-          throw new Error('Quality validation failed');
+          throw new Error("Quality validation failed");
         }
 
         setQualityValidation(response.data);
         return response.data;
       } catch (err: any) {
-        const errorMessage = err.response?.data?.detail || 'Failed to validate quality';
+        const errorMessage = err.response?.data?.detail || "Failed to validate quality";
         setError(errorMessage);
         throw err;
       } finally {

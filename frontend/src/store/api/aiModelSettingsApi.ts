@@ -2,31 +2,25 @@
  * AI Model Settings API — RTK Query endpoints (admin-only)
  */
 
-import { api } from './apiSlice';
+import { api } from "./apiSlice";
 import type {
   AIModelSettingsResponse,
   ModelCatalogEntry,
   UpdateAIModelSettingRequest,
   CreateModelCatalogEntryRequest,
   UpdateModelCatalogEntryRequest,
-} from '@/features/settings/types';
+} from "@/features/settings/types";
 
 export const aiModelSettingsApi = api.injectEndpoints({
   endpoints: (builder) => ({
-    getAIModelSettings: builder.query<
-      { success: boolean; data: AIModelSettingsResponse },
-      void
-    >({
-      query: () => '/admin/ai-models',
-      providesTags: ['AIModelSettings'],
+    getAIModelSettings: builder.query<{ success: boolean; data: AIModelSettingsResponse }, void>({
+      query: () => "/admin/ai-models",
+      providesTags: ["AIModelSettings"],
     }),
 
-    getModelCatalog: builder.query<
-      { success: boolean; data: ModelCatalogEntry[] },
-      void
-    >({
-      query: () => '/admin/ai-models/catalog',
-      providesTags: ['AIModelSettings'],
+    getModelCatalog: builder.query<{ success: boolean; data: ModelCatalogEntry[] }, void>({
+      query: () => "/admin/ai-models/catalog",
+      providesTags: ["AIModelSettings"],
     }),
 
     updateAIModelSetting: builder.mutation<
@@ -35,10 +29,10 @@ export const aiModelSettingsApi = api.injectEndpoints({
     >({
       query: ({ purpose, body }) => ({
         url: `/admin/ai-models/${purpose}`,
-        method: 'PATCH',
+        method: "PATCH",
         body,
       }),
-      invalidatesTags: ['AIModelSettings'],
+      invalidatesTags: ["AIModelSettings"],
     }),
 
     addCatalogEntry: builder.mutation<
@@ -46,11 +40,11 @@ export const aiModelSettingsApi = api.injectEndpoints({
       CreateModelCatalogEntryRequest
     >({
       query: (body) => ({
-        url: '/admin/ai-models/catalog',
-        method: 'POST',
+        url: "/admin/ai-models/catalog",
+        method: "POST",
         body,
       }),
-      invalidatesTags: ['AIModelSettings'],
+      invalidatesTags: ["AIModelSettings"],
     }),
 
     updateCatalogEntry: builder.mutation<
@@ -59,21 +53,18 @@ export const aiModelSettingsApi = api.injectEndpoints({
     >({
       query: ({ entryId, body }) => ({
         url: `/admin/ai-models/catalog/${entryId}`,
-        method: 'PATCH',
+        method: "PATCH",
         body,
       }),
-      invalidatesTags: ['AIModelSettings'],
+      invalidatesTags: ["AIModelSettings"],
     }),
 
-    deleteCatalogEntry: builder.mutation<
-      { success: boolean; detail: string },
-      string
-    >({
+    deleteCatalogEntry: builder.mutation<{ success: boolean; detail: string }, string>({
       query: (entryId) => ({
         url: `/admin/ai-models/catalog/${entryId}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
-      invalidatesTags: ['AIModelSettings'],
+      invalidatesTags: ["AIModelSettings"],
     }),
   }),
 });

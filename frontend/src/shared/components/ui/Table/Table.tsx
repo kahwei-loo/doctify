@@ -4,8 +4,8 @@
  * Reusable table component with sorting, selection, and responsive design.
  */
 
-import React from 'react';
-import './Table.css';
+import React from "react";
+import "./Table.css";
 
 export interface TableColumn<T = any> {
   key: string;
@@ -13,16 +13,16 @@ export interface TableColumn<T = any> {
   sortable?: boolean;
   render?: (value: any, row: T) => React.ReactNode;
   width?: string;
-  align?: 'left' | 'center' | 'right';
+  align?: "left" | "center" | "right";
 }
 
 export interface TableProps<T = any> {
   columns: TableColumn<T>[];
   data: T[];
   keyExtractor: (row: T) => string;
-  onSort?: (key: string, direction: 'asc' | 'desc') => void;
+  onSort?: (key: string, direction: "asc" | "desc") => void;
   sortKey?: string;
-  sortDirection?: 'asc' | 'desc';
+  sortDirection?: "asc" | "desc";
   selectable?: boolean;
   selectedRows?: Set<string>;
   onSelectRow?: (key: string) => void;
@@ -44,7 +44,7 @@ export function Table<T = any>({
   selectedRows = new Set(),
   onSelectRow,
   onSelectAll,
-  emptyMessage = 'No data available',
+  emptyMessage = "No data available",
   loading = false,
   striped = false,
   hoverable = true,
@@ -55,18 +55,18 @@ export function Table<T = any>({
   const handleSort = (key: string) => {
     if (!onSort) return;
 
-    const newDirection = sortKey === key && sortDirection === 'asc' ? 'desc' : 'asc';
+    const newDirection = sortKey === key && sortDirection === "asc" ? "desc" : "asc";
     onSort(key, newDirection);
   };
 
   const tableClassNames = [
-    'table',
-    striped && 'table--striped',
-    hoverable && 'table--hoverable',
-    loading && 'table--loading',
+    "table",
+    striped && "table--striped",
+    hoverable && "table--hoverable",
+    loading && "table--loading",
   ]
     .filter(Boolean)
-    .join(' ');
+    .join(" ");
 
   return (
     <div className="table-container">
@@ -91,7 +91,7 @@ export function Table<T = any>({
             {columns.map((column) => (
               <th
                 key={column.key}
-                className={`table__cell table__cell--header table__cell--align-${column.align || 'left'}`}
+                className={`table__cell table__cell--header table__cell--align-${column.align || "left"}`}
                 style={{ width: column.width }}
                 onClick={() => column.sortable && handleSort(column.key)}
               >
@@ -100,7 +100,7 @@ export function Table<T = any>({
                   {column.sortable && (
                     <span className="table__sort-icon">
                       {sortKey === column.key ? (
-                        sortDirection === 'asc' ? (
+                        sortDirection === "asc" ? (
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             fill="none"
@@ -177,7 +177,7 @@ export function Table<T = any>({
               const isSelected = selectedRows.has(rowKey);
 
               return (
-                <tr key={rowKey} className={isSelected ? 'table__row--selected' : ''}>
+                <tr key={rowKey} className={isSelected ? "table__row--selected" : ""}>
                   {selectable && (
                     <td className="table__cell table__cell--checkbox">
                       <input
@@ -191,9 +191,11 @@ export function Table<T = any>({
                   {columns.map((column) => (
                     <td
                       key={column.key}
-                      className={`table__cell table__cell--align-${column.align || 'left'}`}
+                      className={`table__cell table__cell--align-${column.align || "left"}`}
                     >
-                      {column.render ? column.render((row as Record<string, unknown>)[column.key], row) : String((row as Record<string, unknown>)[column.key] ?? '')}
+                      {column.render
+                        ? column.render((row as Record<string, unknown>)[column.key], row)
+                        : String((row as Record<string, unknown>)[column.key] ?? "")}
                     </td>
                   ))}
                 </tr>

@@ -1,14 +1,8 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { FileText } from 'lucide-react';
-import LoginForm from '@/features/auth/components/LoginForm';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import React from "react";
+import { Link } from "react-router-dom";
+import { FileText } from "lucide-react";
+import LoginForm from "@/features/auth/components/LoginForm";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const LoginPage: React.FC = () => {
   return (
@@ -28,9 +22,7 @@ const LoginPage: React.FC = () => {
         <Card className="shadow-xl border-border/50">
           <CardHeader className="text-center pb-2">
             <CardTitle className="text-2xl">Welcome back</CardTitle>
-            <CardDescription>
-              Sign in to your account to continue
-            </CardDescription>
+            <CardDescription>Sign in to your account to continue</CardDescription>
           </CardHeader>
           <CardContent className="pt-4">
             <LoginForm />

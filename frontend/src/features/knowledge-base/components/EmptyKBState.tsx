@@ -9,30 +9,28 @@
  * - Helpful description
  */
 
-import React from 'react';
-import { Database, Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
+import React from "react";
+import { Database, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 interface EmptyKBStateProps {
   onCreateKB?: () => void;
   className?: string;
 }
 
-export const EmptyKBState: React.FC<EmptyKBStateProps> = ({
-  onCreateKB,
-  className,
-}) => {
+export const EmptyKBState: React.FC<EmptyKBStateProps> = ({ onCreateKB, className }) => {
   return (
-    <Card className={cn('border-dashed', className)}>
+    <Card className={cn("border-dashed", className)}>
       <CardContent className="flex flex-col items-center justify-center py-16 text-center">
         <div className="flex items-center justify-center h-20 w-20 rounded-full bg-primary/10 mb-6">
           <Database className="h-10 w-10 text-primary" />
         </div>
         <h3 className="text-xl font-semibold mb-2">No Knowledge Bases Yet</h3>
         <p className="text-muted-foreground max-w-md mb-6">
-          Create your first knowledge base to start organizing and searching your content with AI-powered semantic search.
+          Create your first knowledge base to start organizing and searching your content with
+          AI-powered semantic search.
         </p>
         {onCreateKB && (
           <Button onClick={onCreateKB} size="lg" className="gap-2">

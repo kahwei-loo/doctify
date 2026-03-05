@@ -5,12 +5,12 @@
  * Combines FieldList and FieldForm for CRUD operations.
  */
 
-import React, { useState, useCallback } from 'react';
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
-import { FieldList } from './FieldList';
-import { FieldForm } from './FieldForm';
-import type { ExtractionField } from '../types';
+import React, { useState, useCallback } from "react";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import { FieldList } from "./FieldList";
+import { FieldForm } from "./FieldForm";
+import type { ExtractionField } from "../types";
 
 interface FieldEditorProps {
   fields: ExtractionField[];
@@ -24,10 +24,7 @@ const generateFieldId = (): string => {
   return `field_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 };
 
-export const FieldEditor: React.FC<FieldEditorProps> = ({
-  fields,
-  onChange,
-}) => {
+export const FieldEditor: React.FC<FieldEditorProps> = ({ fields, onChange }) => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingField, setEditingField] = useState<ExtractionField | null>(null);
 
@@ -48,13 +45,11 @@ export const FieldEditor: React.FC<FieldEditorProps> = ({
 
   // Handle saving a field (add or update)
   const handleSave = useCallback(
-    (fieldData: Omit<ExtractionField, 'id'> & { id?: string }) => {
+    (fieldData: Omit<ExtractionField, "id"> & { id?: string }) => {
       if (fieldData.id) {
         // Update existing field
         const updatedFields = fields.map((f) =>
-          f.id === fieldData.id
-            ? { ...fieldData, id: fieldData.id } as ExtractionField
-            : f
+          f.id === fieldData.id ? ({ ...fieldData, id: fieldData.id } as ExtractionField) : f
         );
         onChange(updatedFields);
       } else {

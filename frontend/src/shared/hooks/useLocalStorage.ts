@@ -5,7 +5,7 @@
  * serialization and deserialization.
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from "react";
 
 export function useLocalStorage<T>(
   key: string,
@@ -69,8 +69,8 @@ export function useLocalStorage<T>(
       }
     };
 
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, [key]);
 
   return [storedValue, setValue, removeValue];
