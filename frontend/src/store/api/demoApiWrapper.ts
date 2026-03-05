@@ -10,8 +10,8 @@ import { mockApiHandler } from "../../features/demo/utils/mockApiHandler";
 /**
  * Wraps a base query to intercept requests in demo mode
  */
-export const createDemoApiWrapper = <T extends BaseQueryFn>(baseQuery: T): BaseQueryFn => {
-  return async (args, api, extraOptions) => {
+export const createDemoApiWrapper = <T extends BaseQueryFn>(baseQuery: T): T => {
+  const wrapper: BaseQueryFn = async (args, api, extraOptions) => {
     // Check if demo mode is active
     const state = api.getState() as RootState;
     const isDemoMode = state.demo?.isActive || false;
@@ -57,4 +57,5 @@ export const createDemoApiWrapper = <T extends BaseQueryFn>(baseQuery: T): BaseQ
     // Not in demo mode, use real base query
     return baseQuery(args, api, extraOptions);
   };
+  return wrapper as unknown as T;
 };

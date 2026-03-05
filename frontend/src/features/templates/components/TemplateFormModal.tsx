@@ -103,7 +103,7 @@ export const TemplateFormModal: React.FC<TemplateFormModalProps> = ({
       setFormData({
         name: template.name,
         description: template.description || "",
-        document_type: template.document_type || "",
+        document_type: (template.document_type || "") as TemplateFormData["document_type"],
         visibility: template.visibility,
         category: template.category || "",
         tags: template.tags || [],

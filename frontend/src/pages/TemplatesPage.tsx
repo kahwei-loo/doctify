@@ -147,7 +147,6 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template, onEdit, onDelete,
               <FileText className="h-3.5 w-3.5" />
               <span>{template.usage_count} uses</span>
             </div>
-            <div className="text-xs">v{template.version}</div>
           </div>
 
           {/* Tags */}

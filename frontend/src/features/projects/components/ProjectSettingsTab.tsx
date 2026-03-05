@@ -125,7 +125,7 @@ export const ProjectSettingsTab: React.FC<ProjectSettingsTabProps> = ({
           <AlertCircle className="h-5 w-5" />
           <span>
             Failed to save settings.{" "}
-            {error && "data" in error
+            {error && typeof error === "object" && "data" in error
               ? String(
                   (error as { data?: { message?: string } }).data?.message || "Please try again."
                 )

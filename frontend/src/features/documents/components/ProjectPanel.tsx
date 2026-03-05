@@ -317,11 +317,11 @@ export const ProjectPanel: React.FC<ProjectPanelProps> = ({
 
             <div className="px-2 pb-2 space-y-1">
               {/* Loading State */}
-              {isLoading && (
+              {isLoading ? (
                 <div className="flex items-center justify-center py-8">
                   <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                 </div>
-              )}
+              ) : null}
 
               {/* Error State */}
               {error && (
