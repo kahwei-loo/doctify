@@ -108,8 +108,8 @@ export default defineConfig({
       clean: true,
     },
 
-    // Watch configuration
-    watch: true,
+    // Watch configuration — disabled in CI so the process exits after tests complete
+    watch: !process.env.CI,
     watchExclude: ['node_modules', 'dist'],
 
     // Thread configuration for performance
