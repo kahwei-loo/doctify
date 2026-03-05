@@ -135,7 +135,10 @@ class AuthenticationService(BaseService[User, UserRepository]):
         if user.is_locked():
             # Calculate remaining lockout time
             from datetime import datetime
-            remaining_time = (user.locked_until - datetime.utcnow()).total_seconds() / 60
+
+            remaining_time = (
+                user.locked_until - datetime.utcnow()
+            ).total_seconds() / 60
             remaining_minutes = int(remaining_time) + 1  # Round up
 
             # Log failed login - account locked
@@ -148,7 +151,9 @@ class AuthenticationService(BaseService[User, UserRepository]):
                 success=False,
                 failure_reason="account_locked",
                 lockout_info={
-                    "locked_until": user.locked_until.isoformat() if user.locked_until else None,
+                    "locked_until": (
+                        user.locked_until.isoformat() if user.locked_until else None
+                    ),
                     "failed_attempts": user.failed_login_attempts,
                     "remaining_minutes": remaining_minutes,
                 },
@@ -160,7 +165,9 @@ class AuthenticationService(BaseService[User, UserRepository]):
                 details={
                     "email": email,
                     "user_id": str(user.id),
-                    "locked_until": user.locked_until.isoformat() if user.locked_until else None,
+                    "locked_until": (
+                        user.locked_until.isoformat() if user.locked_until else None
+                    ),
                     "failed_attempts": user.failed_login_attempts,
                 },
             )
@@ -196,7 +203,9 @@ class AuthenticationService(BaseService[User, UserRepository]):
                     success=False,
                     failure_reason="max_failed_attempts",
                     lockout_info={
-                        "locked_until": user.locked_until.isoformat() if user.locked_until else None,
+                        "locked_until": (
+                            user.locked_until.isoformat() if user.locked_until else None
+                        ),
                         "failed_attempts": user.failed_login_attempts,
                         "lockout_minutes": settings.LOGIN_LOCKOUT_MINUTES,
                     },
@@ -208,13 +217,17 @@ class AuthenticationService(BaseService[User, UserRepository]):
                     details={
                         "email": email,
                         "user_id": str(user.id),
-                        "locked_until": user.locked_until.isoformat() if user.locked_until else None,
+                        "locked_until": (
+                            user.locked_until.isoformat() if user.locked_until else None
+                        ),
                         "failed_attempts": user.failed_login_attempts,
                     },
                 )
             else:
                 # Not locked yet, show remaining attempts
-                remaining_attempts = settings.MAX_LOGIN_ATTEMPTS - user.failed_login_attempts
+                remaining_attempts = (
+                    settings.MAX_LOGIN_ATTEMPTS - user.failed_login_attempts
+                )
 
                 # Log failed login - invalid password
                 await AuditLogger.log_authentication(

@@ -9,8 +9,15 @@ from typing import Literal, List
 
 from app.services.ai import get_ai_gateway, ModelPurpose
 
-
-IntentType = Literal["rag_query", "document_search", "document_operation", "insights_query", "clarification", "greeting", "unknown"]
+IntentType = Literal[
+    "rag_query",
+    "document_search",
+    "document_operation",
+    "insights_query",
+    "clarification",
+    "greeting",
+    "unknown",
+]
 
 
 class IntentClassifier:
@@ -19,7 +26,9 @@ class IntentClassifier:
     def __init__(self):
         self.gateway = get_ai_gateway()
 
-    async def classify_intent(self, user_message: str, conversation_context: dict = None) -> IntentType:
+    async def classify_intent(
+        self, user_message: str, conversation_context: dict = None
+    ) -> IntentType:
         """
         Classify user message intent using GPT-4.
 
@@ -58,7 +67,7 @@ Respond with ONLY the intent category, no explanation."""
                 purpose=ModelPurpose.CLASSIFIER,
                 messages=[
                     {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": f"User message: {user_message}"}
+                    {"role": "user", "content": f"User message: {user_message}"},
                 ],
                 temperature=0.0,
                 max_tokens=20,
@@ -68,8 +77,13 @@ Respond with ONLY the intent category, no explanation."""
 
             # Validate and return
             valid_intents: List[IntentType] = [
-                "rag_query", "document_search", "document_operation",
-                "insights_query", "clarification", "greeting", "unknown"
+                "rag_query",
+                "document_search",
+                "document_operation",
+                "insights_query",
+                "clarification",
+                "greeting",
+                "unknown",
             ]
 
             return intent if intent in valid_intents else "unknown"

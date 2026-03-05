@@ -21,6 +21,7 @@ from enum import Enum
 
 class RetryReason(Enum):
     """Reasons for triggering a retry."""
+
     LOW_OVERALL_CONFIDENCE = "low_overall_confidence"
     MISSING_CRITICAL_FIELDS = "missing_critical_fields"
     LOW_FIELD_CONFIDENCE = "low_field_confidence"
@@ -31,6 +32,7 @@ class RetryReason(Enum):
 @dataclass
 class RetryConfig:
     """Configuration for retry behavior."""
+
     # Confidence thresholds (aligned with Taggun's 0.7-0.8 recommendations)
     min_acceptable_confidence: float = 0.70
     high_confidence_threshold: float = 0.85
@@ -50,6 +52,7 @@ class RetryConfig:
 @dataclass
 class RetryContext:
     """Context for tracking retry state across attempts."""
+
     attempt_number: int = 0
     max_attempts: int = 3
     previous_results: List[Dict[str, Any]] = field(default_factory=list)
@@ -133,9 +136,7 @@ class RetryDecisionEngine:
 
         # Check 3: Low field-level confidence
         field_confidences = result.get("field_confidences", {})
-        low_conf_fields = self._find_low_confidence_fields(
-            field_confidences, doc_type
-        )
+        low_conf_fields = self._find_low_confidence_fields(field_confidences, doc_type)
         if low_conf_fields:
             reasons.append(RetryReason.LOW_FIELD_CONFIDENCE)
             context.low_confidence_fields = low_conf_fields
@@ -150,7 +151,9 @@ class RetryDecisionEngine:
                     reasons.append(RetryReason.SST_VALIDATION_FAILED)
 
         # Decision: Retry if we have reasons and confidence is improvable
-        should_retry = len(reasons) > 0 and confidence < self.config.high_confidence_threshold
+        should_retry = (
+            len(reasons) > 0 and confidence < self.config.high_confidence_threshold
+        )
 
         return should_retry, reasons
 
@@ -171,7 +174,9 @@ class RetryDecisionEngine:
                 # Also check camelCase variant
                 camel = self._to_camel_case(field_name)
                 camel_value = result.get(camel)
-                if camel_value is None or (isinstance(camel_value, str) and not camel_value.strip()):
+                if camel_value is None or (
+                    isinstance(camel_value, str) and not camel_value.strip()
+                ):
                     missing.append(field_name)
 
         return missing
@@ -194,7 +199,8 @@ class RetryDecisionEngine:
             # Use stricter threshold for critical fields
             threshold = (
                 self.config.critical_field_min_confidence
-                if field_name in critical_fields or self._to_snake_case(field_name) in critical_fields
+                if field_name in critical_fields
+                or self._to_snake_case(field_name) in critical_fields
                 else self.config.min_field_confidence
             )
 
@@ -243,6 +249,7 @@ def select_best_result(
         Tuple of (best_result, best_confidence)
     """
     import logging
+
     logger = logging.getLogger(__name__)
 
     if not results:
@@ -279,8 +286,8 @@ def select_best_result(
                 best_conf = conf
             elif curr_filled == best_filled and token_usages:
                 # P1 Fix: Tiebreaker - prefer lower token usage when confidence and completeness are equal
-                curr_tokens = token_usages[i].get("total_tokens", float('inf'))
-                best_tokens = token_usages[best_idx].get("total_tokens", float('inf'))
+                curr_tokens = token_usages[i].get("total_tokens", float("inf"))
+                best_tokens = token_usages[best_idx].get("total_tokens", float("inf"))
                 if curr_tokens < best_tokens:
                     logger.debug(
                         f"Attempt {i+1} has similar confidence ({conf:.3f} vs {best_conf:.3f}), "

@@ -17,6 +17,7 @@ from enum import Enum
 
 class ConversationStatus(str, Enum):
     """Status of a conversation."""
+
     UNRESOLVED = "unresolved"
     IN_PROGRESS = "in_progress"
     RESOLVED = "resolved"

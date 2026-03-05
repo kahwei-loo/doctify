@@ -20,11 +20,16 @@ class ChatConversationRepository(BaseRepository[ChatConversation]):
     def __init__(self, session: AsyncSession):
         super().__init__(session, ChatConversation)
 
-    async def get_by_user_id(self, user_id: UUID, limit: int = 50) -> List[ChatConversation]:
+    async def get_by_user_id(
+        self, user_id: UUID, limit: int = 50
+    ) -> List[ChatConversation]:
         """Get user's conversations ordered by most recent."""
-        stmt = select(ChatConversation).where(
-            ChatConversation.user_id == user_id
-        ).order_by(ChatConversation.updated_at.desc()).limit(limit)
+        stmt = (
+            select(ChatConversation)
+            .where(ChatConversation.user_id == user_id)
+            .order_by(ChatConversation.updated_at.desc())
+            .limit(limit)
+        )
 
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
@@ -37,14 +42,15 @@ class ChatMessageRepository(BaseRepository[ChatMessage]):
         super().__init__(session, ChatMessage)
 
     async def get_by_conversation_id(
-        self,
-        conversation_id: UUID,
-        limit: int = 100
+        self, conversation_id: UUID, limit: int = 100
     ) -> List[ChatMessage]:
         """Get messages for a conversation ordered by time."""
-        stmt = select(ChatMessage).where(
-            ChatMessage.conversation_id == conversation_id
-        ).order_by(ChatMessage.created_at).limit(limit)
+        stmt = (
+            select(ChatMessage)
+            .where(ChatMessage.conversation_id == conversation_id)
+            .order_by(ChatMessage.created_at)
+            .limit(limit)
+        )
 
         result = await self.session.execute(stmt)
         return list(result.scalars().all())

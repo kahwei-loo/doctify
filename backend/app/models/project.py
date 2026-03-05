@@ -8,10 +8,10 @@ Based on the old project's complete configuration system.
 from typing import Optional, List, Dict, Any, Literal
 from pydantic import BaseModel, Field, field_validator
 
-
 # =============================================================================
 # Field Configuration Models
 # =============================================================================
+
 
 class FieldDefinition(BaseModel):
     """
@@ -19,15 +19,19 @@ class FieldDefinition(BaseModel):
 
     Corresponds to the old project's ConfigField structure.
     """
+
     name: str = Field(..., description="Field name (required)")
     description: Optional[str] = Field(None, description="Field description")
     type: Literal["text", "number", "date", "boolean", "array", "object"] = Field(
-        default="text",
-        description="Data type for the field"
+        default="text", description="Data type for the field"
     )
     required: bool = Field(default=False, description="Whether field is mandatory")
-    default_value: Optional[str] = Field(None, description="Default value if not extracted")
-    fixed_value: Optional[str] = Field(None, description="Fixed value (overrides extraction)")
+    default_value: Optional[str] = Field(
+        None, description="Default value if not extracted"
+    )
+    fixed_value: Optional[str] = Field(
+        None, description="Fixed value (overrides extraction)"
+    )
 
     @field_validator("name")
     @classmethod
@@ -44,7 +48,7 @@ class FieldDefinition(BaseModel):
                 "type": "text",
                 "required": True,
                 "default_value": None,
-                "fixed_value": None
+                "fixed_value": None,
             }
         }
 
@@ -53,19 +57,24 @@ class FieldDefinition(BaseModel):
 # Column Configuration Models
 # =============================================================================
 
+
 class ColumnDefinition(BaseModel):
     """
     Column definition for table extraction configuration.
     """
+
     name: str = Field(..., description="Column name (required)")
     description: Optional[str] = Field(None, description="Column description")
     type: Literal["text", "number", "date", "boolean"] = Field(
-        default="text",
-        description="Data type for the column"
+        default="text", description="Data type for the column"
     )
     required: bool = Field(default=False, description="Whether column is mandatory")
-    default_value: Optional[str] = Field(None, description="Default value if not extracted")
-    fixed_value: Optional[str] = Field(None, description="Fixed value (overrides extraction)")
+    default_value: Optional[str] = Field(
+        None, description="Default value if not extracted"
+    )
+    fixed_value: Optional[str] = Field(
+        None, description="Fixed value (overrides extraction)"
+    )
 
     @field_validator("name")
     @classmethod
@@ -80,7 +89,7 @@ class ColumnDefinition(BaseModel):
                 "name": "item_description",
                 "description": "Description of the line item",
                 "type": "text",
-                "required": True
+                "required": True,
             }
         }
 
@@ -89,17 +98,18 @@ class ColumnDefinition(BaseModel):
 # Table Configuration Models
 # =============================================================================
 
+
 class TableDefinition(BaseModel):
     """
     Table definition for extraction configuration.
 
     Used to configure line item extraction from documents.
     """
+
     name: str = Field(..., description="Table name (required)")
     description: Optional[str] = Field(None, description="Table description")
     columns: List[ColumnDefinition] = Field(
-        default_factory=list,
-        description="Column definitions for the table"
+        default_factory=list, description="Column definitions for the table"
     )
 
     @field_validator("name")
@@ -119,8 +129,8 @@ class TableDefinition(BaseModel):
                     {"name": "description", "type": "text", "required": True},
                     {"name": "quantity", "type": "number", "required": True},
                     {"name": "unit_price", "type": "number", "required": True},
-                    {"name": "total", "type": "number", "required": True}
-                ]
+                    {"name": "total", "type": "number", "required": True},
+                ],
             }
         }
 
@@ -129,6 +139,7 @@ class TableDefinition(BaseModel):
 # Project Configuration Model
 # =============================================================================
 
+
 class ProjectConfig(BaseModel):
     """
     Complete project configuration model.
@@ -136,46 +147,41 @@ class ProjectConfig(BaseModel):
     This is the main configuration structure that combines all settings
     for document processing and OCR extraction.
     """
+
     # Basic OCR settings
     ocr_enabled: bool = Field(default=True, description="Enable OCR processing")
     ai_model: str = Field(
-        default="openai/gpt-4o-mini",
-        description="AI model to use for extraction"
+        default="openai/gpt-4o-mini", description="AI model to use for extraction"
     )
     language: str = Field(default="en", description="Primary document language")
     output_format: Literal["json", "xml", "csv"] = Field(
-        default="json",
-        description="Output format for extracted data"
+        default="json", description="Output format for extracted data"
     )
 
     # Field configuration (legacy project core feature)
     fields: List[FieldDefinition] = Field(
-        default_factory=list,
-        description="Field definitions for extraction"
+        default_factory=list, description="Field definitions for extraction"
     )
 
     # Table configuration (legacy project core feature)
     tables: List[TableDefinition] = Field(
-        default_factory=list,
-        description="Table definitions for line item extraction"
+        default_factory=list, description="Table definitions for line item extraction"
     )
 
     # Custom prompt (Layer 3 - highest priority)
     message_content: Optional[str] = Field(
         None,
-        description="Custom extraction prompt (Layer 3 - overrides field/table config)"
+        description="Custom extraction prompt (Layer 3 - overrides field/table config)",
     )
 
     # Sample output for AI few-shot learning
     sample_output: Optional[Dict[str, Any]] = Field(
-        None,
-        description="Expected JSON output structure for AI reference"
+        None, description="Expected JSON output structure for AI reference"
     )
 
     # Validation rules
     validation_rules: Optional[Dict[str, Any]] = Field(
-        default_factory=dict,
-        description="Custom validation rules for extracted data"
+        default_factory=dict, description="Custom validation rules for extracted data"
     )
 
     @classmethod
@@ -197,7 +203,7 @@ class ProjectConfig(BaseModel):
                 "fields": [
                     {"name": "invoice_number", "type": "text", "required": True},
                     {"name": "invoice_date", "type": "date", "required": True},
-                    {"name": "total_amount", "type": "number", "required": True}
+                    {"name": "total_amount", "type": "number", "required": True},
                 ],
                 "tables": [
                     {
@@ -206,8 +212,8 @@ class ProjectConfig(BaseModel):
                         "columns": [
                             {"name": "description", "type": "text", "required": True},
                             {"name": "quantity", "type": "number", "required": True},
-                            {"name": "unit_price", "type": "number", "required": True}
-                        ]
+                            {"name": "unit_price", "type": "number", "required": True},
+                        ],
                     }
                 ],
                 "message_content": None,
@@ -217,8 +223,8 @@ class ProjectConfig(BaseModel):
                     "total_amount": 1500.00,
                     "line_items": [
                         {"description": "Item 1", "quantity": 2, "unit_price": 500.00}
-                    ]
-                }
+                    ],
+                },
             }
         }
 
@@ -227,13 +233,14 @@ class ProjectConfig(BaseModel):
 # API Request/Response Models
 # =============================================================================
 
+
 class ProjectCreate(BaseModel):
     """Request model for creating a project."""
+
     name: str = Field(..., min_length=1, max_length=255, description="Project name")
     description: Optional[str] = Field(None, description="Project description")
     config: Optional[ProjectConfig] = Field(
-        default_factory=ProjectConfig,
-        description="Initial project configuration"
+        default_factory=ProjectConfig, description="Initial project configuration"
     )
 
     @field_validator("name")
@@ -246,27 +253,34 @@ class ProjectCreate(BaseModel):
 
 class ProjectUpdate(BaseModel):
     """Request model for updating a project."""
-    name: Optional[str] = Field(None, min_length=1, max_length=255, description="New project name")
+
+    name: Optional[str] = Field(
+        None, min_length=1, max_length=255, description="New project name"
+    )
     description: Optional[str] = Field(None, description="New project description")
 
 
 class ProjectConfigUpdate(BaseModel):
     """Request model for updating project configuration."""
+
     config: ProjectConfig = Field(..., description="Updated project configuration")
 
 
 class FieldDefinitionCreate(BaseModel):
     """Request model for adding a single field."""
+
     field: FieldDefinition
 
 
 class TableDefinitionCreate(BaseModel):
     """Request model for adding a single table."""
+
     table: TableDefinition
 
 
 class ProjectResponse(BaseModel):
     """Response model for project data."""
+
     project_id: str
     name: str
     description: Optional[str] = None
@@ -278,6 +292,7 @@ class ProjectResponse(BaseModel):
 
 class ProjectListItem(BaseModel):
     """Response model for project list items."""
+
     project_id: str
     name: str
     description: Optional[str] = None
@@ -290,6 +305,7 @@ class ProjectListItem(BaseModel):
 # =============================================================================
 # Helper Functions
 # =============================================================================
+
 
 def get_default_config_dict() -> Dict[str, Any]:
     """Get default project configuration as dictionary."""

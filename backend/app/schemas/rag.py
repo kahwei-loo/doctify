@@ -10,10 +10,10 @@ from datetime import datetime
 from pydantic import BaseModel, Field, ConfigDict
 import uuid
 
-
 # ===========================
 # Request Models
 # ===========================
+
 
 class RAGQueryRequest(BaseModel):
     """Request model for RAG query."""
@@ -103,6 +103,7 @@ class RAGFeedbackRequest(BaseModel):
 # Response Models
 # ===========================
 
+
 class RAGSource(BaseModel):
     """Source document chunk information."""
 
@@ -132,9 +133,15 @@ class RAGQueryResponse(BaseModel):
     context_used: int = Field(..., description="Number of chunks used")
     created_at: datetime = Field(..., description="Query timestamp")
     search_mode: Optional[str] = Field(None, description="Search mode used")
-    cached: Optional[bool] = Field(None, description="Whether response was served from cache")
-    groundedness_score: Optional[float] = Field(None, description="Groundedness score (0-1)")
-    unsupported_claims: Optional[List[str]] = Field(None, description="Claims not supported by context")
+    cached: Optional[bool] = Field(
+        None, description="Whether response was served from cache"
+    )
+    groundedness_score: Optional[float] = Field(
+        None, description="Groundedness score (0-1)"
+    )
+    unsupported_claims: Optional[List[str]] = Field(
+        None, description="Claims not supported by context"
+    )
 
     model_config = ConfigDict(
         from_attributes=True,
@@ -173,7 +180,9 @@ class RAGHistoryItem(BaseModel):
     sources: Optional[List[RAGSource]] = Field(None, description="Source chunks")
     model_used: Optional[str] = Field(None, description="AI model used for generation")
     tokens_used: Optional[int] = Field(None, description="Total tokens consumed")
-    confidence_score: Optional[float] = Field(None, description="Answer confidence (0-1)")
+    confidence_score: Optional[float] = Field(
+        None, description="Answer confidence (0-1)"
+    )
     feedback_rating: Optional[int] = Field(
         None, description="User feedback rating (1-5)"
     )
@@ -241,12 +250,16 @@ class RAGStatsResponse(BaseModel):
 # Conversational RAG (P1.3)
 # ===========================
 
+
 class RAGConversationCreate(BaseModel):
     """Request to create a RAG conversation."""
+
     title: Optional[str] = Field(None, max_length=200, description="Optional title")
+
 
 class RAGConversationResponse(BaseModel):
     """Response for a RAG conversation."""
+
     id: uuid.UUID
     title: str
     created_at: datetime
@@ -254,19 +267,24 @@ class RAGConversationResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class RAGConversationListResponse(BaseModel):
     """Paginated list of conversations."""
+
     items: List[RAGConversationResponse]
     total: int
 
+
 class RAGConversationDetailResponse(RAGConversationResponse):
     """Conversation with its queries."""
+
     queries: List[RAGHistoryItem] = []
 
 
 # ===========================
 # Evaluation (P3.2)
 # ===========================
+
 
 class RAGEvaluationResponse(BaseModel):
     """Response model for a single evaluation run."""
@@ -278,7 +296,9 @@ class RAGEvaluationResponse(BaseModel):
     context_recall: float = Field(..., description="Context recall score (0-1)")
     sample_size: int = Field(..., description="Number of queries evaluated")
     queries_with_feedback: int = Field(..., description="Queries with user feedback")
-    average_groundedness: Optional[float] = Field(None, description="Average groundedness score")
+    average_groundedness: Optional[float] = Field(
+        None, description="Average groundedness score"
+    )
     created_at: datetime = Field(..., description="Evaluation timestamp")
 
     model_config = ConfigDict(from_attributes=True)
@@ -306,6 +326,7 @@ class RAGEvaluationTriggerResponse(BaseModel):
 # ===========================
 # Unified Knowledge Query (RAG + Analytics)
 # ===========================
+
 
 class UnifiedQueryRequest(BaseModel):
     """Request model for unified knowledge base query."""
@@ -343,10 +364,18 @@ class AnalyticsResponseData(BaseModel):
     """Analytics query result data."""
 
     sql: str = Field(..., description="Generated SQL query")
-    data: List[Dict[str, Any]] = Field(default_factory=list, description="Query result rows")
-    chart_type: Optional[str] = Field(None, description="Suggested chart type (bar, line, pie, etc.)")
-    chart_config: Optional[Dict[str, Any]] = Field(None, description="Chart configuration")
-    insights_text: Optional[str] = Field(None, description="Natural language insights summary")
+    data: List[Dict[str, Any]] = Field(
+        default_factory=list, description="Query result rows"
+    )
+    chart_type: Optional[str] = Field(
+        None, description="Suggested chart type (bar, line, pie, etc.)"
+    )
+    chart_config: Optional[Dict[str, Any]] = Field(
+        None, description="Chart configuration"
+    )
+    insights_text: Optional[str] = Field(
+        None, description="Natural language insights summary"
+    )
 
 
 class UnifiedQueryResponse(BaseModel):
@@ -389,6 +418,7 @@ class UnifiedQueryFeedbackRequest(BaseModel):
 # ===========================
 # Knowledge Base Embedding Response (Phase 1)
 # ===========================
+
 
 class EmbeddingResponse(BaseModel):
     """Response model for document embedding."""

@@ -16,11 +16,13 @@ from datetime import datetime
 
 class ChatConversationCreate(BaseModel):
     """Request to create conversation."""
+
     title: Optional[str] = Field(None, max_length=200)
 
 
 class ChatConversationResponse(BaseModel):
     """Response model for conversation."""
+
     id: UUID
     title: Optional[str]
     created_at: datetime
@@ -32,6 +34,7 @@ class ChatConversationResponse(BaseModel):
 
 class ChatMessageResponse(BaseModel):
     """Response model for chat message."""
+
     id: UUID
     role: str
     content: str

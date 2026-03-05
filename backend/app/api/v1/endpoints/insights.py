@@ -53,6 +53,7 @@ router = APIRouter()
 # Dataset Endpoints
 # ============================================
 
+
 @router.post(
     "/datasets",
     response_model=dict,
@@ -63,7 +64,9 @@ router = APIRouter()
 async def upload_dataset(
     file: UploadFile = File(..., description="CSV or XLSX file to upload"),
     name: str = Form(..., min_length=1, max_length=100, description="Dataset name"),
-    description: Optional[str] = Form(None, max_length=500, description="Dataset description"),
+    description: Optional[str] = Form(
+        None, max_length=500, description="Dataset description"
+    ),
     current_user: User = Depends(get_current_active_user),
     dataset_service: DatasetService = Depends(get_insights_dataset_service),
 ):
@@ -87,8 +90,10 @@ async def upload_dataset(
             detail="No file provided",
         )
 
-    allowed_extensions = ['.csv', '.xlsx', '.xls']
-    file_ext = '.' + file.filename.rsplit('.', 1)[-1].lower() if '.' in file.filename else ''
+    allowed_extensions = [".csv", ".xlsx", ".xls"]
+    file_ext = (
+        "." + file.filename.rsplit(".", 1)[-1].lower() if "." in file.filename else ""
+    )
     if file_ext not in allowed_extensions:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -141,7 +146,9 @@ async def upload_dataset(
 )
 async def list_datasets(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
-    limit: int = Query(20, ge=1, le=100, description="Maximum number of records to return"),
+    limit: int = Query(
+        20, ge=1, le=100, description="Maximum number of records to return"
+    ),
     current_user: User = Depends(get_current_active_user),
     dataset_service: DatasetService = Depends(get_insights_dataset_service),
 ):
@@ -322,6 +329,7 @@ async def infer_schema_semantics(
 # Conversation Endpoints
 # ============================================
 
+
 @router.post(
     "/conversations",
     response_model=ConversationResponse,
@@ -366,7 +374,9 @@ async def create_conversation(
 async def list_conversations(
     dataset_id: Optional[str] = Query(None, description="Filter by dataset UUID"),
     skip: int = Query(0, ge=0, description="Number of records to skip"),
-    limit: int = Query(20, ge=1, le=100, description="Maximum number of records to return"),
+    limit: int = Query(
+        20, ge=1, le=100, description="Maximum number of records to return"
+    ),
     current_user: User = Depends(get_current_active_user),
     query_service: QueryService = Depends(get_insights_query_service),
 ):
@@ -457,6 +467,7 @@ async def delete_conversation(
 # Query Endpoints
 # ============================================
 
+
 @router.post(
     "/conversations/{conversation_id}/query",
     response_model=QueryResponse,
@@ -524,7 +535,9 @@ async def send_query(
 async def get_query_history(
     conversation_id: str = Path(..., description="Conversation UUID"),
     skip: int = Query(0, ge=0, description="Number of records to skip"),
-    limit: int = Query(50, ge=1, le=200, description="Maximum number of records to return"),
+    limit: int = Query(
+        50, ge=1, le=200, description="Maximum number of records to return"
+    ),
     current_user: User = Depends(get_current_active_user),
     query_service: QueryService = Depends(get_insights_query_service),
 ):

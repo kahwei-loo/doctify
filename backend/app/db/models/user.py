@@ -215,7 +215,9 @@ class User(BaseModel):
         """Check if user can login."""
         return self.is_active and not self.is_locked()
 
-    def record_failed_login_attempt(self, max_attempts: int = 5, lockout_minutes: int = 15) -> bool:
+    def record_failed_login_attempt(
+        self, max_attempts: int = 5, lockout_minutes: int = 15
+    ) -> bool:
         """
         Record a failed login attempt.
 

@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class EvaluationMetrics:
     """Evaluation metrics for a single query."""
+
     faithfulness: float
     answer_relevancy: float
     context_precision: float
@@ -34,6 +35,7 @@ class EvaluationMetrics:
 @dataclass
 class AggregatedEvaluation:
     """Aggregated evaluation results across multiple queries."""
+
     faithfulness: float
     answer_relevancy: float
     context_precision: float
@@ -129,7 +131,10 @@ Return ONLY a JSON object: {{"score": <float>}}"""
             response = await self.gateway.acompletion(
                 purpose=ModelPurpose.CHAT_FAST,
                 messages=[
-                    {"role": "system", "content": "You are an evaluation judge. Return only valid JSON."},
+                    {
+                        "role": "system",
+                        "content": "You are an evaluation judge. Return only valid JSON.",
+                    },
                     {"role": "user", "content": prompt},
                 ],
                 temperature=0.0,
@@ -151,8 +156,7 @@ Return ONLY a JSON object: {{"score": <float>}}"""
     ) -> EvaluationMetrics:
         """Evaluate a single RAG query across all 4 dimensions."""
         context_text = "\n\n".join(
-            f"[Chunk {i+1}]: {s.get('chunk_text', '')}"
-            for i, s in enumerate(sources)
+            f"[Chunk {i+1}]: {s.get('chunk_text', '')}" for i, s in enumerate(sources)
         )
         chunks_text = "\n".join(
             f"- Chunk {i+1} (similarity: {s.get('similarity_score', 0):.2f}): "
@@ -289,12 +293,18 @@ Return ONLY a JSON object: {{"score": <float>}}"""
 
         aggregated = AggregatedEvaluation(
             faithfulness=round(sum(m.faithfulness for m in metrics_list) / n, 3),
-            answer_relevancy=round(sum(m.answer_relevancy for m in metrics_list) / n, 3),
-            context_precision=round(sum(m.context_precision for m in metrics_list) / n, 3),
+            answer_relevancy=round(
+                sum(m.answer_relevancy for m in metrics_list) / n, 3
+            ),
+            context_precision=round(
+                sum(m.context_precision for m in metrics_list) / n, 3
+            ),
             context_recall=round(sum(m.context_recall for m in metrics_list) / n, 3),
             sample_size=n,
             queries_with_feedback=queries_with_feedback,
-            average_groundedness=round(avg_groundedness, 3) if avg_groundedness else None,
+            average_groundedness=(
+                round(avg_groundedness, 3) if avg_groundedness else None
+            ),
         )
 
         # Persist evaluation

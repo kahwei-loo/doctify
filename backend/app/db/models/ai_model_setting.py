@@ -19,4 +19,6 @@ class AIModelSetting(BaseModel):
     model_name: Mapped[str] = mapped_column(String(200), nullable=False)
     display_name: Mapped[str | None] = mapped_column(String(100), nullable=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    is_active: Mapped[bool] = mapped_column(Boolean, server_default="true", nullable=False)
+    is_active: Mapped[bool] = mapped_column(
+        Boolean, server_default="true", nullable=False
+    )

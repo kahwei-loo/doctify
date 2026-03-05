@@ -44,7 +44,9 @@ def ensure_log_directory() -> Path:
         raise
 
 
-def generate_log_filename(document_id: str, timestamp: Optional[datetime] = None) -> str:
+def generate_log_filename(
+    document_id: str, timestamp: Optional[datetime] = None
+) -> str:
     """
     Generate timestamped log filename.
 
@@ -262,13 +264,19 @@ def log_all_attempts(
         "timestamp": timestamp.isoformat() + "Z",
         "total_attempts": len(all_results),
         "selected_attempt": selected_index + 1,  # 1-based for human readability
-        "selected_confidence": all_confidences[selected_index] if selected_index < len(all_confidences) else None,
+        "selected_confidence": (
+            all_confidences[selected_index]
+            if selected_index < len(all_confidences)
+            else None
+        ),
         "confidence_range": {
             "min": min(all_confidences) if all_confidences else 0.0,
             "max": max(all_confidences) if all_confidences else 0.0,
-            "avg": sum(all_confidences) / len(all_confidences) if all_confidences else 0.0,
+            "avg": (
+                sum(all_confidences) / len(all_confidences) if all_confidences else 0.0
+            ),
         },
-        "attempts": []
+        "attempts": [],
     }
 
     # Add detailed information for each attempt
@@ -278,7 +286,9 @@ def log_all_attempts(
             "model": models_used[i] if i < len(models_used) else "unknown",
             "confidence": all_confidences[i] if i < len(all_confidences) else 0.0,
             "extracted_data": all_results[i],
-            "field_confidences": all_field_confidences[i] if i < len(all_field_confidences) else {},
+            "field_confidences": (
+                all_field_confidences[i] if i < len(all_field_confidences) else {}
+            ),
             "is_selected": i == selected_index,
         }
 
@@ -297,7 +307,9 @@ def log_all_attempts(
         return log_file
 
     except Exception as e:
-        logger.error(f"❌ Failed to write all-attempts log file {log_file}: {e}", exc_info=True)
+        logger.error(
+            f"❌ Failed to write all-attempts log file {log_file}: {e}", exc_info=True
+        )
         # Also print to stdout for celery logs visibility
         print(f"❌ OCR LOGGER ERROR: Failed to write all-attempts log {log_file}: {e}")
         raise
@@ -326,6 +338,8 @@ def cleanup_old_logs(days_to_keep: int = 30) -> int:
             logger.error(f"Failed to delete old log file {log_file}: {e}")
 
     if deleted_count > 0:
-        logger.info(f"Cleaned up {deleted_count} old OCR log files (older than {days_to_keep} days)")
+        logger.info(
+            f"Cleaned up {deleted_count} old OCR log files (older than {days_to_keep} days)"
+        )
 
     return deleted_count

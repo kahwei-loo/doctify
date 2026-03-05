@@ -149,7 +149,9 @@ class FieldConfidence:
 
         for field_name, score in self.field_scores.items():
             if not isinstance(score, ConfidenceScore):
-                raise TypeError(f"Score for field '{field_name}' must be ConfidenceScore")
+                raise TypeError(
+                    f"Score for field '{field_name}' must be ConfidenceScore"
+                )
 
     @classmethod
     def create(cls, field_scores: Dict[str, float]) -> "FieldConfidence":
@@ -215,7 +217,9 @@ class FieldConfidence:
         """
         return max(self.field_scores.values())
 
-    def get_fields_below_threshold(self, threshold: float = 0.75) -> Dict[str, ConfidenceScore]:
+    def get_fields_below_threshold(
+        self, threshold: float = 0.75
+    ) -> Dict[str, ConfidenceScore]:
         """
         Get fields with confidence below threshold.
 
@@ -241,7 +245,9 @@ class FieldConfidence:
         Returns:
             True if all fields meet threshold
         """
-        return all(score.is_acceptable(threshold) for score in self.field_scores.values())
+        return all(
+            score.is_acceptable(threshold) for score in self.field_scores.values()
+        )
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""

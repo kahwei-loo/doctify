@@ -24,15 +24,16 @@ from app.core.exceptions import ValidationError, DatabaseError
 
 class ChunkStrategy(str, Enum):
     """Chunking strategy for text splitting."""
-    FIXED = "fixed"           # Original fixed-token window
-    SEMANTIC = "semantic"     # Sentence-boundary-aware chunking
-    RECURSIVE = "recursive"   # Recursive character-based splitting
+
+    FIXED = "fixed"  # Original fixed-token window
+    SEMANTIC = "semantic"  # Sentence-boundary-aware chunking
+    RECURSIVE = "recursive"  # Recursive character-based splitting
 
 
 # Sentence boundary pattern: split after sentence-ending punctuation followed by whitespace
-_SENTENCE_SPLIT_RE = re.compile(r'(?<=[.!?。！？])\s+')
+_SENTENCE_SPLIT_RE = re.compile(r"(?<=[.!?。！？])\s+")
 # Sub-sentence boundary: commas, semicolons, colons for splitting long sentences
-_SUBSENTENCE_SPLIT_RE = re.compile(r'(?<=[,;:，；：])\s*')
+_SUBSENTENCE_SPLIT_RE = re.compile(r"(?<=[,;:，；：])\s*")
 
 
 class EmbeddingService:
@@ -137,9 +138,7 @@ class EmbeddingService:
 
         return result
 
-    def _chunk_fixed(
-        self, text: str, chunk_size: int, chunk_overlap: int
-    ) -> List[str]:
+    def _chunk_fixed(self, text: str, chunk_size: int, chunk_overlap: int) -> List[str]:
         """Original fixed-token-window chunking."""
         tokens = self.encoding.encode(text)
         if not tokens:
@@ -399,12 +398,16 @@ class EmbeddingService:
 
             # Delete existing embeddings if force regenerate
             if force_regenerate:
-                existing_count = await self.embedding_repo.count_by_document_id(document_id)
+                existing_count = await self.embedding_repo.count_by_document_id(
+                    document_id
+                )
                 if existing_count > 0:
                     await self.embedding_repo.delete_by_document_id(document_id)
 
             # Check if embeddings already exist
-            existing_embeddings = await self.embedding_repo.get_by_document_id(document_id)
+            existing_embeddings = await self.embedding_repo.get_by_document_id(
+                document_id
+            )
             if existing_embeddings and not force_regenerate:
                 return existing_embeddings
 
@@ -417,7 +420,9 @@ class EmbeddingService:
             )
 
             if not chunks_with_pos:
-                raise ValidationError(f"No text chunks generated for document {document_id}")
+                raise ValidationError(
+                    f"No text chunks generated for document {document_id}"
+                )
 
             # Generate embeddings for all chunks
             embeddings = []
@@ -439,7 +444,7 @@ class EmbeddingService:
                         "chunk_strategy": chunk_strategy,
                         "start_char": start_char,
                         "end_char": end_char,
-                    }
+                    },
                 )
                 embeddings.append(doc_embedding)
 
@@ -455,8 +460,7 @@ class EmbeddingService:
             raise DatabaseError(f"Failed to generate embeddings for document: {str(e)}")
 
     async def get_embeddings_for_document(
-        self,
-        document_id: uuid.UUID | str
+        self, document_id: uuid.UUID | str
     ) -> List[DocumentEmbedding]:
         """
         Get all embeddings for a document.
@@ -472,10 +476,7 @@ class EmbeddingService:
 
         return await self.embedding_repo.get_by_document_id(document_id)
 
-    async def delete_embeddings_for_document(
-        self,
-        document_id: uuid.UUID | str
-    ) -> int:
+    async def delete_embeddings_for_document(self, document_id: uuid.UUID | str) -> int:
         """
         Delete all embeddings for a document.
 

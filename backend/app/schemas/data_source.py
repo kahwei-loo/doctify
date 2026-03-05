@@ -10,10 +10,10 @@ from datetime import datetime
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 import uuid
 
-
 # ===========================
 # Request Models
 # ===========================
+
 
 class DataSourceCreate(BaseModel):
     """Request model for creating a data source."""
@@ -39,7 +39,13 @@ class DataSourceCreate(BaseModel):
     @classmethod
     def validate_type(cls, v: str) -> str:
         """Validate data source type."""
-        allowed_types = ["uploaded_docs", "website", "text", "qa_pairs", "structured_data"]
+        allowed_types = [
+            "uploaded_docs",
+            "website",
+            "text",
+            "qa_pairs",
+            "structured_data",
+        ]
         if v not in allowed_types:
             raise ValueError(f"Type must be one of: {', '.join(allowed_types)}")
         return v
@@ -100,6 +106,7 @@ class DataSourceUpdate(BaseModel):
 # Response Models
 # ===========================
 
+
 class DataSourceResponse(BaseModel):
     """Response model for a data source."""
 
@@ -109,7 +116,9 @@ class DataSourceResponse(BaseModel):
     name: str = Field(..., description="Data source name")
     config: Dict[str, Any] = Field(..., description="Configuration")
     status: str = Field(..., description="Status")
-    error_message: Optional[str] = Field(None, description="Error message if status=error")
+    error_message: Optional[str] = Field(
+        None, description="Error message if status=error"
+    )
     document_count: Optional[int] = Field(0, description="Number of documents")
     embedding_count: Optional[int] = Field(0, description="Number of embeddings")
     last_synced_at: Optional[str] = Field(None, description="Last sync timestamp")
@@ -177,9 +186,13 @@ class CrawlStatusResponse(BaseModel):
     """Response model for website crawl status."""
 
     task_id: str = Field(..., description="Celery task ID")
-    status: str = Field(..., description="Task status: pending, in_progress, completed, failed")
+    status: str = Field(
+        ..., description="Task status: pending, in_progress, completed, failed"
+    )
     pages_crawled: int = Field(0, description="Number of pages crawled so far")
-    total_pages: Optional[int] = Field(None, description="Total pages to crawl (estimate)")
+    total_pages: Optional[int] = Field(
+        None, description="Total pages to crawl (estimate)"
+    )
     error: Optional[str] = Field(None, description="Error message if failed")
 
     model_config = ConfigDict(

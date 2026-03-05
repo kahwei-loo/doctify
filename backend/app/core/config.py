@@ -41,85 +41,59 @@ class Settings(BaseSettings):
 
     APP_NAME: str = Field(
         default="Doctify",
-        description="Application name displayed in logs and responses"
+        description="Application name displayed in logs and responses",
     )
 
-    APP_VERSION: str = Field(
-        default="1.0.0",
-        description="Application version"
-    )
+    APP_VERSION: str = Field(default="1.0.0", description="Application version")
 
     DEBUG: bool = Field(
-        default=False,
-        description="Enable debug mode (never use in production)"
+        default=False, description="Enable debug mode (never use in production)"
     )
 
     ENVIRONMENT: str = Field(
         default="development",
-        description="Application environment: development, staging, or production"
+        description="Application environment: development, staging, or production",
     )
 
-    API_V1_STR: str = Field(
-        default="/api/v1",
-        description="API version 1 prefix"
-    )
+    API_V1_STR: str = Field(default="/api/v1", description="API version 1 prefix")
 
     # ============================================================================
     # Server Settings
     # ============================================================================
 
-    HOST: str = Field(
-        default="0.0.0.0",
-        description="Server host address"
-    )
+    HOST: str = Field(default="0.0.0.0", description="Server host address")
 
-    PORT: int = Field(
-        default=8000,
-        description="Server port"
-    )
+    PORT: int = Field(default=8000, description="Server port")
 
     # ============================================================================
     # Database Settings - PostgreSQL
     # ============================================================================
 
     POSTGRES_HOST: str = Field(
-        default="localhost",
-        description="PostgreSQL server hostname"
+        default="localhost", description="PostgreSQL server hostname"
     )
 
-    POSTGRES_PORT: int = Field(
-        default=5432,
-        description="PostgreSQL server port"
-    )
+    POSTGRES_PORT: int = Field(default=5432, description="PostgreSQL server port")
 
-    POSTGRES_USER: str = Field(
-        default="doctify",
-        description="PostgreSQL username"
-    )
+    POSTGRES_USER: str = Field(default="doctify", description="PostgreSQL username")
 
     POSTGRES_PASSWORD: str = Field(
-        default="doctify_dev_password",
-        description="PostgreSQL password"
+        default="doctify_dev_password", description="PostgreSQL password"
     )
 
-    POSTGRES_DB: str = Field(
-        default="doctify",
-        description="PostgreSQL database name"
-    )
+    POSTGRES_DB: str = Field(default="doctify", description="PostgreSQL database name")
 
     POSTGRES_POOL_SIZE: int = Field(
-        default=10,
-        description="PostgreSQL connection pool size"
+        default=10, description="PostgreSQL connection pool size"
     )
 
     POSTGRES_MAX_OVERFLOW: int = Field(
-        default=20,
-        description="Maximum overflow connections beyond pool size"
+        default=20, description="Maximum overflow connections beyond pool size"
     )
 
     POSTGRES_SSL: bool = Field(
         default=False,
-        description="Enable SSL for PostgreSQL connection (required in production)"
+        description="Enable SSL for PostgreSQL connection (required in production)",
     )
 
     # ============================================================================
@@ -127,18 +101,15 @@ class Settings(BaseSettings):
     # ============================================================================
 
     REDIS_URL: str = Field(
-        default="redis://localhost:6379/0",
-        description="Redis connection URL"
+        default="redis://localhost:6379/0", description="Redis connection URL"
     )
 
     REDIS_MAX_CONNECTIONS: int = Field(
-        default=50,
-        description="Maximum Redis connection pool size"
+        default=50, description="Maximum Redis connection pool size"
     )
 
     CACHE_TTL: int = Field(
-        default=3600,
-        description="Default cache time-to-live in seconds (1 hour)"
+        default=3600, description="Default cache time-to-live in seconds (1 hour)"
     )
 
     # ============================================================================
@@ -146,23 +117,19 @@ class Settings(BaseSettings):
     # ============================================================================
 
     CELERY_BROKER_URL: str = Field(
-        default="redis://localhost:6379/1",
-        description="Celery broker URL"
+        default="redis://localhost:6379/1", description="Celery broker URL"
     )
 
     CELERY_RESULT_BACKEND: str = Field(
-        default="redis://localhost:6379/1",
-        description="Celery result backend URL"
+        default="redis://localhost:6379/1", description="Celery result backend URL"
     )
 
     CELERY_TASK_TIME_LIMIT: int = Field(
-        default=300,
-        description="Maximum task execution time in seconds (5 minutes)"
+        default=300, description="Maximum task execution time in seconds (5 minutes)"
     )
 
     CELERY_TASK_SOFT_TIME_LIMIT: int = Field(
-        default=270,
-        description="Soft time limit before hard limit (4.5 minutes)"
+        default=270, description="Soft time limit before hard limit (4.5 minutes)"
     )
 
     # ============================================================================
@@ -173,65 +140,52 @@ class Settings(BaseSettings):
         description="Secret key for JWT token generation (required)"
     )
 
-    ALGORITHM: str = Field(
-        default="HS256",
-        description="JWT signing algorithm"
-    )
+    ALGORITHM: str = Field(default="HS256", description="JWT signing algorithm")
 
     ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(
-        default=30,
-        description="Access token expiration time in minutes"
+        default=30, description="Access token expiration time in minutes"
     )
 
     REFRESH_TOKEN_EXPIRE_DAYS: int = Field(
-        default=7,
-        description="Refresh token expiration time in days"
+        default=7, description="Refresh token expiration time in days"
     )
 
     # ============================================================================
     # Security Settings
     # ============================================================================
 
-    PASSWORD_MIN_LENGTH: int = Field(
-        default=8,
-        description="Minimum password length"
-    )
+    PASSWORD_MIN_LENGTH: int = Field(default=8, description="Minimum password length")
 
     PASSWORD_REQUIRE_UPPERCASE: bool = Field(
-        default=True,
-        description="Require at least one uppercase letter in password"
+        default=True, description="Require at least one uppercase letter in password"
     )
 
     PASSWORD_REQUIRE_LOWERCASE: bool = Field(
-        default=True,
-        description="Require at least one lowercase letter in password"
+        default=True, description="Require at least one lowercase letter in password"
     )
 
     PASSWORD_REQUIRE_DIGIT: bool = Field(
-        default=True,
-        description="Require at least one digit in password"
+        default=True, description="Require at least one digit in password"
     )
 
     PASSWORD_REQUIRE_SPECIAL: bool = Field(
-        default=False,
-        description="Require at least one special character in password"
+        default=False, description="Require at least one special character in password"
     )
 
     MAX_LOGIN_ATTEMPTS: int = Field(
-        default=5,
-        description="Maximum failed login attempts before account lockout"
+        default=5, description="Maximum failed login attempts before account lockout"
     )
 
     LOGIN_LOCKOUT_MINUTES: int = Field(
         default=15,
-        description="Account lockout duration in minutes after max failed attempts"
+        description="Account lockout duration in minutes after max failed attempts",
     )
 
     # Security: Trusted proxy configuration
     # Only trust X-Forwarded-For headers from these IPs
     TRUSTED_PROXIES: List[str] = Field(
         default=["127.0.0.1", "::1"],
-        description="List of trusted proxy IPs that can set X-Forwarded-For header"
+        description="List of trusted proxy IPs that can set X-Forwarded-For header",
     )
 
     # ============================================================================
@@ -239,23 +193,19 @@ class Settings(BaseSettings):
     # ============================================================================
 
     BACKEND_CORS_ORIGINS: List[str] = Field(
-        default=[],
-        description="List of allowed CORS origins"
+        default=[], description="List of allowed CORS origins"
     )
 
     BACKEND_CORS_ALLOW_CREDENTIALS: bool = Field(
-        default=True,
-        description="Allow credentials in CORS requests"
+        default=True, description="Allow credentials in CORS requests"
     )
 
     BACKEND_CORS_ALLOW_METHODS: List[str] = Field(
-        default=["*"],
-        description="Allowed HTTP methods for CORS"
+        default=["*"], description="Allowed HTTP methods for CORS"
     )
 
     BACKEND_CORS_ALLOW_HEADERS: List[str] = Field(
-        default=["*"],
-        description="Allowed HTTP headers for CORS"
+        default=["*"], description="Allowed HTTP headers for CORS"
     )
 
     # ============================================================================
@@ -264,38 +214,29 @@ class Settings(BaseSettings):
 
     OPENAI_BASE_URL: Optional[str] = Field(
         default=None,
-        description="OpenAI API base URL (use OpenRouter or custom endpoint)"
+        description="OpenAI API base URL (use OpenRouter or custom endpoint)",
     )
 
-    OPENAI_API_KEY: Optional[str] = Field(
-        default=None,
-        description="OpenAI API key"
-    )
+    OPENAI_API_KEY: Optional[str] = Field(default=None, description="OpenAI API key")
 
     COHERE_API_KEY: Optional[str] = Field(
-        default=None,
-        description="Cohere API key for reranking (P1.1)"
+        default=None, description="Cohere API key for reranking (P1.1)"
     )
 
     AI_MODEL: Optional[str] = Field(
-        default=None,
-        description="AI model identifier (e.g., gpt-4, claude-3-opus)"
+        default=None, description="AI model identifier (e.g., gpt-4, claude-3-opus)"
     )
 
     AI_TEMPERATURE: float = Field(
         default=0.1,
-        description="AI model temperature (0.0-1.0, lower = more deterministic)"
+        description="AI model temperature (0.0-1.0, lower = more deterministic)",
     )
 
     AI_MAX_TOKENS: int = Field(
-        default=4000,
-        description="Maximum tokens for AI response"
+        default=4000, description="Maximum tokens for AI response"
     )
 
-    AI_TIMEOUT: int = Field(
-        default=60,
-        description="AI API request timeout in seconds"
-    )
+    AI_TIMEOUT: int = Field(default=60, description="AI API request timeout in seconds")
 
     # ============================================================================
     # Intent Classifier Settings (Unified Knowledge)
@@ -303,22 +244,22 @@ class Settings(BaseSettings):
 
     INTENT_CLASSIFIER_MODEL: str = Field(
         default="gpt-4o-mini",
-        description="Model for intent classification (fast, cheap model preferred)"
+        description="Model for intent classification (fast, cheap model preferred)",
     )
 
     INTENT_CLASSIFIER_CACHE_TTL: int = Field(
         default=300,
-        description="Cache TTL for intent classification results in seconds"
+        description="Cache TTL for intent classification results in seconds",
     )
 
     INTENT_CONFIDENCE_THRESHOLD: float = Field(
         default=0.7,
-        description="Minimum confidence for intent classification (below = fallback to RAG)"
+        description="Minimum confidence for intent classification (below = fallback to RAG)",
     )
 
     DATASET_CONFIDENCE_THRESHOLD: float = Field(
         default=0.6,
-        description="Minimum confidence for dataset selection in multi-dataset KBs"
+        description="Minimum confidence for dataset selection in multi-dataset KBs",
     )
 
     # ============================================================================
@@ -327,37 +268,36 @@ class Settings(BaseSettings):
 
     AI_GATEWAY_CHAT_MODEL: str = Field(
         default="openrouter/openai/gpt-4",
-        description="Default chat/generation model (LiteLLM format)"
+        description="Default chat/generation model (LiteLLM format)",
     )
 
     AI_GATEWAY_CHAT_FAST_MODEL: str = Field(
         default="openrouter/openai/gpt-4o-mini",
-        description="Fast/cheap model for judges, classifiers, evaluation"
+        description="Fast/cheap model for judges, classifiers, evaluation",
     )
 
     AI_GATEWAY_EMBEDDING_MODEL: str = Field(
         default="openrouter/openai/text-embedding-3-small",
-        description="Embedding model (LiteLLM format)"
+        description="Embedding model (LiteLLM format)",
     )
 
     AI_GATEWAY_VISION_MODEL: str = Field(
         default="openrouter/qwen/qwen3-vl-8b-instruct",
-        description="Primary vision model for OCR/document processing"
+        description="Primary vision model for OCR/document processing",
     )
 
     AI_GATEWAY_VISION_ESCALATION: str = Field(
         default="openrouter/qwen/qwen3-vl-8b-instruct,openrouter/qwen/qwen3-vl-32b-instruct,openrouter/google/gemini-3-flash-preview",
-        description="Comma-separated vision model escalation chain"
+        description="Comma-separated vision model escalation chain",
     )
 
     AI_GATEWAY_CLASSIFIER_MODEL: str = Field(
         default="openrouter/openai/gpt-4o-mini",
-        description="Intent classification model"
+        description="Intent classification model",
     )
 
     AI_GATEWAY_RERANKER_MODEL: str = Field(
-        default="cohere/rerank-v3.5",
-        description="Reranker model (LiteLLM format)"
+        default="cohere/rerank-v3.5", description="Reranker model (LiteLLM format)"
     )
 
     # ============================================================================
@@ -365,18 +305,15 @@ class Settings(BaseSettings):
     # ============================================================================
 
     MAX_PAGES_HARD: int = Field(
-        default=30,
-        description="Hard limit for maximum pages per document"
+        default=30, description="Hard limit for maximum pages per document"
     )
 
     MAX_PAGES_WARN: int = Field(
-        default=10,
-        description="Warning threshold for page count"
+        default=10, description="Warning threshold for page count"
     )
 
     MAX_FILE_SIZE_MB: int = Field(
-        default=50,
-        description="Maximum file size in megabytes"
+        default=50, description="Maximum file size in megabytes"
     )
 
     ALLOWED_MIME_TYPES: List[str] = Field(
@@ -387,12 +324,12 @@ class Settings(BaseSettings):
             "image/tiff",
             "image/webp",
         ],
-        description="Allowed MIME types for document upload"
+        description="Allowed MIME types for document upload",
     )
 
     ALLOWED_EXTENSIONS: List[str] = Field(
         default=[".pdf", ".jpg", ".jpeg", ".png", ".tiff", ".webp"],
-        description="Allowed file extensions for upload"
+        description="Allowed file extensions for upload",
     )
 
     # ============================================================================
@@ -400,54 +337,40 @@ class Settings(BaseSettings):
     # ============================================================================
 
     STORAGE_BACKEND: str = Field(
-        default="local",
-        description="Storage backend: 'local' or 's3'"
+        default="local", description="Storage backend: 'local' or 's3'"
     )
 
     # Local storage settings
     UPLOAD_DIR: str = Field(
-        default="./uploads",
-        description="Local upload directory path"
+        default="./uploads", description="Local upload directory path"
     )
 
     # S3 storage settings
     S3_ENDPOINT_URL: Optional[str] = Field(
         default=None,
-        description="S3-compatible endpoint URL (for MinIO, DigitalOcean Spaces, etc.)"
+        description="S3-compatible endpoint URL (for MinIO, DigitalOcean Spaces, etc.)",
     )
 
-    S3_ACCESS_KEY: Optional[str] = Field(
-        default=None,
-        description="S3 access key ID"
-    )
+    S3_ACCESS_KEY: Optional[str] = Field(default=None, description="S3 access key ID")
 
     S3_SECRET_KEY: Optional[str] = Field(
-        default=None,
-        description="S3 secret access key"
+        default=None, description="S3 secret access key"
     )
 
-    S3_BUCKET_NAME: Optional[str] = Field(
-        default=None,
-        description="S3 bucket name"
-    )
+    S3_BUCKET_NAME: Optional[str] = Field(default=None, description="S3 bucket name")
 
-    S3_REGION: Optional[str] = Field(
-        default="us-east-1",
-        description="S3 region"
-    )
+    S3_REGION: Optional[str] = Field(default="us-east-1", description="S3 region")
 
     # ============================================================================
     # WebSocket Settings
     # ============================================================================
 
     WS_MESSAGE_QUEUE_SIZE: int = Field(
-        default=100,
-        description="WebSocket message queue size"
+        default=100, description="WebSocket message queue size"
     )
 
     WS_HEARTBEAT_INTERVAL: int = Field(
-        default=30,
-        description="WebSocket heartbeat interval in seconds"
+        default=30, description="WebSocket heartbeat interval in seconds"
     )
 
     # ============================================================================
@@ -456,23 +379,16 @@ class Settings(BaseSettings):
 
     LOG_LEVEL: str = Field(
         default="INFO",
-        description="Logging level: DEBUG, INFO, WARNING, ERROR, CRITICAL"
+        description="Logging level: DEBUG, INFO, WARNING, ERROR, CRITICAL",
     )
 
-    LOG_FORMAT: str = Field(
-        default="json",
-        description="Log format: 'json' or 'text'"
-    )
+    LOG_FORMAT: str = Field(default="json", description="Log format: 'json' or 'text'")
 
     ENABLE_PROMETHEUS: bool = Field(
-        default=False,
-        description="Enable Prometheus metrics endpoint"
+        default=False, description="Enable Prometheus metrics endpoint"
     )
 
-    PROMETHEUS_PORT: int = Field(
-        default=9090,
-        description="Prometheus metrics port"
-    )
+    PROMETHEUS_PORT: int = Field(default=9090, description="Prometheus metrics port")
 
     # ============================================================================
     # Validators
@@ -563,8 +479,7 @@ class Settings(BaseSettings):
                     "S3_BUCKET_NAME",
                 ]
                 missing = [
-                    field for field in required_s3_fields
-                    if not getattr(self, field)
+                    field for field in required_s3_fields if not getattr(self, field)
                 ]
                 if missing:
                     raise ValueError(
@@ -574,10 +489,11 @@ class Settings(BaseSettings):
             # Security: Recommend PostgreSQL SSL in production
             if not self.POSTGRES_SSL:
                 import warnings
+
                 warnings.warn(
                     "POSTGRES_SSL is disabled in production. "
                     "Consider enabling SSL for database connections.",
-                    UserWarning
+                    UserWarning,
                 )
 
         return self

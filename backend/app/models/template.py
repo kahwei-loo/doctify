@@ -11,7 +11,6 @@ from datetime import datetime
 from typing import Optional, List, Any
 from pydantic import BaseModel, Field, field_validator
 
-
 # Valid values for template fields
 VALID_VISIBILITIES = {"private", "public", "organization"}
 VALID_DOCUMENT_TYPES = {"invoice", "receipt", "contract", "form", "report", "custom"}
@@ -19,6 +18,7 @@ VALID_DOCUMENT_TYPES = {"invoice", "receipt", "contract", "form", "report", "cus
 
 class FieldDefinition(BaseModel):
     """Definition of a field to extract."""
+
     name: str = Field(..., min_length=1, max_length=100)
     type: str = Field(default="string")  # string, number, date, boolean, array
     description: Optional[str] = None
@@ -28,6 +28,7 @@ class FieldDefinition(BaseModel):
 
 class TableColumnDefinition(BaseModel):
     """Definition of a table column."""
+
     name: str = Field(..., min_length=1, max_length=100)
     type: str = Field(default="string")
     description: Optional[str] = None
@@ -35,6 +36,7 @@ class TableColumnDefinition(BaseModel):
 
 class TableDefinition(BaseModel):
     """Definition of a table to extract."""
+
     name: str = Field(..., min_length=1, max_length=100)
     columns: List[TableColumnDefinition] = Field(default_factory=list)
     description: Optional[str] = None
@@ -42,6 +44,7 @@ class TableDefinition(BaseModel):
 
 class ExtractionConfig(BaseModel):
     """Configuration for document extraction."""
+
     fields: List[FieldDefinition] = Field(default_factory=list)
     tables: List[TableDefinition] = Field(default_factory=list)
     instructions: Optional[str] = None  # Additional instructions for the AI
@@ -49,6 +52,7 @@ class ExtractionConfig(BaseModel):
 
 class TemplateBase(BaseModel):
     """Base template model with common fields."""
+
     name: str = Field(..., min_length=1, max_length=100)
     description: Optional[str] = Field(default=None, max_length=500)
     document_type: Optional[str] = Field(default="custom")
@@ -59,7 +63,9 @@ class TemplateBase(BaseModel):
     @classmethod
     def validate_document_type(cls, v: Optional[str]) -> Optional[str]:
         if v is not None and v not in VALID_DOCUMENT_TYPES:
-            raise ValueError(f"Invalid document_type. Must be one of: {', '.join(VALID_DOCUMENT_TYPES)}")
+            raise ValueError(
+                f"Invalid document_type. Must be one of: {', '.join(VALID_DOCUMENT_TYPES)}"
+            )
         return v
 
     @field_validator("tags")
@@ -77,6 +83,7 @@ class TemplateBase(BaseModel):
 
 class TemplateCreate(TemplateBase):
     """Model for creating a new template."""
+
     visibility: str = Field(default="private")
     extraction_config: ExtractionConfig = Field(default_factory=ExtractionConfig)
 
@@ -84,12 +91,15 @@ class TemplateCreate(TemplateBase):
     @classmethod
     def validate_visibility(cls, v: str) -> str:
         if v not in VALID_VISIBILITIES:
-            raise ValueError(f"Invalid visibility. Must be one of: {', '.join(VALID_VISIBILITIES)}")
+            raise ValueError(
+                f"Invalid visibility. Must be one of: {', '.join(VALID_VISIBILITIES)}"
+            )
         return v
 
 
 class TemplateUpdate(BaseModel):
     """Model for updating a template (partial update)."""
+
     name: Optional[str] = Field(default=None, min_length=1, max_length=100)
     description: Optional[str] = Field(default=None, max_length=500)
     document_type: Optional[str] = None
@@ -102,14 +112,18 @@ class TemplateUpdate(BaseModel):
     @classmethod
     def validate_visibility(cls, v: Optional[str]) -> Optional[str]:
         if v is not None and v not in VALID_VISIBILITIES:
-            raise ValueError(f"Invalid visibility. Must be one of: {', '.join(VALID_VISIBILITIES)}")
+            raise ValueError(
+                f"Invalid visibility. Must be one of: {', '.join(VALID_VISIBILITIES)}"
+            )
         return v
 
     @field_validator("document_type")
     @classmethod
     def validate_document_type(cls, v: Optional[str]) -> Optional[str]:
         if v is not None and v not in VALID_DOCUMENT_TYPES:
-            raise ValueError(f"Invalid document_type. Must be one of: {', '.join(VALID_DOCUMENT_TYPES)}")
+            raise ValueError(
+                f"Invalid document_type. Must be one of: {', '.join(VALID_DOCUMENT_TYPES)}"
+            )
         return v
 
     @field_validator("tags")
@@ -126,6 +140,7 @@ class TemplateUpdate(BaseModel):
 
 class TemplateResponse(BaseModel):
     """Full template response."""
+
     id: str
     name: str
     description: Optional[str]
@@ -146,6 +161,7 @@ class TemplateResponse(BaseModel):
 
 class TemplateListItem(BaseModel):
     """Simplified template for list views."""
+
     id: str
     name: str
     description: Optional[str]
@@ -162,6 +178,7 @@ class TemplateListItem(BaseModel):
 
 class TemplateListResponse(BaseModel):
     """Paginated template list response."""
+
     success: bool = True
     data: List[TemplateListItem]
     total: int
@@ -172,17 +189,20 @@ class TemplateListResponse(BaseModel):
 
 class TemplateApiResponse(BaseModel):
     """Single template API response."""
+
     success: bool = True
     data: TemplateResponse
 
 
 class ApplyTemplateRequest(BaseModel):
     """Request to apply a template to a project."""
+
     project_id: str
 
 
 class ApplyTemplateResponse(BaseModel):
     """Response after applying a template."""
+
     success: bool = True
     message: str
     project_id: str

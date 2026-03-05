@@ -136,7 +136,10 @@ class DocumentProcessingService(BaseService[Document, DocumentRepository]):
         document = await self.get_by_id(document_id)
 
         # Validate document is processing
-        if document.status not in [DocumentStatus.PENDING.value, DocumentStatus.PROCESSING.value]:
+        if document.status not in [
+            DocumentStatus.PENDING.value,
+            DocumentStatus.PROCESSING.value,
+        ]:
             raise ValidationError(
                 f"Cannot fail from status: {document.status}",
                 details={"document_id": document_id, "current_status": document.status},
@@ -167,7 +170,10 @@ class DocumentProcessingService(BaseService[Document, DocumentRepository]):
         document = await self.get_by_id(document_id)
 
         # Validate document can be cancelled
-        if document.status in [DocumentStatus.COMPLETED.value, DocumentStatus.FAILED.value]:
+        if document.status in [
+            DocumentStatus.COMPLETED.value,
+            DocumentStatus.FAILED.value,
+        ]:
             raise ValidationError(
                 f"Cannot cancel from status: {document.status}",
                 details={"document_id": document_id, "current_status": document.status},
@@ -208,11 +214,17 @@ class DocumentProcessingService(BaseService[Document, DocumentRepository]):
 
         # Calculate processing duration if completed
         if document.processing_completed_at:
-            duration = (document.processing_completed_at - document.created_at).total_seconds()
+            duration = (
+                document.processing_completed_at - document.created_at
+            ).total_seconds()
             status_info["processing_duration_seconds"] = duration
 
         # Add extraction result if available - matches frontend ExtractionResult interface
-        if document.status in [DocumentStatus.COMPLETED.value, "processed", "confirmed"]:
+        if document.status in [
+            DocumentStatus.COMPLETED.value,
+            "processed",
+            "confirmed",
+        ]:
             if document.extracted_data or document.extracted_text:
                 extraction_metadata = document.extraction_metadata or {}
                 status_info["extraction_result"] = {
@@ -220,7 +232,9 @@ class DocumentProcessingService(BaseService[Document, DocumentRepository]):
                     "confidence": extraction_metadata.get("confidence", 0.0),
                     "metadata": extraction_metadata,
                     "extracted_data": document.extracted_data or {},
-                    "confidence_scores": extraction_metadata.get("field_confidences", {}),
+                    "confidence_scores": extraction_metadata.get(
+                        "field_confidences", {}
+                    ),
                 }
 
         # Add error message for failed documents
@@ -308,7 +322,9 @@ class DocumentProcessingService(BaseService[Document, DocumentRepository]):
                 now = datetime.now(timezone.utc)
                 # Handle timezone-aware comparison
                 if document.processing_started_at.tzinfo is None:
-                    processing_time = now.replace(tzinfo=None) - document.processing_started_at
+                    processing_time = (
+                        now.replace(tzinfo=None) - document.processing_started_at
+                    )
                 else:
                     processing_time = now - document.processing_started_at
 
@@ -318,7 +334,11 @@ class DocumentProcessingService(BaseService[Document, DocumentRepository]):
                     details={
                         "document_id": document_id,
                         "current_status": document.status,
-                        "processing_started_at": str(document.processing_started_at) if document.processing_started_at else None,
+                        "processing_started_at": (
+                            str(document.processing_started_at)
+                            if document.processing_started_at
+                            else None
+                        ),
                     },
                 )
         elif document.status == DocumentStatus.COMPLETED.value:
@@ -440,7 +460,9 @@ class DocumentProcessingService(BaseService[Document, DocumentRepository]):
         # Get confidence scores from extraction metadata
         confidence_scores = {}
         if document.extraction_metadata:
-            confidence_scores = document.extraction_metadata.get("confidence_scores", {})
+            confidence_scores = document.extraction_metadata.get(
+                "confidence_scores", {}
+            )
 
         if not confidence_scores:
             return {
@@ -455,7 +477,9 @@ class DocumentProcessingService(BaseService[Document, DocumentRepository]):
         is_valid = field_confidence.all_acceptable(minimum_confidence)
 
         # Get fields below threshold
-        low_confidence_fields = field_confidence.get_fields_below_threshold(minimum_confidence)
+        low_confidence_fields = field_confidence.get_fields_below_threshold(
+            minimum_confidence
+        )
 
         return {
             "is_valid": is_valid,

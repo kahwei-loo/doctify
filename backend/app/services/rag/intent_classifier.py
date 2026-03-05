@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 
 class IntentType(str, Enum):
     """Possible query intent types."""
+
     RAG = "rag"
     ANALYTICS = "analytics"
     AMBIGUOUS = "ambiguous"
@@ -32,6 +33,7 @@ class IntentType(str, Enum):
 @dataclass
 class ClassificationResult:
     """Result of intent classification."""
+
     intent: IntentType
     confidence: float
     dataset_id: Optional[str] = None
@@ -42,6 +44,7 @@ class ClassificationResult:
 @dataclass
 class DataSourceInfo:
     """Minimal info about a KB data source for classification context."""
+
     id: str
     type: str  # 'uploaded_docs', 'website', 'text', 'qa_pairs', 'structured_data'
     name: str
@@ -134,7 +137,9 @@ class IntentClassifier:
     def __init__(self, session: Optional[AsyncSession] = None):
         self.session = session
         self.gateway = get_ai_gateway()
-        self.model = getattr(settings, "INTENT_CLASSIFIER_MODEL", None) or self.gateway.get_model(ModelPurpose.CLASSIFIER)
+        self.model = getattr(
+            settings, "INTENT_CLASSIFIER_MODEL", None
+        ) or self.gateway.get_model(ModelPurpose.CLASSIFIER)
         self.confidence_threshold = getattr(
             settings, "INTENT_CONFIDENCE_THRESHOLD", 0.7
         )
@@ -185,14 +190,19 @@ class IntentClassifier:
         # Conversation stickiness: if previous query in same conversation was analytics
         # with a specific dataset, bias toward same dataset
         sticky_dataset_id = None
-        if conversation_context and conversation_context.get("last_intent") == "analytics":
+        if (
+            conversation_context
+            and conversation_context.get("last_intent") == "analytics"
+        ):
             sticky_dataset_id = conversation_context.get("last_dataset_id")
 
         # Build context about available data sources
         ds_context = self._build_data_source_context(data_sources)
 
         # LLM classification
-        user_message = f"Knowledge Base Data Sources:\n{ds_context}\n\nUser Query: {query}"
+        user_message = (
+            f"Knowledge Base Data Sources:\n{ds_context}\n\nUser Query: {query}"
+        )
 
         if sticky_dataset_id:
             user_message += f"\n\nNote: The previous query in this conversation used dataset '{sticky_dataset_id}'. Consider this for context continuity."
@@ -205,7 +215,10 @@ class IntentClassifier:
                     {"role": "user", "content": user_message},
                 ],
                 tools=[{"type": "function", "function": CLASSIFY_FUNCTION}],
-                tool_choice={"type": "function", "function": {"name": "classify_query_intent"}},
+                tool_choice={
+                    "type": "function",
+                    "function": {"name": "classify_query_intent"},
+                },
                 temperature=0.0,
                 max_tokens=200,
             )
@@ -281,7 +294,10 @@ class IntentClassifier:
             )
 
         # Case 3: Conversation stickiness — if previous was analytics, bias
-        if conversation_context and conversation_context.get("last_intent") == "analytics":
+        if (
+            conversation_context
+            and conversation_context.get("last_intent") == "analytics"
+        ):
             # Only use fast path for strong stickiness signals
             pass  # Let LLM decide for mixed KBs
 

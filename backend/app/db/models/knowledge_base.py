@@ -74,7 +74,9 @@ class KnowledgeBase(BaseModel):
     )
 
     def __repr__(self) -> str:
-        return f"<KnowledgeBase(id={self.id}, name='{self.name}', user_id={self.user_id})>"
+        return (
+            f"<KnowledgeBase(id={self.id}, name='{self.name}', user_id={self.user_id})>"
+        )
 
 
 class DataSource(BaseModel):

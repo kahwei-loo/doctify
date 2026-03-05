@@ -48,16 +48,16 @@ ALLOWED_AGGREGATIONS = {"SUM", "COUNT", "AVG", "MIN", "MAX", "COUNT_DISTINCT"}
 ALLOWED_SORT_DIRECTIONS = {"ASC", "DESC"}
 
 # Security: Column/table name validation pattern (alphanumeric + underscore + Chinese)
-SAFE_IDENTIFIER_PATTERN = re.compile(r'^[\w\u4e00-\u9fff]+$')
+SAFE_IDENTIFIER_PATTERN = re.compile(r"^[\w\u4e00-\u9fff]+$")
 
 # Insights upload directory for path validation
 INSIGHTS_UPLOAD_DIR = os.path.join(settings.UPLOAD_DIR, "insights_datasets")
 
 # Rate limiting constants
 RATE_LIMIT_REQUESTS_PER_MINUTE = 10  # Max LLM requests per user per minute
-RATE_LIMIT_REQUESTS_PER_HOUR = 100   # Max LLM requests per user per hour
-RATE_LIMIT_WINDOW_MINUTE = 60        # Window size in seconds for minute limit
-RATE_LIMIT_WINDOW_HOUR = 3600        # Window size in seconds for hour limit
+RATE_LIMIT_REQUESTS_PER_HOUR = 100  # Max LLM requests per user per hour
+RATE_LIMIT_WINDOW_MINUTE = 60  # Window size in seconds for minute limit
+RATE_LIMIT_WINDOW_HOUR = 3600  # Window size in seconds for hour limit
 
 
 class RedisRateLimiter:
@@ -100,9 +100,18 @@ class RedisRateLimiter:
 
             if minute_count >= RATE_LIMIT_REQUESTS_PER_MINUTE:
                 # Get oldest request in window to calculate wait time
-                oldest = await redis_client.client.zrange(minute_key, 0, 0, withscores=True)
-                wait_time = int(RATE_LIMIT_WINDOW_MINUTE - (current_time - oldest[0][1])) if oldest else 60
-                return False, f"Rate limit exceeded. Please wait {max(1, wait_time)} seconds."
+                oldest = await redis_client.client.zrange(
+                    minute_key, 0, 0, withscores=True
+                )
+                wait_time = (
+                    int(RATE_LIMIT_WINDOW_MINUTE - (current_time - oldest[0][1]))
+                    if oldest
+                    else 60
+                )
+                return (
+                    False,
+                    f"Rate limit exceeded. Please wait {max(1, wait_time)} seconds.",
+                )
 
             hour_cutoff = current_time - RATE_LIMIT_WINDOW_HOUR
             await redis_client.client.zremrangebyscore(hour_key, 0, hour_cutoff)
@@ -152,33 +161,53 @@ QUERY_ANALYSIS_FUNCTION = {
         "properties": {
             "query_type": {
                 "type": "string",
-                "enum": ["aggregation", "breakdown", "trend", "comparison", "filter", "list"],
-                "description": "Type of query"
+                "enum": [
+                    "aggregation",
+                    "breakdown",
+                    "trend",
+                    "comparison",
+                    "filter",
+                    "list",
+                ],
+                "description": "Type of query",
             },
             "metrics": {
                 "type": "array",
                 "items": {
                     "type": "object",
                     "properties": {
-                        "column": {"type": "string", "description": "Column name in data"},
+                        "column": {
+                            "type": "string",
+                            "description": "Column name in data",
+                        },
                         "aggregation": {
                             "type": "string",
-                            "enum": ["SUM", "COUNT", "AVG", "MIN", "MAX", "COUNT_DISTINCT"]
+                            "enum": [
+                                "SUM",
+                                "COUNT",
+                                "AVG",
+                                "MIN",
+                                "MAX",
+                                "COUNT_DISTINCT",
+                            ],
                         },
-                        "alias": {"type": "string", "description": "Display name for this metric"}
+                        "alias": {
+                            "type": "string",
+                            "description": "Display name for this metric",
+                        },
                     },
-                    "required": ["column", "aggregation"]
+                    "required": ["column", "aggregation"],
                 },
-                "description": "Metrics to calculate"
+                "description": "Metrics to calculate",
             },
             "dimensions": {
                 "type": "array",
                 "items": {"type": "string"},
-                "description": "Columns to group by"
+                "description": "Columns to group by",
             },
             "time_column": {
                 "type": "string",
-                "description": "Column name for time filtering (if applicable)"
+                "description": "Column name for time filtering (if applicable)",
             },
             "time_range": {
                 "type": "object",
@@ -186,11 +215,11 @@ QUERY_ANALYSIS_FUNCTION = {
                     "type": {"type": "string", "enum": ["relative", "absolute"]},
                     "value": {
                         "type": "string",
-                        "description": "For relative: this_month, last_month, this_year, etc."
+                        "description": "For relative: this_month, last_month, this_year, etc.",
                     },
                     "start_date": {"type": "string", "description": "ISO date string"},
-                    "end_date": {"type": "string", "description": "ISO date string"}
-                }
+                    "end_date": {"type": "string", "description": "ISO date string"},
+                },
             },
             "filters": {
                 "type": "array",
@@ -200,28 +229,28 @@ QUERY_ANALYSIS_FUNCTION = {
                         "column": {"type": "string"},
                         "operator": {
                             "type": "string",
-                            "enum": ["=", "!=", ">", "<", ">=", "<=", "IN", "LIKE"]
+                            "enum": ["=", "!=", ">", "<", ">=", "<=", "IN", "LIKE"],
                         },
-                        "value": {}
-                    }
-                }
+                        "value": {},
+                    },
+                },
             },
             "sort": {
                 "type": "object",
                 "properties": {
                     "column": {"type": "string"},
-                    "direction": {"type": "string", "enum": ["ASC", "DESC"]}
-                }
+                    "direction": {"type": "string", "enum": ["ASC", "DESC"]},
+                },
             },
             "limit": {"type": "integer"},
             "chart_suggestion": {
                 "type": "string",
                 "enum": ["metric_card", "bar", "line", "pie", "table"],
-                "description": "Suggested chart type for visualization"
-            }
+                "description": "Suggested chart type for visualization",
+            },
         },
-        "required": ["query_type"]
-    }
+        "required": ["query_type"],
+    },
 }
 
 
@@ -248,7 +277,7 @@ class QueryService:
             return (
                 time_range.get("start_date", ""),
                 time_range.get("end_date", ""),
-                f"{time_range.get('start_date')} to {time_range.get('end_date')}"
+                f"{time_range.get('start_date')} to {time_range.get('end_date')}",
             )
 
         value = time_range.get("value", "").lower()
@@ -302,7 +331,7 @@ class QueryService:
         user_message: str,
         schema: SchemaDefinition,
         context: Optional[Dict[str, Any]] = None,
-        history: Optional[List[Dict[str, str]]] = None
+        history: Optional[List[Dict[str, str]]] = None,
     ) -> str:
         """Build GPT prompt with schema and context"""
         prompt_parts = []
@@ -360,7 +389,9 @@ class QueryService:
 
         return "\n".join(prompt_parts)
 
-    async def _call_llm(self, prompt: str, user_id: str) -> Tuple[Dict[str, Any], TokenUsage]:
+    async def _call_llm(
+        self, prompt: str, user_id: str
+    ) -> Tuple[Dict[str, Any], TokenUsage]:
         """
         Call LLM to analyze query intent.
 
@@ -468,12 +499,10 @@ class QueryService:
         return ", ".join(select_parts) if select_parts else "*"
 
     def _build_where_clause(
-        self,
-        intent: QueryIntent,
-        params: List[Any],
-        param_counter: List[int]
+        self, intent: QueryIntent, params: List[Any], param_counter: List[int]
     ) -> str:
         """Build WHERE clause with parameterized values."""
+
         def next_param() -> str:
             param_counter[0] += 1
             return f"${param_counter[0]}"
@@ -483,12 +512,17 @@ class QueryService:
         # Time filter
         if intent.time_range:
             time_range_dict = (
-                intent.time_range.model_dump() if hasattr(intent.time_range, 'model_dump')
+                intent.time_range.model_dump()
+                if hasattr(intent.time_range, "model_dump")
                 else intent.time_range
             )
             start_date, end_date, _ = self._resolve_time_range(time_range_dict)
             if start_date and end_date:
-                time_col = time_range_dict.get("time_column") if isinstance(time_range_dict, dict) else None
+                time_col = (
+                    time_range_dict.get("time_column")
+                    if isinstance(time_range_dict, dict)
+                    else None
+                )
                 if time_col:
                     if not self._validate_identifier(time_col):
                         raise ValueError(f"Invalid time column: {time_col}")
@@ -544,7 +578,9 @@ class QueryService:
                     direction = "DESC"
                 order_by = f'ORDER BY "{self._escape_identifier(col)}" {direction}'
         elif intent.metrics and intent.dimensions:
-            first_metric = intent.metrics[0].get("alias", intent.metrics[0].get("column", ""))
+            first_metric = intent.metrics[0].get(
+                "alias", intent.metrics[0].get("column", "")
+            )
             if first_metric and self._validate_identifier(first_metric):
                 order_by = f'ORDER BY "{self._escape_identifier(first_metric)}" DESC'
 
@@ -559,9 +595,7 @@ class QueryService:
         return group_by, order_by, f"LIMIT {limit_value}"
 
     def _generate_sql_with_params(
-        self,
-        intent: QueryIntent,
-        parquet_path: str
+        self, intent: QueryIntent, parquet_path: str
     ) -> Tuple[str, List[Any]]:
         """
         Generate DuckDB SQL with parameterized queries to prevent SQL injection.
@@ -603,8 +637,7 @@ class QueryService:
 
     @staticmethod
     def _execute_sql_with_params(
-        sql: str,
-        params: List[Any]
+        sql: str, params: List[Any]
     ) -> Tuple[List[Dict[str, Any]], int, float]:
         """Execute parameterized SQL using DuckDB"""
         start_time = time.time()
@@ -623,7 +656,7 @@ class QueryService:
             # Handle datetime serialization
             for row in data:
                 for key, value in row.items():
-                    if hasattr(value, 'isoformat'):
+                    if hasattr(value, "isoformat"):
                         row[key] = value.isoformat()
                     elif pd.isna(value):
                         row[key] = None
@@ -636,9 +669,7 @@ class QueryService:
 
     @staticmethod
     def _format_response(
-        intent: QueryIntent,
-        data: List[Dict[str, Any]],
-        schema: SchemaDefinition
+        intent: QueryIntent, data: List[Dict[str, Any]], schema: SchemaDefinition
     ) -> Tuple[str, Optional[ChartConfig], List[str]]:
         """Format query result into natural language response"""
 
@@ -657,7 +688,11 @@ class QueryService:
                     elif value >= 1000:
                         formatted = f"{value/1000:.1f}K"
                     else:
-                        formatted = f"{value:,.2f}" if isinstance(value, float) else f"{value:,}"
+                        formatted = (
+                            f"{value:,.2f}"
+                            if isinstance(value, float)
+                            else f"{value:,}"
+                        )
                     parts.append(f"{key}: {formatted}")
 
             text = ", ".join(parts)
@@ -669,8 +704,8 @@ class QueryService:
                 config={
                     "value": row[first_key],
                     "label": first_key,
-                    "format": "number"
-                }
+                    "format": "number",
+                },
             )
 
             return text, chart, []
@@ -679,55 +714,65 @@ class QueryService:
         text_parts = []
         if intent.dimensions and intent.metrics:
             dim = intent.dimensions[0]
-            metric_col = intent.metrics[0].get("alias", intent.metrics[0].get("column", ""))
+            metric_col = intent.metrics[0].get(
+                "alias", intent.metrics[0].get("column", "")
+            )
 
             for i, row in enumerate(data[:5]):  # Top 5
                 dim_val = row.get(dim, "Unknown")
                 metric_val = row.get(metric_col, 0)
                 if isinstance(metric_val, (int, float)):
-                    metric_val = f"{metric_val:,.2f}" if isinstance(metric_val, float) else f"{metric_val:,}"
+                    metric_val = (
+                        f"{metric_val:,.2f}"
+                        if isinstance(metric_val, float)
+                        else f"{metric_val:,}"
+                    )
                 text_parts.append(f"{i+1}. {dim_val}: {metric_val}")
 
             text = f"Top results by {dim}:\n" + "\n".join(text_parts)
 
             # Chart config
-            chart_type = ChartType(intent.chart_suggestion) if intent.chart_suggestion else ChartType.BAR
+            chart_type = (
+                ChartType(intent.chart_suggestion)
+                if intent.chart_suggestion
+                else ChartType.BAR
+            )
             chart = ChartConfig(
                 type=chart_type,
                 config={
                     "xField": dim,
                     "yField": metric_col,
-                    "data": data[:20]  # Limit chart data
-                }
+                    "data": data[:20],  # Limit chart data
+                },
             )
 
             # Generate insights
             insights = []
             if len(data) > 1:
                 top_item = data[0]
-                total = sum(row.get(metric_col, 0) for row in data if isinstance(row.get(metric_col), (int, float)))
+                total = sum(
+                    row.get(metric_col, 0)
+                    for row in data
+                    if isinstance(row.get(metric_col), (int, float))
+                )
                 if total > 0:
                     top_value = top_item.get(metric_col, 0)
                     if isinstance(top_value, (int, float)):
                         pct = (top_value / total) * 100
-                        insights.append(f"{top_item.get(dim)} accounts for {pct:.1f}% of total")
+                        insights.append(
+                            f"{top_item.get(dim)} accounts for {pct:.1f}% of total"
+                        )
 
             return text, chart, insights
 
         # Default table display
         text = f"Found {len(data)} rows"
-        chart = ChartConfig(
-            type=ChartType.TABLE,
-            config={"data": data[:50]}
-        )
+        chart = ChartConfig(type=ChartType.TABLE, config={"data": data[:50]})
 
         return text, chart, []
 
     async def create_conversation(
-        self,
-        user_id: UUID,
-        dataset_id: UUID,
-        title: Optional[str] = None
+        self, user_id: UUID, dataset_id: UUID, title: Optional[str] = None
     ) -> ConversationResponse:
         """Create a new conversation"""
         # Verify dataset exists and belongs to user
@@ -736,15 +781,14 @@ class QueryService:
             raise ValueError("Dataset not found")
 
         # Create conversation
-        conversation = await self.conversation_repo.create({
-            "user_id": user_id,
-            "dataset_id": dataset_id,
-            "title": title or f"Conversation on {dataset.name}",
-            "context": {
-                "last_query_intent": None,
-                "referenced_entities": {}
+        conversation = await self.conversation_repo.create(
+            {
+                "user_id": user_id,
+                "dataset_id": dataset_id,
+                "title": title or f"Conversation on {dataset.name}",
+                "context": {"last_query_intent": None, "referenced_entities": {}},
             }
-        })
+        )
 
         return ConversationResponse(
             id=str(conversation.id),
@@ -753,7 +797,7 @@ class QueryService:
             title=conversation.title,
             context=conversation.context or {},
             created_at=conversation.created_at,
-            updated_at=conversation.updated_at
+            updated_at=conversation.updated_at,
         )
 
     async def list_conversations(
@@ -761,7 +805,7 @@ class QueryService:
         user_id: UUID,
         dataset_id: Optional[UUID] = None,
         skip: int = 0,
-        limit: int = 20
+        limit: int = 20,
     ) -> ConversationListResponse:
         """List user's conversations"""
         user_id_str = str(user_id)
@@ -773,10 +817,12 @@ class QueryService:
                 skip=skip,
                 limit=limit,
             )
-            total = await self.conversation_repo.count({
-                "dataset_id": dataset_id,
-                "user_id": user_id,
-            })
+            total = await self.conversation_repo.count(
+                {
+                    "dataset_id": dataset_id,
+                    "user_id": user_id,
+                }
+            )
         else:
             conversations = await self.conversation_repo.get_by_user(
                 user_id_str, skip=skip, limit=limit
@@ -791,20 +837,22 @@ class QueryService:
                 title=conv.title,
                 context=conv.context or {},
                 created_at=conv.created_at,
-                updated_at=conv.updated_at
+                updated_at=conv.updated_at,
             )
             for conv in conversations
         ]
 
-        return ConversationListResponse(conversations=conversation_responses, total=total)
+        return ConversationListResponse(
+            conversations=conversation_responses, total=total
+        )
 
     async def get_conversation(
-        self,
-        conversation_id: UUID,
-        user_id: UUID
+        self, conversation_id: UUID, user_id: UUID
     ) -> Optional[ConversationResponse]:
         """Get a single conversation by ID"""
-        conversation = await self.conversation_repo.get_by_id_and_user(conversation_id, user_id)
+        conversation = await self.conversation_repo.get_by_id_and_user(
+            conversation_id, user_id
+        )
         if not conversation:
             return None
 
@@ -815,19 +863,17 @@ class QueryService:
             title=conversation.title,
             context=conversation.context or {},
             created_at=conversation.created_at,
-            updated_at=conversation.updated_at
+            updated_at=conversation.updated_at,
         )
 
     async def process_query(
-        self,
-        conversation_id: UUID,
-        user_id: UUID,
-        message: str,
-        language: str = "en"
+        self, conversation_id: UUID, user_id: UUID, message: str, language: str = "en"
     ) -> QueryResponse:
         """Process a natural language query"""
         # Get conversation and verify access
-        conversation = await self.conversation_repo.get_by_id_and_user(conversation_id, user_id)
+        conversation = await self.conversation_repo.get_by_id_and_user(
+            conversation_id, user_id
+        )
         if not conversation:
             raise ValueError("Conversation not found")
 
@@ -843,22 +889,25 @@ class QueryService:
         context = conversation.context or {}
 
         # Get recent query history
-        recent_queries = await self.query_repo.get_by_conversation(conversation_id, limit=3)
+        recent_queries = await self.query_repo.get_by_conversation(
+            conversation_id, limit=3
+        )
 
         history = []
         for q in reversed(recent_queries):  # Reverse to get chronological order
-            history.append({
-                "user": q.user_input or "",
-                "assistant": q.response_text or ""
-            })
+            history.append(
+                {"user": q.user_input or "", "assistant": q.response_text or ""}
+            )
 
         # Create query record
-        query_record = await self.query_repo.create({
-            "conversation_id": conversation_id,
-            "user_input": message,
-            "language": language,
-            "status": QueryStatus.PROCESSING.value
-        })
+        query_record = await self.query_repo.create(
+            {
+                "conversation_id": conversation_id,
+                "user_input": message,
+                "language": language,
+                "status": QueryStatus.PROCESSING.value,
+            }
+        )
         query_id = query_record.id
 
         try:
@@ -886,30 +935,34 @@ class QueryService:
             response_text, chart, insights = self._format_response(intent, data, schema)
 
             # Update query record
-            await self.query_repo.update(query_id, {
-                "parsed_intent": intent.model_dump(),
-                "generated_sql": sql,
-                "result": {
-                    "data": data,
-                    "row_count": row_count,
-                    "execution_time_ms": exec_time
+            await self.query_repo.update(
+                query_id,
+                {
+                    "parsed_intent": intent.model_dump(),
+                    "generated_sql": sql,
+                    "result": {
+                        "data": data,
+                        "row_count": row_count,
+                        "execution_time_ms": exec_time,
+                    },
+                    "response_text": response_text,
+                    "response_chart": chart.model_dump() if chart else None,
+                    "response_insights": insights,
+                    "token_usage": token_usage.model_dump(),
+                    "status": QueryStatus.COMPLETED.value,
+                    "execution_time_ms": int(exec_time),
                 },
-                "response_text": response_text,
-                "response_chart": chart.model_dump() if chart else None,
-                "response_insights": insights,
-                "token_usage": token_usage.model_dump(),
-                "status": QueryStatus.COMPLETED.value,
-                "execution_time_ms": int(exec_time)
-            })
+            )
 
             # Update conversation context
             new_context = {
                 "last_query_intent": intent.model_dump(),
-                "referenced_entities": {}
+                "referenced_entities": {},
             }
             if intent.time_range:
                 time_range_dict = (
-                    intent.time_range.model_dump() if hasattr(intent.time_range, 'model_dump')
+                    intent.time_range.model_dump()
+                    if hasattr(intent.time_range, "model_dump")
                     else intent.time_range
                 )
                 _, _, desc = self._resolve_time_range(time_range_dict)
@@ -921,9 +974,9 @@ class QueryService:
             if intent.dimensions:
                 new_context["referenced_entities"]["dimension"] = intent.dimensions[0]
 
-            await self.conversation_repo.update(conversation_id, {
-                "context": new_context
-            })
+            await self.conversation_repo.update(
+                conversation_id, {"context": new_context}
+            )
 
             return QueryResponse(
                 id=str(query_id),
@@ -932,31 +985,31 @@ class QueryService:
                 response_text=response_text,
                 response_chart=chart,
                 response_insights=insights if insights else None,
-                result={"data": data[:100], "row_count": row_count},  # Limit response data
+                result={
+                    "data": data[:100],
+                    "row_count": row_count,
+                },  # Limit response data
                 generated_sql=sql,  # Include for debugging
                 status=QueryStatus.COMPLETED,
                 execution_time_ms=int(exec_time),
-                created_at=query_record.created_at
+                created_at=query_record.created_at,
             )
 
         except Exception as e:
             logger.error(f"Query processing failed: {e}")
-            await self.query_repo.update(query_id, {
-                "status": QueryStatus.ERROR.value,
-                "error_message": str(e)
-            })
+            await self.query_repo.update(
+                query_id, {"status": QueryStatus.ERROR.value, "error_message": str(e)}
+            )
             raise
 
     async def get_query_history(
-        self,
-        conversation_id: UUID,
-        user_id: UUID,
-        skip: int = 0,
-        limit: int = 50
+        self, conversation_id: UUID, user_id: UUID, skip: int = 0, limit: int = 50
     ) -> QueryHistoryResponse:
         """Get query history for a conversation"""
         # Verify access
-        conversation = await self.conversation_repo.get_by_id_and_user(conversation_id, user_id)
+        conversation = await self.conversation_repo.get_by_id_and_user(
+            conversation_id, user_id
+        )
         if not conversation:
             raise ValueError("Conversation not found")
 
@@ -972,25 +1025,25 @@ class QueryService:
             if q.response_chart:
                 chart = ChartConfig(**q.response_chart)
 
-            query_items.append(QueryHistoryItem(
-                id=str(q.id),
-                user_input=q.user_input,
-                response_text=q.response_text,
-                response_chart=chart,
-                status=QueryStatus(q.status),
-                created_at=q.created_at
-            ))
+            query_items.append(
+                QueryHistoryItem(
+                    id=str(q.id),
+                    user_input=q.user_input,
+                    response_text=q.response_text,
+                    response_chart=chart,
+                    status=QueryStatus(q.status),
+                    created_at=q.created_at,
+                )
+            )
 
         return QueryHistoryResponse(queries=query_items, total=total)
 
-    async def delete_conversation(
-        self,
-        conversation_id: UUID,
-        user_id: UUID
-    ) -> bool:
+    async def delete_conversation(self, conversation_id: UUID, user_id: UUID) -> bool:
         """Delete a conversation and all its queries"""
         # Verify access
-        conversation = await self.conversation_repo.get_by_id_and_user(conversation_id, user_id)
+        conversation = await self.conversation_repo.get_by_id_and_user(
+            conversation_id, user_id
+        )
         if not conversation:
             raise ValueError("Conversation not found")
 

@@ -53,7 +53,9 @@ class UserRepository(BaseRepository[User]):
         """
         return await self.get_by_field("username", username.lower())
 
-    async def email_exists(self, email: str, exclude_user_id: Optional[str] = None) -> bool:
+    async def email_exists(
+        self, email: str, exclude_user_id: Optional[str] = None
+    ) -> bool:
         """
         Check if email already exists.
 
@@ -71,7 +73,11 @@ class UserRepository(BaseRepository[User]):
             stmt = select(User).where(User.email == email.lower())
 
             if exclude_user_id:
-                user_uuid = uuid.UUID(exclude_user_id) if isinstance(exclude_user_id, str) else exclude_user_id
+                user_uuid = (
+                    uuid.UUID(exclude_user_id)
+                    if isinstance(exclude_user_id, str)
+                    else exclude_user_id
+                )
                 stmt = stmt.where(User.id != user_uuid)
 
             result = await self.session.execute(stmt)
@@ -80,7 +86,9 @@ class UserRepository(BaseRepository[User]):
         except Exception as e:
             raise DatabaseError(f"Failed to check email existence: {str(e)}")
 
-    async def username_exists(self, username: str, exclude_user_id: Optional[str] = None) -> bool:
+    async def username_exists(
+        self, username: str, exclude_user_id: Optional[str] = None
+    ) -> bool:
         """
         Check if username already exists.
 
@@ -98,7 +106,11 @@ class UserRepository(BaseRepository[User]):
             stmt = select(User).where(User.username == username.lower())
 
             if exclude_user_id:
-                user_uuid = uuid.UUID(exclude_user_id) if isinstance(exclude_user_id, str) else exclude_user_id
+                user_uuid = (
+                    uuid.UUID(exclude_user_id)
+                    if isinstance(exclude_user_id, str)
+                    else exclude_user_id
+                )
                 stmt = stmt.where(User.id != user_uuid)
 
             result = await self.session.execute(stmt)
@@ -177,7 +189,9 @@ class UserRepository(BaseRepository[User]):
         Raises:
             DatabaseError: If database operation fails
         """
-        return await self.update(user_id, {"is_verified": True, "verified_at": datetime.utcnow()})
+        return await self.update(
+            user_id, {"is_verified": True, "verified_at": datetime.utcnow()}
+        )
 
     async def update_preferences(
         self,
@@ -232,8 +246,12 @@ class UserRepository(BaseRepository[User]):
             }
 
             # Increment values
-            current_stats["documents_processed"] = current_stats.get("documents_processed", 0) + documents_processed
-            current_stats["tokens_used"] = current_stats.get("tokens_used", 0) + tokens_used
+            current_stats["documents_processed"] = (
+                current_stats.get("documents_processed", 0) + documents_processed
+            )
+            current_stats["tokens_used"] = (
+                current_stats.get("tokens_used", 0) + tokens_used
+            )
             current_stats["last_updated"] = datetime.utcnow().isoformat()
 
             return await self.update(user_id, {"usage_statistics": current_stats})
@@ -309,13 +327,18 @@ class UserRepository(BaseRepository[User]):
         Raises:
             DatabaseError: If database operation fails
         """
-        return await self.update(user_id, {
-            "failed_login_attempts": 0,
-            "locked_until": None,
-            "last_failed_login": None,
-        })
+        return await self.update(
+            user_id,
+            {
+                "failed_login_attempts": 0,
+                "locked_until": None,
+                "last_failed_login": None,
+            },
+        )
 
-    async def lock_user_account(self, user_id: str, locked_until: datetime) -> Optional[User]:
+    async def lock_user_account(
+        self, user_id: str, locked_until: datetime
+    ) -> Optional[User]:
         """
         Lock user account until specified time.
 
@@ -482,10 +505,13 @@ class ApiKeyRepository(BaseRepository[ApiKey]):
                 return None
 
             new_count = api_key.usage_count + 1
-            return await self.update(key_id, {
-                "usage_count": new_count,
-                "last_used_at": datetime.utcnow(),
-            })
+            return await self.update(
+                key_id,
+                {
+                    "usage_count": new_count,
+                    "last_used_at": datetime.utcnow(),
+                },
+            )
 
         except Exception as e:
             raise DatabaseError(f"Failed to increment API key usage: {str(e)}")

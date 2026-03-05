@@ -102,7 +102,9 @@ class AssistantEntity:
             "description": self.description,
             "model_config": self.model_config.to_dict(),
             "is_active": self.is_active,
-            "knowledge_base_id": str(self.knowledge_base_id) if self.knowledge_base_id else None,
+            "knowledge_base_id": (
+                str(self.knowledge_base_id) if self.knowledge_base_id else None
+            ),
             "widget_config": self.widget_config,
             "total_conversations": self.total_conversations,
             "unresolved_count": self.unresolved_count,

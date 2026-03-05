@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class CachedRAGResponse:
     """Cached RAG response data."""
+
     answer: str
     sources: List[Dict[str, Any]]
     model_used: str
@@ -105,7 +106,7 @@ class SemanticCacheService:
                 return None
 
             entries = json.loads(index_data)
-            truncated_query = embedding[:self.EMBEDDING_DIMS_FOR_CACHE]
+            truncated_query = embedding[: self.EMBEDDING_DIMS_FOR_CACHE]
 
             # Find best match
             best_similarity = 0.0
@@ -166,7 +167,7 @@ class SemanticCacheService:
             entries = json.loads(index_data) if index_data else []
 
             # Add new entry with truncated embedding
-            truncated = embedding[:self.EMBEDDING_DIMS_FOR_CACHE]
+            truncated = embedding[: self.EMBEDDING_DIMS_FOR_CACHE]
             new_entry = {
                 "hash": emb_hash,
                 "embedding": truncated,
@@ -179,11 +180,11 @@ class SemanticCacheService:
             # Trim to max entries (FIFO)
             if len(entries) > self.MAX_CACHED_ENTRIES:
                 # Remove oldest entries and their response keys
-                removed = entries[:len(entries) - self.MAX_CACHED_ENTRIES]
+                removed = entries[: len(entries) - self.MAX_CACHED_ENTRIES]
                 for r in removed:
                     old_key = self._cache_key(user_id, r.get("hash", ""))
                     await redis.delete(old_key)
-                entries = entries[-self.MAX_CACHED_ENTRIES:]
+                entries = entries[-self.MAX_CACHED_ENTRIES :]
 
             await redis.set(index_key, json.dumps(entries), ttl=self.CACHE_TTL)
             return True

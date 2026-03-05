@@ -93,13 +93,17 @@ class AssistantConversationRepository(BaseRepository[AssistantConversation]):
             Existing or new AssistantConversation instance
         """
         # Look for existing conversation
-        stmt = select(AssistantConversation).where(
-            and_(
-                AssistantConversation.assistant_id == assistant_id,
-                AssistantConversation.session_id == session_id,
-                AssistantConversation.status != "resolved",
+        stmt = (
+            select(AssistantConversation)
+            .where(
+                and_(
+                    AssistantConversation.assistant_id == assistant_id,
+                    AssistantConversation.session_id == session_id,
+                    AssistantConversation.status != "resolved",
+                )
             )
-        ).order_by(AssistantConversation.created_at.desc())
+            .order_by(AssistantConversation.created_at.desc())
+        )
 
         result = await self.session.execute(stmt)
         existing = result.scalar_one_or_none()
@@ -221,8 +225,10 @@ class AssistantConversationRepository(BaseRepository[AssistantConversation]):
         if status:
             conditions.append(AssistantConversation.status == status)
 
-        stmt = select(func.count()).select_from(AssistantConversation).where(
-            and_(*conditions)
+        stmt = (
+            select(func.count())
+            .select_from(AssistantConversation)
+            .where(and_(*conditions))
         )
         result = await self.session.execute(stmt)
         return result.scalar() or 0
@@ -314,8 +320,10 @@ class AssistantMessageRepository(BaseRepository[AssistantMessage]):
         Returns:
             Number of messages
         """
-        stmt = select(func.count()).select_from(AssistantMessage).where(
-            AssistantMessage.conversation_id == conversation_id
+        stmt = (
+            select(func.count())
+            .select_from(AssistantMessage)
+            .where(AssistantMessage.conversation_id == conversation_id)
         )
         result = await self.session.execute(stmt)
         return result.scalar() or 0

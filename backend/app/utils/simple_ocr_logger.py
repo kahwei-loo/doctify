@@ -38,32 +38,24 @@ def log_ocr_request(
     document_id: str,
     user_id: Optional[str] = None,
     filename: str = "unknown",
-
     # Processing information
     attempt_number: int = 1,
     model: str = "unknown",
-
     # Prompt & Response
     prompt: Optional[str] = None,
     raw_response: Optional[str] = None,
-
     # Structured output
     extracted_data: Optional[Dict[str, Any]] = None,
-
     # Function/Tool Calling
     tools_called: Optional[List[str]] = None,
-
     # Token usage
     tokens: Optional[Dict[str, int]] = None,
-
     # Performance metrics
     processing_time_seconds: Optional[float] = None,
-
     # Quality metrics
     confidence: Optional[float] = None,
     doc_type: Optional[str] = None,
     validation_errors: int = 0,
-
     # Additional information
     additional_data: Optional[Dict[str, Any]] = None,
 ) -> Optional[Path]:
@@ -116,33 +108,26 @@ def log_ocr_request(
             # Metadata
             "timestamp": timestamp.isoformat() + "Z",
             "log_version": "1.0",
-
             # Basic information
             "document_id": document_id,
             "user_id": user_id,
             "filename": filename,
             "attempt_number": attempt_number,
-
             # AI model information
             "model": model,
             "tokens": tokens or {},
             "processing_time_seconds": processing_time_seconds,
-
             # Prompt & Response
             "prompt": prompt,
             "raw_response": raw_response,
-
             # Structured output
             "extracted_data": extracted_data,
-
             # Function/Tool Calling
             "tools_called": tools_called or [],
-
             # Quality metrics
             "confidence": confidence,
             "doc_type": doc_type,
             "validation_errors": validation_errors,
-
             # Additional information
             "additional_data": additional_data or {},
         }
@@ -247,15 +232,24 @@ def log_all_attempts_summary(
             "total_attempts": len(attempts),
             "selected_attempt": selected_attempt,
             "attempts": attempts,
-
             # Statistics
             "statistics": {
-                "avg_confidence": sum(a.get("confidence", 0) for a in attempts) / len(attempts) if attempts else 0,
-                "max_confidence": max((a.get("confidence", 0) for a in attempts), default=0),
-                "min_confidence": min((a.get("confidence", 0) for a in attempts), default=0),
-                "total_tokens": sum(a.get("tokens", {}).get("total_tokens", 0) for a in attempts),
+                "avg_confidence": (
+                    sum(a.get("confidence", 0) for a in attempts) / len(attempts)
+                    if attempts
+                    else 0
+                ),
+                "max_confidence": max(
+                    (a.get("confidence", 0) for a in attempts), default=0
+                ),
+                "min_confidence": min(
+                    (a.get("confidence", 0) for a in attempts), default=0
+                ),
+                "total_tokens": sum(
+                    a.get("tokens", {}).get("total_tokens", 0) for a in attempts
+                ),
                 "total_time": sum(a.get("processing_time", 0) for a in attempts),
-            }
+            },
         }
 
         # Write file
@@ -277,9 +271,7 @@ def get_recent_logs(limit: int = 10) -> List[Path]:
     try:
         log_dir = ensure_log_directory()
         log_files = sorted(
-            log_dir.glob("ocr_*.json"),
-            key=lambda p: p.stat().st_mtime,
-            reverse=True
+            log_dir.glob("ocr_*.json"), key=lambda p: p.stat().st_mtime, reverse=True
         )
         return log_files[:limit]
     except Exception as e:
@@ -297,10 +289,7 @@ def read_log(log_file: Path) -> Optional[Dict[str, Any]]:
         return None
 
 
-def analyze_logs(
-    document_id: Optional[str] = None,
-    limit: int = 100
-) -> Dict[str, Any]:
+def analyze_logs(document_id: Optional[str] = None, limit: int = 100) -> Dict[str, Any]:
     """
     Analyze log files and generate a statistical report.
 
@@ -319,9 +308,7 @@ def analyze_logs(
             pattern = "ocr_*.json"
 
         log_files = sorted(
-            log_dir.glob(pattern),
-            key=lambda p: p.stat().st_mtime,
-            reverse=True
+            log_dir.glob(pattern), key=lambda p: p.stat().st_mtime, reverse=True
         )[:limit]
 
         if not log_files:
@@ -370,15 +357,27 @@ def analyze_logs(
         report = {
             "total_requests": total_requests,
             "total_tokens": total_tokens,
-            "avg_tokens_per_request": total_tokens / total_requests if total_requests > 0 else 0,
+            "avg_tokens_per_request": (
+                total_tokens / total_requests if total_requests > 0 else 0
+            ),
             "total_processing_time": total_time,
-            "avg_processing_time": total_time / total_requests if total_requests > 0 else 0,
+            "avg_processing_time": (
+                total_time / total_requests if total_requests > 0 else 0
+            ),
             "model_statistics": model_stats,
-            "confidence_statistics": {
-                "avg": sum(confidence_scores) / len(confidence_scores) if confidence_scores else 0,
-                "max": max(confidence_scores) if confidence_scores else 0,
-                "min": min(confidence_scores) if confidence_scores else 0,
-            } if confidence_scores else None,
+            "confidence_statistics": (
+                {
+                    "avg": (
+                        sum(confidence_scores) / len(confidence_scores)
+                        if confidence_scores
+                        else 0
+                    ),
+                    "max": max(confidence_scores) if confidence_scores else 0,
+                    "min": min(confidence_scores) if confidence_scores else 0,
+                }
+                if confidence_scores
+                else None
+            ),
         }
 
         return report
@@ -401,7 +400,9 @@ def cleanup_old_logs(days_to_keep: int = 30) -> int:
                 deleted_count += 1
 
         if deleted_count > 0:
-            logger.info(f"Cleaned up {deleted_count} old OCR logs (>{days_to_keep} days)")
+            logger.info(
+                f"Cleaned up {deleted_count} old OCR logs (>{days_to_keep} days)"
+            )
 
         return deleted_count
 

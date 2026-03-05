@@ -20,7 +20,10 @@ from bs4 import BeautifulSoup
 
 from app.tasks.celery_app import celery_app
 from app.db.database import get_db_session, close_db, init_db
-from app.db.repositories.knowledge_base import KnowledgeBaseRepository, DataSourceRepository
+from app.db.repositories.knowledge_base import (
+    KnowledgeBaseRepository,
+    DataSourceRepository,
+)
 from app.db.repositories.rag import DocumentEmbeddingRepository
 from app.db.models.rag import DocumentEmbedding
 from app.services.rag.embedding_service import EmbeddingService
@@ -61,6 +64,7 @@ async def _read_file_content(file_path: str, file_type: str = "") -> str:
 
         if extension == ".pdf":
             from PyPDF2 import PdfReader
+
             reader = PdfReader(actual_path)
             text_parts = []
             for page in reader.pages:
@@ -116,6 +120,7 @@ async def _extract_text_from_data_source(ds, db) -> str:
         # Extract text from uploaded document references
         # Documents are linked via config["document_ids"]
         from app.db.repositories.document import DocumentRepository
+
         doc_repo = DocumentRepository(db)
 
         document_ids = ds.config.get("document_ids", [])
@@ -140,25 +145,35 @@ async def _extract_text_from_data_source(ds, db) -> str:
                     text_parts.append(doc.extracted_text)
                 elif doc.file_path:
                     # Fallback: read file content directly
-                    logger.info(f"Document {doc_id}: no extracted_text, trying file at {doc.file_path}")
+                    logger.info(
+                        f"Document {doc_id}: no extracted_text, trying file at {doc.file_path}"
+                    )
                     extracted = await _read_file_content(doc.file_path, doc.file_type)
                     if extracted:
                         # Cache extracted text on the document for future use
                         doc.extracted_text = extracted
                         text_parts.append(extracted)
-                        logger.info(f"Document {doc_id}: extracted {len(extracted)} chars from file")
+                        logger.info(
+                            f"Document {doc_id}: extracted {len(extracted)} chars from file"
+                        )
                     else:
                         logger.warning(
                             f"Document {doc_id}: file read returned empty. "
                             f"file_path={doc.file_path}, file_type={doc.file_type}"
                         )
                 else:
-                    logger.warning(f"Document {doc_id}: no extracted_text and no file_path")
+                    logger.warning(
+                        f"Document {doc_id}: no extracted_text and no file_path"
+                    )
             except Exception as e:
-                logger.warning(f"Failed to extract text from document {doc_id}: {e}", exc_info=True)
+                logger.warning(
+                    f"Failed to extract text from document {doc_id}: {e}", exc_info=True
+                )
                 continue
 
-        logger.info(f"uploaded_docs extraction complete: {len(text_parts)} text parts from {len(document_ids)} docs")
+        logger.info(
+            f"uploaded_docs extraction complete: {len(text_parts)} text parts from {len(document_ids)} docs"
+        )
         return "\n\n".join(text_parts)
 
     elif ds_type == "website":
@@ -172,7 +187,9 @@ async def _extract_text_from_data_source(ds, db) -> str:
             content = page.get("content", "")
             url = page.get("url", "")
             if content:
-                page_text = f"Page: {title}\nURL: {url}\n\n{content}" if title else content
+                page_text = (
+                    f"Page: {title}\nURL: {url}\n\n{content}" if title else content
+                )
                 text_parts.append(page_text)
         return "\n\n---\n\n".join(text_parts)
 
@@ -180,7 +197,9 @@ async def _extract_text_from_data_source(ds, db) -> str:
         raise ValueError(f"Unsupported data source type: {ds_type}")
 
 
-async def _generate_embeddings_async(data_source_id: str, force_regenerate: bool, task_instance):
+async def _generate_embeddings_async(
+    data_source_id: str, force_regenerate: bool, task_instance
+):
     """
     Async implementation of embedding generation.
 
@@ -226,7 +245,9 @@ async def _generate_embeddings_async(data_source_id: str, force_regenerate: bool
             if existing:
                 await embedding_repo.delete_by_data_source_id(ds_id)
                 await db.commit()
-                logger.info(f"Deleted {len(existing)} existing embeddings for data source {ds_id}")
+                logger.info(
+                    f"Deleted {len(existing)} existing embeddings for data source {ds_id}"
+                )
 
         # Extract text based on data source type
         text_content = await _extract_text_from_data_source(ds, db)
@@ -275,14 +296,16 @@ async def _generate_embeddings_async(data_source_id: str, force_regenerate: bool
         embeddings_created = []
 
         for i in range(0, total_chunks, batch_size):
-            batch_chunks = chunks[i:i + batch_size]
+            batch_chunks = chunks[i : i + batch_size]
 
             for idx, chunk_text in enumerate(batch_chunks):
                 chunk_index = i + idx
 
                 try:
                     # Generate embedding vector
-                    embedding_vector = await embedding_service.generate_embedding(chunk_text)
+                    embedding_vector = await embedding_service.generate_embedding(
+                        chunk_text
+                    )
 
                     # Create embedding record
                     embedding_data = DocumentEmbedding(
@@ -297,14 +320,16 @@ async def _generate_embeddings_async(data_source_id: str, force_regenerate: bool
                             "chunk_strategy": chunk_strategy,
                             "token_count": embedding_service.count_tokens(chunk_text),
                             "document_name": ds.name,
-                        }
+                        },
                     )
                     db.add(embedding_data)
                     embeddings_created.append(embedding_data)
                     processed_count += 1
 
                 except Exception as e:
-                    logger.error(f"Failed to generate embedding for chunk {chunk_index}: {e}")
+                    logger.error(
+                        f"Failed to generate embedding for chunk {chunk_index}: {e}"
+                    )
                     continue
 
             # Commit batch
@@ -314,15 +339,17 @@ async def _generate_embeddings_async(data_source_id: str, force_regenerate: bool
             progress = ((i + len(batch_chunks)) / total_chunks) * 100
             if task_instance:
                 task_instance.update_state(
-                    state='PROGRESS',
+                    state="PROGRESS",
                     meta={
-                        'processed': i + len(batch_chunks),
-                        'total': total_chunks,
-                        'progress': round(progress, 1)
-                    }
+                        "processed": i + len(batch_chunks),
+                        "total": total_chunks,
+                        "progress": round(progress, 1),
+                    },
                 )
 
-            logger.info(f"Processed batch {i // batch_size + 1}, total processed: {processed_count}/{total_chunks}")
+            logger.info(
+                f"Processed batch {i // batch_size + 1}, total processed: {processed_count}/{total_chunks}"
+            )
 
         # Update data source status to active
         await ds_repo.update_status(ds_id, "active")
@@ -332,14 +359,19 @@ async def _generate_embeddings_async(data_source_id: str, force_regenerate: bool
         current_config = ds.config or {}
         current_config["embedding_count"] = processed_count
         current_config["last_embedding_at"] = datetime.utcnow().isoformat()
-        await ds_repo.update(ds_id, {
-            "config": current_config,
-            "embedding_count": processed_count,
-        })
+        await ds_repo.update(
+            ds_id,
+            {
+                "config": current_config,
+                "embedding_count": processed_count,
+            },
+        )
 
         await db.commit()
 
-        logger.info(f"Embedding generation completed for data source {ds_id}: {processed_count} embeddings")
+        logger.info(
+            f"Embedding generation completed for data source {ds_id}: {processed_count} embeddings"
+        )
 
         return {
             "status": "completed",
@@ -422,10 +454,10 @@ async def _crawl_website_async(data_source_id: str, task_instance):
 
             try:
                 # Fetch page with timeout
-                headers = {
-                    "User-Agent": "DoctifyBot/1.0 (Knowledge Base Crawler)"
-                }
-                response = requests.get(url, timeout=30, headers=headers, allow_redirects=True)
+                headers = {"User-Agent": "DoctifyBot/1.0 (Knowledge Base Crawler)"}
+                response = requests.get(
+                    url, timeout=30, headers=headers, allow_redirects=True
+                )
                 response.raise_for_status()
 
                 # Skip non-HTML content
@@ -444,7 +476,9 @@ async def _crawl_website_async(data_source_id: str, task_instance):
                 text_content = soup.get_text(separator="\n", strip=True)
 
                 # Clean up excessive whitespace
-                lines = [line.strip() for line in text_content.split("\n") if line.strip()]
+                lines = [
+                    line.strip() for line in text_content.split("\n") if line.strip()
+                ]
                 text_content = "\n".join(lines)
 
                 # Get title
@@ -454,13 +488,17 @@ async def _crawl_website_async(data_source_id: str, task_instance):
 
                 # Store page
                 if text_content:
-                    crawled_pages.append({
-                        "url": url,
-                        "title": title,
-                        "content": text_content[:50000],  # Limit content size per page
-                        "depth": depth,
-                        "crawled_at": datetime.utcnow().isoformat(),
-                    })
+                    crawled_pages.append(
+                        {
+                            "url": url,
+                            "title": title,
+                            "content": text_content[
+                                :50000
+                            ],  # Limit content size per page
+                            "depth": depth,
+                            "crawled_at": datetime.utcnow().isoformat(),
+                        }
+                    )
 
                 # Find links for next depth
                 if depth < max_depth:
@@ -479,8 +517,19 @@ async def _crawl_website_async(data_source_id: str, task_instance):
                         clean_url = f"{parsed_next.scheme}://{parsed_next.netloc}{parsed_next.path}"
 
                         # Skip common non-content URLs
-                        skip_extensions = [".pdf", ".jpg", ".jpeg", ".png", ".gif", ".css", ".js", ".xml"]
-                        if any(clean_url.lower().endswith(ext) for ext in skip_extensions):
+                        skip_extensions = [
+                            ".pdf",
+                            ".jpg",
+                            ".jpeg",
+                            ".png",
+                            ".gif",
+                            ".css",
+                            ".js",
+                            ".xml",
+                        ]
+                        if any(
+                            clean_url.lower().endswith(ext) for ext in skip_extensions
+                        ):
                             continue
 
                         if clean_url not in visited_urls:
@@ -489,12 +538,12 @@ async def _crawl_website_async(data_source_id: str, task_instance):
                 # Update progress
                 if task_instance:
                     task_instance.update_state(
-                        state='PROGRESS',
+                        state="PROGRESS",
                         meta={
-                            'pages_crawled': len(crawled_pages),
-                            'total_pages': max_pages,
-                            'current_url': url
-                        }
+                            "pages_crawled": len(crawled_pages),
+                            "total_pages": max_pages,
+                            "current_url": url,
+                        },
                     )
 
                 logger.info(f"Crawled page {len(crawled_pages)}/{max_pages}: {url}")
@@ -512,17 +561,18 @@ async def _crawl_website_async(data_source_id: str, task_instance):
         current_config["crawl_completed_at"] = datetime.utcnow().isoformat()
         current_config["pages_crawled"] = len(crawled_pages)
 
-        await ds_repo.update(ds_id, {
-            "config": current_config,
-            "document_count": len(crawled_pages)
-        })
+        await ds_repo.update(
+            ds_id, {"config": current_config, "document_count": len(crawled_pages)}
+        )
 
         # Update status to active
         await ds_repo.update_status(ds_id, "active")
         await ds_repo.update_sync_timestamp(ds_id)
         await db.commit()
 
-        logger.info(f"Website crawl completed for data source {ds_id}: {len(crawled_pages)} pages")
+        logger.info(
+            f"Website crawl completed for data source {ds_id}: {len(crawled_pages)} pages"
+        )
 
         return {
             "status": "completed",
@@ -556,18 +606,26 @@ def generate_embeddings_task(self, data_source_id: str, force_regenerate: bool =
     """
     try:
         # Run async function in event loop
-        result = asyncio.run(_generate_embeddings_async(data_source_id, force_regenerate, self))
+        result = asyncio.run(
+            _generate_embeddings_async(data_source_id, force_regenerate, self)
+        )
         return result
 
     except Exception as e:
-        logger.error(f"Embedding generation failed for data source {data_source_id}: {str(e)}", exc_info=True)
+        logger.error(
+            f"Embedding generation failed for data source {data_source_id}: {str(e)}",
+            exc_info=True,
+        )
 
         # Update data source status to error
         try:
+
             async def update_error_status():
                 async with get_db_session() as db:
                     ds_repo = DataSourceRepository(db)
-                    await ds_repo.update_status(uuid.UUID(data_source_id), "error", str(e))
+                    await ds_repo.update_status(
+                        uuid.UUID(data_source_id), "error", str(e)
+                    )
                     await db.commit()
 
             asyncio.run(update_error_status())
@@ -630,14 +688,20 @@ def crawl_website_task(self, data_source_id: str):
         return result
 
     except Exception as e:
-        logger.error(f"Website crawl failed for data source {data_source_id}: {str(e)}", exc_info=True)
+        logger.error(
+            f"Website crawl failed for data source {data_source_id}: {str(e)}",
+            exc_info=True,
+        )
 
         # Update data source status to error
         try:
+
             async def update_error_status():
                 async with get_db_session() as db:
                     ds_repo = DataSourceRepository(db)
-                    await ds_repo.update_status(uuid.UUID(data_source_id), "error", str(e))
+                    await ds_repo.update_status(
+                        uuid.UUID(data_source_id), "error", str(e)
+                    )
                     await db.commit()
 
             asyncio.run(update_error_status())

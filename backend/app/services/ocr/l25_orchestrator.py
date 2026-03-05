@@ -826,6 +826,7 @@ class L25Orchestrator:
 
             # Track this attempt's model usage
             import datetime
+
             attempt_info = {
                 "attempt": retry_context.attempt_number,
                 "model": current_model,
@@ -961,13 +962,21 @@ class L25Orchestrator:
                     all_confidences[-1] = confidence
 
             # Update attempt info with results
-            attempt_info.update({
-                "tokens": token_usage,
-                "confidence": confidence or 0.0,
-                "doc_type": doc_type,
-                "line_items_count": len(std_output.get("lineItems", [])) if isinstance(std_output, dict) else 0,
-                "validation_errors": len([e for e in all_errors if e.get("severity") == "error"]),
-            })
+            attempt_info.update(
+                {
+                    "tokens": token_usage,
+                    "confidence": confidence or 0.0,
+                    "doc_type": doc_type,
+                    "line_items_count": (
+                        len(std_output.get("lineItems", []))
+                        if isinstance(std_output, dict)
+                        else 0
+                    ),
+                    "validation_errors": len(
+                        [e for e in all_errors if e.get("severity") == "error"]
+                    ),
+                }
+            )
             models_used.append(attempt_info)
 
             # Enhanced logging for each attempt
@@ -989,27 +998,31 @@ class L25Orchestrator:
                 filename = Path(file_path).name if file_path else "unknown"
 
                 # Priority 1: Use explicitly set IDs from orchestrator
-                if hasattr(self, 'current_document_id') and self.current_document_id:
+                if hasattr(self, "current_document_id") and self.current_document_id:
                     document_id = self.current_document_id
-                if hasattr(self, 'current_user_id') and self.current_user_id:
+                if hasattr(self, "current_user_id") and self.current_user_id:
                     user_id = self.current_user_id
 
                 # Priority 2: Try to extract from path (fallback for legacy paths)
                 if document_id == "unknown" and file_path:
                     import re
+
                     # Extract document_id (UUID pattern)
-                    path_match = re.search(r'/([a-f0-9-]{36})/', file_path)
+                    path_match = re.search(r"/([a-f0-9-]{36})/", file_path)
                     if path_match:
                         document_id = path_match.group(1)
 
                 if not user_id and file_path:
                     import re
+
                     # Extract user_id (first UUID in path)
-                    user_match = re.search(r'uploads/([a-f0-9-]{36})/', file_path)
+                    user_match = re.search(r"uploads/([a-f0-9-]{36})/", file_path)
                     if user_match:
                         user_id = user_match.group(1)
 
-                logger.info(f"Logging OCR attempt {retry_context.attempt_number} for document {document_id} with model {current_model}")
+                logger.info(
+                    f"Logging OCR attempt {retry_context.attempt_number} for document {document_id} with model {current_model}"
+                )
 
                 # Use simple OCR logger
                 log_ocr_request(
@@ -1026,18 +1039,30 @@ class L25Orchestrator:
                     processing_time_seconds=ai_response.get("processing_time"),
                     confidence=confidence,
                     doc_type=doc_type,
-                    validation_errors=len([e for e in all_errors if e.get("severity") == "error"]),
+                    validation_errors=len(
+                        [e for e in all_errors if e.get("severity") == "error"]
+                    ),
                     additional_data={
                         "doc_type_confidence": doc_type_conf,
-                        "retry_reasons": [r.value for r in retry_context.retry_reasons] if retry_context.retry_reasons else [],
+                        "retry_reasons": (
+                            [r.value for r in retry_context.retry_reasons]
+                            if retry_context.retry_reasons
+                            else []
+                        ),
                         "field_confidences": field_confs,
-                        "line_items_count": len(std_output.get("line_items", [])) if isinstance(std_output, dict) else 0,  # Fixed: use normalized field name
-                    }
+                        "line_items_count": (
+                            len(std_output.get("line_items", []))
+                            if isinstance(std_output, dict)
+                            else 0
+                        ),  # Fixed: use normalized field name
+                    },
                 )
             except Exception as log_error:
                 # Don't fail the OCR process if logging fails
                 logger.error(f"❌ Failed to write OCR log: {log_error}", exc_info=True)
-                print(f"❌ OCR_LOG_ERROR: Attempt {retry_context.attempt_number} failed to log: {log_error}")
+                print(
+                    f"❌ OCR_LOG_ERROR: Attempt {retry_context.attempt_number} failed to log: {log_error}"
+                )
 
             # Step 6: Decide whether to retry
             if not self.config.enable_retry:
@@ -1073,10 +1098,14 @@ class L25Orchestrator:
                 all_results, all_confidences, token_usages
             )
             # Find which attempt was selected
-            selected_index = all_confidences.index(best_confidence) if best_confidence in all_confidences else 0
+            selected_index = (
+                all_confidences.index(best_confidence)
+                if best_confidence in all_confidences
+                else 0
+            )
 
             # Improved logging message (fixed misleading "improved from" wording)
-            confidence_history = ', '.join(f'{c:.2f}' for c in all_confidences)
+            confidence_history = ", ".join(f"{c:.2f}" for c in all_confidences)
             logger.info(
                 f"L2.5 completed {len(all_results)} attempts with confidences: [{confidence_history}]. "
                 f"Selected attempt {selected_index + 1} with confidence {best_confidence:.2f}"
@@ -1088,23 +1117,40 @@ class L25Orchestrator:
                 document_id = None
                 if isinstance(file_path, str):
                     import re
-                    path_match = re.search(r'/([a-f0-9-]{36})/', file_path)
+
+                    path_match = re.search(r"/([a-f0-9-]{36})/", file_path)
                     if path_match:
                         document_id = path_match.group(1)
 
                 if document_id and len(all_results) > 1:
-                    logger.info(f"Logging all {len(all_results)} attempts for document {document_id}")
+                    logger.info(
+                        f"Logging all {len(all_results)} attempts for document {document_id}"
+                    )
 
                     # Prepare attempts data for summary
                     attempts_data = []
                     for i in range(len(all_results)):
-                        attempts_data.append({
-                            "model": models_used[i].get("model") if i < len(models_used) else "unknown",
-                            "confidence": all_confidences[i] if i < len(all_confidences) else 0.0,
-                            "tokens": models_used[i].get("tokens") if i < len(models_used) else {},
-                            "validation_errors": 0,  # Can be enhanced
-                            "processing_time": 0,  # Can be enhanced
-                        })
+                        attempts_data.append(
+                            {
+                                "model": (
+                                    models_used[i].get("model")
+                                    if i < len(models_used)
+                                    else "unknown"
+                                ),
+                                "confidence": (
+                                    all_confidences[i]
+                                    if i < len(all_confidences)
+                                    else 0.0
+                                ),
+                                "tokens": (
+                                    models_used[i].get("tokens")
+                                    if i < len(models_used)
+                                    else {}
+                                ),
+                                "validation_errors": 0,  # Can be enhanced
+                                "processing_time": 0,  # Can be enhanced
+                            }
+                        )
 
                     log_all_attempts_summary(
                         document_id=document_id,
@@ -1112,10 +1158,14 @@ class L25Orchestrator:
                         selected_attempt=selected_index + 1,
                     )
                 elif not document_id:
-                    logger.warning(f"Could not extract document_id from file_path: {file_path}, skipping summary log")
+                    logger.warning(
+                        f"Could not extract document_id from file_path: {file_path}, skipping summary log"
+                    )
             except Exception as log_error:
                 # Don't fail the OCR process if logging fails
-                logger.error(f"❌ Failed to write summary log: {log_error}", exc_info=True)
+                logger.error(
+                    f"❌ Failed to write summary log: {log_error}", exc_info=True
+                )
                 print(f"❌ OCR_LOG_ERROR: Summary logging failed: {log_error}")
         else:
             best_result = all_results[0] if all_results else None
@@ -1250,12 +1300,14 @@ class L25Orchestrator:
             l25_enabled=False,
             prompt_enhanced=False,
             model=self.model,  # Include model even without L2.5
-            models_used=[{  # Single attempt without retry
-                "attempt": 1,
-                "model": self.model,
-                "tokens": token_usage,
-                "confidence": confidence or 0.0,
-            }],
+            models_used=[
+                {  # Single attempt without retry
+                    "attempt": 1,
+                    "model": self.model,
+                    "tokens": token_usage,
+                    "confidence": confidence or 0.0,
+                }
+            ],
         )
 
     async def _call_document_intelligence(
@@ -1306,10 +1358,17 @@ class L25Orchestrator:
             except Exception as tool_error:
                 # Check if error is related to tool use not being supported
                 error_msg = str(tool_error).lower()
-                if any(keyword in error_msg for keyword in [
-                    "tool use", "tool_use", "function calling", "function_calling",
-                    "no endpoints found that support", "not supported"
-                ]):
+                if any(
+                    keyword in error_msg
+                    for keyword in [
+                        "tool use",
+                        "tool_use",
+                        "function calling",
+                        "function_calling",
+                        "no endpoints found that support",
+                        "not supported",
+                    ]
+                ):
                     logger.warning(
                         f"Model {self.model} does not support tool use. "
                         f"Falling back to text-based extraction. Error: {tool_error}"
@@ -1318,12 +1377,14 @@ class L25Orchestrator:
                     # Fallback: Call without tools and parse from content
                     # Add explicit instruction to return JSON in the user message
                     fallback_messages = messages.copy()
-                    fallback_messages[1]["content"].append({
-                        "type": "text",
-                        "text": "\n\nIMPORTANT: Since function calling is not available, please return your response as a JSON object in the following format:\n" +
-                        json.dumps(functions[0]["parameters"], indent=2) +
-                        "\n\nReturn ONLY the JSON object, no additional text."
-                    })
+                    fallback_messages[1]["content"].append(
+                        {
+                            "type": "text",
+                            "text": "\n\nIMPORTANT: Since function calling is not available, please return your response as a JSON object in the following format:\n"
+                            + json.dumps(functions[0]["parameters"], indent=2)
+                            + "\n\nReturn ONLY the JSON object, no additional text.",
+                        }
+                    )
 
                     completion = await self.gateway.acompletion(
                         model=self.model,
@@ -1608,7 +1669,11 @@ IMPORTANT:
             properties["field_confidences"] = {
                 "type": "object",
                 "description": "Confidence scores (0-1) for each extracted field",
-                "additionalProperties": {"type": "number", "minimum": 0.0, "maximum": 1.0},
+                "additionalProperties": {
+                    "type": "number",
+                    "minimum": 0.0,
+                    "maximum": 1.0,
+                },
             }
 
         if "doc_type" not in required:
@@ -1633,7 +1698,9 @@ IMPORTANT:
             }
         ]
 
-    def _schema_from_example(self, value: Any, for_google: bool = False) -> Dict[str, Any]:
+    def _schema_from_example(
+        self, value: Any, for_google: bool = False
+    ) -> Dict[str, Any]:
         """
         Generate JSON schema from example value with enhanced constraints.
 
@@ -1645,7 +1712,9 @@ IMPORTANT:
             JSON schema dictionary with type constraints
         """
         if isinstance(value, dict):
-            props = {k: self._schema_from_example(v, for_google) for k, v in value.items()}
+            props = {
+                k: self._schema_from_example(v, for_google) for k, v in value.items()
+            }
             schema = {"type": "object", "properties": props}
             # Prevent hallucinated nested fields
             if not for_google:
@@ -1654,7 +1723,9 @@ IMPORTANT:
 
         if isinstance(value, list):
             item_schema = (
-                self._schema_from_example(value[0], for_google) if value else {"type": "object"}
+                self._schema_from_example(value[0], for_google)
+                if value
+                else {"type": "object"}
             )
             schema = {"type": "array", "items": item_schema}
             # Require at least one item for non-empty arrays in examples

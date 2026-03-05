@@ -10,10 +10,10 @@ from datetime import datetime
 from pydantic import BaseModel, Field, ConfigDict
 import uuid
 
-
 # ===========================
 # Request Models
 # ===========================
+
 
 class KnowledgeBaseCreate(BaseModel):
     """Request model for creating a knowledge base."""
@@ -89,6 +89,7 @@ class KnowledgeBaseUpdate(BaseModel):
 # ===========================
 # Response Models
 # ===========================
+
 
 class KnowledgeBaseResponse(BaseModel):
     """Response model for a knowledge base."""

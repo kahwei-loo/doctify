@@ -11,8 +11,14 @@ from datetime import datetime
 from typing import Optional, TYPE_CHECKING
 
 from sqlalchemy import (
-    String, Text, Integer, BigInteger, DateTime,
-    ForeignKey, Index, Float
+    String,
+    Text,
+    Integer,
+    BigInteger,
+    DateTime,
+    ForeignKey,
+    Index,
+    Float,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID, JSONB
@@ -106,7 +112,9 @@ class InsightsDataset(BaseModel):
         return self.status == "error"
 
     def __repr__(self) -> str:
-        return f"<InsightsDataset(id={self.id}, name={self.name}, status={self.status})>"
+        return (
+            f"<InsightsDataset(id={self.id}, name={self.name}, status={self.status})>"
+        )
 
 
 class InsightsConversation(BaseModel):
@@ -285,7 +293,9 @@ class InsightsQuery(BaseModel):
 
     # Indexes
     __table_args__ = (
-        Index("ix_insights_queries_conversation_created", "conversation_id", "created_at"),
+        Index(
+            "ix_insights_queries_conversation_created", "conversation_id", "created_at"
+        ),
         Index("ix_insights_queries_user_status", "user_id", "status"),
     )
 

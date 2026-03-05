@@ -46,7 +46,9 @@ class DocumentRepository(BaseRepository[Document]):
         Raises:
             DatabaseError: If database operation fails
         """
-        filters = {"user_id": uuid.UUID(user_id) if isinstance(user_id, str) else user_id}
+        filters = {
+            "user_id": uuid.UUID(user_id) if isinstance(user_id, str) else user_id
+        }
 
         if status:
             filters["status"] = status
@@ -85,7 +87,9 @@ class DocumentRepository(BaseRepository[Document]):
             DatabaseError: If database operation fails
         """
         filters: Dict[str, Any] = {
-            "project_id": uuid.UUID(project_id) if isinstance(project_id, str) else project_id,
+            "project_id": (
+                uuid.UUID(project_id) if isinstance(project_id, str) else project_id
+            ),
             "is_archived": False,
         }
 
@@ -245,7 +249,9 @@ class DocumentRepository(BaseRepository[Document]):
             DatabaseError: If database operation fails
         """
         try:
-            project_uuid = uuid.UUID(project_id) if isinstance(project_id, str) else project_id
+            project_uuid = (
+                uuid.UUID(project_id) if isinstance(project_id, str) else project_id
+            )
 
             # Query for status counts
             stmt = (
@@ -353,7 +359,9 @@ class DocumentRepository(BaseRepository[Document]):
         filters: Dict[str, Any] = {"is_archived": False}
 
         if user_id:
-            filters["user_id"] = uuid.UUID(user_id) if isinstance(user_id, str) else user_id
+            filters["user_id"] = (
+                uuid.UUID(user_id) if isinstance(user_id, str) else user_id
+            )
 
         return await self.list(
             filters=filters,
@@ -376,7 +384,9 @@ class DocumentRepository(BaseRepository[Document]):
         Raises:
             DatabaseError: If database operation fails
         """
-        project_uuid = uuid.UUID(project_id) if isinstance(project_id, str) else project_id
+        project_uuid = (
+            uuid.UUID(project_id) if isinstance(project_id, str) else project_id
+        )
         return await self.delete_many({"project_id": project_uuid})
 
     async def count_by_project(self, project_id: str) -> int:
@@ -392,7 +402,9 @@ class DocumentRepository(BaseRepository[Document]):
         Raises:
             DatabaseError: If database operation fails
         """
-        project_uuid = uuid.UUID(project_id) if isinstance(project_id, str) else project_id
+        project_uuid = (
+            uuid.UUID(project_id) if isinstance(project_id, str) else project_id
+        )
         return await self.count({"project_id": project_uuid, "is_archived": False})
 
     async def count_by_user(self, user_id: str, is_archived: bool = False) -> int:
@@ -462,7 +474,9 @@ class DocumentRepository(BaseRepository[Document]):
                 stmt = stmt.where(Document.user_id == user_uuid)
 
             if project_id:
-                project_uuid = uuid.UUID(project_id) if isinstance(project_id, str) else project_id
+                project_uuid = (
+                    uuid.UUID(project_id) if isinstance(project_id, str) else project_id
+                )
                 stmt = stmt.where(Document.project_id == project_uuid)
 
             stmt = stmt.order_by(Document.created_at.desc()).offset(skip).limit(limit)
@@ -567,7 +581,9 @@ class DocumentRepository(BaseRepository[Document]):
         filters: Dict[str, Any] = {"category": category, "is_archived": False}
 
         if user_id:
-            filters["user_id"] = uuid.UUID(user_id) if isinstance(user_id, str) else user_id
+            filters["user_id"] = (
+                uuid.UUID(user_id) if isinstance(user_id, str) else user_id
+            )
 
         return await self.list(
             filters=filters,
@@ -661,13 +677,12 @@ class DocumentRepository(BaseRepository[Document]):
                 total_documents += count
 
             # Get total tokens
-            tokens_stmt = (
-                select(func.coalesce(func.sum(Document.tokens_used), 0))
-                .where(
-                    and_(
-                        Document.user_id == user_uuid,
-                        Document.is_archived == False,
-                    )
+            tokens_stmt = select(
+                func.coalesce(func.sum(Document.tokens_used), 0)
+            ).where(
+                and_(
+                    Document.user_id == user_uuid,
+                    Document.is_archived == False,
                 )
             )
 
@@ -699,24 +714,32 @@ class DocumentRepository(BaseRepository[Document]):
             for row in token_by_project_rows:
                 project_id, project_name, tokens = row
                 if project_id is not None:
-                    token_by_project.append({
-                        "project_id": str(project_id),
-                        "project_name": project_name or "Unknown",
-                        "tokens": int(tokens),
-                    })
+                    token_by_project.append(
+                        {
+                            "project_id": str(project_id),
+                            "project_name": project_name or "Unknown",
+                            "tokens": int(tokens),
+                        }
+                    )
                 else:
                     # Documents without a project
-                    token_by_project.append({
-                        "project_id": None,
-                        "project_name": "Unassigned",
-                        "tokens": int(tokens),
-                    })
+                    token_by_project.append(
+                        {
+                            "project_id": None,
+                            "project_name": "Unassigned",
+                            "tokens": int(tokens),
+                        }
+                    )
 
             # Calculate success rate
             completed_count = status_breakdown["completed"]
             failed_count = status_breakdown["failed"]
             processed_total = completed_count + failed_count
-            success_rate = (completed_count / processed_total * 100) if processed_total > 0 else 0.0
+            success_rate = (
+                (completed_count / processed_total * 100)
+                if processed_total > 0
+                else 0.0
+            )
 
             return {
                 "total_documents": total_documents,
@@ -755,10 +778,14 @@ class DocumentRepository(BaseRepository[Document]):
             filters: Dict[str, Any] = {"status": "failed", "is_archived": False}
 
             if project_id:
-                filters["project_id"] = uuid.UUID(project_id) if isinstance(project_id, str) else project_id
+                filters["project_id"] = (
+                    uuid.UUID(project_id) if isinstance(project_id, str) else project_id
+                )
 
             if user_id:
-                filters["user_id"] = uuid.UUID(user_id) if isinstance(user_id, str) else user_id
+                filters["user_id"] = (
+                    uuid.UUID(user_id) if isinstance(user_id, str) else user_id
+                )
 
             return await self.list(
                 filters=filters,

@@ -245,4 +245,6 @@ class ProjectEntity:
         }
 
     def __repr__(self) -> str:
-        return f"ProjectEntity(id={self.id}, name={self.name}, is_active={self.is_active})"
+        return (
+            f"ProjectEntity(id={self.id}, name={self.name}, is_active={self.is_active})"
+        )

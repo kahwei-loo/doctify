@@ -18,44 +18,26 @@ class DashboardStats(BaseModel):
     Contains key metrics for the user's document processing activity.
     """
 
-    total_projects: int = Field(
-        default=0,
-        description="Total number of projects"
-    )
-    total_documents: int = Field(
-        default=0,
-        description="Total number of documents"
-    )
+    total_projects: int = Field(default=0, description="Total number of projects")
+    total_documents: int = Field(default=0, description="Total number of documents")
     processed_documents: int = Field(
-        default=0,
-        description="Number of successfully processed documents"
+        default=0, description="Number of successfully processed documents"
     )
     pending_documents: int = Field(
-        default=0,
-        description="Number of documents pending processing"
+        default=0, description="Number of documents pending processing"
     )
     processing_documents: int = Field(
-        default=0,
-        description="Number of documents currently being processed"
+        default=0, description="Number of documents currently being processed"
     )
     failed_documents: int = Field(
-        default=0,
-        description="Number of failed document processing attempts"
+        default=0, description="Number of failed document processing attempts"
     )
     success_rate: float = Field(
-        default=0.0,
-        ge=0.0,
-        le=1.0,
-        description="Processing success rate (0.0 - 1.0)"
+        default=0.0, ge=0.0, le=1.0, description="Processing success rate (0.0 - 1.0)"
     )
-    total_tokens_used: int = Field(
-        default=0,
-        description="Total AI tokens used"
-    )
+    total_tokens_used: int = Field(default=0, description="Total AI tokens used")
     estimated_cost: float = Field(
-        default=0.0,
-        ge=0.0,
-        description="Estimated AI processing cost in USD"
+        default=0.0, ge=0.0, description="Estimated AI processing cost in USD"
     )
 
     class Config:
@@ -81,24 +63,11 @@ class TrendDataPoint(BaseModel):
     Represents document activity for a specific date.
     """
 
-    date: datetime.date = Field(
-        ...,
-        description="Date of the data point"
-    )
-    uploaded: int = Field(
-        default=0,
-        ge=0,
-        description="Number of documents uploaded"
-    )
-    processed: int = Field(
-        default=0,
-        ge=0,
-        description="Number of documents processed"
-    )
+    date: datetime.date = Field(..., description="Date of the data point")
+    uploaded: int = Field(default=0, ge=0, description="Number of documents uploaded")
+    processed: int = Field(default=0, ge=0, description="Number of documents processed")
     failed: int = Field(
-        default=0,
-        ge=0,
-        description="Number of failed processing attempts"
+        default=0, ge=0, description="Number of failed processing attempts"
     )
 
     class Config:
@@ -119,27 +88,18 @@ class TrendData(BaseModel):
     Contains historical document processing trends.
     """
 
-    days: int = Field(
-        ...,
-        ge=7,
-        le=90,
-        description="Number of days in the trend data"
-    )
+    days: int = Field(..., ge=7, le=90, description="Number of days in the trend data")
     data: List[TrendDataPoint] = Field(
-        default_factory=list,
-        description="List of trend data points"
+        default_factory=list, description="List of trend data points"
     )
     total_uploaded: int = Field(
-        default=0,
-        description="Total documents uploaded in the period"
+        default=0, description="Total documents uploaded in the period"
     )
     total_processed: int = Field(
-        default=0,
-        description="Total documents processed in the period"
+        default=0, description="Total documents processed in the period"
     )
     total_failed: int = Field(
-        default=0,
-        description="Total failed documents in the period"
+        default=0, description="Total failed documents in the period"
     )
 
     class Config:
@@ -164,24 +124,13 @@ class ProjectDistribution(BaseModel):
     Shows how documents are distributed across projects.
     """
 
-    project_id: str = Field(
-        ...,
-        description="Project unique identifier"
-    )
-    project_name: str = Field(
-        ...,
-        description="Project display name"
-    )
+    project_id: str = Field(..., description="Project unique identifier")
+    project_name: str = Field(..., description="Project display name")
     document_count: int = Field(
-        default=0,
-        ge=0,
-        description="Number of documents in the project"
+        default=0, ge=0, description="Number of documents in the project"
     )
     percentage: float = Field(
-        default=0.0,
-        ge=0.0,
-        le=100.0,
-        description="Percentage of total documents"
+        default=0.0, ge=0.0, le=100.0, description="Percentage of total documents"
     )
 
     class Config:
@@ -202,33 +151,14 @@ class RecentDocument(BaseModel):
     Lightweight document info for recent activity display.
     """
 
-    document_id: str = Field(
-        ...,
-        description="Document unique identifier"
-    )
-    filename: str = Field(
-        ...,
-        description="Original filename"
-    )
-    status: str = Field(
-        ...,
-        description="Processing status"
-    )
-    project_id: Optional[str] = Field(
-        None,
-        description="Associated project ID"
-    )
-    project_name: Optional[str] = Field(
-        None,
-        description="Associated project name"
-    )
-    created_at: datetime.datetime = Field(
-        ...,
-        description="Upload timestamp"
-    )
+    document_id: str = Field(..., description="Document unique identifier")
+    filename: str = Field(..., description="Original filename")
+    status: str = Field(..., description="Processing status")
+    project_id: Optional[str] = Field(None, description="Associated project ID")
+    project_name: Optional[str] = Field(None, description="Associated project name")
+    created_at: datetime.datetime = Field(..., description="Upload timestamp")
     processed_at: Optional[datetime.datetime] = Field(
-        None,
-        description="Processing completion timestamp"
+        None, description="Processing completion timestamp"
     )
 
     class Config:
@@ -255,17 +185,12 @@ class DashboardResponse(BaseModel):
     Combines stats, trends, and recent activity.
     """
 
-    stats: DashboardStats = Field(
-        ...,
-        description="Dashboard statistics"
-    )
+    stats: DashboardStats = Field(..., description="Dashboard statistics")
     recent_documents: List[RecentDocument] = Field(
-        default_factory=list,
-        description="Recent document activity"
+        default_factory=list, description="Recent document activity"
     )
     project_distribution: List[ProjectDistribution] = Field(
-        default_factory=list,
-        description="Document distribution by project"
+        default_factory=list, description="Document distribution by project"
     )
 
     class Config:
@@ -338,32 +263,22 @@ class TrendComparison(BaseModel):
     """
 
     documents_this_week: int = Field(
-        default=0,
-        ge=0,
-        description="Documents uploaded this week"
+        default=0, ge=0, description="Documents uploaded this week"
     )
     documents_last_week: int = Field(
-        default=0,
-        ge=0,
-        description="Documents uploaded last week"
+        default=0, ge=0, description="Documents uploaded last week"
     )
     documents_change_percent: float = Field(
-        default=0.0,
-        description="Percentage change in documents (can be negative)"
+        default=0.0, description="Percentage change in documents (can be negative)"
     )
     conversations_this_week: int = Field(
-        default=0,
-        ge=0,
-        description="Conversations started this week"
+        default=0, ge=0, description="Conversations started this week"
     )
     conversations_last_week: int = Field(
-        default=0,
-        ge=0,
-        description="Conversations started last week"
+        default=0, ge=0, description="Conversations started last week"
     )
     conversations_change_percent: float = Field(
-        default=0.0,
-        description="Percentage change in conversations (can be negative)"
+        default=0.0, description="Percentage change in conversations (can be negative)"
     )
 
     class Config:
@@ -389,47 +304,34 @@ class UnifiedStats(DashboardStats):
 
     # Knowledge Base stats
     total_knowledge_bases: int = Field(
-        default=0,
-        ge=0,
-        description="Total number of knowledge bases"
+        default=0, ge=0, description="Total number of knowledge bases"
     )
     total_data_sources: int = Field(
-        default=0,
-        ge=0,
-        description="Total number of data sources across all KBs"
+        default=0, ge=0, description="Total number of data sources across all KBs"
     )
     total_embeddings: int = Field(
-        default=0,
-        ge=0,
-        description="Total number of document embeddings"
+        default=0, ge=0, description="Total number of document embeddings"
     )
 
     # Assistant stats
     total_assistants: int = Field(
-        default=0,
-        ge=0,
-        description="Total number of AI assistants"
+        default=0, ge=0, description="Total number of AI assistants"
     )
     active_assistants: int = Field(
-        default=0,
-        ge=0,
-        description="Number of active AI assistants"
+        default=0, ge=0, description="Number of active AI assistants"
     )
     total_conversations: int = Field(
         default=0,
         ge=0,
-        description="Total number of conversations across all assistants"
+        description="Total number of conversations across all assistants",
     )
     unresolved_conversations: int = Field(
-        default=0,
-        ge=0,
-        description="Number of unresolved conversations"
+        default=0, ge=0, description="Number of unresolved conversations"
     )
 
     # Trend comparison
     trend_comparison: Optional[TrendComparison] = Field(
-        None,
-        description="Week-over-week trend comparison"
+        None, description="Week-over-week trend comparison"
     )
 
     class Config:
@@ -470,33 +372,20 @@ class RecentActivity(BaseModel):
     Represents either a document upload or conversation activity.
     """
 
-    activity_id: str = Field(
-        ...,
-        description="Unique activity identifier"
-    )
+    activity_id: str = Field(..., description="Unique activity identifier")
     activity_type: Literal["document", "conversation"] = Field(
-        ...,
-        description="Type of activity"
+        ..., description="Type of activity"
     )
     title: str = Field(
-        ...,
-        description="Activity title (filename or conversation summary)"
+        ..., description="Activity title (filename or conversation summary)"
     )
     subtitle: Optional[str] = Field(
-        None,
-        description="Additional context (project name, assistant name)"
+        None, description="Additional context (project name, assistant name)"
     )
-    status: str = Field(
-        ...,
-        description="Activity status"
-    )
-    timestamp: datetime.datetime = Field(
-        ...,
-        description="Activity timestamp"
-    )
+    status: str = Field(..., description="Activity status")
+    timestamp: datetime.datetime = Field(..., description="Activity timestamp")
     metadata: Dict[str, Any] = Field(
-        default_factory=dict,
-        description="Additional activity-specific metadata"
+        default_factory=dict, description="Additional activity-specific metadata"
     )
 
     class Config:

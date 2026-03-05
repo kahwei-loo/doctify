@@ -32,6 +32,7 @@ VALID_PURPOSES = {p.value for p in ModelPurpose}
 # Catalog CRUD (must be declared BEFORE /{purpose} to avoid conflicts)
 # ------------------------------------------------------------------
 
+
 @router.get(
     "/catalog",
     response_model=ModelCatalogApiResponse,
@@ -100,6 +101,7 @@ async def delete_catalog_entry(
 # ------------------------------------------------------------------
 # Model Settings (purpose → model_name assignments)
 # ------------------------------------------------------------------
+
 
 @router.get(
     "",

@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 # Try to import bleach, fall back to basic sanitization if not available
 try:
     import bleach
+
     BLEACH_AVAILABLE = True
 except ImportError:
     BLEACH_AVAILABLE = False
@@ -29,15 +30,17 @@ class SanitizationConfig:
     """Configuration for HTML sanitization."""
 
     # Tags allowed for rich text content
-    allowed_tags: Set[str] = field(default_factory=lambda: {
-        "b", "i", "em", "strong", "br", "p", "span"
-    })
+    allowed_tags: Set[str] = field(
+        default_factory=lambda: {"b", "i", "em", "strong", "br", "p", "span"}
+    )
 
     # Attributes allowed on permitted tags
-    allowed_attributes: Dict[str, List[str]] = field(default_factory=lambda: {
-        "span": ["class"],
-        "p": ["class"],
-    })
+    allowed_attributes: Dict[str, List[str]] = field(
+        default_factory=lambda: {
+            "span": ["class"],
+            "p": ["class"],
+        }
+    )
 
     # Strip all tags (for plain text)
     strip_all: bool = False
@@ -55,10 +58,7 @@ STRIP_ALL_CONFIG = SanitizationConfig(strip_all=True)
 RICH_TEXT_CONFIG = SanitizationConfig(strip_all=False)
 
 
-def sanitize_string(
-    value: str,
-    config: Optional[SanitizationConfig] = None
-) -> str:
+def sanitize_string(value: str, config: Optional[SanitizationConfig] = None) -> str:
     """
     Sanitize a single string value.
 
@@ -77,7 +77,7 @@ def sanitize_string(
 
     # Truncate to max length
     if len(value) > config.max_length:
-        value = value[:config.max_length]
+        value = value[: config.max_length]
         logger.warning(f"String truncated to {config.max_length} characters")
 
     if config.strip_all:
@@ -93,16 +93,13 @@ def sanitize_string(
                 value,
                 tags=config.allowed_tags,
                 attributes=config.allowed_attributes,
-                strip=True
+                strip=True,
             )
         else:
             return _basic_strip_tags(value)
 
 
-def sanitize_html(
-    value: str,
-    config: Optional[SanitizationConfig] = None
-) -> str:
+def sanitize_html(value: str, config: Optional[SanitizationConfig] = None) -> str:
     """
     Sanitize HTML content while preserving safe tags.
 
@@ -122,8 +119,7 @@ def sanitize_html(
 
 
 def sanitize_extracted_result(
-    result: Dict[str, Any],
-    config: Optional[SanitizationConfig] = None
+    result: Dict[str, Any], config: Optional[SanitizationConfig] = None
 ) -> Dict[str, Any]:
     """
     Sanitize all string values in an extracted result from AI.
@@ -196,7 +192,9 @@ def _sanitize_value(value: Any, config: SanitizationConfig) -> Any:
         return value
 
     if isinstance(value, list):
-        return [_sanitize_value(item, config) for item in value[:1000]]  # Limit list size
+        return [
+            _sanitize_value(item, config) for item in value[:1000]
+        ]  # Limit list size
 
     if isinstance(value, dict):
         return {
@@ -233,10 +231,18 @@ def _sanitize_key(key: str) -> Optional[str]:
 
     # Block dangerous keys
     dangerous_keys = {
-        "__proto__", "constructor", "prototype",
-        "__class__", "__bases__", "__mro__",
-        "__subclasses__", "__init__", "__new__",
-        "__dict__", "__globals__", "__builtins__",
+        "__proto__",
+        "constructor",
+        "prototype",
+        "__class__",
+        "__bases__",
+        "__mro__",
+        "__subclasses__",
+        "__init__",
+        "__new__",
+        "__dict__",
+        "__globals__",
+        "__builtins__",
     }
 
     if key.lower() in dangerous_keys:

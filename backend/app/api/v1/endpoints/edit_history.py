@@ -13,7 +13,10 @@ from app.api.v1.deps import (
     get_edit_history_service,
     verify_document_ownership,
 )
-from app.services.edit_history.edit_history_service import EditHistoryService, FieldChange
+from app.services.edit_history.edit_history_service import (
+    EditHistoryService,
+    FieldChange,
+)
 from app.db.models.user import User
 from app.models.edit_history import (
     EditHistoryResponse,
@@ -30,7 +33,9 @@ import math
 router = APIRouter()
 
 
-def _to_edit_history_response(entry, user_email: Optional[str] = None, user_name: Optional[str] = None) -> EditHistoryResponse:
+def _to_edit_history_response(
+    entry, user_email: Optional[str] = None, user_name: Optional[str] = None
+) -> EditHistoryResponse:
     """Convert EditHistory model to response model."""
     return EditHistoryResponse(
         id=str(entry.id),
@@ -107,7 +112,11 @@ async def get_document_history(
     )
 
 
-@router.post("/{document_id}", response_model=EditHistoryApiResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/{document_id}",
+    response_model=EditHistoryApiResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 async def track_modification(
     document_id: str = Path(..., description="Document ID"),
     modification: TrackModificationRequest = ...,
@@ -132,8 +141,16 @@ async def track_modification(
     user_agent = request.headers.get("user-agent") if request else None
 
     # Wrap values in dict format for JSONB storage
-    old_value = {"value": modification.old_value} if modification.old_value is not None else None
-    new_value = {"value": modification.new_value} if modification.new_value is not None else None
+    old_value = (
+        {"value": modification.old_value}
+        if modification.old_value is not None
+        else None
+    )
+    new_value = (
+        {"value": modification.new_value}
+        if modification.new_value is not None
+        else None
+    )
 
     entry = await history_service.track_single_modification(
         document_id=doc_uuid,
@@ -149,11 +166,17 @@ async def track_modification(
 
     return EditHistoryApiResponse(
         success=True,
-        data=_to_edit_history_response(entry, current_user.email, current_user.full_name),
+        data=_to_edit_history_response(
+            entry, current_user.email, current_user.full_name
+        ),
     )
 
 
-@router.post("/{document_id}/bulk", response_model=EditHistoryListResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/{document_id}/bulk",
+    response_model=EditHistoryListResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 async def track_bulk_modifications(
     document_id: str = Path(..., description="Document ID"),
     bulk_request: BulkTrackModificationRequest = ...,
@@ -179,11 +202,13 @@ async def track_bulk_modifications(
     for mod in bulk_request.modifications:
         old_value = {"value": mod.old_value} if mod.old_value is not None else None
         new_value = {"value": mod.new_value} if mod.new_value is not None else None
-        changes.append(FieldChange(
-            field_path=mod.field_path,
-            old_value=old_value,
-            new_value=new_value,
-        ))
+        changes.append(
+            FieldChange(
+                field_path=mod.field_path,
+                old_value=old_value,
+                new_value=new_value,
+            )
+        )
 
     entries = await history_service.track_modification(
         document_id=doc_uuid,
@@ -263,7 +288,11 @@ async def rollback_document(
             success=True,
             message="Successfully rolled back field to previous value",
             entries_count=1,
-            entries=[_to_edit_history_response(result, current_user.email, current_user.full_name)],
+            entries=[
+                _to_edit_history_response(
+                    result, current_user.email, current_user.full_name
+                )
+            ],
         )
 
     else:

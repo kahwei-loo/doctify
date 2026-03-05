@@ -40,6 +40,7 @@ router = APIRouter()
 # User Authentication Endpoints
 # =============================================================================
 
+
 @router.post("/register", status_code=status.HTTP_201_CREATED)
 async def register(
     request: Request,
@@ -215,6 +216,7 @@ async def logout(
     except Exception as e:
         # Log error but still return success to avoid leaking info
         import logging
+
         logger = logging.getLogger(__name__)
         logger.error(f"Failed to revoke token on logout: {str(e)}")
 
@@ -241,6 +243,7 @@ async def logout(
 # =============================================================================
 # Password Management Endpoints
 # =============================================================================
+
 
 @router.post("/password/change")
 async def change_password(
@@ -343,6 +346,7 @@ async def confirm_password_reset(
 # Email Verification Endpoints
 # =============================================================================
 
+
 @router.post("/verify-email")
 async def verify_email(
     verification_token: str = Body(..., description="Email verification token"),
@@ -375,6 +379,7 @@ async def verify_email(
 # =============================================================================
 # User Profile Endpoints
 # =============================================================================
+
 
 @router.get("/me")
 async def get_current_user_profile(
@@ -421,10 +426,7 @@ async def update_current_user_profile(
             raise ValidationError("No update data provided")
 
         # Update user
-        updated_user = await user_repository.update(
-            str(current_user.id),
-            update_data
-        )
+        updated_user = await user_repository.update(str(current_user.id), update_data)
 
         if not updated_user:
             raise NotFoundError("User not found")
@@ -455,6 +457,7 @@ async def update_current_user_profile(
 # =============================================================================
 # API Key Management Endpoints
 # =============================================================================
+
 
 @router.post("/api-keys", status_code=status.HTTP_201_CREATED)
 async def create_api_key(
@@ -670,6 +673,7 @@ async def rotate_api_key(
 # =============================================================================
 # Account Management Endpoints (Admin)
 # =============================================================================
+
 
 @router.post("/users/{user_id}/unlock")
 async def unlock_user_account(

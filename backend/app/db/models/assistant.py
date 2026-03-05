@@ -41,7 +41,9 @@ class Assistant(BaseModel):
     model_config: Mapped[Dict[str, Any]] = mapped_column(
         JSONB,
         nullable=False,
-        server_default=text("'{\"provider\": \"openai\", \"model\": \"gpt-4\", \"temperature\": 0.7, \"max_tokens\": 2048}'::jsonb"),
+        server_default=text(
+            '\'{"provider": "openai", "model": "gpt-4", "temperature": 0.7, "max_tokens": 2048}\'::jsonb'
+        ),
     )
 
     # Status
@@ -63,7 +65,9 @@ class Assistant(BaseModel):
     widget_config: Mapped[Dict[str, Any]] = mapped_column(
         JSONB,
         nullable=False,
-        server_default=text("'{\"primary_color\": \"#3b82f6\", \"position\": \"bottom-right\"}'::jsonb"),
+        server_default=text(
+            '\'{"primary_color": "#3b82f6", "position": "bottom-right"}\'::jsonb'
+        ),
     )
 
     # Relationships
@@ -86,7 +90,9 @@ class Assistant(BaseModel):
     )
 
     def __repr__(self) -> str:
-        return f"<Assistant(id={self.id}, name='{self.name}', is_active={self.is_active})>"
+        return (
+            f"<Assistant(id={self.id}, name='{self.name}', is_active={self.is_active})>"
+        )
 
     def to_response_dict(
         self,
@@ -110,7 +116,9 @@ class Assistant(BaseModel):
             "description": self.description,
             "model_config": self.model_config,
             "is_active": self.is_active,
-            "knowledge_base_id": str(self.knowledge_base_id) if self.knowledge_base_id else None,
+            "knowledge_base_id": (
+                str(self.knowledge_base_id) if self.knowledge_base_id else None
+            ),
             "widget_config": self.widget_config,
             "total_conversations": total_conversations,
             "unresolved_count": unresolved_count,

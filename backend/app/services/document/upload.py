@@ -14,7 +14,12 @@ from app.services.base import BaseService
 from app.db.repositories.document import DocumentRepository
 from app.db.repositories.project import ProjectRepository
 from app.db.models.document import Document
-from app.core.exceptions import ValidationError, FileProcessingError, NotFoundError, AuthorizationError
+from app.core.exceptions import (
+    ValidationError,
+    FileProcessingError,
+    NotFoundError,
+    AuthorizationError,
+)
 from app.core.security import (
     calculate_file_hash,
     validate_file_type,
@@ -98,7 +103,9 @@ class DocumentUploadService(BaseService[Document, DocumentRepository]):
         """
         # Convert string IDs to UUIDs early for validation
         user_uuid = uuid_module.UUID(user_id) if isinstance(user_id, str) else user_id
-        project_uuid = uuid_module.UUID(project_id) if isinstance(project_id, str) else project_id
+        project_uuid = (
+            uuid_module.UUID(project_id) if isinstance(project_id, str) else project_id
+        )
 
         # Validate project exists and belongs to user
         if self.project_repository:
@@ -126,7 +133,9 @@ class DocumentUploadService(BaseService[Document, DocumentRepository]):
         file_hash = calculate_file_hash(file_content)
 
         # Check for duplicate (scoped to current user)
-        existing_doc = await self.repository.get_by_file_hash(file_hash, user_id=user_id)
+        existing_doc = await self.repository.get_by_file_hash(
+            file_hash, user_id=user_id
+        )
         if existing_doc:
             raise ValidationError(
                 "Duplicate file detected",
@@ -153,7 +162,11 @@ class DocumentUploadService(BaseService[Document, DocumentRepository]):
             file_path = await self._save_file(unique_filename, file_content)
 
             # Generate title from filename if not provided
-            doc_title = title or safe_filename.rsplit(".", 1)[0] if safe_filename else "Untitled"
+            doc_title = (
+                title or safe_filename.rsplit(".", 1)[0]
+                if safe_filename
+                else "Untitled"
+            )
 
             # Create document record
             document_data = {
@@ -357,7 +370,10 @@ class DocumentUploadService(BaseService[Document, DocumentRepository]):
             if not os.path.exists(document.file_path):
                 raise FileProcessingError(
                     "File not found in storage",
-                    details={"document_id": document_id, "file_path": document.file_path},
+                    details={
+                        "document_id": document_id,
+                        "file_path": document.file_path,
+                    },
                 )
 
             with open(document.file_path, "rb") as f:

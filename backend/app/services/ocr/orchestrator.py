@@ -137,7 +137,7 @@ class OCROrchestrator:
 
                 # Log retry attempt
                 if attempt < self.max_retries - 1:
-                    await asyncio.sleep(2 ** attempt)  # Exponential backoff
+                    await asyncio.sleep(2**attempt)  # Exponential backoff
                     continue
 
         # All retries failed
@@ -349,10 +349,12 @@ Guidelines:
         processed_results = []
         for i, result in enumerate(results):
             if isinstance(result, Exception):
-                processed_results.append({
-                    "error": str(result),
-                    "file_path": file_paths[i],
-                })
+                processed_results.append(
+                    {
+                        "error": str(result),
+                        "file_path": file_paths[i],
+                    }
+                )
             else:
                 processed_results.append(result)
 
@@ -383,7 +385,9 @@ Guidelines:
         rates = pricing.get(model, {"prompt": 0.01, "completion": 0.02})
 
         prompt_cost = (token_usage.get("prompt_tokens", 0) / 1000) * rates["prompt"]
-        completion_cost = (token_usage.get("completion_tokens", 0) / 1000) * rates["completion"]
+        completion_cost = (token_usage.get("completion_tokens", 0) / 1000) * rates[
+            "completion"
+        ]
 
         return round(prompt_cost + completion_cost, 4)
 
@@ -445,10 +449,16 @@ Guidelines:
             logger.error(f"L2.5 OCR processing failed: {str(e)}")
             raise ExternalServiceError(
                 f"L2.5 OCR processing failed: {str(e)}",
-                details={"provider": self.provider, "model": self.model, "l25_enabled": True},
+                details={
+                    "provider": self.provider,
+                    "model": self.model,
+                    "l25_enabled": True,
+                },
             )
 
-    def _convert_to_project_config(self, extraction_config: Dict[str, Any]) -> Dict[str, Any]:
+    def _convert_to_project_config(
+        self, extraction_config: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Convert extraction_config to project_config format for L2.5."""
         project_config = {}
 
@@ -456,12 +466,14 @@ Guidelines:
         if "extraction_fields" in extraction_config:
             fields = []
             for field in extraction_config["extraction_fields"]:
-                fields.append({
-                    "fieldName": field.get("name", ""),
-                    "outputType": field.get("type", "string"),
-                    "defaultValue": field.get("default", ""),
-                    "description": field.get("description", ""),
-                })
+                fields.append(
+                    {
+                        "fieldName": field.get("name", ""),
+                        "outputType": field.get("type", "string"),
+                        "defaultValue": field.get("default", ""),
+                        "description": field.get("description", ""),
+                    }
+                )
             project_config["fields"] = fields
 
         # Pass through other config options
@@ -469,7 +481,9 @@ Guidelines:
             project_config["language"] = extraction_config["language"]
 
         if "expected_json_output" in extraction_config:
-            project_config["expected_json_output"] = extraction_config["expected_json_output"]
+            project_config["expected_json_output"] = extraction_config[
+                "expected_json_output"
+            ]
 
         if "message_content" in extraction_config:
             project_config["message_content"] = extraction_config["message_content"]
@@ -487,12 +501,16 @@ Guidelines:
         # Extract model and provider from result
         actual_model = result_dict.get("model", self.model)
         # Provider is the prefix before "/" in model name (e.g., "openai" from "openai/gpt-4")
-        actual_provider = actual_model.split("/")[0] if "/" in actual_model else self.provider
+        actual_provider = (
+            actual_model.split("/")[0] if "/" in actual_model else self.provider
+        )
 
         # Map to standard format expected by the application
         return {
             "extracted_data": result_dict.get("standardized_output", {}),
-            "confidence_scores": result_dict.get("standardized_output", {}).get("field_confidences", {}),
+            "confidence_scores": result_dict.get("standardized_output", {}).get(
+                "field_confidences", {}
+            ),
             "overall_confidence": result_dict.get("confidence"),
             "document_type": result_dict.get("doc_type"),
             "document_type_confidence": result_dict.get("doc_type_confidence"),
@@ -501,8 +519,12 @@ Guidelines:
             "model": actual_model,
             "provider": actual_provider,  # Extract provider from model name
             "l25_metadata": {
-                "enabled": result_dict.get("l25_metadata", {}).get("l25_enabled", False),
-                "prompt_enhanced": result_dict.get("l25_metadata", {}).get("prompt_enhanced", False),
+                "enabled": result_dict.get("l25_metadata", {}).get(
+                    "l25_enabled", False
+                ),
+                "prompt_enhanced": result_dict.get("l25_metadata", {}).get(
+                    "prompt_enhanced", False
+                ),
                 "retry_count": result_dict.get("retry_count", 0),
                 "retry_reasons": result_dict.get("retry_reasons", []),
                 "was_corrected": result_dict.get("was_corrected", False),

@@ -67,10 +67,11 @@ class BaseModel(Base, UUIDMixin, TimestampMixin):
     def __tablename__(cls) -> str:
         """Generate table name from class name (snake_case)."""
         import re
+
         name = cls.__name__
         # Convert CamelCase to snake_case
-        s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
-        return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+        s1 = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
+        return re.sub("([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
 
     def to_dict(self) -> dict[str, Any]:
         """
@@ -79,8 +80,7 @@ class BaseModel(Base, UUIDMixin, TimestampMixin):
         Useful for serialization and API responses.
         """
         return {
-            column.name: getattr(self, column.name)
-            for column in self.__table__.columns
+            column.name: getattr(self, column.name) for column in self.__table__.columns
         }
 
     def __repr__(self) -> str:
