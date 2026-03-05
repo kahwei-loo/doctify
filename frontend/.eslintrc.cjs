@@ -13,7 +13,7 @@ module.exports = {
   rules: {
     // HMR-only rule — shadcn components legitimately export non-components
     'react-refresh/only-export-components': 'off',
-    // TypeScript tsc --noEmit already catches unused vars; avoid duplication
+    // Unused vars enforced by TypeScript (noUnusedLocals/noUnusedParameters in tsconfig.json)
     '@typescript-eslint/no-unused-vars': 'off',
     // Allow any — too noisy for a mixed-type project
     '@typescript-eslint/no-explicit-any': 'off',
