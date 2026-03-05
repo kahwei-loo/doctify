@@ -15,3 +15,4 @@ jobs:
     steps:
       - name: All checks delegated to service workflows
         run: echo "See Frontend CI and Backend CI workflow runs for detailed results."
+
