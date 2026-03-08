@@ -5,7 +5,7 @@
  * Handles connection, reconnection, and message handling.
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from "react";
 
 export interface UseWebSocketOptions {
   onOpen?: (event: Event) => void;
@@ -67,7 +67,11 @@ export function useWebSocket(url: string, options: UseWebSocketOptions = {}): Us
         onClose?.(event);
 
         // Attempt reconnection if enabled
-        if (shouldConnectRef.current && reconnect && reconnectCountRef.current < reconnectAttempts) {
+        if (
+          shouldConnectRef.current &&
+          reconnect &&
+          reconnectCountRef.current < reconnectAttempts
+        ) {
           reconnectCountRef.current += 1;
           reconnectTimeoutRef.current = setTimeout(() => {
             connect();
@@ -86,7 +90,7 @@ export function useWebSocket(url: string, options: UseWebSocketOptions = {}): Us
 
       wsRef.current = ws;
     } catch (error) {
-      console.error('Failed to create WebSocket connection:', error);
+      console.error("Failed to create WebSocket connection:", error);
     }
   }, [url, onOpen, onClose, onMessage, onError, reconnect, reconnectInterval, reconnectAttempts]);
 
@@ -116,7 +120,7 @@ export function useWebSocket(url: string, options: UseWebSocketOptions = {}): Us
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(data);
     } else {
-      console.warn('WebSocket is not connected. Cannot send message.');
+      console.warn("WebSocket is not connected. Cannot send message.");
     }
   }, []);
 
@@ -132,7 +136,6 @@ export function useWebSocket(url: string, options: UseWebSocketOptions = {}): Us
       shouldConnectRef.current = false;
       disconnect();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [url]);
 
   return {

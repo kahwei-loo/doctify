@@ -7,19 +7,16 @@
  * Week 1 Task 1.2.1: Enhanced Error States
  */
 
-import React from 'react';
-import { WifiOff, RefreshCw } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import React from "react";
+import { WifiOff, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface NetworkErrorStateProps {
   onRetry: () => void;
   message?: string;
 }
 
-export const NetworkErrorState: React.FC<NetworkErrorStateProps> = ({
-  onRetry,
-  message,
-}) => {
+export const NetworkErrorState: React.FC<NetworkErrorStateProps> = ({ onRetry, message }) => {
   return (
     <div className="flex flex-col items-center justify-center h-64 gap-4 p-6">
       {/* Icon */}
@@ -32,7 +29,7 @@ export const NetworkErrorState: React.FC<NetworkErrorStateProps> = ({
         <h3 className="font-semibold text-lg mb-2">Connection Lost</h3>
         <p className="text-muted-foreground text-sm">
           {message ||
-            'Unable to connect to the server. Please check your internet connection and try again.'}
+            "Unable to connect to the server. Please check your internet connection and try again."}
         </p>
       </div>
 

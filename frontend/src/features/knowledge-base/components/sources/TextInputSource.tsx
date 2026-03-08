@@ -11,14 +11,13 @@
  * Future Enhancement: Replace with Tiptap editor for rich formatting
  */
 
-import React, { useState } from 'react';
-import { FileText, Eye, Edit3 } from 'lucide-react';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Card, CardContent } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
+import React, { useState } from "react";
+import { FileText, Eye, Edit3 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 interface TextInputSourceProps {
   content?: string;
@@ -27,28 +26,26 @@ interface TextInputSourceProps {
 }
 
 export const TextInputSource: React.FC<TextInputSourceProps> = ({
-  content = '',
+  content = "",
   onChange,
   className,
 }) => {
-  const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
+  const [activeTab, setActiveTab] = useState<"edit" | "preview">("edit");
 
   const characterCount = content.length;
   const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0;
-  const lineCount = content.split('\n').length;
+  const lineCount = content.split("\n").length;
 
   return (
-    <div className={cn('space-y-4', className)}>
+    <div className={cn("space-y-4", className)}>
       {/* Header */}
       <div>
         <h3 className="text-lg font-medium">Text Content</h3>
-        <p className="text-sm text-muted-foreground">
-          Enter or paste text content directly
-        </p>
+        <p className="text-sm text-muted-foreground">Enter or paste text content directly</p>
       </div>
 
       {/* Edit/Preview Tabs */}
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'edit' | 'preview')}>
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "edit" | "preview")}>
         <div className="flex items-center justify-between">
           <TabsList>
             <TabsTrigger value="edit" className="gap-2">
@@ -128,8 +125,8 @@ This content will be processed and embedded for semantic search."
               <div className="flex-1">
                 <h4 className="text-sm font-medium mb-1">Future Enhancement</h4>
                 <p className="text-xs text-muted-foreground">
-                  Rich text formatting (bold, italic, lists, etc.) will be available
-                  in a future update using Tiptap editor
+                  Rich text formatting (bold, italic, lists, etc.) will be available in a future
+                  update using Tiptap editor
                 </p>
               </div>
             </div>

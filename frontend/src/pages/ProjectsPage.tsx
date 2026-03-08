@@ -13,32 +13,15 @@
  * - Search and filter projects
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import {
-  FolderKanban,
-  Plus,
-  Search,
-  Loader2,
-  LayoutGrid,
-  List,
-  RefreshCw,
-  Settings,
-  Archive,
-  Filter,
-} from 'lucide-react';
-import toast from 'react-hot-toast';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import React, { useState, useCallback, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { Plus, Search, Loader2, LayoutGrid, List, RefreshCw, Filter } from "lucide-react";
+import toast from "react-hot-toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -46,7 +29,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -54,8 +37,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+} from "@/components/ui/dropdown-menu";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   useGetProjectsQuery,
   useGetAggregateStatsQuery,
@@ -64,7 +47,7 @@ import {
   useDeleteProjectMutation,
   useUpdateExtractionConfigMutation,
   type Project,
-} from '@/store/api/projectsApi';
+} from "@/store/api/projectsApi";
 import {
   ProjectStats,
   EnhancedProjectCard,
@@ -75,12 +58,12 @@ import {
   EmptyProjectsState,
   DeleteProjectDialog,
   type ProjectStatsData,
-} from '@/features/projects';
-import type { ExtractionConfig, ProjectConfig } from '@/features/projects';
-import { cn } from '@/lib/utils';
+} from "@/features/projects";
+import type { ExtractionConfig, ProjectConfig } from "@/features/projects";
+import { cn } from "@/lib/utils";
 
-type ViewMode = 'grid' | 'list';
-type FilterOption = 'all' | 'active' | 'archived';
+type ViewMode = "grid" | "list";
+type FilterOption = "all" | "active" | "archived";
 
 /**
  * Wrapper component that fetches project statistics and renders EnhancedProjectCard
@@ -113,12 +96,12 @@ const ProjectsPage: React.FC = () => {
   const navigate = useNavigate();
 
   // UI State
-  const [searchQuery, setSearchQuery] = useState('');
-  const [viewMode, setViewMode] = useState<ViewMode>('grid');
-  const [filterOption, setFilterOption] = useState<FilterOption>('active');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [filterOption, setFilterOption] = useState<FilterOption>("active");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [newProjectName, setNewProjectName] = useState('');
-  const [newProjectDescription, setNewProjectDescription] = useState('');
+  const [newProjectName, setNewProjectName] = useState("");
+  const [newProjectDescription, setNewProjectDescription] = useState("");
   const [configProject, setConfigProject] = useState<Project | null>(null);
   const [deleteDialogProject, setDeleteDialogProject] = useState<Project | null>(null);
 
@@ -129,7 +112,7 @@ const ProjectsPage: React.FC = () => {
     isError: isProjectsError,
     refetch: refetchProjects,
   } = useGetProjectsQuery({
-    includeArchived: filterOption === 'archived' || filterOption === 'all',
+    includeArchived: filterOption === "archived" || filterOption === "all",
   });
 
   const {
@@ -160,9 +143,9 @@ const ProjectsPage: React.FC = () => {
     }
 
     // Apply archived filter
-    if (filterOption === 'active') {
+    if (filterOption === "active") {
       result = result.filter((project) => !project.is_archived);
-    } else if (filterOption === 'archived') {
+    } else if (filterOption === "archived") {
       result = result.filter((project) => project.is_archived);
     }
 
@@ -191,7 +174,7 @@ const ProjectsPage: React.FC = () => {
   // Handlers
   const handleCreateProject = useCallback(async () => {
     if (!newProjectName.trim()) {
-      toast.error('Project name is required');
+      toast.error("Project name is required");
       return;
     }
 
@@ -201,16 +184,16 @@ const ProjectsPage: React.FC = () => {
         description: newProjectDescription.trim() || undefined,
       }).unwrap();
 
-      toast.success('Project created successfully');
+      toast.success("Project created successfully");
       setIsCreateDialogOpen(false);
-      setNewProjectName('');
-      setNewProjectDescription('');
+      setNewProjectName("");
+      setNewProjectDescription("");
 
       // Navigate to the new project's documents
       navigate(`/documents?project=${result.data.project_id}`);
     } catch (error: unknown) {
       const err = error as { data?: { detail?: string } };
-      toast.error(err.data?.detail || 'Failed to create project');
+      toast.error(err.data?.detail || "Failed to create project");
     }
   }, [newProjectName, newProjectDescription, createProject, navigate]);
 
@@ -218,21 +201,18 @@ const ProjectsPage: React.FC = () => {
     setDeleteDialogProject(project);
   }, []);
 
-  const handleConfirmDelete = useCallback(
-    async () => {
-      if (!deleteDialogProject) return;
+  const handleConfirmDelete = useCallback(async () => {
+    if (!deleteDialogProject) return;
 
-      try {
-        await deleteProject({ projectId: deleteDialogProject.project_id }).unwrap();
-        toast.success('Project deleted');
-        setDeleteDialogProject(null);
-      } catch (error: unknown) {
-        const err = error as { data?: { detail?: string } };
-        toast.error(err.data?.detail || 'Failed to delete project');
-      }
-    },
-    [deleteProject, deleteDialogProject]
-  );
+    try {
+      await deleteProject({ projectId: deleteDialogProject.project_id }).unwrap();
+      toast.success("Project deleted");
+      setDeleteDialogProject(null);
+    } catch (error: unknown) {
+      const err = error as { data?: { detail?: string } };
+      toast.error(err.data?.detail || "Failed to delete project");
+    }
+  }, [deleteProject, deleteDialogProject]);
 
   const handleConfigureProject = useCallback((project: Project) => {
     setConfigProject(project);
@@ -245,11 +225,11 @@ const ProjectsPage: React.FC = () => {
           projectId,
           extractionConfig: config as unknown as Record<string, unknown>,
         }).unwrap();
-        toast.success('Configuration saved');
+        toast.success("Configuration saved");
         setConfigProject(null);
       } catch (error: unknown) {
         const err = error as { data?: { detail?: string } };
-        toast.error(err.data?.detail || 'Failed to save configuration');
+        toast.error(err.data?.detail || "Failed to save configuration");
         throw error;
       }
     },
@@ -299,20 +279,14 @@ const ProjectsPage: React.FC = () => {
         <ProjectStats
           data={projectStatsData}
           isLoading={isLoadingStats}
-          error={isStatsError ? 'Failed to load statistics' : null}
+          error={isStatsError ? "Failed to load statistics" : null}
         />
 
         {/* Charts Row */}
         {projectStatsData && projectStatsData.totalDocuments > 0 && (
           <div className="grid gap-4 md:grid-cols-2">
-            <ProcessingChart
-              data={projectStatsData.statusBreakdown}
-              isLoading={isLoadingStats}
-            />
-            <TokenUsageChart
-              data={projectStatsData.tokenByProject}
-              isLoading={isLoadingStats}
-            />
+            <ProcessingChart data={projectStatsData.statusBreakdown} isLoading={isLoadingStats} />
+            <TokenUsageChart data={projectStatsData.tokenByProject} isLoading={isLoadingStats} />
           </div>
         )}
       </div>
@@ -355,29 +329,29 @@ const ProjectsPage: React.FC = () => {
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="gap-2">
                   <Filter className="h-4 w-4" />
-                  {filterOption === 'all' && 'All'}
-                  {filterOption === 'active' && 'Active'}
-                  {filterOption === 'archived' && 'Archived'}
+                  {filterOption === "all" && "All"}
+                  {filterOption === "active" && "Active"}
+                  {filterOption === "archived" && "Archived"}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Filter Projects</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuCheckboxItem
-                  checked={filterOption === 'all'}
-                  onCheckedChange={() => setFilterOption('all')}
+                  checked={filterOption === "all"}
+                  onCheckedChange={() => setFilterOption("all")}
                 >
                   All Projects
                 </DropdownMenuCheckboxItem>
                 <DropdownMenuCheckboxItem
-                  checked={filterOption === 'active'}
-                  onCheckedChange={() => setFilterOption('active')}
+                  checked={filterOption === "active"}
+                  onCheckedChange={() => setFilterOption("active")}
                 >
                   Active Only
                 </DropdownMenuCheckboxItem>
                 <DropdownMenuCheckboxItem
-                  checked={filterOption === 'archived'}
-                  onCheckedChange={() => setFilterOption('archived')}
+                  checked={filterOption === "archived"}
+                  onCheckedChange={() => setFilterOption("archived")}
                 >
                   Archived Only
                 </DropdownMenuCheckboxItem>
@@ -391,10 +365,8 @@ const ProjectsPage: React.FC = () => {
       {isLoadingProjects ? (
         <div
           className={cn(
-            'grid gap-4',
-            viewMode === 'grid'
-              ? 'md:grid-cols-2 lg:grid-cols-3'
-              : 'grid-cols-1'
+            "grid gap-4",
+            viewMode === "grid" ? "md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"
           )}
         >
           {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -406,15 +378,13 @@ const ProjectsPage: React.FC = () => {
           onCreateProject={() => setIsCreateDialogOpen(true)}
           hasSearchQuery={!!searchQuery}
           filterOption={filterOption}
-          onClearSearch={() => setSearchQuery('')}
+          onClearSearch={() => setSearchQuery("")}
         />
       ) : (
         <div
           className={cn(
-            'grid gap-4',
-            viewMode === 'grid'
-              ? 'md:grid-cols-2 lg:grid-cols-3'
-              : 'grid-cols-1'
+            "grid gap-4",
+            viewMode === "grid" ? "md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"
           )}
         >
           {filteredProjects.map((project) => (
@@ -433,9 +403,7 @@ const ProjectsPage: React.FC = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Create New Project</DialogTitle>
-            <DialogDescription>
-              Add a new project to organize your documents
-            </DialogDescription>
+            <DialogDescription>Add a new project to organize your documents</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
@@ -460,10 +428,7 @@ const ProjectsPage: React.FC = () => {
             </div>
           </div>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsCreateDialogOpen(false)}
-            >
+            <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
               Cancel
             </Button>
             <Button onClick={handleCreateProject} disabled={isCreating}>

@@ -7,10 +7,10 @@
  * Week 1 Task 1.2.1: Enhanced Error States
  */
 
-import React from 'react';
-import { AlertCircle, Upload, FileX } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
+import React from "react";
+import { AlertCircle, Upload, FileX } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 
 interface CorruptedFileErrorProps {
   filename?: string;
@@ -36,7 +36,7 @@ export const CorruptedFileError: React.FC<CorruptedFileErrorProps> = ({
               and cannot be processed.
             </>
           ) : (
-            'This file appears to be corrupted and cannot be processed.'
+            "This file appears to be corrupted and cannot be processed."
           )}
         </p>
 
@@ -52,12 +52,7 @@ export const CorruptedFileError: React.FC<CorruptedFileErrorProps> = ({
 
         {onUploadNew && (
           <div className="pt-2">
-            <Button
-              onClick={onUploadNew}
-              variant="outline"
-              size="sm"
-              className="gap-2"
-            >
+            <Button onClick={onUploadNew} variant="outline" size="sm" className="gap-2">
               <Upload className="h-4 w-4" />
               Upload Different File
             </Button>

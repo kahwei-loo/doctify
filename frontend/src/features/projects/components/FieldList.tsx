@@ -4,9 +4,9 @@
  * Displays a list of extraction fields with edit and delete actions.
  */
 
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -14,7 +14,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from "@/components/ui/table";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,10 +25,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import { Pencil, Trash2, GripVertical } from 'lucide-react';
-import type { ExtractionField } from '../types';
-import { FIELD_TYPE_LABELS, normalizeFieldType } from '../types';
+} from "@/components/ui/alert-dialog";
+import { Pencil, Trash2, GripVertical } from "lucide-react";
+import type { ExtractionField } from "../types";
+import { FIELD_TYPE_LABELS, normalizeFieldType } from "../types";
 
 interface FieldListProps {
   fields: ExtractionField[];
@@ -37,18 +37,12 @@ interface FieldListProps {
   onReorder?: (fields: ExtractionField[]) => void;
 }
 
-export const FieldList: React.FC<FieldListProps> = ({
-  fields,
-  onEdit,
-  onDelete,
-}) => {
+export const FieldList: React.FC<FieldListProps> = ({ fields, onEdit, onDelete }) => {
   if (fields.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
         <p>No extraction fields defined yet.</p>
-        <p className="text-sm mt-1">
-          Add fields to define what data to extract from documents.
-        </p>
+        <p className="text-sm mt-1">Add fields to define what data to extract from documents.</p>
       </div>
     );
   }
@@ -72,9 +66,7 @@ export const FieldList: React.FC<FieldListProps> = ({
               <TableCell>
                 <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab" />
               </TableCell>
-              <TableCell className="font-medium font-mono text-sm">
-                {field.name}
-              </TableCell>
+              <TableCell className="font-medium font-mono text-sm">{field.name}</TableCell>
               <TableCell>
                 <Badge variant="secondary">
                   {FIELD_TYPE_LABELS[normalizeFieldType(field.type)]}
@@ -88,7 +80,7 @@ export const FieldList: React.FC<FieldListProps> = ({
                 )}
               </TableCell>
               <TableCell className="text-muted-foreground text-sm max-w-[200px] truncate">
-                {field.description || '—'}
+                {field.description || "—"}
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
@@ -115,8 +107,8 @@ export const FieldList: React.FC<FieldListProps> = ({
                       <AlertDialogHeader>
                         <AlertDialogTitle>Delete Field</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Are you sure you want to delete the field "{field.name}"?
-                          This action cannot be undone.
+                          Are you sure you want to delete the field "{field.name}"? This action
+                          cannot be undone.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>

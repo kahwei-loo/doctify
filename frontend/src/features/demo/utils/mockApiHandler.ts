@@ -41,7 +41,7 @@ import {
   DEMO_RAG_RESPONSES,
   // Unified Query
   matchUnifiedQueryMock,
-} from '../mockData';
+} from "../mockData";
 
 // Simulate network delay for realism
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -68,21 +68,18 @@ const wrapResponse = <T>(data: T) => ({
 /**
  * Mock API handler - matches endpoint and returns mock data
  */
-export const mockApiHandler = async (
-  endpoint: string,
-  args?: any
-): Promise<MockApiResponse> => {
-  console.log('[Demo API] Handling request:', endpoint, args);
+export const mockApiHandler = async (endpoint: string, args?: any): Promise<MockApiResponse> => {
+  console.log("[Demo API] Handling request:", endpoint, args);
 
   // Add realistic delay
   await randomDelay();
 
   // Parse URL to extract path and query params
-  const url = new URL(endpoint, 'http://localhost');
+  const url = new URL(endpoint, "http://localhost");
   const path = url.pathname;
 
   // Auth endpoints
-  if (path === '/api/v1/auth/me' || path.endsWith('/auth/me')) {
+  if (path === "/api/v1/auth/me" || path.endsWith("/auth/me")) {
     return {
       data: {
         success: true,
@@ -91,7 +88,7 @@ export const mockApiHandler = async (
     };
   }
 
-  if (path === '/api/v1/auth/login' || path.endsWith('/auth/login')) {
+  if (path === "/api/v1/auth/login" || path.endsWith("/auth/login")) {
     return {
       data: {
         success: true,
@@ -101,12 +98,12 @@ export const mockApiHandler = async (
   }
 
   // Dashboard endpoints
-  if (path === '/api/v1/dashboard/stats' || path.endsWith('/dashboard/stats')) {
+  if (path === "/api/v1/dashboard/stats" || path.endsWith("/dashboard/stats")) {
     return { data: wrapResponse(DEMO_DASHBOARD_STATS) };
   }
 
   // Unified stats endpoint (Week 6 optimization)
-  if (path === '/api/v1/dashboard/unified-stats' || path.endsWith('/dashboard/unified-stats')) {
+  if (path === "/api/v1/dashboard/unified-stats" || path.endsWith("/dashboard/unified-stats")) {
     const unifiedStats = {
       ...DEMO_DASHBOARD_STATS,
       // Knowledge Base stats
@@ -131,7 +128,7 @@ export const mockApiHandler = async (
     return { data: wrapResponse(unifiedStats) };
   }
 
-  if (path === '/api/v1/dashboard/trends' || path.endsWith('/dashboard/trends')) {
+  if (path === "/api/v1/dashboard/trends" || path.endsWith("/dashboard/trends")) {
     return {
       data: {
         success: true,
@@ -148,10 +145,10 @@ export const mockApiHandler = async (
   }
 
   if (
-    path === '/api/v1/dashboard/activity' ||
-    path.endsWith('/dashboard/activity') ||
-    path === '/api/v1/dashboard/recent-activity' ||
-    path.endsWith('/dashboard/recent-activity')
+    path === "/api/v1/dashboard/activity" ||
+    path.endsWith("/dashboard/activity") ||
+    path === "/api/v1/dashboard/recent-activity" ||
+    path.endsWith("/dashboard/recent-activity")
   ) {
     return {
       data: {
@@ -162,32 +159,32 @@ export const mockApiHandler = async (
   }
 
   // Project distribution endpoint
-  if (path === '/api/v1/dashboard/distribution' || path.endsWith('/dashboard/distribution')) {
+  if (path === "/api/v1/dashboard/distribution" || path.endsWith("/dashboard/distribution")) {
     return {
       data: {
         success: true,
         data: [
           {
-            project_id: 'proj-001',
-            project_name: 'Q1 2024 Invoices',
+            project_id: "proj-001",
+            project_name: "Q1 2024 Invoices",
             document_count: 15,
             percentage: 31.9,
           },
           {
-            project_id: 'proj-002',
-            project_name: 'Expense Receipts',
+            project_id: "proj-002",
+            project_name: "Expense Receipts",
             document_count: 12,
             percentage: 25.5,
           },
           {
-            project_id: 'proj-003',
-            project_name: 'Legal Contracts',
+            project_id: "proj-003",
+            project_name: "Legal Contracts",
             document_count: 8,
             percentage: 17.0,
           },
           {
             project_id: null,
-            project_name: 'Unassigned',
+            project_name: "Unassigned",
             document_count: 12,
             percentage: 25.5,
           },
@@ -197,11 +194,11 @@ export const mockApiHandler = async (
   }
 
   // Documents endpoints
-  if (path === '/api/v1/documents' || path.endsWith('/documents')) {
+  if (path === "/api/v1/documents" || path.endsWith("/documents")) {
     // Handle query parameters
-    const page = parseInt(url.searchParams.get('page') || '1');
-    const perPage = parseInt(url.searchParams.get('per_page') || '20');
-    const projectId = url.searchParams.get('project_id');
+    const page = parseInt(url.searchParams.get("page") || "1");
+    const perPage = parseInt(url.searchParams.get("per_page") || "20");
+    const projectId = url.searchParams.get("project_id");
 
     let filteredDocs = [...DEMO_DOCUMENTS];
 
@@ -231,7 +228,7 @@ export const mockApiHandler = async (
 
   // Document detail endpoint
   if (path.match(/\/api\/v1\/documents\/[\w-]+$/) || path.match(/\/documents\/[\w-]+$/)) {
-    const docId = path.split('/').pop();
+    const docId = path.split("/").pop();
     const document = DEMO_DOCUMENTS.find((doc) => doc.document_id === docId);
 
     if (document) {
@@ -244,7 +241,7 @@ export const mockApiHandler = async (
     } else {
       return {
         error: {
-          message: 'Document not found',
+          message: "Document not found",
           status: 404,
         },
       };
@@ -252,7 +249,7 @@ export const mockApiHandler = async (
   }
 
   // Documents stats endpoint
-  if (path === '/api/v1/documents/stats' || path.endsWith('/documents/stats')) {
+  if (path === "/api/v1/documents/stats" || path.endsWith("/documents/stats")) {
     return {
       data: {
         success: true,
@@ -262,9 +259,14 @@ export const mockApiHandler = async (
   }
 
   // Projects endpoints
-  if (path === '/api/v1/projects' || path === '/api/v1/projects/' || path.endsWith('/projects') || path.endsWith('/projects/')) {
-    const page = parseInt(url.searchParams.get('page') || '1');
-    const perPage = parseInt(url.searchParams.get('per_page') || '20');
+  if (
+    path === "/api/v1/projects" ||
+    path === "/api/v1/projects/" ||
+    path.endsWith("/projects") ||
+    path.endsWith("/projects/")
+  ) {
+    const page = parseInt(url.searchParams.get("page") || "1");
+    const perPage = parseInt(url.searchParams.get("per_page") || "20");
 
     const start = (page - 1) * perPage;
     const end = start + perPage;
@@ -288,7 +290,7 @@ export const mockApiHandler = async (
 
   // Project detail endpoint
   if (path.match(/\/api\/v1\/projects\/[\w-]+$/) || path.match(/\/projects\/[\w-]+$/)) {
-    const projectId = path.split('/').pop();
+    const projectId = path.split("/").pop();
     const project = DEMO_PROJECTS.find((proj) => proj.project_id === projectId);
 
     if (project) {
@@ -301,7 +303,7 @@ export const mockApiHandler = async (
     } else {
       return {
         error: {
-          message: 'Project not found',
+          message: "Project not found",
           status: 404,
         },
       };
@@ -309,7 +311,7 @@ export const mockApiHandler = async (
   }
 
   // Projects stats endpoint
-  if (path === '/api/v1/projects/stats' || path.endsWith('/projects/stats')) {
+  if (path === "/api/v1/projects/stats" || path.endsWith("/projects/stats")) {
     return {
       data: {
         success: true,
@@ -319,7 +321,12 @@ export const mockApiHandler = async (
   }
 
   // Assistants endpoints
-  if (path === '/api/v1/assistants/' || path === '/api/v1/assistants' || path.endsWith('/assistants/') || path.endsWith('/assistants')) {
+  if (
+    path === "/api/v1/assistants/" ||
+    path === "/api/v1/assistants" ||
+    path.endsWith("/assistants/") ||
+    path.endsWith("/assistants")
+  ) {
     return {
       data: {
         success: true,
@@ -333,7 +340,7 @@ export const mockApiHandler = async (
 
   // Single assistant endpoint
   if (path.match(/\/api\/v1\/assistants\/[\w-]+$/) || path.match(/\/assistants\/[\w-]+$/)) {
-    const assistantId = path.split('/').pop();
+    const assistantId = path.split("/").pop();
     const assistant = DEMO_ASSISTANTS.find((a) => a.id === assistantId);
     if (assistant) {
       return {
@@ -346,10 +353,14 @@ export const mockApiHandler = async (
   }
 
   // Assistant conversations endpoint
-  if (path.match(/\/api\/v1\/assistants\/[\w-]+\/conversations$/) || path.match(/\/assistants\/[\w-]+\/conversations$/)) {
-    const pathParts = path.split('/');
+  if (
+    path.match(/\/api\/v1\/assistants\/[\w-]+\/conversations$/) ||
+    path.match(/\/assistants\/[\w-]+\/conversations$/)
+  ) {
+    const pathParts = path.split("/");
     const assistantId = pathParts[pathParts.length - 2];
-    const rawConversations = DEMO_ASSISTANT_CONVERSATIONS[assistantId as keyof typeof DEMO_ASSISTANT_CONVERSATIONS] || [];
+    const rawConversations =
+      DEMO_ASSISTANT_CONVERSATIONS[assistantId as keyof typeof DEMO_ASSISTANT_CONVERSATIONS] || [];
 
     // Transform to match BackendConversationResponse shape expected by transformResponse
     const conversations = rawConversations.map((conv: any) => ({
@@ -358,11 +369,11 @@ export const mockApiHandler = async (
       user_id: null,
       session_id: null,
       status: conv.status,
-      last_message_preview: conv.title || '',
+      last_message_preview: conv.title || "",
       last_message_at: conv.created_at,
       message_count: conv.message_count || 0,
       context: {},
-      resolved_at: conv.status === 'resolved' ? conv.created_at : null,
+      resolved_at: conv.status === "resolved" ? conv.created_at : null,
       created_at: conv.created_at,
       updated_at: conv.created_at,
     }));
@@ -379,7 +390,7 @@ export const mockApiHandler = async (
   }
 
   // Assistant stats endpoint
-  if (path === '/api/v1/assistants/stats' || path.endsWith('/assistants/stats')) {
+  if (path === "/api/v1/assistants/stats" || path.endsWith("/assistants/stats")) {
     return {
       data: {
         success: true,
@@ -394,7 +405,7 @@ export const mockApiHandler = async (
   }
 
   // RAG/Knowledge Base endpoints
-  if (path === '/api/v1/rag/stats' || path.endsWith('/rag/stats')) {
+  if (path === "/api/v1/rag/stats" || path.endsWith("/rag/stats")) {
     return {
       data: {
         success: true,
@@ -411,7 +422,7 @@ export const mockApiHandler = async (
   }
 
   // RAG query history
-  if (path.includes('/rag/history')) {
+  if (path.includes("/rag/history")) {
     return {
       data: {
         success: true,
@@ -426,9 +437,9 @@ export const mockApiHandler = async (
   }
 
   // Unified query endpoint (RAG + Analytics)
-  if (path.includes('/unified-query')) {
+  if (path.includes("/unified-query")) {
     const body = args?.body;
-    const queryText = body?.query || 'What are the payment terms?';
+    const queryText = body?.query || "What are the payment terms?";
     const mockResponse = matchUnifiedQueryMock(queryText);
     return { data: mockResponse };
   }
@@ -439,7 +450,7 @@ export const mockApiHandler = async (
   }
 
   // Knowledge bases endpoint
-  if (path.includes('/knowledge-bases') || path.includes('/kb')) {
+  if (path.includes("/knowledge-bases") || path.includes("/kb")) {
     return {
       data: {
         success: true,
@@ -455,8 +466,8 @@ export const mockApiHandler = async (
 
   // Chat conversations list
   // NOTE: Chat RTK Query endpoints expect raw data (no {success, data} wrapper)
-  if (path === '/api/v1/chat/conversations' || path.endsWith('/chat/conversations')) {
-    const limit = parseInt(url.searchParams.get('limit') || '50');
+  if (path === "/api/v1/chat/conversations" || path.endsWith("/chat/conversations")) {
+    const limit = parseInt(url.searchParams.get("limit") || "50");
     return {
       data: DEMO_CHAT_CONVERSATIONS.slice(0, limit),
     };
@@ -464,7 +475,7 @@ export const mockApiHandler = async (
 
   // Chat conversation messages
   if (path.match(/\/chat\/conversations\/[\w-]+\/messages$/)) {
-    const pathParts = path.split('/');
+    const pathParts = path.split("/");
     const conversationId = pathParts[pathParts.length - 2];
     const messages = DEMO_CHAT_MESSAGES[conversationId as keyof typeof DEMO_CHAT_MESSAGES] || [];
 
@@ -474,7 +485,7 @@ export const mockApiHandler = async (
   }
 
   // Chat stats
-  if (path === '/api/v1/chat/stats' || path.endsWith('/chat/stats')) {
+  if (path === "/api/v1/chat/stats" || path.endsWith("/chat/stats")) {
     return {
       data: DEMO_CHAT_STATS,
     };
@@ -482,7 +493,7 @@ export const mockApiHandler = async (
 
   // Single chat conversation
   if (path.match(/\/chat\/conversations\/[\w-]+$/)) {
-    const conversationId = path.split('/').pop();
+    const conversationId = path.split("/").pop();
     const conversation = DEMO_CHAT_CONVERSATIONS.find((c) => c.id === conversationId);
 
     if (conversation) {
@@ -495,7 +506,7 @@ export const mockApiHandler = async (
   // ===== INSIGHTS/DATASETS ENDPOINTS =====
 
   // Insights conversations (used by InsightsPage)
-  if (path === '/api/v1/insights/conversations' || path.endsWith('/insights/conversations')) {
+  if (path === "/api/v1/insights/conversations" || path.endsWith("/insights/conversations")) {
     // Return datasets as "conversations" for the insights page
     return {
       data: {
@@ -518,7 +529,7 @@ export const mockApiHandler = async (
 
   // Single insights conversation/dataset
   if (path.match(/\/insights\/conversations\/[\w-]+$/)) {
-    const datasetId = path.split('/').pop();
+    const datasetId = path.split("/").pop();
     const dataset = DEMO_DATASETS.find((d) => d.dataset_id === datasetId);
 
     if (dataset) {
@@ -542,7 +553,7 @@ export const mockApiHandler = async (
 
   // Insights query endpoint
   if (path.match(/\/insights\/conversations\/[\w-]+\/query$/)) {
-    const pathParts = path.split('/');
+    const pathParts = path.split("/");
     const conversationId = pathParts[pathParts.length - 2];
 
     // Find a matching preset query or return a generic response
@@ -551,7 +562,7 @@ export const mockApiHandler = async (
       ? DEMO_QUERY_RESULTS[presetQuery.query_id as keyof typeof DEMO_QUERY_RESULTS]
       : {
           success: true,
-          answer: 'Based on the analyzed documents, the query has been processed successfully.',
+          answer: "Based on the analyzed documents, the query has been processed successfully.",
           chart_data: null,
           sources: [],
         };
@@ -583,7 +594,7 @@ export const mockApiHandler = async (
   }
 
   // Datasets endpoint
-  if (path === '/api/v1/datasets' || path.endsWith('/datasets')) {
+  if (path === "/api/v1/datasets" || path.endsWith("/datasets")) {
     return {
       data: {
         success: true,
@@ -598,10 +609,15 @@ export const mockApiHandler = async (
   // ===== TEMPLATES ENDPOINTS =====
 
   // Templates list
-  if (path === '/api/v1/templates' || path === '/api/v1/templates/' || path.endsWith('/templates') || path.endsWith('/templates/')) {
-    const page = parseInt(url.searchParams.get('page') || '1');
-    const perPage = parseInt(url.searchParams.get('per_page') || '20');
-    const activeOnly = url.searchParams.get('active') === 'true';
+  if (
+    path === "/api/v1/templates" ||
+    path === "/api/v1/templates/" ||
+    path.endsWith("/templates") ||
+    path.endsWith("/templates/")
+  ) {
+    const page = parseInt(url.searchParams.get("page") || "1");
+    const perPage = parseInt(url.searchParams.get("per_page") || "20");
+    const activeOnly = url.searchParams.get("active") === "true";
 
     let filteredTemplates = [...DEMO_TEMPLATES];
     if (activeOnly) {
@@ -628,7 +644,7 @@ export const mockApiHandler = async (
 
   // Single template
   if (path.match(/\/templates\/[\w-]+$/)) {
-    const templateId = path.split('/').pop();
+    const templateId = path.split("/").pop();
     const template = DEMO_TEMPLATES.find((t) => t.template_id === templateId);
 
     if (template) {
@@ -641,7 +657,7 @@ export const mockApiHandler = async (
     } else {
       return {
         error: {
-          message: 'Template not found',
+          message: "Template not found",
           status: 404,
         },
       };
@@ -649,7 +665,7 @@ export const mockApiHandler = async (
   }
 
   // Templates stats
-  if (path === '/api/v1/templates/stats' || path.endsWith('/templates/stats')) {
+  if (path === "/api/v1/templates/stats" || path.endsWith("/templates/stats")) {
     return {
       data: {
         success: true,
@@ -661,7 +677,12 @@ export const mockApiHandler = async (
   // ===== SETTINGS ENDPOINTS =====
 
   // User profile
-  if (path === '/api/v1/settings/profile' || path.endsWith('/settings/profile') || path === '/api/v1/users/me' || path.endsWith('/users/me')) {
+  if (
+    path === "/api/v1/settings/profile" ||
+    path.endsWith("/settings/profile") ||
+    path === "/api/v1/users/me" ||
+    path.endsWith("/users/me")
+  ) {
     return {
       data: {
         success: true,
@@ -671,7 +692,7 @@ export const mockApiHandler = async (
   }
 
   // Notification settings
-  if (path === '/api/v1/settings/notifications' || path.endsWith('/settings/notifications')) {
+  if (path === "/api/v1/settings/notifications" || path.endsWith("/settings/notifications")) {
     return {
       data: {
         success: true,
@@ -681,7 +702,12 @@ export const mockApiHandler = async (
   }
 
   // API keys
-  if (path === '/api/v1/settings/api-keys' || path.endsWith('/settings/api-keys') || path === '/api/v1/api-keys' || path.endsWith('/api-keys')) {
+  if (
+    path === "/api/v1/settings/api-keys" ||
+    path.endsWith("/settings/api-keys") ||
+    path === "/api/v1/api-keys" ||
+    path.endsWith("/api-keys")
+  ) {
     return {
       data: {
         success: true,
@@ -694,7 +720,12 @@ export const mockApiHandler = async (
   }
 
   // Billing info
-  if (path === '/api/v1/settings/billing' || path.endsWith('/settings/billing') || path === '/api/v1/billing' || path.endsWith('/billing')) {
+  if (
+    path === "/api/v1/settings/billing" ||
+    path.endsWith("/settings/billing") ||
+    path === "/api/v1/billing" ||
+    path.endsWith("/billing")
+  ) {
     return {
       data: {
         success: true,
@@ -704,7 +735,7 @@ export const mockApiHandler = async (
   }
 
   // Security settings
-  if (path === '/api/v1/settings/security' || path.endsWith('/settings/security')) {
+  if (path === "/api/v1/settings/security" || path.endsWith("/settings/security")) {
     return {
       data: {
         success: true,
@@ -714,7 +745,7 @@ export const mockApiHandler = async (
   }
 
   // All settings (combined)
-  if (path === '/api/v1/settings' || path.endsWith('/settings')) {
+  if (path === "/api/v1/settings" || path.endsWith("/settings")) {
     return {
       data: {
         success: true,
@@ -727,7 +758,7 @@ export const mockApiHandler = async (
 
   // Assistant conversation messages (different from assistant's conversations list)
   if (path.match(/\/assistants\/conversations\/[\w-]+\/messages$/)) {
-    const pathParts = path.split('/');
+    const pathParts = path.split("/");
     const conversationId = pathParts[pathParts.length - 2];
 
     // Generate some mock messages for any conversation
@@ -735,29 +766,31 @@ export const mockApiHandler = async (
       {
         message_id: `msg-${conversationId}-1`,
         conversation_id: conversationId,
-        role: 'user',
-        content: 'Hello, I need help with document processing.',
+        role: "user",
+        content: "Hello, I need help with document processing.",
         created_at: new Date(Date.now() - 3600000).toISOString(),
       },
       {
         message_id: `msg-${conversationId}-2`,
         conversation_id: conversationId,
-        role: 'assistant',
-        content: 'Hello! I\'d be happy to help you with document processing. What type of documents would you like to process?',
+        role: "assistant",
+        content:
+          "Hello! I'd be happy to help you with document processing. What type of documents would you like to process?",
         created_at: new Date(Date.now() - 3500000).toISOString(),
       },
       {
         message_id: `msg-${conversationId}-3`,
         conversation_id: conversationId,
-        role: 'user',
-        content: 'I have some invoices that need to be extracted.',
+        role: "user",
+        content: "I have some invoices that need to be extracted.",
         created_at: new Date(Date.now() - 3400000).toISOString(),
       },
       {
         message_id: `msg-${conversationId}-4`,
         conversation_id: conversationId,
-        role: 'assistant',
-        content: 'I can help you extract data from invoices. You can upload your invoice documents, and I\'ll automatically extract key fields like invoice number, date, vendor name, line items, and total amount. Would you like me to guide you through the upload process?',
+        role: "assistant",
+        content:
+          "I can help you extract data from invoices. You can upload your invoice documents, and I'll automatically extract key fields like invoice number, date, vendor name, line items, and total amount. Would you like me to guide you through the upload process?",
         created_at: new Date(Date.now() - 3300000).toISOString(),
       },
     ];
@@ -779,7 +812,7 @@ export const mockApiHandler = async (
       data: {
         success: true,
         data: {
-          status: 'in_progress',
+          status: "in_progress",
           last_message_at: new Date().toISOString(),
         },
       },
@@ -789,7 +822,7 @@ export const mockApiHandler = async (
   // ===== ADMIN: AI MODEL SETTINGS =====
 
   // GET /admin/ai-models — full settings response
-  if (path === '/api/v1/admin/ai-models' || path.endsWith('/admin/ai-models')) {
+  if (path === "/api/v1/admin/ai-models" || path.endsWith("/admin/ai-models")) {
     return {
       data: {
         success: true,
@@ -799,7 +832,7 @@ export const mockApiHandler = async (
   }
 
   // GET /admin/ai-models/catalog — model catalog list
-  if (path === '/api/v1/admin/ai-models/catalog' || path.endsWith('/admin/ai-models/catalog')) {
+  if (path === "/api/v1/admin/ai-models/catalog" || path.endsWith("/admin/ai-models/catalog")) {
     return {
       data: {
         success: true,
@@ -809,7 +842,7 @@ export const mockApiHandler = async (
   }
 
   // PATCH /admin/ai-models/:purpose — update a model setting (read-only in demo)
-  if (path.match(/\/admin\/ai-models\/[\w-]+$/) && !path.endsWith('/catalog')) {
+  if (path.match(/\/admin\/ai-models\/[\w-]+$/) && !path.endsWith("/catalog")) {
     return { data: { success: true, data: DEMO_AI_MODEL_SETTINGS } };
   }
 
@@ -821,16 +854,16 @@ export const mockApiHandler = async (
   // ===== RAG: DIRECT QUERY & CONVERSATIONS =====
 
   // POST /rag/query — direct RAG question
-  if (path === '/api/v1/rag/query' || path.endsWith('/rag/query')) {
-    const queryText: string = args?.body?.query || 'What is the vacation policy?';
+  if (path === "/api/v1/rag/query" || path.endsWith("/rag/query")) {
+    const queryText: string = args?.body?.query || "What is the vacation policy?";
     const matchedKey = Object.keys(DEMO_RAG_RESPONSES).find((k) =>
-      DEMO_RAG_QUERIES.find((q) => q.query_id === k)?.question
-        .toLowerCase()
-        .includes(queryText.toLowerCase().split(' ')[0])
+      DEMO_RAG_QUERIES.find((q) => q.query_id === k)
+        ?.question.toLowerCase()
+        .includes(queryText.toLowerCase().split(" ")[0])
     );
     const response = matchedKey
       ? DEMO_RAG_RESPONSES[matchedKey as keyof typeof DEMO_RAG_RESPONSES]
-      : DEMO_RAG_RESPONSES['rag-query-001'];
+      : DEMO_RAG_RESPONSES["rag-query-001"];
     return {
       data: {
         success: true,
@@ -845,10 +878,10 @@ export const mockApiHandler = async (
 
   // GET /rag/conversations — conversation list
   if (
-    (path === '/api/v1/rag/conversations' || path.endsWith('/rag/conversations')) &&
-    args?.method !== 'POST'
+    (path === "/api/v1/rag/conversations" || path.endsWith("/rag/conversations")) &&
+    args?.method !== "POST"
   ) {
-    const limit = parseInt(url.searchParams.get('limit') || '50');
+    const limit = parseInt(url.searchParams.get("limit") || "50");
     return {
       data: {
         success: true,
@@ -868,15 +901,15 @@ export const mockApiHandler = async (
 
   // POST /rag/conversations — create conversation (demo: return stub)
   if (
-    (path === '/api/v1/rag/conversations' || path.endsWith('/rag/conversations')) &&
-    args?.method === 'POST'
+    (path === "/api/v1/rag/conversations" || path.endsWith("/rag/conversations")) &&
+    args?.method === "POST"
   ) {
     return {
       data: {
         success: true,
         data: {
           conversation_id: `rag-conv-${Date.now()}`,
-          title: 'New Conversation',
+          title: "New Conversation",
           created_at: new Date().toISOString(),
         },
       },
@@ -884,7 +917,7 @@ export const mockApiHandler = async (
   }
 
   // GET /rag/evaluations — evaluation list (empty in demo)
-  if (path.includes('/rag/evaluations')) {
+  if (path.includes("/rag/evaluations")) {
     return {
       data: {
         success: true,
@@ -901,13 +934,13 @@ export const mockApiHandler = async (
   // ===== SEARCH ENDPOINTS =====
 
   // GET /documents/search
-  if (path === '/api/v1/documents/search' || path.endsWith('/documents/search')) {
-    const q = url.searchParams.get('q') || '';
+  if (path === "/api/v1/documents/search" || path.endsWith("/documents/search")) {
+    const q = url.searchParams.get("q") || "";
     const filtered = DEMO_DOCUMENTS.filter(
       (d) =>
         !q ||
         d.filename.toLowerCase().includes(q.toLowerCase()) ||
-        (d.mime_type || '').toLowerCase().includes(q.toLowerCase())
+        (d.mime_type || "").toLowerCase().includes(q.toLowerCase())
     );
     return {
       data: {
@@ -918,13 +951,13 @@ export const mockApiHandler = async (
   }
 
   // GET /projects/search
-  if (path === '/api/v1/projects/search' || path.endsWith('/projects/search')) {
-    const q = url.searchParams.get('q') || '';
+  if (path === "/api/v1/projects/search" || path.endsWith("/projects/search")) {
+    const q = url.searchParams.get("q") || "";
     const filtered = DEMO_PROJECTS.filter(
       (p) =>
         !q ||
         p.name.toLowerCase().includes(q.toLowerCase()) ||
-        (p.description || '').toLowerCase().includes(q.toLowerCase())
+        (p.description || "").toLowerCase().includes(q.toLowerCase())
     );
     return {
       data: {
@@ -937,7 +970,7 @@ export const mockApiHandler = async (
   // ===== MISC ENDPOINTS =====
 
   // GET /dashboard/recent (alias for recent-activity)
-  if (path === '/api/v1/dashboard/recent' || path.endsWith('/dashboard/recent')) {
+  if (path === "/api/v1/dashboard/recent" || path.endsWith("/dashboard/recent")) {
     return {
       data: {
         success: true,
@@ -947,12 +980,12 @@ export const mockApiHandler = async (
   }
 
   // POST /auth/change-password (demo: always succeed)
-  if (path === '/api/v1/auth/change-password' || path.endsWith('/auth/change-password')) {
-    return { data: { success: true, message: 'Password updated successfully' } };
+  if (path === "/api/v1/auth/change-password" || path.endsWith("/auth/change-password")) {
+    return { data: { success: true, message: "Password updated successfully" } };
   }
 
   // GET /auth/api-keys (RTK Query path via authApi)
-  if (path === '/api/v1/auth/api-keys' || path.endsWith('/auth/api-keys')) {
+  if (path === "/api/v1/auth/api-keys" || path.endsWith("/auth/api-keys")) {
     return {
       data: {
         success: true,
@@ -962,7 +995,7 @@ export const mockApiHandler = async (
   }
 
   // Edit history — return empty (feature not demoed)
-  if (path.includes('/edit-history')) {
+  if (path.includes("/edit-history")) {
     return {
       data: {
         success: true,
@@ -973,21 +1006,21 @@ export const mockApiHandler = async (
 
   // POST mutations that are no-ops in demo (delete, cancel, retry, etc.)
   if (
-    args?.method === 'DELETE' ||
-    path.includes('/cancel') ||
-    path.includes('/retry') ||
-    path.includes('/confirm') ||
-    path.includes('/validate-quality') ||
-    path.includes('/process') ||
-    path.includes('/export') ||
-    path.includes('/invalidate-cache') ||
-    path.includes('/logout')
+    args?.method === "DELETE" ||
+    path.includes("/cancel") ||
+    path.includes("/retry") ||
+    path.includes("/confirm") ||
+    path.includes("/validate-quality") ||
+    path.includes("/process") ||
+    path.includes("/export") ||
+    path.includes("/invalidate-cache") ||
+    path.includes("/logout")
   ) {
     return { data: { success: true } };
   }
 
   // Default: endpoint not found
-  console.warn('[Demo API] No mock handler for endpoint:', endpoint);
+  console.warn("[Demo API] No mock handler for endpoint:", endpoint);
   return {
     error: {
       message: `No mock data for endpoint: ${path}`,

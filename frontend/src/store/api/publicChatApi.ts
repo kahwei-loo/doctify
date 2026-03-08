@@ -7,10 +7,10 @@
  * Note: These endpoints do NOT require authentication.
  */
 
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import type { Message, MessageListResponse } from '@/features/assistants/types';
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import type { Message, MessageListResponse } from "@/features/assistants/types";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:50080';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:50080";
 
 // ============================================================================
 // Request/Response Types
@@ -57,7 +57,7 @@ interface PublicAssistantConfig {
 
 // SSE Event Types
 interface SSEMessageSavedEvent {
-  type: 'message_saved';
+  type: "message_saved";
   data: {
     conversation_id: string;
     user_message_id: string;
@@ -65,12 +65,12 @@ interface SSEMessageSavedEvent {
 }
 
 interface SSEChunkEvent {
-  type: 'chunk';
+  type: "chunk";
   data: string;
 }
 
 interface SSECompleteEvent {
-  type: 'complete';
+  type: "complete";
   data: {
     message_id: string;
     content: string;
@@ -79,7 +79,7 @@ interface SSECompleteEvent {
 }
 
 interface SSEErrorEvent {
-  type: 'error';
+  type: "error";
   data: string;
 }
 
@@ -91,26 +91,24 @@ type SSEEvent = SSEMessageSavedEvent | SSEChunkEvent | SSECompleteEvent | SSEErr
 
 // Create a separate API slice for public chat (no auth token injection)
 export const publicChatApi = createApi({
-  reducerPath: 'publicChatApi',
+  reducerPath: "publicChatApi",
   baseQuery: fetchBaseQuery({
     baseUrl: `${API_BASE_URL}/api/v1`,
     // No auth token injection for public endpoints
   }),
-  tagTypes: ['PublicMessages', 'PublicConfig'],
+  tagTypes: ["PublicMessages", "PublicConfig"],
   endpoints: (builder) => ({
     // Get assistant public config (widget settings)
     getPublicAssistantConfig: builder.query<PublicAssistantConfig, string>({
       query: (assistantId) => `/public/chat/${assistantId}/config`,
-      providesTags: (result, error, assistantId) => [
-        { type: 'PublicConfig', id: assistantId },
-      ],
+      providesTags: (_result, _error, assistantId) => [{ type: "PublicConfig", id: assistantId }],
     }),
 
     // Send public message (non-streaming)
     sendPublicMessage: builder.mutation<PublicSendMessageResponse, PublicSendMessageRequest>({
       query: (request) => ({
         url: `/public/chat/${request.assistant_id}/message`,
-        method: 'POST',
+        method: "POST",
         body: {
           session_id: request.session_id,
           content: request.content,
@@ -127,14 +125,14 @@ export const publicChatApi = createApi({
             user_message: {
               message_id: `user-${Date.now()}`, // User message ID not returned by backend
               conversation_id: response.conversation_id,
-              role: 'user',
-              content: '', // Will be filled by the caller
+              role: "user",
+              content: "", // Will be filled by the caller
               created_at: now,
             },
             assistant_message: {
               message_id: response.message_id,
               conversation_id: response.conversation_id,
-              role: 'assistant',
+              role: "assistant",
               content: response.content,
               created_at: now,
               metadata: response.model_used ? { model_used: response.model_used } : undefined,
@@ -159,7 +157,7 @@ export const publicChatApi = createApi({
           },
         };
       },
-      providesTags: ['PublicMessages'],
+      providesTags: ["PublicMessages"],
     }),
   }),
 });
@@ -197,26 +195,23 @@ export const sendPublicMessageStreaming = async (
   const controller = new AbortController();
 
   try {
-    const response = await fetch(
-      `${API_BASE_URL}/api/v1/public/chat/${assistantId}/stream`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          session_id: sessionId,
-          content,
-          context,
-        }),
-        signal: controller.signal,
-      }
-    );
+    const response = await fetch(`${API_BASE_URL}/api/v1/public/chat/${assistantId}/stream`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        session_id: sessionId,
+        content,
+        context,
+      }),
+      signal: controller.signal,
+    });
 
     if (!response.ok) {
       const errorText = await response.text();
       onEvent({
-        type: 'error',
+        type: "error",
         data: `HTTP ${response.status}: ${errorText}`,
       });
       return controller;
@@ -225,14 +220,14 @@ export const sendPublicMessageStreaming = async (
     const reader = response.body?.getReader();
     if (!reader) {
       onEvent({
-        type: 'error',
-        data: 'Failed to get response reader',
+        type: "error",
+        data: "Failed to get response reader",
       });
       return controller;
     }
 
     const decoder = new TextDecoder();
-    let buffer = '';
+    let buffer = "";
 
     while (true) {
       const { done, value } = await reader.read();
@@ -244,23 +239,23 @@ export const sendPublicMessageStreaming = async (
       buffer += decoder.decode(value, { stream: true });
 
       // Process complete SSE messages
-      const lines = buffer.split('\n\n');
-      buffer = lines.pop() || ''; // Keep incomplete message in buffer
+      const lines = buffer.split("\n\n");
+      buffer = lines.pop() || ""; // Keep incomplete message in buffer
 
       for (const line of lines) {
-        if (line.startsWith('data: ')) {
+        if (line.startsWith("data: ")) {
           try {
             const data = JSON.parse(line.slice(6));
             onEvent(data as SSEEvent);
           } catch (e) {
-            console.error('Failed to parse SSE event:', line, e);
+            console.error("Failed to parse SSE event:", line, e);
           }
         }
       }
     }
 
     // Process any remaining buffer
-    if (buffer.startsWith('data: ')) {
+    if (buffer.startsWith("data: ")) {
       try {
         const data = JSON.parse(buffer.slice(6));
         onEvent(data as SSEEvent);
@@ -269,10 +264,10 @@ export const sendPublicMessageStreaming = async (
       }
     }
   } catch (error) {
-    if ((error as Error).name !== 'AbortError') {
+    if ((error as Error).name !== "AbortError") {
       onEvent({
-        type: 'error',
-        data: (error as Error).message || 'Unknown error',
+        type: "error",
+        data: (error as Error).message || "Unknown error",
       });
     }
   }

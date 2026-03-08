@@ -7,22 +7,18 @@
  * Uses resizable panels from react-resizable-panels for flexible split view.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Database,
-  Settings,
-  Loader2,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import React, { useState, useEffect, useCallback } from "react";
+import { Database, Settings, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetDescription,
-} from '@/components/ui/sheet';
-import { SourcesPanel } from './SourcesPanel';
-import { ChatPanel } from './ChatPanel';
+} from "@/components/ui/sheet";
+import { SourcesPanel } from "./SourcesPanel";
+import { ChatPanel } from "./ChatPanel";
 import {
   AddDataSourceDialog,
   DataSourceConfigDialog,
@@ -30,16 +26,16 @@ import {
   KBSettings,
   ConfirmDeleteDialog,
   ErrorState,
-} from '.';
-import { knowledgeBaseApi } from '../services/mockData';
-import toast from 'react-hot-toast';
+} from ".";
+import { knowledgeBaseApi } from "../services/mockData";
+import toast from "react-hot-toast";
 import type {
   KnowledgeBase,
   DataSource,
   DataSourceConfig,
   Embedding,
   DataSourceType,
-} from '../types';
+} from "../types";
 
 interface KBSplitLayoutProps {
   kbId: string;
@@ -55,7 +51,7 @@ export const KBSplitLayout: React.FC<KBSplitLayoutProps> = ({ kbId }) => {
   const [embeddings, setEmbeddings] = useState<Embedding[]>([]);
   const [isLoadingKB, setIsLoadingKB] = useState(false);
   const [isLoadingSources, setIsLoadingSources] = useState(false);
-  const [isLoadingEmbeddings, setIsLoadingEmbeddings] = useState(false);
+  const [_isLoadingEmbeddings, setIsLoadingEmbeddings] = useState(false);
   const [kbError, setKbError] = useState<string | null>(null);
 
   // Dialog State
@@ -78,7 +74,7 @@ export const KBSplitLayout: React.FC<KBSplitLayoutProps> = ({ kbId }) => {
       const response = await knowledgeBaseApi.getKnowledgeBase(kbId);
       setSelectedKB(response.data);
     } catch {
-      setKbError('Failed to load knowledge base details');
+      setKbError("Failed to load knowledge base details");
       setSelectedKB(null);
     } finally {
       setIsLoadingKB(false);
@@ -150,9 +146,9 @@ export const KBSplitLayout: React.FC<KBSplitLayoutProps> = ({ kbId }) => {
       try {
         await knowledgeBaseApi.updateDataSource(dataSource.id, updates);
         await loadDataSources();
-        toast.success('Data source updated successfully');
+        toast.success("Data source updated successfully");
       } catch (err) {
-        toast.error('Failed to update data source');
+        toast.error("Failed to update data source");
         throw err;
       }
     },
@@ -162,27 +158,29 @@ export const KBSplitLayout: React.FC<KBSplitLayoutProps> = ({ kbId }) => {
   const handleRegenerateEmbeddings = useCallback(
     async (dataSource: DataSource) => {
       try {
-        if (dataSource.type === 'website') {
+        if (dataSource.type === "website") {
           // Website sources: re-crawl first, backend auto-chains to embed
           await knowledgeBaseApi.triggerCrawl(dataSource.id);
-          toast.success('Crawling website — embeddings will generate automatically after crawl completes');
+          toast.success(
+            "Crawling website — embeddings will generate automatically after crawl completes"
+          );
         } else {
           await knowledgeBaseApi.generateEmbeddings(dataSource.id, true);
-          toast.success('Regenerating embeddings...');
+          toast.success("Regenerating embeddings...");
         }
         await Promise.all([loadDataSources(), loadEmbeddings(), loadKB()]);
       } catch {
-        toast.error('Failed to regenerate embeddings');
+        toast.error("Failed to regenerate embeddings");
       }
     },
     [loadDataSources, loadEmbeddings, loadKB]
   );
 
   const handleCreateDataSource = useCallback(
-    async (name: string, config: DataSource['config']) => {
+    async (name: string, config: DataSource["config"]) => {
       if (!kbId || !selectedSourceType) return null;
 
-      if (selectedSourceType === 'structured_data') {
+      if (selectedSourceType === "structured_data") {
         const response = await knowledgeBaseApi.listDataSources(kbId);
         setDataSources(response.data);
         setSelectedSourceType(null);
@@ -215,16 +213,16 @@ export const KBSplitLayout: React.FC<KBSplitLayoutProps> = ({ kbId }) => {
       setDataSources(response.data);
       setDeleteDialogOpen(false);
       setDataSourceToDelete(null);
-      toast.success('Data source deleted');
+      toast.success("Data source deleted");
     } catch {
-      toast.error('Failed to delete data source');
+      toast.error("Failed to delete data source");
     } finally {
       setIsDeleting(false);
     }
   }, [kbId, dataSourceToDelete]);
 
   const handleSettingsSaved = useCallback(
-    (config: KnowledgeBase['config']) => {
+    (config: KnowledgeBase["config"]) => {
       if (selectedKB) {
         setSelectedKB({ ...selectedKB, config });
       }
@@ -277,13 +275,9 @@ export const KBSplitLayout: React.FC<KBSplitLayoutProps> = ({ kbId }) => {
               <Database className="h-4 w-4 text-primary" />
             </div>
             <div className="min-w-0">
-              <h1 className="text-base font-semibold tracking-tight truncate">
-                {selectedKB.name}
-              </h1>
+              <h1 className="text-base font-semibold tracking-tight truncate">{selectedKB.name}</h1>
               {selectedKB.description && (
-                <p className="text-xs text-muted-foreground truncate">
-                  {selectedKB.description}
-                </p>
+                <p className="text-xs text-muted-foreground truncate">{selectedKB.description}</p>
               )}
             </div>
           </div>
@@ -302,9 +296,7 @@ export const KBSplitLayout: React.FC<KBSplitLayoutProps> = ({ kbId }) => {
             <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
               <SheetHeader>
                 <SheetTitle>Knowledge Base Settings</SheetTitle>
-                <SheetDescription>
-                  Configure settings for {selectedKB.name}
-                </SheetDescription>
+                <SheetDescription>Configure settings for {selectedKB.name}</SheetDescription>
               </SheetHeader>
               <div className="mt-6">
                 <KBSettings knowledgeBase={selectedKB} onSave={handleSettingsSaved} />
@@ -373,7 +365,7 @@ export const KBSplitLayout: React.FC<KBSplitLayoutProps> = ({ kbId }) => {
         itemName={dataSourceToDelete?.name}
         impact={
           dataSourceToDelete
-            ? [{ label: 'embedding', count: dataSourceToDelete.embedding_count || 0 }]
+            ? [{ label: "embedding", count: dataSourceToDelete.embedding_count || 0 }]
             : []
         }
         isDeleting={isDeleting}

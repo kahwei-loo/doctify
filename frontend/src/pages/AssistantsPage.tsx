@@ -10,25 +10,25 @@
  * Day 5-7: Conversations Inbox with resizable split layout
  */
 
-import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
+import React, { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import {
   AssistantsPanel,
   AssistantFormModal,
   DeleteAssistantDialog,
   ConversationsInbox,
-} from '@/features/assistants/components';
+} from "@/features/assistants/components";
 import {
   useCreateAssistantMutation,
   useUpdateAssistantMutation,
   useDeleteAssistantMutation,
   useGetAssistantsQuery,
-} from '@/store/api/assistantsApi';
-import type { Assistant, CreateAssistantRequest } from '@/features/assistants/types';
-import { Card, CardContent } from '@/components/ui/card';
-import { ErrorBoundary } from '@/shared/components';
-import { Bot } from 'lucide-react';
+} from "@/store/api/assistantsApi";
+import type { Assistant, CreateAssistantRequest } from "@/features/assistants/types";
+import { Card, CardContent } from "@/components/ui/card";
+import { ErrorBoundary } from "@/shared/components";
+import { Bot } from "lucide-react";
 
 const AssistantsPage: React.FC = () => {
   const { assistantId } = useParams<{ assistantId?: string }>();
@@ -55,7 +55,7 @@ const AssistantsPage: React.FC = () => {
     if (id) {
       navigate(`/assistants/${id}`);
     } else {
-      navigate('/assistants');
+      navigate("/assistants");
     }
   };
 
@@ -79,24 +79,24 @@ const AssistantsPage: React.FC = () => {
 
   // Handle form submission (create or update)
   const handleFormSubmit = async (data: CreateAssistantRequest) => {
-    console.log('[AssistantsPage] handleFormSubmit called:', data);
-    console.log('[AssistantsPage] isEditMode:', !!editingAssistant);
+    console.log("[AssistantsPage] handleFormSubmit called:", data);
+    console.log("[AssistantsPage] isEditMode:", !!editingAssistant);
     try {
       if (editingAssistant) {
         // Update existing assistant
-        console.log('[AssistantsPage] Calling updateAssistant...');
+        console.log("[AssistantsPage] Calling updateAssistant...");
         await updateAssistant({
           assistant_id: editingAssistant.assistant_id,
           ...data,
         }).unwrap();
-        console.log('[AssistantsPage] updateAssistant completed successfully');
+        console.log("[AssistantsPage] updateAssistant completed successfully");
 
         toast.success(`Assistant "${data.name}" updated successfully`);
       } else {
         // Create new assistant
-        console.log('[AssistantsPage] Calling createAssistant...');
+        console.log("[AssistantsPage] Calling createAssistant...");
         const result = await createAssistant(data).unwrap();
-        console.log('[AssistantsPage] createAssistant completed successfully:', result);
+        console.log("[AssistantsPage] createAssistant completed successfully:", result);
 
         toast.success(`Assistant "${data.name}" created successfully`);
 
@@ -105,15 +105,15 @@ const AssistantsPage: React.FC = () => {
       }
 
       // Close modal
-      console.log('[AssistantsPage] Closing modal...');
+      console.log("[AssistantsPage] Closing modal...");
       setFormModalOpen(false);
       setEditingAssistant(null);
     } catch (error) {
-      console.error('[AssistantsPage] Failed to save assistant:', error);
+      console.error("[AssistantsPage] Failed to save assistant:", error);
       toast.error(
         editingAssistant
-          ? 'Failed to update assistant. Please try again.'
-          : 'Failed to create assistant. Please try again.'
+          ? "Failed to update assistant. Please try again."
+          : "Failed to create assistant. Please try again."
       );
     }
   };
@@ -129,15 +129,15 @@ const AssistantsPage: React.FC = () => {
 
       // If deleted assistant was selected, navigate to base path
       if (assistantId === deletingAssistant.assistant_id) {
-        navigate('/assistants');
+        navigate("/assistants");
       }
 
       // Close dialog
       setDeleteDialogOpen(false);
       setDeletingAssistant(null);
     } catch (error) {
-      console.error('Failed to delete assistant:', error);
-      toast.error('Failed to delete assistant. Please try again.');
+      console.error("Failed to delete assistant:", error);
+      toast.error("Failed to delete assistant. Please try again.");
     }
   };
 
@@ -152,10 +152,10 @@ const AssistantsPage: React.FC = () => {
         is_active: newStatus,
       }).unwrap();
 
-      toast.success(newStatus ? 'Assistant activated' : 'Assistant deactivated');
+      toast.success(newStatus ? "Assistant activated" : "Assistant deactivated");
     } catch (error) {
-      console.error('Failed to toggle assistant status:', error);
-      toast.error('Failed to update assistant status. Please try again.');
+      console.error("Failed to toggle assistant status:", error);
+      toast.error("Failed to update assistant status. Please try again.");
     }
   };
 

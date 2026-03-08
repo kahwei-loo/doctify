@@ -4,7 +4,7 @@
  * Utilities and helpers for optimizing React component performance.
  */
 
-import React, { useCallback, useEffect, useRef, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useMemo, useState } from "react";
 
 /**
  * Deep comparison for React.memo
@@ -12,7 +12,7 @@ import React, { useCallback, useEffect, useRef, useMemo, useState } from 'react'
  */
 export function deepEqual<T>(a: T, b: T): boolean {
   if (a === b) return true;
-  if (typeof a !== 'object' || typeof b !== 'object' || a === null || b === null) {
+  if (typeof a !== "object" || typeof b !== "object" || a === null || b === null) {
     return false;
   }
 
@@ -36,7 +36,7 @@ export function deepEqual<T>(a: T, b: T): boolean {
  */
 export function shallowEqual<T>(a: T, b: T): boolean {
   if (a === b) return true;
-  if (typeof a !== 'object' || typeof b !== 'object' || a === null || b === null) {
+  if (typeof a !== "object" || typeof b !== "object" || a === null || b === null) {
     return false;
   }
 
@@ -123,9 +123,7 @@ export function useRenderPerformance(componentName: string): void {
     const renderTime = endTime - startTime.current;
 
     if (import.meta.env.DEV) {
-      console.log(
-        `[Performance] ${componentName} render #${renderCount.current}: ${renderTime}ms`
-      );
+      console.log(`[Performance] ${componentName} render #${renderCount.current}: ${renderTime}ms`);
     }
 
     startTime.current = Date.now();
@@ -247,14 +245,14 @@ export class PerformanceMetrics {
   static report(): void {
     if (!import.meta.env.DEV) return;
 
-    console.group('[Performance Report]');
+    console.group("[Performance Report]");
     this.metrics.forEach((durations, name) => {
       console.log(`${name}:`, {
         count: durations.length,
-        avg: this.getAverage(name).toFixed(2) + 'ms',
-        p95: this.getP95(name).toFixed(2) + 'ms',
-        min: Math.min(...durations).toFixed(2) + 'ms',
-        max: Math.max(...durations).toFixed(2) + 'ms',
+        avg: this.getAverage(name).toFixed(2) + "ms",
+        p95: this.getP95(name).toFixed(2) + "ms",
+        min: Math.min(...durations).toFixed(2) + "ms",
+        max: Math.max(...durations).toFixed(2) + "ms",
       });
     });
     console.groupEnd();
@@ -276,7 +274,7 @@ export function withPerformanceMonitoring<P extends object>(
   Component: React.ComponentType<P>,
   componentName?: string
 ): React.ComponentType<P> {
-  const displayName = componentName || Component.displayName || Component.name || 'Component';
+  const displayName = componentName || Component.displayName || Component.name || "Component";
 
   const WrappedComponent: React.FC<P> = (props) => {
     useRenderPerformance(displayName);
@@ -293,10 +291,7 @@ export function withPerformanceMonitoring<P extends object>(
 /**
  * Utility to measure async operation performance
  */
-export async function measureAsync<T>(
-  name: string,
-  operation: () => Promise<T>
-): Promise<T> {
+export async function measureAsync<T>(name: string, operation: () => Promise<T>): Promise<T> {
   const startTime = performance.now();
 
   try {

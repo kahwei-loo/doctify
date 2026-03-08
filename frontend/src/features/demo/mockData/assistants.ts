@@ -4,16 +4,17 @@
 
 export const DEMO_ASSISTANTS = [
   {
-    id: 'asst-001',
-    user_id: 'demo-user',
-    name: 'Document Analyzer',
-    description: 'Analyzes documents and extracts key information',
+    id: "asst-001",
+    user_id: "demo-user",
+    name: "Document Analyzer",
+    description: "Analyzes documents and extracts key information",
     model_configuration: {
-      provider: 'openai',
-      model: 'gpt-4-turbo',
+      provider: "openai",
+      model: "gpt-4-turbo",
       temperature: 0.7,
       max_tokens: 2048,
-      system_prompt: 'You are a document analysis assistant. Extract key information from documents including dates, amounts, parties, and terms. Provide structured output in JSON format.',
+      system_prompt:
+        "You are a document analysis assistant. Extract key information from documents including dates, amounts, parties, and terms. Provide structured output in JSON format.",
     },
     widget_config: {},
     is_active: true,
@@ -24,16 +25,17 @@ export const DEMO_ASSISTANTS = [
     unresolved_count: 3,
   },
   {
-    id: 'asst-002',
-    user_id: 'demo-user',
-    name: 'Data Extractor',
-    description: 'Specialized in extracting structured data from invoices and receipts',
+    id: "asst-002",
+    user_id: "demo-user",
+    name: "Data Extractor",
+    description: "Specialized in extracting structured data from invoices and receipts",
     model_configuration: {
-      provider: 'openai',
-      model: 'gpt-4-turbo',
+      provider: "openai",
+      model: "gpt-4-turbo",
       temperature: 0.5,
       max_tokens: 2048,
-      system_prompt: 'You are a data extraction specialist. Focus on extracting invoice numbers, dates, line items, totals, and vendor information. Validate extracted amounts and dates.',
+      system_prompt:
+        "You are a data extraction specialist. Focus on extracting invoice numbers, dates, line items, totals, and vendor information. Validate extracted amounts and dates.",
     },
     widget_config: {},
     is_active: true,
@@ -46,58 +48,58 @@ export const DEMO_ASSISTANTS = [
 ];
 
 export const DEMO_ASSISTANT_CONVERSATIONS = {
-  'asst-001': [
+  "asst-001": [
     {
-      conversation_id: 'asst-conv-001',
-      assistant_id: 'asst-001',
-      title: 'Contract Analysis Session',
+      conversation_id: "asst-conv-001",
+      assistant_id: "asst-001",
+      title: "Contract Analysis Session",
       created_at: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(), // 12 hours ago
       message_count: 6,
-      status: 'resolved',
+      status: "resolved",
     },
     {
-      conversation_id: 'asst-conv-002',
-      assistant_id: 'asst-001',
-      title: 'Document Review',
+      conversation_id: "asst-conv-002",
+      assistant_id: "asst-001",
+      title: "Document Review",
       created_at: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
       message_count: 4,
-      status: 'resolved',
+      status: "resolved",
     },
   ],
-  'asst-002': [
+  "asst-002": [
     {
-      conversation_id: 'asst-conv-003',
-      assistant_id: 'asst-002',
-      title: 'Invoice Batch Processing',
+      conversation_id: "asst-conv-003",
+      assistant_id: "asst-002",
+      title: "Invoice Batch Processing",
       created_at: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString(), // 6 hours ago
       message_count: 8,
-      status: 'in_progress',
+      status: "in_progress",
     },
     {
-      conversation_id: 'asst-conv-004',
-      assistant_id: 'asst-002',
-      title: 'Receipt Data Extraction',
+      conversation_id: "asst-conv-004",
+      assistant_id: "asst-002",
+      title: "Receipt Data Extraction",
       created_at: new Date(Date.now() - 1000 * 60 * 60 * 18).toISOString(), // 18 hours ago
       message_count: 5,
-      status: 'resolved',
+      status: "resolved",
     },
   ],
 };
 
 export const DEMO_ASSISTANT_MESSAGES = {
-  'asst-conv-001': [
+  "asst-conv-001": [
     {
-      message_id: 'asst-msg-001-01',
-      conversation_id: 'asst-conv-001',
-      role: 'user',
-      content: 'Analyze Contract_ABC_Corp.pdf and extract key terms',
+      message_id: "asst-msg-001-01",
+      conversation_id: "asst-conv-001",
+      role: "user",
+      content: "Analyze Contract_ABC_Corp.pdf and extract key terms",
       created_at: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(),
-      attachments: [{ filename: 'Contract_ABC_Corp.pdf', document_id: 'doc-003' }],
+      attachments: [{ filename: "Contract_ABC_Corp.pdf", document_id: "doc-003" }],
     },
     {
-      message_id: 'asst-msg-001-02',
-      conversation_id: 'asst-conv-001',
-      role: 'assistant',
+      message_id: "asst-msg-001-02",
+      conversation_id: "asst-conv-001",
+      role: "assistant",
       content: `I've analyzed the contract. Here are the key terms:
 
 **Parties:**
@@ -123,25 +125,25 @@ Would you like me to provide more details on any specific clause?`,
       created_at: new Date(Date.now() - 1000 * 60 * 60 * 11.95).toISOString(),
     },
   ],
-  'asst-conv-003': [
+  "asst-conv-003": [
     {
-      message_id: 'asst-msg-003-01',
-      conversation_id: 'asst-conv-003',
-      role: 'user',
-      content: 'Extract data from these 5 invoices',
+      message_id: "asst-msg-003-01",
+      conversation_id: "asst-conv-003",
+      role: "user",
+      content: "Extract data from these 5 invoices",
       created_at: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString(),
       attachments: [
-        { filename: 'Invoice_001.pdf', document_id: 'doc-011' },
-        { filename: 'Invoice_002.pdf', document_id: 'doc-012' },
-        { filename: 'Invoice_003.pdf', document_id: 'doc-013' },
-        { filename: 'Invoice_004.pdf', document_id: 'doc-014' },
-        { filename: 'Invoice_005.pdf', document_id: 'doc-015' },
+        { filename: "Invoice_001.pdf", document_id: "doc-011" },
+        { filename: "Invoice_002.pdf", document_id: "doc-012" },
+        { filename: "Invoice_003.pdf", document_id: "doc-013" },
+        { filename: "Invoice_004.pdf", document_id: "doc-014" },
+        { filename: "Invoice_005.pdf", document_id: "doc-015" },
       ],
     },
     {
-      message_id: 'asst-msg-003-02',
-      conversation_id: 'asst-conv-003',
-      role: 'assistant',
+      message_id: "asst-msg-003-02",
+      conversation_id: "asst-conv-003",
+      role: "assistant",
       content: `I've processed all 5 invoices. Here's the summary:
 
 **Invoice_001.pdf**

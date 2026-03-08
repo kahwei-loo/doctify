@@ -4,11 +4,11 @@
  * Redux slice for global UI state management (modals, toasts, theme, etc.).
  */
 
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface Toast {
   id: string;
-  type: 'success' | 'error' | 'warning' | 'info';
+  type: "success" | "error" | "warning" | "info";
   message: string;
   duration?: number;
 }
@@ -20,7 +20,7 @@ interface Modal {
 }
 
 interface UIState {
-  theme: 'light' | 'dark';
+  theme: "light" | "dark";
   sidebarOpen: boolean;
   modals: Record<string, Modal>;
   toasts: Toast[];
@@ -28,7 +28,7 @@ interface UIState {
 }
 
 const initialState: UIState = {
-  theme: (localStorage.getItem('theme') as 'light' | 'dark') || 'light',
+  theme: (localStorage.getItem("theme") as "light" | "dark") || "light",
   sidebarOpen: true,
   modals: {},
   toasts: [],
@@ -36,18 +36,18 @@ const initialState: UIState = {
 };
 
 const uiSlice = createSlice({
-  name: 'ui',
+  name: "ui",
   initialState,
   reducers: {
     // Theme
-    setTheme: (state, action: PayloadAction<'light' | 'dark'>) => {
+    setTheme: (state, action: PayloadAction<"light" | "dark">) => {
       state.theme = action.payload;
-      localStorage.setItem('theme', action.payload);
+      localStorage.setItem("theme", action.payload);
     },
 
     toggleTheme: (state) => {
-      state.theme = state.theme === 'light' ? 'dark' : 'light';
-      localStorage.setItem('theme', state.theme);
+      state.theme = state.theme === "light" ? "dark" : "light";
+      localStorage.setItem("theme", state.theme);
     },
 
     // Sidebar
@@ -79,7 +79,7 @@ const uiSlice = createSlice({
     },
 
     // Toasts
-    addToast: (state, action: PayloadAction<Omit<Toast, 'id'>>) => {
+    addToast: (state, action: PayloadAction<Omit<Toast, "id">>) => {
       const id = `toast-${Date.now()}-${Math.random()}`;
       state.toasts.push({
         id,

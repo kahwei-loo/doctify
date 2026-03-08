@@ -10,14 +10,14 @@
  * - Support for different error types
  */
 
-import React from 'react';
-import { AlertCircle, RefreshCw, WifiOff, ServerCrash, FileWarning } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Card, CardContent } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
+import React from "react";
+import { AlertCircle, RefreshCw, WifiOff, ServerCrash, FileWarning } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
-type ErrorType = 'network' | 'server' | 'not-found' | 'unknown';
+type ErrorType = "network" | "server" | "not-found" | "unknown";
 
 interface ErrorStateProps {
   type?: ErrorType;
@@ -27,42 +27,45 @@ interface ErrorStateProps {
   onRetry?: () => void;
   isRetrying?: boolean;
   showRetry?: boolean;
-  variant?: 'card' | 'alert' | 'inline';
+  variant?: "card" | "alert" | "inline";
   className?: string;
 }
 
-const ERROR_CONFIGS: Record<ErrorType, { icon: React.ReactNode; defaultTitle: string; defaultMessage: string }> = {
+const ERROR_CONFIGS: Record<
+  ErrorType,
+  { icon: React.ReactNode; defaultTitle: string; defaultMessage: string }
+> = {
   network: {
     icon: <WifiOff className="h-8 w-8" />,
-    defaultTitle: 'Network Error',
-    defaultMessage: 'Unable to connect to the server. Please check your internet connection.',
+    defaultTitle: "Network Error",
+    defaultMessage: "Unable to connect to the server. Please check your internet connection.",
   },
   server: {
     icon: <ServerCrash className="h-8 w-8" />,
-    defaultTitle: 'Server Error',
-    defaultMessage: 'The server encountered an error. Please try again later.',
+    defaultTitle: "Server Error",
+    defaultMessage: "The server encountered an error. Please try again later.",
   },
-  'not-found': {
+  "not-found": {
     icon: <FileWarning className="h-8 w-8" />,
-    defaultTitle: 'Not Found',
-    defaultMessage: 'The requested resource could not be found.',
+    defaultTitle: "Not Found",
+    defaultMessage: "The requested resource could not be found.",
   },
   unknown: {
     icon: <AlertCircle className="h-8 w-8" />,
-    defaultTitle: 'Something Went Wrong',
-    defaultMessage: 'An unexpected error occurred. Please try again.',
+    defaultTitle: "Something Went Wrong",
+    defaultMessage: "An unexpected error occurred. Please try again.",
   },
 };
 
 export const ErrorState: React.FC<ErrorStateProps> = ({
-  type = 'unknown',
+  type = "unknown",
   title,
   message,
   details,
   onRetry,
   isRetrying = false,
   showRetry = true,
-  variant = 'card',
+  variant = "card",
   className,
 }) => {
   const config = ERROR_CONFIGS[type];
@@ -91,8 +94,8 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
               size="sm"
               className="mt-4 gap-2"
             >
-              <RefreshCw className={cn('h-4 w-4', isRetrying && 'animate-spin')} />
-              {isRetrying ? 'Retrying...' : 'Try Again'}
+              <RefreshCw className={cn("h-4 w-4", isRetrying && "animate-spin")} />
+              {isRetrying ? "Retrying..." : "Try Again"}
             </Button>
           )}
         </div>
@@ -100,7 +103,7 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
     </>
   );
 
-  if (variant === 'alert') {
+  if (variant === "alert") {
     return (
       <Alert variant="destructive" className={className}>
         <AlertCircle className="h-4 w-4" />
@@ -108,9 +111,7 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
         <AlertDescription>
           <p>{displayMessage}</p>
           {details && (
-            <div className="mt-2 p-2 bg-background/50 rounded text-xs font-mono">
-              {details}
-            </div>
+            <div className="mt-2 p-2 bg-background/50 rounded text-xs font-mono">{details}</div>
           )}
           {showRetry && onRetry && (
             <Button
@@ -120,8 +121,8 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
               size="sm"
               className="mt-3 gap-2"
             >
-              <RefreshCw className={cn('h-4 w-4', isRetrying && 'animate-spin')} />
-              {isRetrying ? 'Retrying...' : 'Try Again'}
+              <RefreshCw className={cn("h-4 w-4", isRetrying && "animate-spin")} />
+              {isRetrying ? "Retrying..." : "Try Again"}
             </Button>
           )}
         </AlertDescription>
@@ -129,12 +130,12 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
     );
   }
 
-  if (variant === 'inline') {
-    return <div className={cn('py-8', className)}>{content}</div>;
+  if (variant === "inline") {
+    return <div className={cn("py-8", className)}>{content}</div>;
   }
 
   return (
-    <Card className={cn('border-destructive/50', className)}>
+    <Card className={cn("border-destructive/50", className)}>
       <CardContent className="py-8">{content}</CardContent>
     </Card>
   );

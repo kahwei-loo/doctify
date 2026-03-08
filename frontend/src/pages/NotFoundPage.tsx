@@ -1,7 +1,7 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Home, ArrowLeft, Search, FileQuestion } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { Home, ArrowLeft, FileQuestion } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const NotFoundPage: React.FC = () => {
   const navigate = useNavigate();
@@ -23,12 +23,10 @@ const NotFoundPage: React.FC = () => {
 
         {/* Text */}
         <h1 className="text-6xl font-bold text-foreground mb-4">404</h1>
-        <h2 className="text-2xl font-semibold text-foreground mb-2">
-          Page Not Found
-        </h2>
+        <h2 className="text-2xl font-semibold text-foreground mb-2">Page Not Found</h2>
         <p className="text-muted-foreground mb-8">
-          Oops! The page you're looking for doesn't exist or has been moved.
-          Let's get you back on track.
+          Oops! The page you're looking for doesn't exist or has been moved. Let's get you back on
+          track.
         </p>
 
         {/* Actions */}
@@ -37,7 +35,7 @@ const NotFoundPage: React.FC = () => {
             <ArrowLeft className="mr-2 h-4 w-4" />
             Go Back
           </Button>
-          <Button onClick={() => navigate('/dashboard')}>
+          <Button onClick={() => navigate("/dashboard")}>
             <Home className="mr-2 h-4 w-4" />
             Dashboard
           </Button>
@@ -49,25 +47,13 @@ const NotFoundPage: React.FC = () => {
             You might be looking for:
           </h3>
           <div className="flex flex-wrap gap-2 justify-center">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/documents')}
-            >
+            <Button variant="ghost" size="sm" onClick={() => navigate("/documents")}>
               Documents
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/projects')}
-            >
+            <Button variant="ghost" size="sm" onClick={() => navigate("/projects")}>
               Projects
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/settings')}
-            >
+            <Button variant="ghost" size="sm" onClick={() => navigate("/settings")}>
               Settings
             </Button>
           </div>

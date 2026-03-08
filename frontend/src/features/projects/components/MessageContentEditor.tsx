@@ -12,26 +12,20 @@
  * - Preview mode
  */
 
-import React, { useState, useCallback } from 'react';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
+import React, { useState, useCallback } from "react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import {
-  MessageSquare,
-  Wand2,
-  AlertTriangle,
-  Info,
-  Sparkles,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { MessageSquare, Wand2, AlertTriangle, Info, Sparkles } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface MessageContentEditorProps {
   value: string | null;
@@ -43,8 +37,8 @@ interface MessageContentEditorProps {
  */
 const PROMPT_TEMPLATES = [
   {
-    id: 'invoice',
-    name: 'Invoice Extraction',
+    id: "invoice",
+    name: "Invoice Extraction",
     content: `Extract the following information from this invoice document:
 
 1. Vendor/Supplier Information:
@@ -71,8 +65,8 @@ const PROMPT_TEMPLATES = [
 Return the data in a structured JSON format.`,
   },
   {
-    id: 'receipt',
-    name: 'Receipt Extraction',
+    id: "receipt",
+    name: "Receipt Extraction",
     content: `Extract the following from this receipt:
 
 1. Store name and location
@@ -89,8 +83,8 @@ Return the data in a structured JSON format.`,
 Format as JSON with "items" as an array.`,
   },
   {
-    id: 'contract',
-    name: 'Contract Analysis',
+    id: "contract",
+    name: "Contract Analysis",
     content: `Analyze this contract document and extract:
 
 1. Contract title
@@ -104,8 +98,8 @@ Format as JSON with "items" as an array.`,
 Return as structured JSON.`,
   },
   {
-    id: 'form',
-    name: 'Form Data Extraction',
+    id: "form",
+    name: "Form Data Extraction",
     content: `Extract all filled fields from this form:
 
 1. Identify each form field and its label
@@ -117,32 +111,35 @@ Return as structured JSON.`,
 Return as a flat JSON object with field labels as keys.`,
   },
   {
-    id: 'custom',
-    name: 'Custom (Start from scratch)',
-    content: '',
+    id: "custom",
+    name: "Custom (Start from scratch)",
+    content: "",
   },
 ];
 
-export const MessageContentEditor: React.FC<MessageContentEditorProps> = ({
-  value,
-  onChange,
-}) => {
+export const MessageContentEditor: React.FC<MessageContentEditorProps> = ({ value, onChange }) => {
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
 
   // Handle template selection
-  const handleTemplateSelect = useCallback((templateId: string) => {
-    setSelectedTemplate(templateId);
-    const template = PROMPT_TEMPLATES.find((t) => t.id === templateId);
-    if (template) {
-      onChange(template.content || null);
-    }
-  }, [onChange]);
+  const handleTemplateSelect = useCallback(
+    (templateId: string) => {
+      setSelectedTemplate(templateId);
+      const template = PROMPT_TEMPLATES.find((t) => t.id === templateId);
+      if (template) {
+        onChange(template.content || null);
+      }
+    },
+    [onChange]
+  );
 
   // Handle text change
-  const handleTextChange = useCallback((text: string) => {
-    onChange(text.trim() || null);
-    setSelectedTemplate(null); // Clear template selection when manually editing
-  }, [onChange]);
+  const handleTextChange = useCallback(
+    (text: string) => {
+      onChange(text.trim() || null);
+      setSelectedTemplate(null); // Clear template selection when manually editing
+    },
+    [onChange]
+  );
 
   // Clear content
   const handleClear = useCallback(() => {
@@ -179,10 +176,7 @@ export const MessageContentEditor: React.FC<MessageContentEditorProps> = ({
       {/* Template selector */}
       <div className="flex items-center gap-3">
         <Label className="text-sm font-medium">Start from template:</Label>
-        <Select
-          value={selectedTemplate || undefined}
-          onValueChange={handleTemplateSelect}
-        >
+        <Select value={selectedTemplate || undefined} onValueChange={handleTemplateSelect}>
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Select a template..." />
           </SelectTrigger>
@@ -190,7 +184,7 @@ export const MessageContentEditor: React.FC<MessageContentEditorProps> = ({
             {PROMPT_TEMPLATES.map((template) => (
               <SelectItem key={template.id} value={template.id}>
                 <div className="flex items-center gap-2">
-                  {template.id === 'custom' ? (
+                  {template.id === "custom" ? (
                     <Sparkles className="h-3 w-3" />
                   ) : (
                     <Wand2 className="h-3 w-3" />
@@ -211,7 +205,7 @@ export const MessageContentEditor: React.FC<MessageContentEditorProps> = ({
       {/* Text editor */}
       <div className="relative">
         <Textarea
-          value={value || ''}
+          value={value || ""}
           onChange={(e) => handleTextChange(e.target.value)}
           placeholder="Enter your custom extraction instructions here...
 
@@ -248,18 +242,24 @@ Return the data as a JSON object."
       <div className="border rounded-lg p-4 space-y-3">
         <h4 className="font-medium text-sm">Extraction Priority Layers</h4>
         <div className="space-y-2 text-sm">
-          <div className={cn(
-            "flex items-center gap-3 p-2 rounded",
-            hasContent ? "bg-primary/10 border border-primary/20" : "opacity-50"
-          )}>
-            <span className="font-mono text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded">L3</span>
+          <div
+            className={cn(
+              "flex items-center gap-3 p-2 rounded",
+              hasContent ? "bg-primary/10 border border-primary/20" : "opacity-50"
+            )}
+          >
+            <span className="font-mono text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded">
+              L3
+            </span>
             <span>Custom Prompt</span>
             {hasContent && <span className="ml-auto text-xs text-primary font-medium">Active</span>}
           </div>
-          <div className={cn(
-            "flex items-center gap-3 p-2 rounded",
-            !hasContent ? "bg-muted" : "opacity-50"
-          )}>
+          <div
+            className={cn(
+              "flex items-center gap-3 p-2 rounded",
+              !hasContent ? "bg-muted" : "opacity-50"
+            )}
+          >
             <span className="font-mono text-xs bg-muted-foreground/20 px-2 py-0.5 rounded">L2</span>
             <span>Field & Table Configuration</span>
             {!hasContent && <span className="ml-auto text-xs text-muted-foreground">Active</span>}

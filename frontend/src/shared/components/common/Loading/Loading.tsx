@@ -4,33 +4,33 @@
  * Reusable loading spinner component with customizable size and message.
  */
 
-import React from 'react';
-import './Loading.css';
+import React from "react";
+import "./Loading.css";
 
 export interface LoadingProps {
-  size?: 'small' | 'medium' | 'large';
+  size?: "small" | "medium" | "large";
   message?: string;
   fullScreen?: boolean;
   overlay?: boolean;
 }
 
 export const Loading: React.FC<LoadingProps> = ({
-  size = 'medium',
+  size = "medium",
   message,
   fullScreen = false,
   overlay = false,
 }) => {
   const containerClassNames = [
-    'loading',
-    fullScreen && 'loading--fullscreen',
-    overlay && 'loading--overlay',
+    "loading",
+    fullScreen && "loading--fullscreen",
+    overlay && "loading--overlay",
   ]
     .filter(Boolean)
-    .join(' ');
+    .join(" ");
 
-  const spinnerClassNames = ['loading__spinner', `loading__spinner--${size}`]
+  const spinnerClassNames = ["loading__spinner", `loading__spinner--${size}`]
     .filter(Boolean)
-    .join(' ');
+    .join(" ");
 
   return (
     <div className={containerClassNames}>

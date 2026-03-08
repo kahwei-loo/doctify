@@ -6,7 +6,7 @@
  * Features real-time message updates via WebSocket.
  */
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   Send,
   CheckCircle2,
@@ -14,50 +14,43 @@ import {
   User,
   Bot,
   Loader2,
-  AlertCircle,
   MessageSquare,
   Wifi,
   WifiOff,
-} from 'lucide-react';
+} from "lucide-react";
 import {
   useGetConversationMessagesQuery,
   useUpdateConversationStatusMutation,
   useSendMessageMutation,
-} from '@/store/api/conversationsApi';
-import { useAssistantWebSocket, type WebSocketEventUnion } from '../hooks';
-import type { Conversation, Message, ConversationStatus } from '../types';
-import { ErrorState } from './ErrorState';
-import { ConversationChatSkeleton } from './LoadingStates';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { cn } from '@/lib/utils';
-import dayjs from 'dayjs';
-import toast from 'react-hot-toast';
+} from "@/store/api/conversationsApi";
+import { useAssistantWebSocket, type WebSocketEventUnion } from "../hooks";
+import type { Conversation, Message, ConversationStatus } from "../types";
+import { ErrorState } from "./ErrorState";
+import { ConversationChatSkeleton } from "./LoadingStates";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
+import dayjs from "dayjs";
+import toast from "react-hot-toast";
 
 interface ConversationChatProps {
   conversation: Conversation;
   className?: string;
 }
 
-export const ConversationChat: React.FC<ConversationChatProps> = ({
-  conversation,
-  className,
-}) => {
-  const [messageInput, setMessageInput] = useState('');
+export const ConversationChat: React.FC<ConversationChatProps> = ({ conversation, className }) => {
+  const [messageInput, setMessageInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Fetch messages
-  const { data: response, isLoading, isError, refetch } = useGetConversationMessagesQuery(
-    conversation.conversation_id
-  );
+  const {
+    data: response,
+    isLoading,
+    isError,
+    refetch,
+  } = useGetConversationMessagesQuery(conversation.conversation_id);
   const messages = response?.data || [];
 
   // Mutations
@@ -67,10 +60,10 @@ export const ConversationChat: React.FC<ConversationChatProps> = ({
   // WebSocket event handler - refetch messages on new message
   const handleWebSocketEvent = useCallback(
     (event: WebSocketEventUnion) => {
-      if (event.type === 'message.created') {
+      if (event.type === "message.created") {
         // Refetch messages to get the new message
         refetch();
-      } else if (event.type === 'conversation.updated') {
+      } else if (event.type === "conversation.updated") {
         // Conversation status changed, could trigger UI update
         refetch();
       }
@@ -87,7 +80,7 @@ export const ConversationChat: React.FC<ConversationChatProps> = ({
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   // Handle status change
@@ -97,11 +90,9 @@ export const ConversationChat: React.FC<ConversationChatProps> = ({
         conversationId: conversation.conversation_id,
         status: newStatus,
       }).unwrap();
-      toast.success(
-        newStatus === 'resolved' ? 'Conversation resolved' : 'Conversation reopened'
-      );
+      toast.success(newStatus === "resolved" ? "Conversation resolved" : "Conversation reopened");
     } catch (error) {
-      toast.error('Failed to update conversation status');
+      toast.error("Failed to update conversation status");
     }
   };
 
@@ -113,17 +104,17 @@ export const ConversationChat: React.FC<ConversationChatProps> = ({
       await sendMessage({
         conversation_id: conversation.conversation_id,
         content: messageInput.trim(),
-        role: 'assistant',
+        role: "assistant",
       }).unwrap();
-      setMessageInput('');
+      setMessageInput("");
     } catch (error) {
-      toast.error('Failed to send message');
+      toast.error("Failed to send message");
     }
   };
 
   // Handle keyboard submit
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
@@ -132,19 +123,19 @@ export const ConversationChat: React.FC<ConversationChatProps> = ({
   // Status badge config
   const statusConfig = {
     unresolved: {
-      color: 'text-orange-600 dark:text-orange-400',
-      bg: 'bg-orange-100 dark:bg-orange-900/20',
-      label: 'Unresolved',
+      color: "text-orange-600 dark:text-orange-400",
+      bg: "bg-orange-100 dark:bg-orange-900/20",
+      label: "Unresolved",
     },
     in_progress: {
-      color: 'text-blue-600 dark:text-blue-400',
-      bg: 'bg-blue-100 dark:bg-blue-900/20',
-      label: 'In Progress',
+      color: "text-blue-600 dark:text-blue-400",
+      bg: "bg-blue-100 dark:bg-blue-900/20",
+      label: "In Progress",
     },
     resolved: {
-      color: 'text-green-600 dark:text-green-400',
-      bg: 'bg-green-100 dark:bg-green-900/20',
-      label: 'Resolved',
+      color: "text-green-600 dark:text-green-400",
+      bg: "bg-green-100 dark:bg-green-900/20",
+      label: "Resolved",
     },
   };
 
@@ -158,7 +149,7 @@ export const ConversationChat: React.FC<ConversationChatProps> = ({
   // Error state
   if (isError) {
     return (
-      <div className={cn('flex flex-col h-full bg-background', className)}>
+      <div className={cn("flex flex-col h-full bg-background", className)}>
         <div className="p-4 border-b">
           <h3 className="font-semibold">Conversation</h3>
         </div>
@@ -176,7 +167,7 @@ export const ConversationChat: React.FC<ConversationChatProps> = ({
   }
 
   return (
-    <div className={cn('flex flex-col h-full bg-background', className)}>
+    <div className={cn("flex flex-col h-full bg-background", className)}>
       {/* Header */}
       <div className="p-4 border-b flex items-center justify-between">
         <div>
@@ -184,7 +175,7 @@ export const ConversationChat: React.FC<ConversationChatProps> = ({
             <h3 className="font-semibold">Conversation</h3>
             <Badge
               variant="outline"
-              className={cn('text-xs h-5', status.color, status.bg, 'border-0')}
+              className={cn("text-xs h-5", status.color, status.bg, "border-0")}
             >
               {status.label}
             </Badge>
@@ -201,24 +192,24 @@ export const ConversationChat: React.FC<ConversationChatProps> = ({
                   </span>
                 </TooltipTrigger>
                 <TooltipContent>
-                  {wsConnected ? 'Real-time updates active' : 'Real-time updates inactive'}
+                  {wsConnected ? "Real-time updates active" : "Real-time updates inactive"}
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
           </div>
           <p className="text-xs text-muted-foreground">
-            {dayjs(conversation.created_at).format('MMM D, YYYY h:mm A')} •{' '}
+            {dayjs(conversation.created_at).format("MMM D, YYYY h:mm A")} •{" "}
             {conversation.message_count} messages
           </p>
         </div>
 
         {/* Status Action */}
         <div>
-          {conversation.status !== 'resolved' ? (
+          {conversation.status !== "resolved" ? (
             <Button
               variant="outline"
               size="sm"
-              onClick={() => handleStatusChange('resolved')}
+              onClick={() => handleStatusChange("resolved")}
               disabled={isUpdatingStatus}
             >
               {isUpdatingStatus ? (
@@ -232,7 +223,7 @@ export const ConversationChat: React.FC<ConversationChatProps> = ({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => handleStatusChange('unresolved')}
+              onClick={() => handleStatusChange("unresolved")}
               disabled={isUpdatingStatus}
             >
               {isUpdatingStatus ? (
@@ -256,15 +247,13 @@ export const ConversationChat: React.FC<ConversationChatProps> = ({
             <p className="text-sm text-muted-foreground">No messages yet</p>
           </div>
         ) : (
-          messages.map((message) => (
-            <MessageBubble key={message.message_id} message={message} />
-          ))
+          messages.map((message) => <MessageBubble key={message.message_id} message={message} />)
         )}
         <div ref={messagesEndRef} />
       </div>
 
       {/* Resolved State Info */}
-      {conversation.status === 'resolved' && (
+      {conversation.status === "resolved" && (
         <div className="px-4 pb-2">
           <div className="flex items-center justify-center py-3 px-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-900/40">
             <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400 mr-2" />
@@ -280,19 +269,19 @@ export const ConversationChat: React.FC<ConversationChatProps> = ({
         <div className="flex gap-2">
           <Textarea
             placeholder={
-              conversation.status === 'resolved'
-                ? 'Reopen to send a message...'
-                : 'Type a message...'
+              conversation.status === "resolved"
+                ? "Reopen to send a message..."
+                : "Type a message..."
             }
             value={messageInput}
             onChange={(e) => setMessageInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            disabled={conversation.status === 'resolved' || isSending}
+            disabled={conversation.status === "resolved" || isSending}
             className="min-h-[80px] resize-none"
           />
           <Button
             onClick={handleSendMessage}
-            disabled={!messageInput.trim() || isSending || conversation.status === 'resolved'}
+            disabled={!messageInput.trim() || isSending || conversation.status === "resolved"}
             className="self-end"
           >
             {isSending ? (
@@ -316,17 +305,15 @@ interface MessageBubbleProps {
 }
 
 const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
-  const isUser = message.role === 'user';
+  const isUser = message.role === "user";
 
   return (
-    <div className={cn('flex gap-3', isUser ? '' : 'flex-row-reverse')}>
+    <div className={cn("flex gap-3", isUser ? "" : "flex-row-reverse")}>
       {/* Avatar */}
       <div
         className={cn(
-          'flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center',
-          isUser
-            ? 'bg-blue-100 dark:bg-blue-900/30'
-            : 'bg-primary/10'
+          "flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center",
+          isUser ? "bg-blue-100 dark:bg-blue-900/30" : "bg-primary/10"
         )}
       >
         {isUser ? (
@@ -339,20 +326,13 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
       {/* Bubble */}
       <div
         className={cn(
-          'max-w-[70%] rounded-lg px-4 py-2',
-          isUser
-            ? 'bg-blue-600 text-white rounded-tl-none'
-            : 'bg-muted rounded-tr-none'
+          "max-w-[70%] rounded-lg px-4 py-2",
+          isUser ? "bg-blue-600 text-white rounded-tl-none" : "bg-muted rounded-tr-none"
         )}
       >
         <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-        <p
-          className={cn(
-            'text-xs mt-1',
-            isUser ? 'text-blue-100' : 'text-muted-foreground'
-          )}
-        >
-          {dayjs(message.created_at).format('h:mm A')}
+        <p className={cn("text-xs mt-1", isUser ? "text-blue-100" : "text-muted-foreground")}>
+          {dayjs(message.created_at).format("h:mm A")}
         </p>
       </div>
     </div>

@@ -13,7 +13,7 @@
  * - Responsive design
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -21,18 +21,10 @@ import {
   flexRender,
   type ColumnDef,
   type SortingState,
-} from '@tanstack/react-table';
-import {
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown,
-  Download,
-  Copy,
-  Check,
-  Package,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
+} from "@tanstack/react-table";
+import { ArrowUpDown, ArrowUp, ArrowDown, Package } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -41,8 +33,8 @@ import {
   TableHeader,
   TableRow,
   TableFooter,
-} from '@/components/ui/table';
-import { sanitizeAIOutput } from '@/shared/utils/sanitize';
+} from "@/components/ui/table";
+import { sanitizeAIOutput } from "@/shared/utils/sanitize";
 
 /**
  * Line item data structure
@@ -72,7 +64,7 @@ interface LineItemsTableProps {
   /** Custom class name */
   className?: string;
   /** Callback for export */
-  onExport?: () => void;
+  onExport?: () => void; // kept in interface for API compatibility
 }
 
 /**
@@ -83,10 +75,10 @@ const formatCurrency = (
   currency: string,
   locale: string
 ): string => {
-  if (value === undefined || value === null) return '-';
+  if (value === undefined || value === null) return "-";
   try {
     return new Intl.NumberFormat(locale, {
-      style: 'currency',
+      style: "currency",
       currency,
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
@@ -104,7 +96,7 @@ const formatNumber = (
   locale: string,
   decimals: number = 2
 ): string => {
-  if (value === undefined || value === null) return '-';
+  if (value === undefined || value === null) return "-";
   return new Intl.NumberFormat(locale, {
     minimumFractionDigits: 0,
     maximumFractionDigits: decimals,
@@ -114,13 +106,10 @@ const formatNumber = (
 /**
  * Format percentage
  */
-const formatPercent = (
-  value: number | undefined | null,
-  locale: string
-): string => {
-  if (value === undefined || value === null) return '-';
+const formatPercent = (value: number | undefined | null, locale: string): string => {
+  if (value === undefined || value === null) return "-";
   return new Intl.NumberFormat(locale, {
-    style: 'percent',
+    style: "percent",
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   }).format(value / 100);
@@ -138,14 +127,13 @@ const EmptyState: React.FC = () => (
 
 export const LineItemsTable: React.FC<LineItemsTableProps> = ({
   items,
-  currency = 'MYR', // Default to Malaysian Ringgit for Malaysian market
-  locale = 'en-MY', // Default to Malaysian locale
+  currency = "MYR", // Default to Malaysian Ringgit for Malaysian market
+  locale = "en-MY", // Default to Malaysian locale
   showTotal = true,
   className,
-  onExport,
+  onExport: _onExport,
 }) => {
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [copied, setCopied] = useState(false);
 
   // Sanitize line items
   const sanitizedItems = useMemo(() => {
@@ -185,8 +173,8 @@ export const LineItemsTable: React.FC<LineItemsTableProps> = ({
     const cols: ColumnDef<LineItem, unknown>[] = [
       // Item number (optional)
       {
-        accessorKey: 'itemNo',
-        header: '#',
+        accessorKey: "itemNo",
+        header: "#",
         cell: ({ row }) => (
           <span className="text-muted-foreground font-mono text-sm">
             {row.original.itemNo || row.index + 1}
@@ -196,17 +184,17 @@ export const LineItemsTable: React.FC<LineItemsTableProps> = ({
       },
       // Description (always shown)
       {
-        accessorKey: 'description',
+        accessorKey: "description",
         header: ({ column }) => (
           <Button
             variant="ghost"
             className="h-8 px-2 -ml-2"
-            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Description
-            {column.getIsSorted() === 'asc' ? (
+            {column.getIsSorted() === "asc" ? (
               <ArrowUp className="ml-2 h-4 w-4" />
-            ) : column.getIsSorted() === 'desc' ? (
+            ) : column.getIsSorted() === "desc" ? (
               <ArrowDown className="ml-2 h-4 w-4" />
             ) : (
               <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -224,17 +212,17 @@ export const LineItemsTable: React.FC<LineItemsTableProps> = ({
     // Quantity column
     if (hasQuantity) {
       cols.push({
-        accessorKey: 'quantity',
+        accessorKey: "quantity",
         header: ({ column }) => (
           <Button
             variant="ghost"
             className="h-8 px-2 -ml-2"
-            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Qty
-            {column.getIsSorted() === 'asc' ? (
+            {column.getIsSorted() === "asc" ? (
               <ArrowUp className="ml-2 h-4 w-4" />
-            ) : column.getIsSorted() === 'desc' ? (
+            ) : column.getIsSorted() === "desc" ? (
               <ArrowDown className="ml-2 h-4 w-4" />
             ) : (
               <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -258,17 +246,17 @@ export const LineItemsTable: React.FC<LineItemsTableProps> = ({
     // Unit price column
     if (hasUnitPrice) {
       cols.push({
-        accessorKey: 'unitPrice',
+        accessorKey: "unitPrice",
         header: ({ column }) => (
           <Button
             variant="ghost"
             className="h-8 px-2 -ml-2"
-            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Unit Price
-            {column.getIsSorted() === 'asc' ? (
+            {column.getIsSorted() === "asc" ? (
               <ArrowUp className="ml-2 h-4 w-4" />
-            ) : column.getIsSorted() === 'desc' ? (
+            ) : column.getIsSorted() === "desc" ? (
               <ArrowDown className="ml-2 h-4 w-4" />
             ) : (
               <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -287,8 +275,8 @@ export const LineItemsTable: React.FC<LineItemsTableProps> = ({
     // Discount column
     if (hasDiscount) {
       cols.push({
-        accessorKey: 'discount',
-        header: 'Discount',
+        accessorKey: "discount",
+        header: "Discount",
         cell: ({ row }) => {
           const discount = row.original.discount;
           if (!discount) return <span className="text-muted-foreground">-</span>;
@@ -305,8 +293,8 @@ export const LineItemsTable: React.FC<LineItemsTableProps> = ({
     // Tax column
     if (hasTax) {
       cols.push({
-        accessorKey: 'taxAmount',
-        header: 'Tax',
+        accessorKey: "taxAmount",
+        header: "Tax",
         cell: ({ row }) => {
           const { taxRate, taxAmount } = row.original;
           if (taxAmount !== undefined) {
@@ -322,11 +310,7 @@ export const LineItemsTable: React.FC<LineItemsTableProps> = ({
             );
           }
           if (taxRate !== undefined) {
-            return (
-              <span className="text-muted-foreground">
-                {formatPercent(taxRate, locale)}
-              </span>
-            );
+            return <span className="text-muted-foreground">{formatPercent(taxRate, locale)}</span>;
           }
           return <span className="text-muted-foreground">-</span>;
         },
@@ -336,17 +320,17 @@ export const LineItemsTable: React.FC<LineItemsTableProps> = ({
 
     // Amount column (always shown)
     cols.push({
-      accessorKey: 'amount',
+      accessorKey: "amount",
       header: ({ column }) => (
         <Button
           variant="ghost"
           className="h-8 px-2 -ml-2"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Amount
-          {column.getIsSorted() === 'asc' ? (
+          {column.getIsSorted() === "asc" ? (
             <ArrowUp className="ml-2 h-4 w-4" />
-          ) : column.getIsSorted() === 'desc' ? (
+          ) : column.getIsSorted() === "desc" ? (
             <ArrowDown className="ml-2 h-4 w-4" />
           ) : (
             <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -372,31 +356,6 @@ export const LineItemsTable: React.FC<LineItemsTableProps> = ({
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
   });
-
-  // Copy table to clipboard
-  const copyToClipboard = async () => {
-    const headers = columns.map((col) => {
-      if (typeof col.header === 'string') return col.header;
-      if ('accessorKey' in col && col.accessorKey) return String(col.accessorKey);
-      return '';
-    });
-
-    const rows = sanitizedItems.map((item) => [
-      item.itemNo || '',
-      item.description,
-      item.quantity?.toString() || '',
-      item.unitPrice?.toString() || '',
-      item.discount?.toString() || '',
-      item.taxAmount?.toString() || '',
-      item.amount.toString(),
-    ]);
-
-    const csv = [headers.join('\t'), ...rows.map((row) => row.join('\t'))].join('\n');
-
-    await navigator.clipboard.writeText(csv);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
-  };
 
   if (sanitizedItems.length === 0) {
     return <EmptyState />;
@@ -441,10 +400,7 @@ export const LineItemsTable: React.FC<LineItemsTableProps> = ({
               {/* Subtotal row */}
               {(hasDiscount || hasTax) && (
                 <TableRow className="bg-muted/30">
-                  <TableCell
-                    colSpan={columns.length - 1}
-                    className="text-right font-medium"
-                  >
+                  <TableCell colSpan={columns.length - 1} className="text-right font-medium">
                     Subtotal
                   </TableCell>
                   <TableCell className="text-right tabular-nums font-medium">
@@ -455,10 +411,7 @@ export const LineItemsTable: React.FC<LineItemsTableProps> = ({
               {/* Discount row */}
               {hasDiscount && totals.discount > 0 && (
                 <TableRow className="bg-muted/30">
-                  <TableCell
-                    colSpan={columns.length - 1}
-                    className="text-right font-medium"
-                  >
+                  <TableCell colSpan={columns.length - 1} className="text-right font-medium">
                     Discount
                   </TableCell>
                   <TableCell className="text-right tabular-nums font-medium text-red-500">
@@ -469,10 +422,7 @@ export const LineItemsTable: React.FC<LineItemsTableProps> = ({
               {/* Tax row */}
               {hasTax && totals.tax > 0 && (
                 <TableRow className="bg-muted/30">
-                  <TableCell
-                    colSpan={columns.length - 1}
-                    className="text-right font-medium"
-                  >
+                  <TableCell colSpan={columns.length - 1} className="text-right font-medium">
                     Tax
                   </TableCell>
                   <TableCell className="text-right tabular-nums font-medium">
@@ -482,10 +432,7 @@ export const LineItemsTable: React.FC<LineItemsTableProps> = ({
               )}
               {/* Total row */}
               <TableRow className="bg-primary/5">
-                <TableCell
-                  colSpan={columns.length - 1}
-                  className="text-right font-bold text-base"
-                >
+                <TableCell colSpan={columns.length - 1} className="text-right font-bold text-base">
                   Total
                 </TableCell>
                 <TableCell className="text-right tabular-nums font-bold text-base">

@@ -9,7 +9,7 @@
  * - Rate limiting warnings and UI feedback
  */
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from "react";
 import {
   MessageCircle,
   X,
@@ -22,19 +22,16 @@ import {
   AlertTriangle,
   RefreshCw,
   WifiOff,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
-import { usePublicChatSession } from '../hooks/usePublicChatSession';
-import {
-  useSendPublicMessageMutation,
-  useGetPublicMessagesQuery,
-} from '@/store/api/publicChatApi';
-import type { Message } from '../types';
-import dayjs from 'dayjs';
-import toast from 'react-hot-toast';
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
+import { usePublicChatSession } from "../hooks/usePublicChatSession";
+import { useSendPublicMessageMutation, useGetPublicMessagesQuery } from "@/store/api/publicChatApi";
+import type { Message } from "../types";
+import dayjs from "dayjs";
+import toast from "react-hot-toast";
 
 interface PublicChatWidgetProps {
   /** ID of the assistant to chat with */
@@ -44,7 +41,7 @@ interface PublicChatWidgetProps {
   /** Initial open state */
   defaultOpen?: boolean;
   /** Position of the widget */
-  position?: 'bottom-right' | 'bottom-left';
+  position?: "bottom-right" | "bottom-left";
   /** Primary color for the widget */
   primaryColor?: string;
   /** Custom welcome message */
@@ -55,50 +52,43 @@ interface PublicChatWidgetProps {
 
 export const PublicChatWidget: React.FC<PublicChatWidgetProps> = ({
   assistantId,
-  assistantName = 'AI Assistant',
+  assistantName = "AI Assistant",
   defaultOpen = false,
-  position = 'bottom-right',
-  primaryColor = '#3b82f6', // blue-500
+  position = "bottom-right",
+  primaryColor = "#3b82f6", // blue-500
   welcomeMessage = "Hi! I'm here to help. What would you like to know?",
   className,
 }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const [isMinimized, setIsMinimized] = useState(false);
-  const [messageInput, setMessageInput] = useState('');
+  const [messageInput, setMessageInput] = useState("");
   const [localMessages, setLocalMessages] = useState<Message[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Session management with rate limiting
-  const {
-    sessionId,
-    isRateLimited,
-    rateLimitRemaining,
-    incrementMessageCount,
-    resetSession,
-  } = usePublicChatSession({
-    assistantId,
-    onRateLimitWarning: (remaining) => {
-      toast.custom(
-        (t) => (
-          <div
-            className={cn(
-              'flex items-center gap-2 bg-orange-100 border border-orange-300 text-orange-800 px-4 py-3 rounded-lg shadow-lg',
-              t.visible ? 'animate-enter' : 'animate-leave'
-            )}
-          >
-            <AlertTriangle className="h-5 w-5" />
-            <span>
-              Rate limit approaching: {remaining} messages remaining this minute
-            </span>
-          </div>
-        ),
-        { duration: 4000 }
-      );
-    },
-    onRateLimitExceeded: () => {
-      toast.error('Rate limit exceeded. Please wait a minute before sending more messages.');
-    },
-  });
+  const { sessionId, isRateLimited, rateLimitRemaining, incrementMessageCount, resetSession } =
+    usePublicChatSession({
+      assistantId,
+      onRateLimitWarning: (remaining) => {
+        toast.custom(
+          (t) => (
+            <div
+              className={cn(
+                "flex items-center gap-2 bg-orange-100 border border-orange-300 text-orange-800 px-4 py-3 rounded-lg shadow-lg",
+                t.visible ? "animate-enter" : "animate-leave"
+              )}
+            >
+              <AlertTriangle className="h-5 w-5" />
+              <span>Rate limit approaching: {remaining} messages remaining this minute</span>
+            </div>
+          ),
+          { duration: 4000 }
+        );
+      },
+      onRateLimitExceeded: () => {
+        toast.error("Rate limit exceeded. Please wait a minute before sending more messages.");
+      },
+    });
 
   // API hooks
   const {
@@ -122,7 +112,7 @@ export const PublicChatWidget: React.FC<PublicChatWidgetProps> = ({
   // Auto-scroll to bottom
   useEffect(() => {
     if (!isMinimized) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [localMessages, isMinimized]);
 
@@ -135,13 +125,13 @@ export const PublicChatWidget: React.FC<PublicChatWidgetProps> = ({
     if (!canSend) return;
 
     const content = messageInput.trim();
-    setMessageInput('');
+    setMessageInput("");
 
     // Optimistic update: Add user message immediately
     const optimisticUserMessage: Message = {
       message_id: `temp-${Date.now()}`,
-      conversation_id: 'pending',
-      role: 'user',
+      conversation_id: "pending",
+      role: "user",
       content,
       created_at: new Date().toISOString(),
     };
@@ -152,7 +142,7 @@ export const PublicChatWidget: React.FC<PublicChatWidgetProps> = ({
         assistant_id: assistantId,
         session_id: sessionId,
         content,
-        context: { source: 'widget', page_url: window.location.href },
+        context: { source: "widget", page_url: window.location.href },
       }).unwrap();
 
       // Keep optimistic user message (has correct content) and add assistant response
@@ -162,13 +152,13 @@ export const PublicChatWidget: React.FC<PublicChatWidgetProps> = ({
       setLocalMessages((prev) =>
         prev.filter((m) => m.message_id !== optimisticUserMessage.message_id)
       );
-      toast.error('Failed to send message. Please try again.');
+      toast.error("Failed to send message. Please try again.");
     }
   };
 
   // Handle keyboard submit
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
@@ -176,21 +166,21 @@ export const PublicChatWidget: React.FC<PublicChatWidgetProps> = ({
 
   // Position classes
   const positionClasses = {
-    'bottom-right': 'bottom-4 right-4',
-    'bottom-left': 'bottom-4 left-4',
+    "bottom-right": "bottom-4 right-4",
+    "bottom-left": "bottom-4 left-4",
   };
 
   return (
     <div
-      className={cn('fixed z-50', positionClasses[position], className)}
-      style={{ '--widget-primary': primaryColor } as React.CSSProperties}
+      className={cn("fixed z-50", positionClasses[position], className)}
+      style={{ "--widget-primary": primaryColor } as React.CSSProperties}
     >
       {/* Chat Window */}
       {isOpen && (
         <div
           className={cn(
-            'mb-4 bg-background rounded-lg shadow-2xl border overflow-hidden transition-all duration-300',
-            isMinimized ? 'h-14' : 'w-80 sm:w-96 h-[500px]'
+            "mb-4 bg-background rounded-lg shadow-2xl border overflow-hidden transition-all duration-300",
+            isMinimized ? "h-14" : "w-80 sm:w-96 h-[500px]"
           )}
         >
           {/* Header */}
@@ -205,9 +195,7 @@ export const PublicChatWidget: React.FC<PublicChatWidgetProps> = ({
               <div>
                 <h3 className="font-semibold text-sm">{assistantName}</h3>
                 {!isMinimized && (
-                  <p className="text-xs opacity-80">
-                    {isRateLimited ? 'Rate limited' : 'Online'}
-                  </p>
+                  <p className="text-xs opacity-80">{isRateLimited ? "Rate limited" : "Online"}</p>
                 )}
               </div>
             </div>
@@ -261,9 +249,7 @@ export const PublicChatWidget: React.FC<PublicChatWidgetProps> = ({
                       <WifiOff className="h-5 w-5 text-destructive" />
                     </div>
                     <p className="text-sm text-destructive mb-1">Connection Error</p>
-                    <p className="text-xs text-muted-foreground mb-3">
-                      Unable to load messages
-                    </p>
+                    <p className="text-xs text-muted-foreground mb-3">Unable to load messages</p>
                     <Button variant="outline" size="sm" onClick={() => refetchMessages()}>
                       <RefreshCw className="h-3 w-3 mr-1" />
                       Retry
@@ -309,11 +295,11 @@ export const PublicChatWidget: React.FC<PublicChatWidgetProps> = ({
                         <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
                         <div
                           className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                          style={{ animationDelay: '0.1s' }}
+                          style={{ animationDelay: "0.1s" }}
                         />
                         <div
                           className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                          style={{ animationDelay: '0.2s' }}
+                          style={{ animationDelay: "0.2s" }}
                         />
                       </div>
                     </div>
@@ -350,8 +336,8 @@ export const PublicChatWidget: React.FC<PublicChatWidgetProps> = ({
                   <Textarea
                     placeholder={
                       isRateLimited
-                        ? 'Please wait before sending more messages...'
-                        : 'Type your message...'
+                        ? "Please wait before sending more messages..."
+                        : "Type your message..."
                     }
                     value={messageInput}
                     onChange={(e) => setMessageInput(e.target.value)}
@@ -392,16 +378,12 @@ export const PublicChatWidget: React.FC<PublicChatWidgetProps> = ({
           setIsMinimized(false);
         }}
         className={cn(
-          'h-14 w-14 rounded-full shadow-lg transition-transform hover:scale-110',
-          isOpen && 'rotate-90'
+          "h-14 w-14 rounded-full shadow-lg transition-transform hover:scale-110",
+          isOpen && "rotate-90"
         )}
         style={{ backgroundColor: primaryColor }}
       >
-        {isOpen ? (
-          <X className="h-6 w-6" />
-        ) : (
-          <MessageCircle className="h-6 w-6" />
-        )}
+        {isOpen ? <X className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
       </Button>
     </div>
   );
@@ -414,15 +396,15 @@ interface MessageBubbleProps {
 }
 
 const MessageBubble: React.FC<MessageBubbleProps> = ({ message, primaryColor }) => {
-  const isUser = message.role === 'user';
+  const isUser = message.role === "user";
 
   return (
-    <div className={cn('flex gap-3', isUser ? 'flex-row-reverse' : '')}>
+    <div className={cn("flex gap-3", isUser ? "flex-row-reverse" : "")}>
       {/* Avatar */}
       <div
         className={cn(
-          'flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center',
-          isUser ? 'bg-gray-200 dark:bg-gray-700' : ''
+          "flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center",
+          isUser ? "bg-gray-200 dark:bg-gray-700" : ""
         )}
         style={!isUser ? { backgroundColor: `${primaryColor}20` } : undefined}
       >
@@ -436,19 +418,14 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, primaryColor }) 
       {/* Bubble */}
       <div
         className={cn(
-          'max-w-[80%] rounded-lg px-4 py-2',
-          isUser ? 'text-white rounded-tr-none' : 'bg-muted rounded-tl-none'
+          "max-w-[80%] rounded-lg px-4 py-2",
+          isUser ? "text-white rounded-tr-none" : "bg-muted rounded-tl-none"
         )}
         style={isUser ? { backgroundColor: primaryColor } : undefined}
       >
         <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-        <p
-          className={cn(
-            'text-xs mt-1',
-            isUser ? 'text-white/70' : 'text-muted-foreground'
-          )}
-        >
-          {dayjs(message.created_at).format('h:mm A')}
+        <p className={cn("text-xs mt-1", isUser ? "text-white/70" : "text-muted-foreground")}>
+          {dayjs(message.created_at).format("h:mm A")}
         </p>
       </div>
     </div>

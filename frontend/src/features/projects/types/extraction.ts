@@ -8,12 +8,12 @@
 /**
  * Supported field types for extraction
  */
-export type FieldType = 'text' | 'number' | 'date' | 'boolean' | 'array' | 'object';
+export type FieldType = "text" | "number" | "date" | "boolean" | "array" | "object";
 
 /**
  * Legacy field type (for backward compatibility)
  */
-export type LegacyFieldType = 'string' | 'float';
+export type LegacyFieldType = "string" | "float";
 
 /**
  * Individual field definition for extraction configuration
@@ -35,7 +35,7 @@ export interface FieldDefinition {
 export interface ColumnDefinition {
   name: string;
   description?: string;
-  type: Exclude<FieldType, 'array' | 'object'>;
+  type: Exclude<FieldType, "array" | "object">;
   required: boolean;
   default_value?: string;
   fixed_value?: string;
@@ -67,27 +67,27 @@ export interface ExtractionField {
  * Supported AI models for document processing
  */
 export type AIModel =
-  | 'openai/gpt-4o-mini'
-  | 'openai/gpt-4o'
-  | 'anthropic/claude-3-5-sonnet'
-  | 'anthropic/claude-3-opus'
-  | 'google/gemini-pro'
+  | "openai/gpt-4o-mini"
+  | "openai/gpt-4o"
+  | "anthropic/claude-3-5-sonnet"
+  | "anthropic/claude-3-opus"
+  | "google/gemini-pro"
   // Legacy values for backward compatibility
-  | 'gpt-4'
-  | 'gpt-4-turbo'
-  | 'gpt-3.5-turbo'
-  | 'claude-3-opus'
-  | 'claude-3-sonnet';
+  | "gpt-4"
+  | "gpt-4-turbo"
+  | "gpt-3.5-turbo"
+  | "claude-3-opus"
+  | "claude-3-sonnet";
 
 /**
  * Supported languages for OCR
  */
-export type OCRLanguage = 'en' | 'es' | 'fr' | 'de' | 'zh' | 'ja' | 'ko' | 'ar' | 'my' | 'auto';
+export type OCRLanguage = "en" | "es" | "fr" | "de" | "zh" | "ja" | "ko" | "ar" | "my" | "auto";
 
 /**
  * Output format options
  */
-export type OutputFormat = 'json' | 'csv' | 'xml' | 'xlsx';
+export type OutputFormat = "json" | "csv" | "xml" | "xlsx";
 
 /**
  * Processing settings for a project
@@ -144,9 +144,9 @@ export interface ExtractionConfig {
  */
 export const DEFAULT_PROJECT_CONFIG: ProjectConfig = {
   ocr_enabled: true,
-  ai_model: 'openai/gpt-4o-mini',
-  language: 'en',
-  output_format: 'json',
+  ai_model: "openai/gpt-4o-mini",
+  language: "en",
+  output_format: "json",
   fields: [],
   tables: [],
   message_content: null,
@@ -160,9 +160,9 @@ export const DEFAULT_PROJECT_CONFIG: ProjectConfig = {
 export const DEFAULT_EXTRACTION_CONFIG: ExtractionConfig = {
   extraction_fields: [],
   ocr_enabled: true,
-  ai_model: 'openai/gpt-4o-mini',
-  language: 'en',
-  output_format: 'json',
+  ai_model: "openai/gpt-4o-mini",
+  language: "en",
+  output_format: "json",
   validation_rules: {},
 };
 
@@ -170,20 +170,20 @@ export const DEFAULT_EXTRACTION_CONFIG: ExtractionConfig = {
  * Field type display labels
  */
 export const FIELD_TYPE_LABELS: Record<FieldType, string> = {
-  text: 'Text',
-  number: 'Number',
-  date: 'Date',
-  boolean: 'Yes/No',
-  array: 'List',
-  object: 'Object',
+  text: "Text",
+  number: "Number",
+  date: "Date",
+  boolean: "Yes/No",
+  array: "List",
+  object: "Object",
 };
 
 /**
  * Legacy field type labels (for backward compatibility)
  */
 export const LEGACY_FIELD_TYPE_LABELS: Record<LegacyFieldType, string> = {
-  string: 'Text',
-  float: 'Decimal',
+  string: "Text",
+  float: "Decimal",
 };
 
 /**
@@ -191,41 +191,41 @@ export const LEGACY_FIELD_TYPE_LABELS: Record<LegacyFieldType, string> = {
  */
 export const AI_MODEL_LABELS: Record<string, string> = {
   // New model format
-  'openai/gpt-4o-mini': 'GPT-4o Mini (Recommended)',
-  'openai/gpt-4o': 'GPT-4o (Premium)',
-  'anthropic/claude-3-5-sonnet': 'Claude 3.5 Sonnet (Balanced)',
-  'anthropic/claude-3-opus': 'Claude 3 Opus (Premium)',
-  'google/gemini-pro': 'Gemini Pro',
+  "openai/gpt-4o-mini": "GPT-4o Mini (Recommended)",
+  "openai/gpt-4o": "GPT-4o (Premium)",
+  "anthropic/claude-3-5-sonnet": "Claude 3.5 Sonnet (Balanced)",
+  "anthropic/claude-3-opus": "Claude 3 Opus (Premium)",
+  "google/gemini-pro": "Gemini Pro",
   // Legacy format (for backward compatibility)
-  'gpt-4': 'GPT-4 (Legacy)',
-  'gpt-4-turbo': 'GPT-4 Turbo (Legacy)',
-  'gpt-3.5-turbo': 'GPT-3.5 Turbo (Legacy)',
-  'claude-3-opus': 'Claude 3 Opus (Legacy)',
-  'claude-3-sonnet': 'Claude 3 Sonnet (Legacy)',
+  "gpt-4": "GPT-4 (Legacy)",
+  "gpt-4-turbo": "GPT-4 Turbo (Legacy)",
+  "gpt-3.5-turbo": "GPT-3.5 Turbo (Legacy)",
+  "claude-3-opus": "Claude 3 Opus (Legacy)",
+  "claude-3-sonnet": "Claude 3 Sonnet (Legacy)",
 };
 
 /**
  * Language display labels
  */
 export const LANGUAGE_LABELS: Record<OCRLanguage, string> = {
-  en: 'English',
-  es: 'Spanish',
-  fr: 'French',
-  de: 'German',
-  zh: 'Chinese',
-  ja: 'Japanese',
-  ko: 'Korean',
-  ar: 'Arabic',
-  my: 'Malay',
-  auto: 'Auto-detect',
+  en: "English",
+  es: "Spanish",
+  fr: "French",
+  de: "German",
+  zh: "Chinese",
+  ja: "Japanese",
+  ko: "Korean",
+  ar: "Arabic",
+  my: "Malay",
+  auto: "Auto-detect",
 };
 
 /**
  * Helper function to convert legacy field type to new type
  */
 export function normalizeFieldType(type: FieldType | LegacyFieldType): FieldType {
-  if (type === 'string') return 'text';
-  if (type === 'float') return 'number';
+  if (type === "string") return "text";
+  if (type === "float") return "number";
   return type as FieldType;
 }
 

@@ -10,13 +10,16 @@
  * - Selected files list with remove capability
  */
 
-import React, { useState } from 'react';
-import { FileStack, AlertCircle, FileText, Image, X } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { DocumentUploadZone, getFileRejectionMessage } from '@/features/documents/components/DocumentUploadZone';
-import type { FileRejection } from 'react-dropzone';
-import { cn } from '@/lib/utils';
+import React, { useState } from "react";
+import { FileStack, AlertCircle, FileText, Image, X } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import {
+  DocumentUploadZone,
+  getFileRejectionMessage,
+} from "@/features/documents/components/DocumentUploadZone";
+import type { FileRejection } from "react-dropzone";
+import { cn } from "@/lib/utils";
 
 interface UploadedDocsSourceProps {
   selectedFiles?: File[];
@@ -31,7 +34,7 @@ function formatFileSize(bytes: number): string {
 }
 
 function getFileIcon(file: File) {
-  if (file.type.startsWith('image/')) {
+  if (file.type.startsWith("image/")) {
     return <Image className="h-4 w-4 text-green-600" />;
   }
   return <FileText className="h-4 w-4 text-blue-600" />;
@@ -52,9 +55,7 @@ export const UploadedDocsSource: React.FC<UploadedDocsSourceProps> = ({
   };
 
   const handleFilesRejected = (rejections: FileRejection[]) => {
-    const errors = rejections.map((rejection) =>
-      getFileRejectionMessage(rejection)
-    );
+    const errors = rejections.map((rejection) => getFileRejectionMessage(rejection));
     setUploadErrors(errors);
   };
 
@@ -64,7 +65,7 @@ export const UploadedDocsSource: React.FC<UploadedDocsSourceProps> = ({
   };
 
   return (
-    <div className={cn('space-y-4', className)}>
+    <div className={cn("space-y-4", className)}>
       {/* Upload Zone */}
       <DocumentUploadZone
         onFilesAccepted={handleFilesAccepted}
@@ -75,7 +76,7 @@ export const UploadedDocsSource: React.FC<UploadedDocsSourceProps> = ({
       {selectedFiles.length > 0 && (
         <div className="space-y-1.5">
           <p className="text-xs font-medium text-muted-foreground">
-            {selectedFiles.length} file{selectedFiles.length !== 1 ? 's' : ''} selected
+            {selectedFiles.length} file{selectedFiles.length !== 1 ? "s" : ""} selected
           </p>
           {selectedFiles.map((file, index) => (
             <div

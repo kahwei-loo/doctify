@@ -4,8 +4,8 @@
  * Memoized selectors for documents state with reselect.
  */
 
-import { createSelector } from '@reduxjs/toolkit';
-import type { RootState } from '../index';
+import { createSelector } from "@reduxjs/toolkit";
+import type { RootState } from "../index";
 
 // Base selectors
 export const selectDocumentsState = (state: RootState) => state.documents;
@@ -58,19 +58,19 @@ export const selectDocumentsByStatus = (status: string) =>
   );
 
 export const selectPendingDocuments = createSelector([selectDocuments], (documents) =>
-  documents.filter((doc) => doc.status === 'pending')
+  documents.filter((doc) => doc.status === "pending")
 );
 
 export const selectProcessingDocuments = createSelector([selectDocuments], (documents) =>
-  documents.filter((doc) => doc.status === 'processing')
+  documents.filter((doc) => doc.status === "processing")
 );
 
 export const selectCompletedDocuments = createSelector([selectDocuments], (documents) =>
-  documents.filter((doc) => doc.status === 'completed')
+  documents.filter((doc) => doc.status === "completed")
 );
 
 export const selectFailedDocuments = createSelector([selectDocuments], (documents) =>
-  documents.filter((doc) => doc.status === 'failed')
+  documents.filter((doc) => doc.status === "failed")
 );
 
 export const selectSelectedDocumentIds = createSelector(
@@ -85,13 +85,13 @@ export const selectSelectedDocumentsCount = createSelector(
 
 export const selectAreAllDocumentsSelected = createSelector(
   [selectDocuments, selectSelectedDocuments],
-  (documents, selectedDocs) => documents.length > 0 && documents.every((doc) => selectedDocs.includes(doc.document_id))
+  (documents, selectedDocs) =>
+    documents.length > 0 && documents.every((doc) => selectedDocs.includes(doc.document_id))
 );
 
 export const selectAreSomeDocumentsSelected = createSelector(
   [selectDocuments, selectSelectedDocuments],
-  (documents, selectedDocs) =>
-    selectedDocs.length > 0 && selectedDocs.length < documents.length
+  (documents, selectedDocs) => selectedDocs.length > 0 && selectedDocs.length < documents.length
 );
 
 export const selectTotalDocuments = createSelector(

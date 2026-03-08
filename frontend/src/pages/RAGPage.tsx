@@ -6,7 +6,7 @@
  * Enhanced: P1.3 Conversational RAG with sidebar
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback } from "react";
 import {
   MessageSquare,
   History,
@@ -15,18 +15,18 @@ import {
   Plus,
   Trash2,
   MessagesSquare,
-} from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { RAGQueryPanel } from '@/features/rag/components/RAGQueryPanel';
-import { RAGResponseCard } from '@/features/rag/components/RAGResponseCard';
+} from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { RAGQueryPanel } from "@/features/rag/components/RAGQueryPanel";
+import { RAGResponseCard } from "@/features/rag/components/RAGResponseCard";
 import {
   NoQuestionsState,
   NoHistoryState,
   NoStatsState,
-} from '@/features/rag/components/EmptyStates';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
+} from "@/features/rag/components/EmptyStates";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   useGetRAGHistoryQuery,
   useGetRAGStatsQuery,
@@ -36,26 +36,24 @@ import {
   useGetConversationQuery,
   useGetEvaluationsQuery,
   useTriggerEvaluationMutation,
-} from '@/store/api/ragApi';
-import type {
-  RAGQueryResponse,
-  RAGSource,
-  StreamDoneData,
-} from '@/store/api/ragApi';
-import { formatConfidence, formatQueryDate } from '@/store/api/ragApi';
-import { Badge } from '@/components/ui/badge';
+} from "@/store/api/ragApi";
+import type { RAGQueryResponse, RAGSource, StreamDoneData } from "@/store/api/ragApi";
+import { formatConfidence, formatQueryDate } from "@/store/api/ragApi";
+import { Badge } from "@/components/ui/badge";
 
 export default function RAGPage() {
   const [responses, setResponses] = useState<RAGQueryResponse[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
-  const [streamingAnswer, setStreamingAnswer] = useState('');
+  const [streamingAnswer, setStreamingAnswer] = useState("");
   const [streamingSources, setStreamingSources] = useState<RAGSource[]>([]);
 
   const { data: history, isLoading: historyLoading } = useGetRAGHistoryQuery({ limit: 50 });
   const { data: stats, isLoading: statsLoading } = useGetRAGStatsQuery();
   const { data: evaluations, isLoading: evaluationsLoading } = useGetEvaluationsQuery({ limit: 5 });
   const [triggerEvaluation, { isLoading: evaluationRunning }] = useTriggerEvaluationMutation();
-  const { data: conversations, isLoading: conversationsLoading } = useGetConversationsQuery({ limit: 50 });
+  const { data: conversations, isLoading: conversationsLoading } = useGetConversationsQuery({
+    limit: 50,
+  });
   const { data: activeConversation } = useGetConversationQuery(activeConversationId!, {
     skip: !activeConversationId,
   });
@@ -64,7 +62,7 @@ export default function RAGPage() {
 
   const handleQueryComplete = (response: RAGQueryResponse) => {
     setResponses((prev) => [response, ...prev]);
-    setStreamingAnswer('');
+    setStreamingAnswer("");
     setStreamingSources([]);
   };
 
@@ -76,39 +74,42 @@ export default function RAGPage() {
     setStreamingSources(sources);
   }, []);
 
-  const handleStreamingDone = useCallback((data: StreamDoneData) => {
-    // Build a synthetic response from streaming data
-    const response: RAGQueryResponse = {
-      id: crypto.randomUUID(),
-      question: '',
-      answer: data.answer,
-      sources: streamingSources,
-      model_used: data.model_used,
-      tokens_used: data.tokens_used,
-      confidence_score: data.confidence_score,
-      context_used: data.context_used,
-      created_at: new Date().toISOString(),
-    };
-    setResponses((prev) => [response, ...prev]);
-    setStreamingAnswer('');
-    setStreamingSources([]);
-  }, [streamingSources]);
+  const handleStreamingDone = useCallback(
+    (data: StreamDoneData) => {
+      // Build a synthetic response from streaming data
+      const response: RAGQueryResponse = {
+        id: crypto.randomUUID(),
+        question: "",
+        answer: data.answer,
+        sources: streamingSources,
+        model_used: data.model_used,
+        tokens_used: data.tokens_used,
+        confidence_score: data.confidence_score,
+        context_used: data.context_used,
+        created_at: new Date().toISOString(),
+      };
+      setResponses((prev) => [response, ...prev]);
+      setStreamingAnswer("");
+      setStreamingSources([]);
+    },
+    [streamingSources]
+  );
 
   const handleNewConversation = async () => {
     try {
       const conv = await createConversation({}).unwrap();
       setActiveConversationId(conv.id);
       setResponses([]);
-      setStreamingAnswer('');
+      setStreamingAnswer("");
     } catch (err) {
-      console.error('Failed to create conversation:', err);
+      console.error("Failed to create conversation:", err);
     }
   };
 
   const handleSelectConversation = (id: string) => {
     setActiveConversationId(id);
     setResponses([]);
-    setStreamingAnswer('');
+    setStreamingAnswer("");
   };
 
   const handleDeleteConversation = async (id: string, e: React.MouseEvent) => {
@@ -120,14 +121,14 @@ export default function RAGPage() {
         setResponses([]);
       }
     } catch (err) {
-      console.error('Failed to delete conversation:', err);
+      console.error("Failed to delete conversation:", err);
     }
   };
 
   const handleExitConversation = () => {
     setActiveConversationId(null);
     setResponses([]);
-    setStreamingAnswer('');
+    setStreamingAnswer("");
   };
 
   return (
@@ -138,7 +139,8 @@ export default function RAGPage() {
           Document Q&A
         </h1>
         <p className="text-muted-foreground mt-2">
-          Ask questions about your processed documents and get AI-powered answers with source citations.
+          Ask questions about your processed documents and get AI-powered answers with source
+          citations.
         </p>
       </div>
 
@@ -186,7 +188,7 @@ export default function RAGPage() {
                   {/* Single-query mode button */}
                   <button
                     className={`w-full text-left px-4 py-2 text-sm hover:bg-muted transition-colors border-b ${
-                      !activeConversationId ? 'bg-muted font-medium' : ''
+                      !activeConversationId ? "bg-muted font-medium" : ""
                     }`}
                     onClick={handleExitConversation}
                   >
@@ -206,7 +208,7 @@ export default function RAGPage() {
                         <button
                           key={conv.id}
                           className={`w-full text-left px-4 py-2 text-sm hover:bg-muted transition-colors border-b group ${
-                            activeConversationId === conv.id ? 'bg-muted font-medium' : ''
+                            activeConversationId === conv.id ? "bg-muted font-medium" : ""
                           }`}
                           onClick={() => handleSelectConversation(conv.id)}
                         >
@@ -247,7 +249,7 @@ export default function RAGPage() {
               {activeConversationId && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <MessagesSquare className="h-4 w-4" />
-                  <span>Conversation: {activeConversation?.title || 'Loading...'}</span>
+                  <span>Conversation: {activeConversation?.title || "Loading..."}</span>
                 </div>
               )}
 
@@ -264,32 +266,39 @@ export default function RAGPage() {
                 <Card>
                   <CardContent className="pt-6">
                     <div className="prose prose-sm max-w-none dark:prose-invert">
-                      <p className="whitespace-pre-wrap">{streamingAnswer}<span className="animate-pulse">|</span></p>
+                      <p className="whitespace-pre-wrap">
+                        {streamingAnswer}
+                        <span className="animate-pulse">|</span>
+                      </p>
                     </div>
                   </CardContent>
                 </Card>
               )}
 
               {/* Conversation history (from server) */}
-              {activeConversationId && activeConversation?.queries && activeConversation.queries.length > 0 && (
-                <div className="space-y-4">
-                  <h2 className="text-sm font-medium text-muted-foreground">Conversation History</h2>
-                  {activeConversation.queries.map((item) => (
-                    <RAGResponseCard
-                      key={item.id}
-                      response={{
-                        ...item,
-                        answer: item.answer || 'No answer recorded',
-                        sources: item.sources || [],
-                        model_used: item.model_used || 'Unknown',
-                        tokens_used: item.tokens_used || 0,
-                        confidence_score: item.confidence_score || 0,
-                        context_used: 0,
-                      }}
-                    />
-                  ))}
-                </div>
-              )}
+              {activeConversationId &&
+                activeConversation?.queries &&
+                activeConversation.queries.length > 0 && (
+                  <div className="space-y-4">
+                    <h2 className="text-sm font-medium text-muted-foreground">
+                      Conversation History
+                    </h2>
+                    {activeConversation.queries.map((item) => (
+                      <RAGResponseCard
+                        key={item.id}
+                        response={{
+                          ...item,
+                          answer: item.answer || "No answer recorded",
+                          sources: item.sources || [],
+                          model_used: item.model_used || "Unknown",
+                          tokens_used: item.tokens_used || 0,
+                          confidence_score: item.confidence_score || 0,
+                          context_used: 0,
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
 
               {/* Current session responses */}
               {responses.length > 0 && (
@@ -321,18 +330,16 @@ export default function RAGPage() {
             <>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold">Query History</h2>
-                <p className="text-sm text-muted-foreground">
-                  Total: {history.total} queries
-                </p>
+                <p className="text-sm text-muted-foreground">Total: {history.total} queries</p>
               </div>
               {history.items.map((item) => (
                 <RAGResponseCard
                   key={item.id}
                   response={{
                     ...item,
-                    answer: item.answer || 'No answer recorded',
+                    answer: item.answer || "No answer recorded",
                     sources: item.sources || [],
-                    model_used: item.model_used || 'Unknown',
+                    model_used: item.model_used || "Unknown",
                     tokens_used: item.tokens_used || 0,
                     confidence_score: item.confidence_score || 0,
                     context_used: 0,
@@ -411,7 +418,8 @@ export default function RAGPage() {
                   <div className="text-2xl font-bold">
                     {stats.total_queries > 0
                       ? ((stats.queries_with_feedback / stats.total_queries) * 100).toFixed(1)
-                      : 0}%
+                      : 0}
+                    %
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">
                     {stats.queries_with_feedback} of {stats.total_queries} queries
@@ -472,8 +480,21 @@ export default function RAGPage() {
                         {(evaluations.items[0].faithfulness * 100).toFixed(0)}%
                       </div>
                       <p className="text-xs text-muted-foreground">Faithfulness</p>
-                      <Badge variant={evaluations.items[0].faithfulness >= 0.8 ? 'default' : evaluations.items[0].faithfulness >= 0.6 ? 'secondary' : 'destructive'} className="text-xs mt-1">
-                        {evaluations.items[0].faithfulness >= 0.8 ? 'Good' : evaluations.items[0].faithfulness >= 0.6 ? 'Fair' : 'Low'}
+                      <Badge
+                        variant={
+                          evaluations.items[0].faithfulness >= 0.8
+                            ? "default"
+                            : evaluations.items[0].faithfulness >= 0.6
+                              ? "secondary"
+                              : "destructive"
+                        }
+                        className="text-xs mt-1"
+                      >
+                        {evaluations.items[0].faithfulness >= 0.8
+                          ? "Good"
+                          : evaluations.items[0].faithfulness >= 0.6
+                            ? "Fair"
+                            : "Low"}
                       </Badge>
                     </div>
                     <div className="text-center p-3 border rounded-lg">
@@ -481,8 +502,21 @@ export default function RAGPage() {
                         {(evaluations.items[0].answer_relevancy * 100).toFixed(0)}%
                       </div>
                       <p className="text-xs text-muted-foreground">Relevancy</p>
-                      <Badge variant={evaluations.items[0].answer_relevancy >= 0.8 ? 'default' : evaluations.items[0].answer_relevancy >= 0.6 ? 'secondary' : 'destructive'} className="text-xs mt-1">
-                        {evaluations.items[0].answer_relevancy >= 0.8 ? 'Good' : evaluations.items[0].answer_relevancy >= 0.6 ? 'Fair' : 'Low'}
+                      <Badge
+                        variant={
+                          evaluations.items[0].answer_relevancy >= 0.8
+                            ? "default"
+                            : evaluations.items[0].answer_relevancy >= 0.6
+                              ? "secondary"
+                              : "destructive"
+                        }
+                        className="text-xs mt-1"
+                      >
+                        {evaluations.items[0].answer_relevancy >= 0.8
+                          ? "Good"
+                          : evaluations.items[0].answer_relevancy >= 0.6
+                            ? "Fair"
+                            : "Low"}
                       </Badge>
                     </div>
                     <div className="text-center p-3 border rounded-lg">
@@ -490,8 +524,21 @@ export default function RAGPage() {
                         {(evaluations.items[0].context_precision * 100).toFixed(0)}%
                       </div>
                       <p className="text-xs text-muted-foreground">Precision</p>
-                      <Badge variant={evaluations.items[0].context_precision >= 0.8 ? 'default' : evaluations.items[0].context_precision >= 0.6 ? 'secondary' : 'destructive'} className="text-xs mt-1">
-                        {evaluations.items[0].context_precision >= 0.8 ? 'Good' : evaluations.items[0].context_precision >= 0.6 ? 'Fair' : 'Low'}
+                      <Badge
+                        variant={
+                          evaluations.items[0].context_precision >= 0.8
+                            ? "default"
+                            : evaluations.items[0].context_precision >= 0.6
+                              ? "secondary"
+                              : "destructive"
+                        }
+                        className="text-xs mt-1"
+                      >
+                        {evaluations.items[0].context_precision >= 0.8
+                          ? "Good"
+                          : evaluations.items[0].context_precision >= 0.6
+                            ? "Fair"
+                            : "Low"}
                       </Badge>
                     </div>
                     <div className="text-center p-3 border rounded-lg">
@@ -499,8 +546,21 @@ export default function RAGPage() {
                         {(evaluations.items[0].context_recall * 100).toFixed(0)}%
                       </div>
                       <p className="text-xs text-muted-foreground">Recall</p>
-                      <Badge variant={evaluations.items[0].context_recall >= 0.8 ? 'default' : evaluations.items[0].context_recall >= 0.6 ? 'secondary' : 'destructive'} className="text-xs mt-1">
-                        {evaluations.items[0].context_recall >= 0.8 ? 'Good' : evaluations.items[0].context_recall >= 0.6 ? 'Fair' : 'Low'}
+                      <Badge
+                        variant={
+                          evaluations.items[0].context_recall >= 0.8
+                            ? "default"
+                            : evaluations.items[0].context_recall >= 0.6
+                              ? "secondary"
+                              : "destructive"
+                        }
+                        className="text-xs mt-1"
+                      >
+                        {evaluations.items[0].context_recall >= 0.8
+                          ? "Good"
+                          : evaluations.items[0].context_recall >= 0.6
+                            ? "Fair"
+                            : "Low"}
                       </Badge>
                     </div>
                   </div>
@@ -508,10 +568,17 @@ export default function RAGPage() {
                   {/* Evaluation history */}
                   {evaluations.items.length > 1 && (
                     <div className="space-y-2">
-                      <p className="text-xs font-medium text-muted-foreground">Previous Evaluations</p>
+                      <p className="text-xs font-medium text-muted-foreground">
+                        Previous Evaluations
+                      </p>
                       {evaluations.items.slice(1).map((evaluation) => (
-                        <div key={evaluation.id} className="flex items-center justify-between text-xs border rounded-lg p-2">
-                          <span className="text-muted-foreground">{formatQueryDate(evaluation.created_at)}</span>
+                        <div
+                          key={evaluation.id}
+                          className="flex items-center justify-between text-xs border rounded-lg p-2"
+                        >
+                          <span className="text-muted-foreground">
+                            {formatQueryDate(evaluation.created_at)}
+                          </span>
                           <div className="flex items-center gap-3">
                             <span>F: {(evaluation.faithfulness * 100).toFixed(0)}%</span>
                             <span>R: {(evaluation.answer_relevancy * 100).toFixed(0)}%</span>
@@ -527,7 +594,8 @@ export default function RAGPage() {
                   )}
 
                   <p className="text-xs text-muted-foreground">
-                    Last evaluated: {formatQueryDate(evaluations.items[0].created_at)} ({evaluations.items[0].sample_size} queries sampled)
+                    Last evaluated: {formatQueryDate(evaluations.items[0].created_at)} (
+                    {evaluations.items[0].sample_size} queries sampled)
                   </p>
                 </div>
               ) : (

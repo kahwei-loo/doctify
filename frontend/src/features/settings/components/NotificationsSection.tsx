@@ -1,5 +1,5 @@
-import React from 'react';
-import { Bell } from 'lucide-react';
+import React from "react";
+import { Bell } from "lucide-react";
 
 interface NotificationsSectionProps {
   isDemoMode: boolean;
@@ -20,8 +20,8 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = () => {
         </div>
         <h3 className="text-base font-medium mb-1">Coming Soon</h3>
         <p className="text-sm text-muted-foreground max-w-sm">
-          Email notifications for document processing, weekly digests, and team
-          activity will be available in a future update.
+          Email notifications for document processing, weekly digests, and team activity will be
+          available in a future update.
         </p>
       </div>
     </div>

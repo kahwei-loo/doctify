@@ -7,8 +7,8 @@
  * Week 7 Task 1.4.1: Replace window.confirm() usage
  */
 
-import React from 'react';
-import { Loader2, Key, AlertTriangle } from 'lucide-react';
+import React from "react";
+import { Loader2, Key, AlertTriangle } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,7 +18,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+} from "@/components/ui/alert-dialog";
 
 interface RevokeApiKeyDialogProps {
   /** Whether the dialog is open */
@@ -55,7 +55,7 @@ export const RevokeApiKeyDialog: React.FC<RevokeApiKeyDialogProps> = ({
             <AlertDialogTitle>Revoke API Key</AlertDialogTitle>
           </div>
           <AlertDialogDescription className="pt-2">
-            Are you sure you want to revoke the API key{' '}
+            Are you sure you want to revoke the API key{" "}
             <span className="font-medium text-foreground">"{keyName}"</span>?
           </AlertDialogDescription>
         </AlertDialogHeader>
@@ -85,7 +85,7 @@ export const RevokeApiKeyDialog: React.FC<RevokeApiKeyDialogProps> = ({
                 Revoking...
               </>
             ) : (
-              'Revoke Key'
+              "Revoke Key"
             )}
           </AlertDialogAction>
         </AlertDialogFooter>

@@ -5,8 +5,8 @@
  * Mimics the structure of a data table with configurable rows and columns.
  */
 
-import React from 'react';
-import { Skeleton } from '@/components/ui/skeleton';
+import React from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -14,8 +14,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 
 export interface TableSkeletonColumn {
   /** Width of the column (e.g., 'w-8', 'w-32', 'flex-1') */
@@ -36,12 +36,12 @@ interface TableSkeletonProps {
 }
 
 const defaultColumns: TableSkeletonColumn[] = [
-  { width: 'w-8', checkbox: true },
-  { width: 'w-48' },
-  { width: 'w-24' },
-  { width: 'w-20' },
-  { width: 'w-24' },
-  { width: 'w-8' },
+  { width: "w-8", checkbox: true },
+  { width: "w-48" },
+  { width: "w-24" },
+  { width: "w-20" },
+  { width: "w-24" },
+  { width: "w-8" },
 ];
 
 export const TableSkeleton: React.FC<TableSkeletonProps> = ({
@@ -51,7 +51,7 @@ export const TableSkeleton: React.FC<TableSkeletonProps> = ({
   className,
 }) => {
   return (
-    <div className={cn('rounded-lg border', className)}>
+    <div className={cn("rounded-lg border", className)}>
       <Table>
         {showHeader && (
           <TableHeader>

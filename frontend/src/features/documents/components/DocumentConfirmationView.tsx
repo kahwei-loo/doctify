@@ -9,21 +9,21 @@
  * Week 1 Task 1.1: OCR Confirmation Flow Implementation
  */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Loader2, AlertCircle, Save, X } from 'lucide-react';
-import toast from 'react-hot-toast';
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { Loader2, AlertCircle, Save, X } from "lucide-react";
+import toast from "react-hot-toast";
 import {
   DocumentPreview,
   ExtractedStructuredView,
   LineItemsTable,
   RestoreDraftDialog,
   type LineItem,
-} from '@/features/documents/components';
-import type { ExtractionResult, FieldChange, DocumentDetail } from '@/features/documents/types';
-import { useConfirmDocumentMutation } from '@/store/api/documentsApi';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+} from "@/features/documents/components";
+import type { ExtractionResult, FieldChange, DocumentDetail } from "@/features/documents/types";
+import { useConfirmDocumentMutation } from "@/store/api/documentsApi";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,7 +33,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+} from "@/components/ui/alert-dialog";
 
 interface DocumentConfirmationViewProps {
   documentId: string;
@@ -48,13 +48,13 @@ interface DocumentConfirmationViewProps {
 const extractLineItems = (result: ExtractionResult | null | undefined): LineItem[] => {
   if (!result?.metadata) return [];
 
-  const possibleFields = ['line_items', 'lineItems', 'items', 'lines'];
+  const possibleFields = ["line_items", "lineItems", "items", "lines"];
   for (const field of possibleFields) {
     const items = result.metadata[field];
     if (Array.isArray(items) && items.length > 0) {
       return items.map((item: any, index: number) => ({
         itemNo: item.item_no || item.itemNo || item.no || String(index + 1),
-        description: item.description || item.name || item.item || '',
+        description: item.description || item.name || item.item || "",
         quantity: item.quantity || item.qty || 1,
         unit: item.unit,
         unitPrice: item.unit_price || item.unitPrice || item.price,
@@ -122,7 +122,7 @@ export const DocumentConfirmationView: React.FC<DocumentConfirmationViewProps> =
           setEditedData(extractionData);
           setHasChanges(false);
         } catch (error) {
-          console.error('Failed to parse draft:', error);
+          console.error("Failed to parse draft:", error);
           localStorage.removeItem(draftKey);
           localStorage.removeItem(draftTimestampKey);
           setEditedData(extractionData);
@@ -158,75 +158,72 @@ export const DocumentConfirmationView: React.FC<DocumentConfirmationViewProps> =
   }, [documentId]);
 
   // Handle field changes with nested path support and change tracking
-  const handleFieldChange = useCallback(
-    (fieldPath: string, value: any) => {
-      setEditedData((prev) => {
-        if (!prev) return null;
+  const handleFieldChange = useCallback((fieldPath: string, value: any) => {
+    setEditedData((prev) => {
+      if (!prev) return null;
 
-        // Get original value for tracking
-        const keys = fieldPath.split('.');
-        let originalValue: any;
+      // Get original value for tracking
+      const keys = fieldPath.split(".");
+      let originalValue: any;
 
-        if (keys.length === 1) {
-          originalValue = originalDataRef.current?.[keys[0] as keyof ExtractionResult];
-        } else if (keys[0] === 'metadata' && keys.length === 2) {
-          originalValue = originalDataRef.current?.metadata?.[keys[1]];
-        }
+      if (keys.length === 1) {
+        originalValue = originalDataRef.current?.[keys[0] as keyof ExtractionResult];
+      } else if (keys[0] === "metadata" && keys.length === 2) {
+        originalValue = originalDataRef.current?.metadata?.[keys[1]];
+      }
 
-        // Track field change if value is different
-        if (originalValue !== value) {
-          setFieldChanges((prevChanges) => {
-            const existingIndex = prevChanges.findIndex((c) => c.field === fieldPath);
-            const newChange: FieldChange = {
-              field: fieldPath,
-              original_value: originalValue,
-              new_value: value,
-              timestamp: new Date().toISOString(),
-            };
-
-            if (existingIndex >= 0) {
-              // Update existing change
-              const updated = [...prevChanges];
-              updated[existingIndex] = newChange;
-              return updated;
-            } else {
-              // Add new change
-              return [...prevChanges, newChange];
-            }
-          });
-        }
-
-        // Update edited data
-        const newData = { ...prev };
-
-        if (keys.length === 1) {
-          // Top-level field
-          return { ...newData, [keys[0]]: value };
-        } else if (keys[0] === 'metadata' && keys.length === 2) {
-          // Metadata field
-          return {
-            ...newData,
-            metadata: {
-              ...newData.metadata,
-              [keys[1]]: value,
-            },
+      // Track field change if value is different
+      if (originalValue !== value) {
+        setFieldChanges((prevChanges) => {
+          const existingIndex = prevChanges.findIndex((c) => c.field === fieldPath);
+          const newChange: FieldChange = {
+            field: fieldPath,
+            original_value: originalValue,
+            new_value: value,
+            timestamp: new Date().toISOString(),
           };
-        }
 
-        // Fallback for other nested structures
-        return newData;
-      });
-      setHasChanges(true);
-    },
-    []
-  );
+          if (existingIndex >= 0) {
+            // Update existing change
+            const updated = [...prevChanges];
+            updated[existingIndex] = newChange;
+            return updated;
+          } else {
+            // Add new change
+            return [...prevChanges, newChange];
+          }
+        });
+      }
+
+      // Update edited data
+      const newData = { ...prev };
+
+      if (keys.length === 1) {
+        // Top-level field
+        return { ...newData, [keys[0]]: value };
+      } else if (keys[0] === "metadata" && keys.length === 2) {
+        // Metadata field
+        return {
+          ...newData,
+          metadata: {
+            ...newData.metadata,
+            [keys[1]]: value,
+          },
+        };
+      }
+
+      // Fallback for other nested structures
+      return newData;
+    });
+    setHasChanges(true);
+  }, []);
 
   // Handle discard action
   const handleDiscard = useCallback(() => {
     if (hasChanges) {
       setShowDiscardDialog(true);
     } else {
-      navigate('/documents');
+      navigate("/documents");
     }
   }, [hasChanges, navigate]);
 
@@ -240,7 +237,7 @@ export const DocumentConfirmationView: React.FC<DocumentConfirmationViewProps> =
     setHasChanges(false);
     setFieldChanges([]);
     setShowDiscardDialog(false);
-    navigate('/documents');
+    navigate("/documents");
   }, [document, documentId, navigate]);
 
   // Handle save action with retry mechanism
@@ -264,18 +261,17 @@ export const DocumentConfirmationView: React.FC<DocumentConfirmationViewProps> =
         // Success - clear draft and navigate
         localStorage.removeItem(`draft_${documentId}`);
         localStorage.removeItem(`draft_timestamp_${documentId}`);
-        toast.success('Document confirmed successfully');
-        navigate('/documents');
+        toast.success("Document confirmed successfully");
+        navigate("/documents");
       } catch (error: any) {
         // Check if we should retry
         if (currentRetry < MAX_RETRIES) {
           const nextRetry = currentRetry + 1;
           const backoffDelay = 1000 * Math.pow(2, currentRetry); // Exponential backoff
 
-          toast.error(
-            `Save failed. Retrying... (${nextRetry}/${MAX_RETRIES})`,
-            { duration: backoffDelay }
-          );
+          toast.error(`Save failed. Retrying... (${nextRetry}/${MAX_RETRIES})`, {
+            duration: backoffDelay,
+          });
 
           // Wait with exponential backoff, then retry
           await new Promise((resolve) => setTimeout(resolve, backoffDelay));
@@ -285,7 +281,7 @@ export const DocumentConfirmationView: React.FC<DocumentConfirmationViewProps> =
           const errorMessage =
             error?.data?.detail ||
             error?.message ||
-            'Failed to confirm document after multiple retries';
+            "Failed to confirm document after multiple retries";
           toast.error(errorMessage, { duration: 5000 });
           throw error;
         }
@@ -300,7 +296,7 @@ export const DocumentConfirmationView: React.FC<DocumentConfirmationViewProps> =
       await attemptSave(0);
     } catch (error) {
       // Final error already handled above
-      console.error('Failed to save document:', error);
+      console.error("Failed to save document:", error);
     }
   }, [documentId, editedData, fieldChanges, confirmDocument, navigate, MAX_RETRIES]);
 
@@ -314,9 +310,9 @@ export const DocumentConfirmationView: React.FC<DocumentConfirmationViewProps> =
         const draftTimestampKey = `draft_timestamp_${documentId}`;
         localStorage.setItem(draftKey, JSON.stringify(editedData));
         localStorage.setItem(draftTimestampKey, new Date().toISOString());
-        console.log('Draft auto-saved');
+        console.log("Draft auto-saved");
       } catch (error) {
-        console.error('Failed to save draft:', error);
+        console.error("Failed to save draft:", error);
       }
     }, 2000); // 2 second debounce
 
@@ -328,12 +324,12 @@ export const DocumentConfirmationView: React.FC<DocumentConfirmationViewProps> =
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (hasChanges) {
         e.preventDefault();
-        e.returnValue = '';
+        e.returnValue = "";
       }
     };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [hasChanges]);
 
   // Extract line items
@@ -401,7 +397,9 @@ export const DocumentConfirmationView: React.FC<DocumentConfirmationViewProps> =
               <AlertCircle className="h-4 w-4" />
               You have unsaved changes
               {fieldChanges.length > 0 && (
-                <span className="text-xs">({fieldChanges.length} field{fieldChanges.length > 1 ? 's' : ''} modified)</span>
+                <span className="text-xs">
+                  ({fieldChanges.length} field{fieldChanges.length > 1 ? "s" : ""} modified)
+                </span>
               )}
             </span>
           )}
@@ -414,20 +412,11 @@ export const DocumentConfirmationView: React.FC<DocumentConfirmationViewProps> =
         </div>
 
         <div className="flex gap-3">
-          <Button
-            variant="outline"
-            onClick={handleDiscard}
-            disabled={isSaving}
-            className="gap-2"
-          >
+          <Button variant="outline" onClick={handleDiscard} disabled={isSaving} className="gap-2">
             <X className="h-4 w-4" />
             Discard
           </Button>
-          <Button
-            onClick={handleSave}
-            disabled={!hasChanges || isSaving}
-            className="gap-2"
-          >
+          <Button onClick={handleSave} disabled={!hasChanges || isSaving} className="gap-2">
             {isSaving ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -449,8 +438,8 @@ export const DocumentConfirmationView: React.FC<DocumentConfirmationViewProps> =
           <AlertDialogHeader>
             <AlertDialogTitle>Discard changes?</AlertDialogTitle>
             <AlertDialogDescription>
-              You have unsaved changes to the extracted data. If you discard,
-              all your corrections will be lost.
+              You have unsaved changes to the extracted data. If you discard, all your corrections
+              will be lost.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

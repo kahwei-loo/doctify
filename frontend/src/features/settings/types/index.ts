@@ -8,7 +8,7 @@ export interface AIModelSetting {
   display_name?: string | null;
   description?: string | null;
   is_active: boolean;
-  source: 'database' | 'env_default';
+  source: "database" | "env_default";
 }
 
 export interface AIModelSettingsResponse {

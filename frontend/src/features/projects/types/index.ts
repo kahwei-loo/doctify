@@ -17,7 +17,7 @@ export type {
   ProcessingSettings,
   ProjectConfig,
   ExtractionConfig,
-} from './extraction';
+} from "./extraction";
 
 export {
   DEFAULT_PROJECT_CONFIG,
@@ -31,4 +31,4 @@ export {
   toExtractionField,
   toExtractionConfig,
   toProjectConfig,
-} from './extraction';
+} from "./extraction";

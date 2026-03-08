@@ -4,9 +4,9 @@
  * Wraps the application with Redux Provider.
  */
 
-import React from 'react';
-import { Provider } from 'react-redux';
-import { store } from './index';
+import React from "react";
+import { Provider } from "react-redux";
+import { store } from "./index";
 
 interface ReduxProviderProps {
   children: React.ReactNode;

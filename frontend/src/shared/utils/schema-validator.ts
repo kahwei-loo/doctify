@@ -5,7 +5,7 @@
  * Includes security measures to prevent injection attacks.
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 // ============================================================================
 // Field Name Validation (Security)
@@ -20,16 +20,16 @@ const FIELD_NAME_REGEX = /^[a-zA-Z][a-zA-Z0-9_]{0,63}$/;
  * Reserved names that could be used for prototype pollution attacks
  */
 const RESERVED_NAMES = [
-  '__proto__',
-  'constructor',
-  'prototype',
-  'eval',
-  'function',
-  'this',
-  'window',
-  'document',
-  'global',
-  'process',
+  "__proto__",
+  "constructor",
+  "prototype",
+  "eval",
+  "function",
+  "this",
+  "window",
+  "document",
+  "global",
+  "process",
 ];
 
 /**
@@ -37,12 +37,15 @@ const RESERVED_NAMES = [
  */
 export const FieldNameSchema = z
   .string()
-  .min(1, 'Field name is required')
-  .max(64, 'Field name must be 64 characters or less')
-  .regex(FIELD_NAME_REGEX, 'Field name must start with a letter and contain only letters, numbers, and underscores')
+  .min(1, "Field name is required")
+  .max(64, "Field name must be 64 characters or less")
+  .regex(
+    FIELD_NAME_REGEX,
+    "Field name must start with a letter and contain only letters, numbers, and underscores"
+  )
   .refine(
     (name) => !RESERVED_NAMES.includes(name.toLowerCase()),
-    'This field name is reserved and cannot be used'
+    "This field name is reserved and cannot be used"
   );
 
 // ============================================================================
@@ -52,14 +55,7 @@ export const FieldNameSchema = z
 /**
  * Supported field types in Schema Builder
  */
-export const FieldTypeEnum = z.enum([
-  'text',
-  'number',
-  'boolean',
-  'date',
-  'enum',
-  'array',
-]);
+export const FieldTypeEnum = z.enum(["text", "number", "boolean", "date", "enum", "array"]);
 
 export type FieldType = z.infer<typeof FieldTypeEnum>;
 
@@ -209,26 +205,27 @@ export const coerceToType = (value: unknown, type: FieldType): unknown => {
   }
 
   switch (type) {
-    case 'text':
+    case "text":
       return String(value);
-    case 'number':
+    case "number": {
       const num = Number(value);
       return isNaN(num) ? 0 : num;
-    case 'boolean':
-      if (typeof value === 'string') {
-        return value.toLowerCase() === 'true' || value === '1';
+    }
+    case "boolean":
+      if (typeof value === "string") {
+        return value.toLowerCase() === "true" || value === "1";
       }
       return Boolean(value);
-    case 'date':
+    case "date":
       if (value instanceof Date) return value.toISOString();
-      if (typeof value === 'string') {
+      if (typeof value === "string") {
         const date = new Date(value);
-        return isNaN(date.getTime()) ? '' : date.toISOString();
+        return isNaN(date.getTime()) ? "" : date.toISOString();
       }
-      return '';
-    case 'enum':
+      return "";
+    case "enum":
       return String(value);
-    case 'array':
+    case "array":
       return Array.isArray(value) ? value : [value];
     default:
       return value;
@@ -240,17 +237,17 @@ export const coerceToType = (value: unknown, type: FieldType): unknown => {
  */
 export const getDefaultForType = (type: FieldType): unknown => {
   switch (type) {
-    case 'text':
-      return '';
-    case 'number':
+    case "text":
+      return "";
+    case "number":
       return 0;
-    case 'boolean':
+    case "boolean":
       return false;
-    case 'date':
-      return '';
-    case 'enum':
-      return '';
-    case 'array':
+    case "date":
+      return "";
+    case "enum":
+      return "";
+    case "array":
       return [];
     default:
       return null;

@@ -10,22 +10,22 @@
  * - Crawl progress display
  */
 
-import React, { useState } from 'react';
-import { Globe, Plus, X, Play, Pause, Loader2, AlertCircle } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
+import React, { useState } from "react";
+import { Globe, Plus, X, Play, Loader2, AlertCircle } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Progress } from '@/components/ui/progress';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/select";
+import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
 
 interface WebsiteCrawlerSourceProps {
   url?: string;
@@ -48,7 +48,7 @@ interface WebsiteCrawlerSourceProps {
 }
 
 export const WebsiteCrawlerSource: React.FC<WebsiteCrawlerSourceProps> = ({
-  url = '',
+  url = "",
   maxDepth = 2,
   includePatterns = [],
   excludePatterns = [],
@@ -58,25 +58,25 @@ export const WebsiteCrawlerSource: React.FC<WebsiteCrawlerSourceProps> = ({
   crawlProgress,
   className,
 }) => {
-  const [newIncludePattern, setNewIncludePattern] = useState('');
-  const [newExcludePattern, setNewExcludePattern] = useState('');
+  const [newIncludePattern, setNewIncludePattern] = useState("");
+  const [newExcludePattern, setNewExcludePattern] = useState("");
   const [urlError, setUrlError] = useState<string | null>(null);
 
   const validateUrl = (value: string) => {
     if (!value.trim()) {
-      setUrlError('URL is required');
+      setUrlError("URL is required");
       return false;
     }
     try {
       const urlObj = new URL(value);
-      if (!urlObj.protocol.startsWith('http')) {
-        setUrlError('URL must start with http:// or https://');
+      if (!urlObj.protocol.startsWith("http")) {
+        setUrlError("URL must start with http:// or https://");
         return false;
       }
       setUrlError(null);
       return true;
     } catch {
-      setUrlError('Invalid URL format');
+      setUrlError("Invalid URL format");
       return false;
     }
   };
@@ -98,7 +98,7 @@ export const WebsiteCrawlerSource: React.FC<WebsiteCrawlerSourceProps> = ({
         includePatterns: [...includePatterns, newIncludePattern.trim()],
         excludePatterns,
       });
-      setNewIncludePattern('');
+      setNewIncludePattern("");
     }
   };
 
@@ -119,7 +119,7 @@ export const WebsiteCrawlerSource: React.FC<WebsiteCrawlerSourceProps> = ({
         includePatterns,
         excludePatterns: [...excludePatterns, newExcludePattern.trim()],
       });
-      setNewExcludePattern('');
+      setNewExcludePattern("");
     }
   };
 
@@ -135,7 +135,7 @@ export const WebsiteCrawlerSource: React.FC<WebsiteCrawlerSourceProps> = ({
   const canStartCrawl = url.trim() && !urlError && !crawling;
 
   return (
-    <div className={cn('space-y-6', className)}>
+    <div className={cn("space-y-6", className)}>
       {/* Header */}
       <div>
         <h3 className="text-lg font-medium">Website Crawler</h3>
@@ -156,7 +156,7 @@ export const WebsiteCrawlerSource: React.FC<WebsiteCrawlerSourceProps> = ({
               value={url}
               onChange={(e) => handleUrlChange(e.target.value)}
               disabled={crawling}
-              className={cn(urlError && 'border-destructive')}
+              className={cn(urlError && "border-destructive")}
             />
             {urlError && (
               <p className="text-xs text-destructive flex items-center gap-1">
@@ -202,7 +202,7 @@ export const WebsiteCrawlerSource: React.FC<WebsiteCrawlerSourceProps> = ({
             value={newIncludePattern}
             onChange={(e) => setNewIncludePattern(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') {
+              if (e.key === "Enter") {
                 e.preventDefault();
                 handleAddIncludePattern();
               }
@@ -248,7 +248,7 @@ export const WebsiteCrawlerSource: React.FC<WebsiteCrawlerSourceProps> = ({
             value={newExcludePattern}
             onChange={(e) => setNewExcludePattern(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') {
+              if (e.key === "Enter") {
                 e.preventDefault();
                 handleAddExcludePattern();
               }
@@ -311,11 +311,7 @@ export const WebsiteCrawlerSource: React.FC<WebsiteCrawlerSourceProps> = ({
       {/* Start Crawl Button */}
       {onStartCrawl && (
         <div className="flex justify-end">
-          <Button
-            onClick={onStartCrawl}
-            disabled={!canStartCrawl}
-            className="gap-2"
-          >
+          <Button onClick={onStartCrawl} disabled={!canStartCrawl} className="gap-2">
             {crawling ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />

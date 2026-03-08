@@ -1,13 +1,13 @@
-import * as React from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
-import { cn } from '@/lib/utils';
+import * as React from "react";
+import { cva, type VariantProps } from "class-variance-authority";
+import { cn } from "@/lib/utils";
 
 /**
  * Generate a consistent color based on project name
  * Uses HSL for better color distribution
  */
 const generateAvatarColor = (name: string): string => {
-  const hash = name.split('').reduce((acc, char) => {
+  const hash = name.split("").reduce((acc, char) => {
     return char.charCodeAt(0) + ((acc << 5) - acc);
   }, 0);
   const hue = Math.abs(hash % 360);
@@ -26,25 +26,24 @@ const getInitials = (name: string): string => {
 };
 
 const projectAvatarVariants = cva(
-  'inline-flex items-center justify-center rounded-full font-semibold text-white select-none',
+  "inline-flex items-center justify-center rounded-full font-semibold text-white select-none",
   {
     variants: {
       size: {
-        sm: 'h-6 w-6 text-[10px]',
-        md: 'h-8 w-8 text-xs',
-        lg: 'h-10 w-10 text-sm',
-        xl: 'h-12 w-12 text-base',
+        sm: "h-6 w-6 text-[10px]",
+        md: "h-8 w-8 text-xs",
+        lg: "h-10 w-10 text-sm",
+        xl: "h-12 w-12 text-base",
       },
     },
     defaultVariants: {
-      size: 'md',
+      size: "md",
     },
   }
 );
 
 export interface ProjectAvatarProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof projectAvatarVariants> {
+  extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof projectAvatarVariants> {
   /** Project name - used for initials and color generation */
   name: string;
   /** Optional custom background color (overrides auto-generated) */
@@ -63,7 +62,7 @@ const ProjectAvatar = React.forwardRef<HTMLDivElement, ProjectAvatarProps>(
         ref={ref}
         className={cn(
           projectAvatarVariants({ size, className }),
-          selected && 'ring-2 ring-white ring-offset-2 ring-offset-primary'
+          selected && "ring-2 ring-white ring-offset-2 ring-offset-primary"
         )}
         style={{
           backgroundColor,
@@ -77,7 +76,7 @@ const ProjectAvatar = React.forwardRef<HTMLDivElement, ProjectAvatarProps>(
     );
   }
 );
-ProjectAvatar.displayName = 'ProjectAvatar';
+ProjectAvatar.displayName = "ProjectAvatar";
 
 // Export getProjectColor as an alias for generateAvatarColor for backwards compatibility
 const getProjectColor = generateAvatarColor;

@@ -12,21 +12,21 @@
  * - Click-to-upload fallback
  */
 
-import React, { useCallback } from 'react';
-import { useDropzone, type FileRejection, type DropEvent } from 'react-dropzone';
-import { Upload, FileText, Image, AlertCircle } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
+import React, { useCallback } from "react";
+import { useDropzone, type FileRejection, type DropEvent } from "react-dropzone";
+import { Upload, FileText, Image, AlertCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 // Supported file types and their MIME types
 const ACCEPTED_FILE_TYPES = {
-  'application/pdf': ['.pdf'],
-  'image/png': ['.png'],
-  'image/jpeg': ['.jpg', '.jpeg'],
-  'text/plain': ['.txt'],
-  'text/markdown': ['.md'],
-  'text/csv': ['.csv'],
-  'application/json': ['.json'],
+  "application/pdf": [".pdf"],
+  "image/png": [".png"],
+  "image/jpeg": [".jpg", ".jpeg"],
+  "text/plain": [".txt"],
+  "text/markdown": [".md"],
+  "text/csv": [".csv"],
+  "application/json": [".json"],
 };
 
 // Max file size: 10MB
@@ -62,38 +62,32 @@ export const DocumentUploadZone: React.FC<DocumentUploadZoneProps> = ({
     [onFilesAccepted, onFilesRejected]
   );
 
-  const {
-    getRootProps,
-    getInputProps,
-    isDragActive,
-    isDragAccept,
-    isDragReject,
-    open,
-  } = useDropzone({
-    onDrop,
-    accept: ACCEPTED_FILE_TYPES,
-    maxSize: MAX_FILE_SIZE,
-    maxFiles: MAX_FILES,
-    disabled,
-    noClick: compact, // In compact mode, only allow drag or button click
-    noKeyboard: false,
-  });
+  const { getRootProps, getInputProps, isDragActive, isDragAccept, isDragReject, open } =
+    useDropzone({
+      onDrop,
+      accept: ACCEPTED_FILE_TYPES,
+      maxSize: MAX_FILE_SIZE,
+      maxFiles: MAX_FILES,
+      disabled,
+      noClick: compact, // In compact mode, only allow drag or button click
+      noKeyboard: false,
+    });
 
   // Determine the current state for styling
   const getStateStyles = () => {
     if (disabled) {
-      return 'border-muted-foreground/20 bg-muted/50 cursor-not-allowed';
+      return "border-muted-foreground/20 bg-muted/50 cursor-not-allowed";
     }
     if (isDragReject) {
-      return 'border-destructive bg-destructive/5 cursor-not-allowed';
+      return "border-destructive bg-destructive/5 cursor-not-allowed";
     }
     if (isDragAccept) {
-      return 'border-primary bg-primary/5 cursor-copy';
+      return "border-primary bg-primary/5 cursor-copy";
     }
     if (isDragActive) {
-      return 'border-primary/50 bg-primary/5 cursor-copy';
+      return "border-primary/50 bg-primary/5 cursor-copy";
     }
-    return 'border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50 cursor-pointer';
+    return "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50 cursor-pointer";
   };
 
   // Compact version for inline use
@@ -102,7 +96,7 @@ export const DocumentUploadZone: React.FC<DocumentUploadZoneProps> = ({
       <div
         {...getRootProps()}
         className={cn(
-          'flex items-center gap-3 p-3 border-2 border-dashed rounded-lg transition-all',
+          "flex items-center gap-3 p-3 border-2 border-dashed rounded-lg transition-all",
           getStateStyles(),
           className
         )}
@@ -110,36 +104,25 @@ export const DocumentUploadZone: React.FC<DocumentUploadZoneProps> = ({
         <input {...getInputProps()} />
         <div
           className={cn(
-            'flex items-center justify-center h-10 w-10 rounded-lg',
-            isDragActive ? 'bg-primary/10' : 'bg-muted'
+            "flex items-center justify-center h-10 w-10 rounded-lg",
+            isDragActive ? "bg-primary/10" : "bg-muted"
           )}
         >
           <Upload
-            className={cn(
-              'h-5 w-5',
-              isDragActive ? 'text-primary' : 'text-muted-foreground'
-            )}
+            className={cn("h-5 w-5", isDragActive ? "text-primary" : "text-muted-foreground")}
           />
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium">
             {isDragActive
               ? isDragReject
-                ? 'Invalid file type'
-                : 'Drop files here'
-              : 'Drag & drop files'}
+                ? "Invalid file type"
+                : "Drop files here"
+              : "Drag & drop files"}
           </p>
-          <p className="text-xs text-muted-foreground">
-            PDF, TXT, MD, CSV, PNG, JPG up to 10MB
-          </p>
+          <p className="text-xs text-muted-foreground">PDF, TXT, MD, CSV, PNG, JPG up to 10MB</p>
         </div>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={open}
-          disabled={disabled}
-        >
+        <Button type="button" variant="outline" size="sm" onClick={open} disabled={disabled}>
           Browse
         </Button>
       </div>
@@ -151,7 +134,7 @@ export const DocumentUploadZone: React.FC<DocumentUploadZoneProps> = ({
     <div
       {...getRootProps()}
       className={cn(
-        'flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-xl transition-all min-h-[200px]',
+        "flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-xl transition-all min-h-[200px]",
         getStateStyles(),
         className
       )}
@@ -161,12 +144,8 @@ export const DocumentUploadZone: React.FC<DocumentUploadZoneProps> = ({
       {/* Icon */}
       <div
         className={cn(
-          'flex items-center justify-center h-16 w-16 rounded-full mb-4 transition-colors',
-          isDragActive
-            ? isDragReject
-              ? 'bg-destructive/10'
-              : 'bg-primary/10'
-            : 'bg-muted'
+          "flex items-center justify-center h-16 w-16 rounded-full mb-4 transition-colors",
+          isDragActive ? (isDragReject ? "bg-destructive/10" : "bg-primary/10") : "bg-muted"
         )}
       >
         {isDragReject ? (
@@ -174,8 +153,8 @@ export const DocumentUploadZone: React.FC<DocumentUploadZoneProps> = ({
         ) : (
           <Upload
             className={cn(
-              'h-8 w-8 transition-colors',
-              isDragActive ? 'text-primary' : 'text-muted-foreground'
+              "h-8 w-8 transition-colors",
+              isDragActive ? "text-primary" : "text-muted-foreground"
             )}
           />
         )}
@@ -185,15 +164,13 @@ export const DocumentUploadZone: React.FC<DocumentUploadZoneProps> = ({
       <p className="text-lg font-medium mb-1">
         {isDragActive
           ? isDragReject
-            ? 'Invalid file type'
-            : 'Drop files to upload'
-          : 'Drag & drop documents here'}
+            ? "Invalid file type"
+            : "Drop files to upload"
+          : "Drag & drop documents here"}
       </p>
 
       {/* Subtitle */}
-      <p className="text-sm text-muted-foreground mb-4">
-        or click to browse your files
-      </p>
+      <p className="text-sm text-muted-foreground mb-4">or click to browse your files</p>
 
       {/* File Type Icons */}
       <div className="flex items-center gap-4 mb-4 flex-wrap">
@@ -240,16 +217,16 @@ export const getFileRejectionMessage = (rejection: FileRejection): string => {
 
   for (const error of errors) {
     switch (error.code) {
-      case 'file-invalid-type':
+      case "file-invalid-type":
         errorMessages.push(`"${file.name}" has an unsupported file type`);
         break;
-      case 'file-too-large':
+      case "file-too-large":
         errorMessages.push(`"${file.name}" exceeds the 10MB size limit`);
         break;
-      case 'file-too-small':
+      case "file-too-small":
         errorMessages.push(`"${file.name}" is too small`);
         break;
-      case 'too-many-files':
+      case "too-many-files":
         errorMessages.push(`Too many files selected (max ${MAX_FILES})`);
         break;
       default:
@@ -257,7 +234,7 @@ export const getFileRejectionMessage = (rejection: FileRejection): string => {
     }
   }
 
-  return errorMessages.join(', ');
+  return errorMessages.join(", ");
 };
 
 export default DocumentUploadZone;

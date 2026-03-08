@@ -1,7 +1,7 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { blurFadeUp, slideInFromLeft, staggerSlow } from './animations';
-import { steps } from './constants';
+import React from "react";
+import { motion } from "framer-motion";
+import { blurFadeUp, slideInFromLeft, staggerSlow } from "./animations";
+import { steps } from "./constants";
 
 const HowItWorksSection: React.FC = () => {
   return (
@@ -11,11 +11,11 @@ const HowItWorksSection: React.FC = () => {
           className="text-center mb-16"
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: '-100px' }}
+          viewport={{ once: true, margin: "-100px" }}
           variants={slideInFromLeft}
         >
           <h2 className="text-3xl sm:text-4xl font-bold">
-            How it{' '}
+            How it{" "}
             <span className="bg-gradient-to-r from-landing-teal to-landing-accent bg-clip-text text-transparent">
               works
             </span>
@@ -29,7 +29,7 @@ const HowItWorksSection: React.FC = () => {
           className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4"
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: '-100px' }}
+          viewport={{ once: true, margin: "-100px" }}
           variants={staggerSlow}
         >
           {steps.map((step, index) => {
@@ -42,8 +42,9 @@ const HowItWorksSection: React.FC = () => {
               >
                 {/* Connecting gradient line (desktop only) */}
                 {index < steps.length - 1 && (
-                  <div className="absolute left-[calc(50%+2rem)] top-6 hidden h-0.5 lg:block overflow-hidden"
-                    style={{ width: 'calc(100% - 4rem)' }}
+                  <div
+                    className="absolute left-[calc(50%+2rem)] top-6 hidden h-0.5 lg:block overflow-hidden"
+                    style={{ width: "calc(100% - 4rem)" }}
                   >
                     <div className="h-full w-full bg-gradient-to-r from-landing-accent/40 to-landing-teal/40" />
                     {/* Traveling dot */}
@@ -65,9 +66,7 @@ const HowItWorksSection: React.FC = () => {
                 <div className="mt-4 glass-card rounded-xl p-5 w-full">
                   <Icon className="mx-auto h-8 w-8 text-muted-foreground/60 mb-3" />
                   <h3 className="font-semibold text-lg">{step.title}</h3>
-                  <p className="mt-1 text-sm text-muted-foreground/70">
-                    {step.description}
-                  </p>
+                  <p className="mt-1 text-sm text-muted-foreground/70">{step.description}</p>
                 </div>
               </motion.div>
             );

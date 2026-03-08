@@ -4,8 +4,8 @@
  * Displays project details with tabs for Overview, Documents, and Settings.
  */
 
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft,
   FolderKanban,
@@ -19,32 +19,21 @@ import {
   X,
   BarChart3,
   LayoutDashboard,
-} from 'lucide-react';
-import toast from 'react-hot-toast';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
+} from "lucide-react";
+import toast from "react-hot-toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   useGetProjectQuery,
   useGetProjectStatisticsQuery,
   useUpdateProjectMutation,
   useDeleteProjectMutation,
-} from '@/store/api/projectsApi';
-import { ProjectSettingsTab, DeleteProjectDialog } from '@/features/projects/components';
-import type { ExtractionConfig } from '@/features/projects/types';
+} from "@/store/api/projectsApi";
+import { ProjectSettingsTab, DeleteProjectDialog } from "@/features/projects/components";
+import type { ExtractionConfig } from "@/features/projects/types";
 
 const ProjectDetailPage: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -52,7 +41,7 @@ const ProjectDetailPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Get active tab from URL or default to 'overview'
-  const activeTab = searchParams.get('tab') || 'overview';
+  const activeTab = searchParams.get("tab") || "overview";
 
   // RTK Query hooks
   const {
@@ -62,10 +51,10 @@ const ProjectDetailPage: React.FC = () => {
     refetch,
   } = useGetProjectQuery(projectId!, { skip: !projectId });
 
-  const {
-    data: statisticsData,
-    isLoading: isLoadingStats,
-  } = useGetProjectStatisticsQuery(projectId!, { skip: !projectId });
+  const { data: statisticsData, isLoading: isLoadingStats } = useGetProjectStatisticsQuery(
+    projectId!,
+    { skip: !projectId }
+  );
 
   const [updateProject, { isLoading: isUpdating }] = useUpdateProjectMutation();
   const [deleteProject, { isLoading: isDeleting }] = useDeleteProjectMutation();
@@ -75,15 +64,15 @@ const ProjectDetailPage: React.FC = () => {
 
   // Edit mode state
   const [isEditing, setIsEditing] = useState(false);
-  const [editName, setEditName] = useState('');
-  const [editDescription, setEditDescription] = useState('');
+  const [editName, setEditName] = useState("");
+  const [editDescription, setEditDescription] = useState("");
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   // Initialize edit form when project loads
   useEffect(() => {
     if (project) {
       setEditName(project.name);
-      setEditDescription(project.description || '');
+      setEditDescription(project.description || "");
     }
   }, [project]);
 
@@ -94,7 +83,7 @@ const ProjectDetailPage: React.FC = () => {
 
   const handleSave = async () => {
     if (!editName.trim()) {
-      toast.error('Project name is required');
+      toast.error("Project name is required");
       return;
     }
 
@@ -105,11 +94,11 @@ const ProjectDetailPage: React.FC = () => {
         description: editDescription.trim() || undefined,
       }).unwrap();
 
-      toast.success('Project updated');
+      toast.success("Project updated");
       setIsEditing(false);
     } catch (error: unknown) {
       const err = error as { data?: { detail?: string } };
-      toast.error(err.data?.detail || 'Failed to update project');
+      toast.error(err.data?.detail || "Failed to update project");
     }
   };
 
@@ -120,12 +109,12 @@ const ProjectDetailPage: React.FC = () => {
   const handleConfirmDelete = async () => {
     try {
       await deleteProject({ projectId: projectId! }).unwrap();
-      toast.success('Project deleted');
+      toast.success("Project deleted");
       setShowDeleteDialog(false);
-      navigate('/projects');
+      navigate("/projects");
     } catch (error: unknown) {
       const err = error as { data?: { detail?: string } };
-      toast.error(err.data?.detail || 'Failed to delete project');
+      toast.error(err.data?.detail || "Failed to delete project");
     }
   };
 
@@ -133,26 +122,26 @@ const ProjectDetailPage: React.FC = () => {
     setIsEditing(false);
     if (project) {
       setEditName(project.name);
-      setEditDescription(project.description || '');
+      setEditDescription(project.description || "");
     }
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
   const formatBytes = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return "0 Bytes";
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   if (isLoading) {
@@ -175,7 +164,7 @@ const ProjectDetailPage: React.FC = () => {
           <Button variant="outline" onClick={() => refetch()}>
             Retry
           </Button>
-          <Button onClick={() => navigate('/projects')}>
+          <Button onClick={() => navigate("/projects")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Projects
           </Button>
@@ -188,7 +177,7 @@ const ProjectDetailPage: React.FC = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/projects')}>
+        <Button variant="ghost" size="icon" onClick={() => navigate("/projects")}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div className="flex-1">
@@ -205,7 +194,7 @@ const ProjectDetailPage: React.FC = () => {
             <>
               <h1 className="text-2xl font-bold">{project.name}</h1>
               <p className="text-muted-foreground mt-1">
-                {project.description || 'No description'}
+                {project.description || "No description"}
               </p>
             </>
           )}
@@ -295,7 +284,7 @@ const ProjectDetailPage: React.FC = () => {
                       {isLoadingStats ? (
                         <Loader2 className="h-5 w-5 animate-spin" />
                       ) : (
-                        statistics?.total_documents ?? 0
+                        (statistics?.total_documents ?? 0)
                       )}
                     </p>
                   </div>
@@ -362,8 +351,11 @@ const ProjectDetailPage: React.FC = () => {
               <CardContent>
                 <div className="grid gap-4 md:grid-cols-4">
                   {Object.entries(statistics.status_counts).map(([status, count]) => (
-                    <div key={status} className="flex items-center justify-between p-3 rounded-lg bg-muted">
-                      <span className="text-sm capitalize">{status.replace('_', ' ')}</span>
+                    <div
+                      key={status}
+                      className="flex items-center justify-between p-3 rounded-lg bg-muted"
+                    >
+                      <span className="text-sm capitalize">{status.replace("_", " ")}</span>
                       <span className="font-medium">{count}</span>
                     </div>
                   ))}
@@ -383,7 +375,7 @@ const ProjectDetailPage: React.FC = () => {
                 <Upload className="mr-2 h-4 w-4" />
                 Upload Documents
               </Button>
-              <Button variant="outline" onClick={() => handleTabChange('settings')}>
+              <Button variant="outline" onClick={() => handleTabChange("settings")}>
                 <Settings className="mr-2 h-4 w-4" />
                 Configure Extraction
               </Button>
@@ -412,7 +404,10 @@ const ProjectDetailPage: React.FC = () => {
                   <p className="mt-1 text-sm text-muted-foreground">
                     Upload documents to this project to get started.
                   </p>
-                  <Button className="mt-4" onClick={() => navigate(`/documents?project_id=${projectId}`)}>
+                  <Button
+                    className="mt-4"
+                    onClick={() => navigate(`/documents?project_id=${projectId}`)}
+                  >
                     <Upload className="mr-2 h-4 w-4" />
                     Upload Document
                   </Button>

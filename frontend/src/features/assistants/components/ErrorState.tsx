@@ -4,13 +4,13 @@
  * Reusable error display with retry functionality for the Assistants feature.
  */
 
-import React from 'react';
-import { AlertCircle, RefreshCw, WifiOff, ServerCrash } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
+import React from "react";
+import { AlertCircle, RefreshCw, WifiOff, ServerCrash } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
-type ErrorType = 'generic' | 'network' | 'server' | 'notFound';
+type ErrorType = "generic" | "network" | "server" | "notFound";
 
 interface ErrorStateProps {
   type?: ErrorType;
@@ -21,31 +21,32 @@ interface ErrorStateProps {
   compact?: boolean;
 }
 
-const errorConfig: Record<ErrorType, { icon: React.ElementType; title: string; message: string }> = {
-  generic: {
-    icon: AlertCircle,
-    title: 'Something went wrong',
-    message: 'An unexpected error occurred. Please try again.',
-  },
-  network: {
-    icon: WifiOff,
-    title: 'Connection Error',
-    message: 'Unable to connect to the server. Please check your internet connection.',
-  },
-  server: {
-    icon: ServerCrash,
-    title: 'Server Error',
-    message: 'The server encountered an error. Please try again later.',
-  },
-  notFound: {
-    icon: AlertCircle,
-    title: 'Not Found',
-    message: 'The requested resource could not be found.',
-  },
-};
+const errorConfig: Record<ErrorType, { icon: React.ElementType; title: string; message: string }> =
+  {
+    generic: {
+      icon: AlertCircle,
+      title: "Something went wrong",
+      message: "An unexpected error occurred. Please try again.",
+    },
+    network: {
+      icon: WifiOff,
+      title: "Connection Error",
+      message: "Unable to connect to the server. Please check your internet connection.",
+    },
+    server: {
+      icon: ServerCrash,
+      title: "Server Error",
+      message: "The server encountered an error. Please try again later.",
+    },
+    notFound: {
+      icon: AlertCircle,
+      title: "Not Found",
+      message: "The requested resource could not be found.",
+    },
+  };
 
 export const ErrorState: React.FC<ErrorStateProps> = ({
-  type = 'generic',
+  type = "generic",
   title,
   message,
   onRetry,
@@ -59,7 +60,7 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
 
   if (compact) {
     return (
-      <div className={cn('flex flex-col items-center justify-center p-4 text-center', className)}>
+      <div className={cn("flex flex-col items-center justify-center p-4 text-center", className)}>
         <Icon className="h-6 w-6 text-destructive mb-2" />
         <p className="text-sm font-medium text-destructive mb-1">{displayTitle}</p>
         <p className="text-xs text-muted-foreground mb-3">{displayMessage}</p>
@@ -74,7 +75,7 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
   }
 
   return (
-    <Card className={cn('border-destructive/50', className)}>
+    <Card className={cn("border-destructive/50", className)}>
       <CardContent className="flex flex-col items-center justify-center py-12 px-6 text-center">
         <div className="rounded-full bg-destructive/10 p-4 mb-4">
           <Icon className="h-8 w-8 text-destructive" />
@@ -107,8 +108,8 @@ export const InlineError: React.FC<InlineErrorProps> = ({ message, onRetry, clas
   return (
     <div
       className={cn(
-        'flex items-center justify-between p-3 rounded-lg',
-        'bg-destructive/10 border border-destructive/20',
+        "flex items-center justify-between p-3 rounded-lg",
+        "bg-destructive/10 border border-destructive/20",
         className
       )}
     >

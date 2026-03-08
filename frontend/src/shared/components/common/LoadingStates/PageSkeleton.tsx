@@ -5,11 +5,11 @@
  * Includes header, stats, and content areas.
  */
 
-import React from 'react';
-import { Loader2 } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Card, CardContent } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
+import React from "react";
+import { Loader2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 interface PageSkeletonProps {
   /** Show page header area */
@@ -21,7 +21,7 @@ interface PageSkeletonProps {
   /** Show search/filter bar */
   showFilters?: boolean;
   /** Content area type */
-  contentType?: 'cards' | 'table' | 'list';
+  contentType?: "cards" | "table" | "list";
   /** Number of content items */
   contentCount?: number;
   /** Additional class names */
@@ -33,12 +33,12 @@ export const PageSkeleton: React.FC<PageSkeletonProps> = ({
   showStats = false,
   statCount = 4,
   showFilters = true,
-  contentType = 'cards',
+  contentType = "cards",
   contentCount = 6,
   className,
 }) => {
   return (
-    <div className={cn('space-y-6', className)}>
+    <div className={cn("space-y-6", className)}>
       {/* Header */}
       {showHeader && (
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -83,7 +83,7 @@ export const PageSkeleton: React.FC<PageSkeletonProps> = ({
       )}
 
       {/* Content */}
-      {contentType === 'cards' && (
+      {contentType === "cards" && (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: contentCount }).map((_, i) => (
             <Card key={i} className="animate-pulse">
@@ -105,7 +105,7 @@ export const PageSkeleton: React.FC<PageSkeletonProps> = ({
         </div>
       )}
 
-      {contentType === 'table' && (
+      {contentType === "table" && (
         <Card>
           <div className="p-4 space-y-4">
             {Array.from({ length: contentCount }).map((_, i) => (
@@ -120,7 +120,7 @@ export const PageSkeleton: React.FC<PageSkeletonProps> = ({
         </Card>
       )}
 
-      {contentType === 'list' && (
+      {contentType === "list" && (
         <div className="space-y-2">
           {Array.from({ length: contentCount }).map((_, i) => (
             <Card key={i} className="animate-pulse">
@@ -150,28 +150,23 @@ export const PageSkeleton: React.FC<PageSkeletonProps> = ({
 interface InlineLoadingProps {
   message?: string;
   className?: string;
-  size?: 'sm' | 'md' | 'lg';
+  size?: "sm" | "md" | "lg";
 }
 
 const sizeClasses = {
-  sm: 'h-4 w-4',
-  md: 'h-5 w-5',
-  lg: 'h-6 w-6',
+  sm: "h-4 w-4",
+  md: "h-5 w-5",
+  lg: "h-6 w-6",
 };
 
 export const InlineLoading: React.FC<InlineLoadingProps> = ({
-  message = 'Loading...',
+  message = "Loading...",
   className,
-  size = 'md',
+  size = "md",
 }) => {
   return (
-    <div
-      className={cn(
-        'flex items-center justify-center gap-2 text-muted-foreground',
-        className
-      )}
-    >
-      <Loader2 className={cn('animate-spin', sizeClasses[size])} />
+    <div className={cn("flex items-center justify-center gap-2 text-muted-foreground", className)}>
+      <Loader2 className={cn("animate-spin", sizeClasses[size])} />
       {message && <span className="text-sm">{message}</span>}
     </div>
   );
@@ -188,15 +183,12 @@ interface FullPageLoadingProps {
 }
 
 export const FullPageLoading: React.FC<FullPageLoadingProps> = ({
-  message = 'Loading...',
+  message = "Loading...",
   className,
 }) => {
   return (
     <div
-      className={cn(
-        'flex flex-col items-center justify-center h-full min-h-[400px]',
-        className
-      )}
+      className={cn("flex flex-col items-center justify-center h-full min-h-[400px]", className)}
     >
       <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
       <p className="text-sm text-muted-foreground">{message}</p>

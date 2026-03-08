@@ -6,7 +6,7 @@
  * and real-time WebSocket updates.
  */
 
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useRef } from "react";
 import {
   Search,
   Filter,
@@ -16,20 +16,17 @@ import {
   FileText,
   Upload,
   Settings,
-} from 'lucide-react';
-import toast from 'react-hot-toast';
-import { type FileRejection } from 'react-dropzone';
+} from "lucide-react";
+import toast from "react-hot-toast";
+import { type FileRejection } from "react-dropzone";
 import {
   useGetDocumentsQuery,
   useDeleteDocumentMutation,
   useRetryProcessingMutation,
-} from '@/store/api/documentsApi';
-import {
-  useGetProjectQuery,
-  useUpdateExtractionConfigMutation,
-} from '@/store/api/projectsApi';
-import { ProjectConfigModal, type ProjectConfig, type ExtractionConfig } from '@/features/projects';
-import type { DocumentStatus, DocumentListItem } from '@/features/documents/types';
+} from "@/store/api/documentsApi";
+import { useGetProjectQuery, useUpdateExtractionConfigMutation } from "@/store/api/projectsApi";
+import { ProjectConfigModal, type ProjectConfig, type ExtractionConfig } from "@/features/projects";
+import type { DocumentStatus, DocumentListItem } from "@/features/documents/types";
 import {
   ProjectPanel,
   DocumentUploadZone,
@@ -38,39 +35,33 @@ import {
   DocumentTable,
   DeleteDocumentsDialog,
   ProjectSettingsDrawer,
-} from '@/features/documents/components';
+} from "@/features/documents/components";
 import {
   useDocumentUpload,
   useDocumentListWebSocket,
   type DocumentProgressEvent,
-} from '@/features/documents/hooks';
-import { useDemoMode } from '@/features/demo/hooks/useDemoMode';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+} from "@/features/documents/hooks";
+import { useDemoMode } from "@/features/demo/hooks/useDemoMode";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
 // Accepted file types for document upload
 const ACCEPTED_FILE_TYPES = [
-  'application/pdf',
-  'image/png',
-  'image/jpeg',
-  'image/jpg',
-  'image/webp',
-  'image/tiff',
+  "application/pdf",
+  "image/png",
+  "image/jpeg",
+  "image/jpg",
+  "image/webp",
+  "image/tiff",
 ];
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -78,7 +69,7 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const DocumentsPage: React.FC = () => {
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState<DocumentStatus | undefined>();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
@@ -98,49 +89,50 @@ const DocumentsPage: React.FC = () => {
   const dropZoneRef = useRef<HTMLDivElement>(null);
 
   // Demo mode hook
-  const { isDemoMode, isRestricted, getRestrictionMessage } = useDemoMode();
+  const {
+    isDemoMode,
+    isRestricted: _isRestricted,
+    getRestrictionMessage: _getRestrictionMessage,
+  } = useDemoMode();
 
   // Document upload hook
-  const {
-    uploads,
-    isUploading,
-    uploadMultiple,
-    cancelUpload,
-    clearCompleted,
-    clearAll,
-  } = useDocumentUpload();
+  const { uploads, isUploading, uploadMultiple, cancelUpload, clearCompleted, clearAll } =
+    useDocumentUpload();
 
   // Validate files before upload
-  const validateFiles = useCallback((files: File[]): { valid: File[]; rejected: FileRejection[] } => {
-    const valid: File[] = [];
-    const rejected: FileRejection[] = [];
+  const validateFiles = useCallback(
+    (files: File[]): { valid: File[]; rejected: FileRejection[] } => {
+      const valid: File[] = [];
+      const rejected: FileRejection[] = [];
 
-    files.forEach((file) => {
-      const errors: { code: string; message: string }[] = [];
+      files.forEach((file) => {
+        const errors: { code: string; message: string }[] = [];
 
-      if (!ACCEPTED_FILE_TYPES.includes(file.type)) {
-        errors.push({
-          code: 'file-invalid-type',
-          message: `File type ${file.type || 'unknown'} is not supported`,
-        });
-      }
+        if (!ACCEPTED_FILE_TYPES.includes(file.type)) {
+          errors.push({
+            code: "file-invalid-type",
+            message: `File type ${file.type || "unknown"} is not supported`,
+          });
+        }
 
-      if (file.size > MAX_FILE_SIZE) {
-        errors.push({
-          code: 'file-too-large',
-          message: `File size exceeds ${MAX_FILE_SIZE / 1024 / 1024}MB limit`,
-        });
-      }
+        if (file.size > MAX_FILE_SIZE) {
+          errors.push({
+            code: "file-too-large",
+            message: `File size exceeds ${MAX_FILE_SIZE / 1024 / 1024}MB limit`,
+          });
+        }
 
-      if (errors.length > 0) {
-        rejected.push({ file, errors });
-      } else {
-        valid.push(file);
-      }
-    });
+        if (errors.length > 0) {
+          rejected.push({ file, errors });
+        } else {
+          valid.push(file);
+        }
+      });
 
-    return { valid, rejected };
-  }, []);
+      return { valid, rejected };
+    },
+    []
+  );
 
   // Fetch documents with project filter
   const { data, isLoading, isFetching, refetch } = useGetDocumentsQuery({
@@ -156,16 +148,14 @@ const DocumentsPage: React.FC = () => {
   const [retryProcessing] = useRetryProcessingMutation();
 
   // Fetch selected project for configuration
-  const { data: selectedProject } = useGetProjectQuery(
-    selectedProjectId || '',
-    { skip: !selectedProjectId }
-  );
+  const { data: selectedProject } = useGetProjectQuery(selectedProjectId || "", {
+    skip: !selectedProjectId,
+  });
 
   // Fetch project for settings drawer
-  const { data: settingsProject } = useGetProjectQuery(
-    settingsProjectId || '',
-    { skip: !settingsProjectId }
-  );
+  const { data: settingsProject } = useGetProjectQuery(settingsProjectId || "", {
+    skip: !settingsProjectId,
+  });
 
   const [updateExtractionConfig, { isLoading: isUpdatingConfig }] =
     useUpdateExtractionConfigMutation();
@@ -176,15 +166,18 @@ const DocumentsPage: React.FC = () => {
   // WebSocket for real-time document updates
   const { isConnected: wsConnected } = useDocumentListWebSocket({
     enabled: true,
-    onDocumentUpdate: useCallback((document: DocumentListItem) => {
-      // Filter by current project if one is selected
-      if (!selectedProjectId || document.project_id === selectedProjectId) {
-        refetch();
-      }
-    }, [selectedProjectId, refetch]),
-    onDocumentProgress: useCallback((progressData: DocumentProgressEvent['data']) => {
+    onDocumentUpdate: useCallback(
+      (document: DocumentListItem) => {
+        // Filter by current project if one is selected
+        if (!selectedProjectId || document.project_id === selectedProjectId) {
+          refetch();
+        }
+      },
+      [selectedProjectId, refetch]
+    ),
+    onDocumentProgress: useCallback((progressData: DocumentProgressEvent["data"]) => {
       // Could show progress indicator in the UI if needed
-      console.debug('[Documents] Progress update:', progressData);
+      console.debug("[Documents] Progress update:", progressData);
     }, []),
   });
 
@@ -214,47 +207,50 @@ const DocumentsPage: React.FC = () => {
     e.stopPropagation();
   }, []);
 
-  const handleDrop = useCallback(async (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDraggingOver(false);
-    dragCounterRef.current = 0;
+  const handleDrop = useCallback(
+    async (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDraggingOver(false);
+      dragCounterRef.current = 0;
 
-    if (isDemoMode) {
-      toast.error('⚠️ Upload disabled in demo mode. Sign up to upload documents.');
-      return;
-    }
-
-    if (!selectedProjectId) {
-      toast.error('Please select a project first');
-      return;
-    }
-
-    const files = Array.from(e.dataTransfer.files);
-    if (files.length === 0) return;
-
-    const { valid, rejected } = validateFiles(files);
-
-    // Show errors for rejected files
-    rejected.forEach((rejection) => {
-      toast.error(getFileRejectionMessage(rejection));
-    });
-
-    // Upload valid files
-    if (valid.length > 0) {
-      try {
-        await uploadMultiple(valid, selectedProjectId);
-        toast.success(
-          valid.length === 1
-            ? 'Document uploaded successfully'
-            : `${valid.length} documents uploaded successfully`
-        );
-        refetch();
-      } catch (error) {
-        // Individual file errors are tracked in the upload queue
+      if (isDemoMode) {
+        toast.error("⚠️ Upload disabled in demo mode. Sign up to upload documents.");
+        return;
       }
-    }
-  }, [selectedProjectId, validateFiles, uploadMultiple, refetch]);
+
+      if (!selectedProjectId) {
+        toast.error("Please select a project first");
+        return;
+      }
+
+      const files = Array.from(e.dataTransfer.files);
+      if (files.length === 0) return;
+
+      const { valid, rejected } = validateFiles(files);
+
+      // Show errors for rejected files
+      rejected.forEach((rejection) => {
+        toast.error(getFileRejectionMessage(rejection));
+      });
+
+      // Upload valid files
+      if (valid.length > 0) {
+        try {
+          await uploadMultiple(valid, selectedProjectId);
+          toast.success(
+            valid.length === 1
+              ? "Document uploaded successfully"
+              : `${valid.length} documents uploaded successfully`
+          );
+          refetch();
+        } catch (error) {
+          // Individual file errors are tracked in the upload queue
+        }
+      }
+    },
+    [selectedProjectId, validateFiles, uploadMultiple, refetch]
+  );
 
   // Reset page when project changes
   const handleSelectProject = useCallback((projectId: string | null) => {
@@ -272,7 +268,7 @@ const DocumentsPage: React.FC = () => {
   const handleFilesAccepted = useCallback(
     async (files: File[]) => {
       if (!selectedProjectId) {
-        toast.error('Please select a project first');
+        toast.error("Please select a project first");
         return;
       }
 
@@ -280,7 +276,7 @@ const DocumentsPage: React.FC = () => {
         await uploadMultiple(files, selectedProjectId);
         toast.success(
           files.length === 1
-            ? 'Document uploaded successfully'
+            ? "Document uploaded successfully"
             : `${files.length} documents uploaded successfully`
         );
         refetch();
@@ -300,7 +296,7 @@ const DocumentsPage: React.FC = () => {
 
   // Handle retry upload
   const handleRetryUpload = useCallback(
-    async (fileId: string, file: File) => {
+    async (_fileId: string, file: File) => {
       if (!selectedProjectId) return;
       try {
         await uploadMultiple([file], selectedProjectId);
@@ -313,14 +309,17 @@ const DocumentsPage: React.FC = () => {
   );
 
   // Handle document delete - show confirmation dialog
-  const handleDelete = useCallback((documentIds: string[]) => {
-    if (isDemoMode) {
-      toast.error('⚠️ Delete disabled in demo mode');
-      return;
-    }
-    setDocumentsToDelete(documentIds);
-    setDeleteDialogOpen(true);
-  }, [isDemoMode]);
+  const handleDelete = useCallback(
+    (documentIds: string[]) => {
+      if (isDemoMode) {
+        toast.error("⚠️ Delete disabled in demo mode");
+        return;
+      }
+      setDocumentsToDelete(documentIds);
+      setDeleteDialogOpen(true);
+    },
+    [isDemoMode]
+  );
 
   // Confirm and execute document deletion
   const handleConfirmDelete = useCallback(async () => {
@@ -331,12 +330,12 @@ const DocumentsPage: React.FC = () => {
 
     try {
       await Promise.all(documentsToDelete.map((id) => deleteDocument(id).unwrap()));
-      toast.success(count === 1 ? 'Document deleted' : `${count} documents deleted`);
+      toast.success(count === 1 ? "Document deleted" : `${count} documents deleted`);
       setDeleteDialogOpen(false);
       setDocumentsToDelete([]);
       refetch();
     } catch (error: any) {
-      toast.error(error?.data?.detail || 'Failed to delete document(s)');
+      toast.error(error?.data?.detail || "Failed to delete document(s)");
     } finally {
       setIsDeleting(false);
     }
@@ -347,10 +346,10 @@ const DocumentsPage: React.FC = () => {
     async (documentId: string) => {
       try {
         await retryProcessing(documentId).unwrap();
-        toast.success('Document queued for reprocessing');
+        toast.success("Document queued for reprocessing");
         refetch();
       } catch (error: any) {
-        toast.error(error?.data?.detail || 'Failed to reprocess document');
+        toast.error(error?.data?.detail || "Failed to reprocess document");
       }
     },
     [retryProcessing, refetch]
@@ -364,10 +363,10 @@ const DocumentsPage: React.FC = () => {
           projectId,
           extractionConfig: config as unknown as Record<string, unknown>,
         }).unwrap();
-        toast.success('Project configuration saved');
+        toast.success("Project configuration saved");
         setIsConfigModalOpen(false);
       } catch (error: any) {
-        toast.error(error?.data?.detail || 'Failed to save configuration');
+        toast.error(error?.data?.detail || "Failed to save configuration");
         throw error;
       }
     },
@@ -378,8 +377,8 @@ const DocumentsPage: React.FC = () => {
     <div
       ref={dropZoneRef}
       className={cn(
-        'flex h-[calc(100vh-112px)] relative',
-        isDraggingOver && 'ring-2 ring-primary ring-inset'
+        "flex h-[calc(100vh-112px)] relative",
+        isDraggingOver && "ring-2 ring-primary ring-inset"
       )}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
@@ -389,30 +388,30 @@ const DocumentsPage: React.FC = () => {
       {/* Full-Page Drag Overlay */}
       {isDraggingOver && (
         <div className="absolute inset-0 z-50 bg-primary/10 backdrop-blur-sm flex items-center justify-center pointer-events-none">
-          <div className={cn(
-            "bg-background border-2 border-dashed rounded-lg p-8 shadow-lg",
-            isDemoMode ? "border-yellow-400" : "border-primary"
-          )}>
+          <div
+            className={cn(
+              "bg-background border-2 border-dashed rounded-lg p-8 shadow-lg",
+              isDemoMode ? "border-yellow-400" : "border-primary"
+            )}
+          >
             <div className="flex flex-col items-center gap-4 text-center">
-              <div className={cn(
-                "p-4 rounded-full",
-                isDemoMode ? "bg-yellow-100" : "bg-primary/10"
-              )}>
-                <Upload className={cn(
-                  "h-12 w-12",
-                  isDemoMode ? "text-yellow-600" : "text-primary"
-                )} />
+              <div
+                className={cn("p-4 rounded-full", isDemoMode ? "bg-yellow-100" : "bg-primary/10")}
+              >
+                <Upload
+                  className={cn("h-12 w-12", isDemoMode ? "text-yellow-600" : "text-primary")}
+                />
               </div>
               <div>
                 <p className="text-xl font-semibold">
-                  {isDemoMode ? 'Upload disabled in demo mode' : 'Drop files to upload'}
+                  {isDemoMode ? "Upload disabled in demo mode" : "Drop files to upload"}
                 </p>
                 <p className="text-muted-foreground mt-1">
                   {isDemoMode
-                    ? 'Sign up to upload your own documents'
+                    ? "Sign up to upload your own documents"
                     : selectedProjectId
-                    ? 'Release to upload documents to this project'
-                    : 'Select a project first to upload documents'}
+                      ? "Release to upload documents to this project"
+                      : "Select a project first to upload documents"}
                 </p>
               </div>
             </div>
@@ -451,9 +450,7 @@ const DocumentsPage: React.FC = () => {
               <div>
                 <h1 className="text-2xl font-bold">Documents</h1>
                 <p className="text-muted-foreground mt-1">
-                  {selectedProjectId
-                    ? 'Project documents'
-                    : 'All documents across projects'}
+                  {selectedProjectId ? "Project documents" : "All documents across projects"}
                 </p>
               </div>
             </div>
@@ -461,29 +458,25 @@ const DocumentsPage: React.FC = () => {
               {/* WebSocket connection indicator */}
               <div
                 className={cn(
-                  'flex items-center gap-1.5 px-2 py-1 rounded-full text-xs',
+                  "flex items-center gap-1.5 px-2 py-1 rounded-full text-xs",
                   wsConnected
-                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                    : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                    ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                    : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
                 )}
-                title={wsConnected ? 'Real-time updates active' : 'Connecting to real-time updates...'}
+                title={
+                  wsConnected ? "Real-time updates active" : "Connecting to real-time updates..."
+                }
               >
                 <span
                   className={cn(
-                    'w-2 h-2 rounded-full',
-                    wsConnected ? 'bg-green-500' : 'bg-yellow-500 animate-pulse'
+                    "w-2 h-2 rounded-full",
+                    wsConnected ? "bg-green-500" : "bg-yellow-500 animate-pulse"
                   )}
                 />
-                {wsConnected ? 'Live' : 'Connecting'}
+                {wsConnected ? "Live" : "Connecting"}
               </div>
-              <Button
-                variant="outline"
-                onClick={() => refetch()}
-                disabled={isFetching}
-              >
-                <RefreshCw
-                  className={cn('mr-2 h-4 w-4', isFetching && 'animate-spin')}
-                />
+              <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
+                <RefreshCw className={cn("mr-2 h-4 w-4", isFetching && "animate-spin")} />
                 Refresh
               </Button>
               {/* Project Settings Button */}
@@ -520,7 +513,7 @@ const DocumentsPage: React.FC = () => {
                       </div>
                     </div>
                     <Button
-                      onClick={() => window.location.href = '/auth/register'}
+                      onClick={() => (window.location.href = "/auth/register")}
                       className="bg-yellow-600 hover:bg-yellow-700 text-white"
                     >
                       Sign Up to Upload
@@ -544,12 +537,10 @@ const DocumentsPage: React.FC = () => {
                     <FileText className="h-6 w-6 text-primary" />
                   </div>
                   <div>
-                    <p className="font-medium text-lg">
-                      Select a project to upload documents
-                    </p>
+                    <p className="font-medium text-lg">Select a project to upload documents</p>
                     <p className="text-sm text-muted-foreground">
-                      Choose a project from the left panel to start uploading and
-                      processing documents
+                      Choose a project from the left panel to start uploading and processing
+                      documents
                     </p>
                   </div>
                 </div>
@@ -588,7 +579,7 @@ const DocumentsPage: React.FC = () => {
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline">
                       <Filter className="mr-2 h-4 w-4" />
-                      {statusFilter ? statusFilter : 'All Status'}
+                      {statusFilter ? statusFilter : "All Status"}
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
@@ -603,7 +594,7 @@ const DocumentsPage: React.FC = () => {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={() => {
-                        setStatusFilter('pending');
+                        setStatusFilter("pending");
                         setPage(1);
                       }}
                     >
@@ -611,7 +602,7 @@ const DocumentsPage: React.FC = () => {
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => {
-                        setStatusFilter('processing');
+                        setStatusFilter("processing");
                         setPage(1);
                       }}
                     >
@@ -619,7 +610,7 @@ const DocumentsPage: React.FC = () => {
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => {
-                        setStatusFilter('completed');
+                        setStatusFilter("completed");
                         setPage(1);
                       }}
                     >
@@ -627,7 +618,7 @@ const DocumentsPage: React.FC = () => {
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => {
-                        setStatusFilter('failed');
+                        setStatusFilter("failed");
                         setPage(1);
                       }}
                     >
@@ -642,12 +633,8 @@ const DocumentsPage: React.FC = () => {
           {/* Documents Table */}
           <Card>
             <CardHeader>
-              <CardTitle>
-                {selectedProjectId ? 'Project Documents' : 'All Documents'}
-              </CardTitle>
-              <CardDescription>
-                {pagination?.total || 0} documents total
-              </CardDescription>
+              <CardTitle>{selectedProjectId ? "Project Documents" : "All Documents"}</CardTitle>
+              <CardDescription>{pagination?.total || 0} documents total</CardDescription>
             </CardHeader>
             <CardContent>
               <DocumentTable

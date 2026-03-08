@@ -6,7 +6,7 @@
  * for uploaded_docs and structured_data types.
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   FileStack,
   Globe,
@@ -17,7 +17,7 @@ import {
   X,
   Loader2,
   Info,
-} from 'lucide-react';
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -25,14 +25,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/badge';
-import type { DataSource, DataSourceConfig, DataSourceType, QAPair } from '../types';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import type { DataSource, DataSourceConfig, DataSourceType, QAPair } from "../types";
 
 interface EditDataSourceDialogProps {
   open: boolean;
@@ -46,31 +46,31 @@ interface EditDataSourceDialogProps {
 
 const getTypeIcon = (type: DataSourceType) => {
   switch (type) {
-    case 'uploaded_docs':
+    case "uploaded_docs":
       return <FileStack className="h-5 w-5" />;
-    case 'website':
+    case "website":
       return <Globe className="h-5 w-5" />;
-    case 'text':
+    case "text":
       return <FileText className="h-5 w-5" />;
-    case 'qa_pairs':
+    case "qa_pairs":
       return <MessageSquare className="h-5 w-5" />;
-    case 'structured_data':
+    case "structured_data":
       return <Database className="h-5 w-5" />;
   }
 };
 
 const getTypeLabel = (type: DataSourceType) => {
   switch (type) {
-    case 'uploaded_docs':
-      return 'Uploaded Documents';
-    case 'website':
-      return 'Website Crawler';
-    case 'text':
-      return 'Text Input';
-    case 'qa_pairs':
-      return 'Q&A Pairs';
-    case 'structured_data':
-      return 'Structured Data';
+    case "uploaded_docs":
+      return "Uploaded Documents";
+    case "website":
+      return "Website Crawler";
+    case "text":
+      return "Text Input";
+    case "qa_pairs":
+      return "Q&A Pairs";
+    case "structured_data":
+      return "Structured Data";
   }
 };
 
@@ -89,9 +89,7 @@ const TextEditor: React.FC<{
         placeholder="Enter text content..."
         className="min-h-[200px] resize-y font-mono text-sm"
       />
-      <p className="text-xs text-muted-foreground">
-        {content.length.toLocaleString()} characters
-      </p>
+      <p className="text-xs text-muted-foreground">{content.length.toLocaleString()} characters</p>
     </div>
   );
 };
@@ -114,10 +112,7 @@ const QAPairsEditor: React.FC<{
   };
 
   const handleAddPair = () => {
-    onChange([
-      ...pairs,
-      { id: `qa-new-${Date.now()}`, question: '', answer: '' },
-    ]);
+    onChange([...pairs, { id: `qa-new-${Date.now()}`, question: "", answer: "" }]);
   };
 
   const handleRemovePair = (index: number) => {
@@ -130,16 +125,13 @@ const QAPairsEditor: React.FC<{
       <div className="flex items-center justify-between">
         <Label>Q&A Pairs</Label>
         <Badge variant="secondary" className="text-xs">
-          {pairs.length} pair{pairs.length !== 1 ? 's' : ''}
+          {pairs.length} pair{pairs.length !== 1 ? "s" : ""}
         </Badge>
       </div>
 
       <div className="space-y-3">
         {pairs.map((pair, index) => (
-          <div
-            key={pair.id || index}
-            className="border rounded-lg p-4 space-y-3 relative group"
-          >
+          <div key={pair.id || index} className="border rounded-lg p-4 space-y-3 relative group">
             <div className="flex items-start justify-between gap-2">
               <span className="text-xs font-medium text-muted-foreground shrink-0 mt-2.5">
                 #{index + 1}
@@ -183,12 +175,7 @@ const QAPairsEditor: React.FC<{
         ))}
       </div>
 
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={handleAddPair}
-        className="w-full gap-1.5"
-      >
+      <Button variant="outline" size="sm" onClick={handleAddPair} className="w-full gap-1.5">
         <Plus className="h-4 w-4" />
         Add Q&A Pair
       </Button>
@@ -250,7 +237,7 @@ const UploadedDocsReadOnly: React.FC<{ dataSource: DataSource }> = ({ dataSource
         <div className="flex items-center gap-2 text-sm">
           <FileStack className="h-4 w-4 text-muted-foreground" />
           <span>
-            {count} document{count !== 1 ? 's' : ''} uploaded
+            {count} document{count !== 1 ? "s" : ""} uploaded
           </span>
         </div>
         {docIds.length > 0 && (
@@ -281,7 +268,8 @@ const StructuredDataReadOnly: React.FC<{ dataSource: DataSource }> = ({ dataSour
       <div className="flex items-start gap-2 p-3 rounded-lg bg-blue-50 text-blue-700 text-sm">
         <Info className="h-4 w-4 mt-0.5 shrink-0" />
         <span>
-          Structured data cannot be edited. To update the data, create a new data source with the updated file.
+          Structured data cannot be edited. To update the data, create a new data source with the
+          updated file.
         </span>
       </div>
       {fileInfo && (
@@ -292,9 +280,7 @@ const StructuredDataReadOnly: React.FC<{ dataSource: DataSource }> = ({ dataSour
           </div>
           <div className="grid grid-cols-3 gap-3">
             <div className="text-center p-2 bg-muted/50 rounded-lg">
-              <div className="text-sm font-bold">
-                {fileInfo.row_count?.toLocaleString() || 0}
-              </div>
+              <div className="text-sm font-bold">{fileInfo.row_count?.toLocaleString() || 0}</div>
               <div className="text-xs text-muted-foreground">Rows</div>
             </div>
             <div className="text-center p-2 bg-muted/50 rounded-lg">
@@ -302,9 +288,7 @@ const StructuredDataReadOnly: React.FC<{ dataSource: DataSource }> = ({ dataSour
               <div className="text-xs text-muted-foreground">Columns</div>
             </div>
             <div className="text-center p-2 bg-muted/50 rounded-lg">
-              <div className="text-sm font-bold">
-                {formatBytes(fileInfo.size)}
-              </div>
+              <div className="text-sm font-bold">{formatBytes(fileInfo.size)}</div>
               <div className="text-xs text-muted-foreground">Size</div>
             </div>
           </div>
@@ -312,11 +296,9 @@ const StructuredDataReadOnly: React.FC<{ dataSource: DataSource }> = ({ dataSour
       )}
       {schema?.columns && schema.columns.length > 0 && (
         <div className="border rounded-lg p-4 space-y-2">
-          <h4 className="text-sm font-medium">
-            Schema ({schema.columns.length} columns)
-          </h4>
+          <h4 className="text-sm font-medium">Schema ({schema.columns.length} columns)</h4>
           <div className="text-xs text-muted-foreground">
-            {schema.columns.map((c) => c.name).join(', ')}
+            {schema.columns.map((c) => c.name).join(", ")}
           </div>
         </div>
       )}
@@ -325,9 +307,9 @@ const StructuredDataReadOnly: React.FC<{ dataSource: DataSource }> = ({ dataSour
 };
 
 function formatBytes(bytes: number): string {
-  if (!bytes || bytes === 0) return '0 B';
+  if (!bytes || bytes === 0) return "0 B";
   const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const sizes = ["B", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
 }
@@ -339,10 +321,10 @@ export const EditDataSourceDialog: React.FC<EditDataSourceDialogProps> = ({
   onSave,
 }) => {
   // Form state
-  const [name, setName] = useState('');
-  const [textContent, setTextContent] = useState('');
+  const [name, setName] = useState("");
+  const [textContent, setTextContent] = useState("");
   const [qaPairs, setQaPairs] = useState<QAPair[]>([]);
-  const [websiteUrl, setWebsiteUrl] = useState('');
+  const [websiteUrl, setWebsiteUrl] = useState("");
   const [maxDepth, setMaxDepth] = useState(1);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -350,13 +332,11 @@ export const EditDataSourceDialog: React.FC<EditDataSourceDialogProps> = ({
   useEffect(() => {
     if (dataSource) {
       setName(dataSource.name);
-      setTextContent(dataSource.config.content || '');
+      setTextContent(dataSource.config.content || "");
       setQaPairs(
-        dataSource.config.qa_pairs
-          ? dataSource.config.qa_pairs.map((p) => ({ ...p }))
-          : []
+        dataSource.config.qa_pairs ? dataSource.config.qa_pairs.map((p) => ({ ...p })) : []
       );
-      setWebsiteUrl(dataSource.config.url || '');
+      setWebsiteUrl(dataSource.config.url || "");
       setMaxDepth(dataSource.config.max_depth || 1);
     }
   }, [dataSource]);
@@ -368,24 +348,23 @@ export const EditDataSourceDialog: React.FC<EditDataSourceDialogProps> = ({
     if (name !== dataSource.name) return true;
 
     switch (dataSource.type) {
-      case 'text':
-        return textContent !== (dataSource.config.content || '');
-      case 'qa_pairs': {
+      case "text":
+        return textContent !== (dataSource.config.content || "");
+      case "qa_pairs": {
         const original = dataSource.config.qa_pairs || [];
         if (qaPairs.length !== original.length) return true;
         return qaPairs.some(
           (pair, i) =>
-            pair.question !== original[i]?.question ||
-            pair.answer !== original[i]?.answer
+            pair.question !== original[i]?.question || pair.answer !== original[i]?.answer
         );
       }
-      case 'website':
+      case "website":
         return (
-          websiteUrl !== (dataSource.config.url || '') ||
+          websiteUrl !== (dataSource.config.url || "") ||
           maxDepth !== (dataSource.config.max_depth || 1)
         );
-      case 'uploaded_docs':
-      case 'structured_data':
+      case "uploaded_docs":
+      case "structured_data":
         // Only name can be changed for these types
         return false;
       default:
@@ -405,28 +384,27 @@ export const EditDataSourceDialog: React.FC<EditDataSourceDialogProps> = ({
       }
 
       switch (dataSource.type) {
-        case 'text':
-          if (textContent !== (dataSource.config.content || '')) {
+        case "text":
+          if (textContent !== (dataSource.config.content || "")) {
             updates.config = { content: textContent };
           }
           break;
-        case 'qa_pairs': {
+        case "qa_pairs": {
           const original = dataSource.config.qa_pairs || [];
           const pairsChanged =
             qaPairs.length !== original.length ||
             qaPairs.some(
               (pair, i) =>
-                pair.question !== original[i]?.question ||
-                pair.answer !== original[i]?.answer
+                pair.question !== original[i]?.question || pair.answer !== original[i]?.answer
             );
           if (pairsChanged) {
             updates.config = { qa_pairs: qaPairs };
           }
           break;
         }
-        case 'website':
+        case "website":
           if (
-            websiteUrl !== (dataSource.config.url || '') ||
+            websiteUrl !== (dataSource.config.url || "") ||
             maxDepth !== (dataSource.config.max_depth || 1)
           ) {
             updates.config = { url: websiteUrl, max_depth: maxDepth };
@@ -437,24 +415,31 @@ export const EditDataSourceDialog: React.FC<EditDataSourceDialogProps> = ({
       await onSave(dataSource, updates);
       onOpenChange(false);
     } catch (err) {
-      console.error('Failed to save data source:', err);
+      console.error("Failed to save data source:", err);
     } finally {
       setIsSaving(false);
     }
-  }, [dataSource, name, textContent, qaPairs, websiteUrl, maxDepth, hasChanges, onSave, onOpenChange]);
+  }, [
+    dataSource,
+    name,
+    textContent,
+    qaPairs,
+    websiteUrl,
+    maxDepth,
+    hasChanges,
+    onSave,
+    onOpenChange,
+  ]);
 
   if (!dataSource) return null;
 
-  const isReadOnly =
-    dataSource.type === 'uploaded_docs' || dataSource.type === 'structured_data';
-
   const renderTypeEditor = () => {
     switch (dataSource.type) {
-      case 'text':
+      case "text":
         return <TextEditor content={textContent} onChange={setTextContent} />;
-      case 'qa_pairs':
+      case "qa_pairs":
         return <QAPairsEditor pairs={qaPairs} onChange={setQaPairs} />;
-      case 'website':
+      case "website":
         return (
           <WebsiteEditor
             url={websiteUrl}
@@ -463,9 +448,9 @@ export const EditDataSourceDialog: React.FC<EditDataSourceDialogProps> = ({
             onMaxDepthChange={setMaxDepth}
           />
         );
-      case 'uploaded_docs':
+      case "uploaded_docs":
         return <UploadedDocsReadOnly dataSource={dataSource} />;
-      case 'structured_data':
+      case "structured_data":
         return <StructuredDataReadOnly dataSource={dataSource} />;
       default:
         return null;
@@ -487,10 +472,7 @@ export const EditDataSourceDialog: React.FC<EditDataSourceDialogProps> = ({
           </div>
         </DialogHeader>
 
-        <ScrollArea
-          className="flex-1 -mx-6 px-6"
-          style={{ maxHeight: 'calc(85vh - 200px)' }}
-        >
+        <ScrollArea className="flex-1 -mx-6 px-6" style={{ maxHeight: "calc(85vh - 200px)" }}>
           <div className="space-y-6 py-2">
             {/* Name field - always editable */}
             <div className="space-y-2">
@@ -512,10 +494,7 @@ export const EditDataSourceDialog: React.FC<EditDataSourceDialogProps> = ({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button
-            onClick={handleSave}
-            disabled={!hasChanges || isSaving || !name.trim()}
-          >
+          <Button onClick={handleSave} disabled={!hasChanges || isSaving || !name.trim()}>
             {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Save Changes
           </Button>

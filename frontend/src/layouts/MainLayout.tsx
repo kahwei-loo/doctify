@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { Outlet } from 'react-router-dom';
-import Sidebar from '@/shared/components/layout/Sidebar';
-import Header from '@/shared/components/layout/Header';
-import { CommandPalette } from '@/shared/components/common/CommandPalette';
-import { DemoModeBanner } from '@/features/demo/components/DemoModeBanner';
-import { useAppSelector } from '@/store';
-import { selectIsDemoMode } from '@/store/slices/demoSlice';
-import { cn } from '@/lib/utils';
+import React, { useState } from "react";
+import { Outlet } from "react-router-dom";
+import Sidebar from "@/shared/components/layout/Sidebar";
+import Header from "@/shared/components/layout/Header";
+import { CommandPalette } from "@/shared/components/common/CommandPalette";
+import { DemoModeBanner } from "@/features/demo/components/DemoModeBanner";
+import { useAppSelector } from "@/store";
+import { selectIsDemoMode } from "@/store/slices/demoSlice";
+import { cn } from "@/lib/utils";
 
 const SIDEBAR_WIDTH_EXPANDED = 240;
 const SIDEBAR_WIDTH_COLLAPSED = 68;
@@ -19,9 +19,7 @@ const MainLayout: React.FC = () => {
 
   const toggleSidebar = () => setSidebarCollapsed((collapsed) => !collapsed);
 
-  const currentSidebarWidth = sidebarCollapsed
-    ? SIDEBAR_WIDTH_COLLAPSED
-    : SIDEBAR_WIDTH_EXPANDED;
+  const currentSidebarWidth = sidebarCollapsed ? SIDEBAR_WIDTH_COLLAPSED : SIDEBAR_WIDTH_EXPANDED;
 
   const topPadding = isDemoMode ? HEADER_HEIGHT + DEMO_BANNER_HEIGHT : HEADER_HEIGHT;
 
@@ -41,10 +39,7 @@ const MainLayout: React.FC = () => {
 
       {/* Main content area */}
       <main
-        className={cn(
-          'transition-all duration-300 ease-in-out',
-          'min-h-screen bg-background'
-        )}
+        className={cn("transition-all duration-300 ease-in-out", "min-h-screen bg-background")}
         style={{
           marginLeft: currentSidebarWidth,
           paddingTop: topPadding,

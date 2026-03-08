@@ -5,9 +5,14 @@
  */
 
 // Assistant Types
-export type AssistantStatus = 'active' | 'inactive';
-export type AIProvider = 'openai' | 'anthropic' | 'google';
-export type AIModel = 'gpt-4' | 'gpt-3.5-turbo' | 'claude-3-opus' | 'claude-3-sonnet' | 'gemini-pro';
+export type AssistantStatus = "active" | "inactive";
+export type AIProvider = "openai" | "anthropic" | "google";
+export type AIModel =
+  | "gpt-4"
+  | "gpt-3.5-turbo"
+  | "claude-3-opus"
+  | "claude-3-sonnet"
+  | "gemini-pro";
 
 export interface ModelConfig {
   provider: AIProvider;
@@ -88,11 +93,11 @@ export interface AssistantFilters {
 }
 
 // Conversation Types
-export type ConversationStatus = 'unresolved' | 'in_progress' | 'resolved';
-export type MessageRole = 'user' | 'assistant' | 'system';
+export type ConversationStatus = "unresolved" | "in_progress" | "resolved";
+export type MessageRole = "user" | "assistant" | "system";
 
 export interface ConversationContext {
-  source?: 'test_dialog' | 'widget' | 'api';
+  source?: "test_dialog" | "widget" | "api";
   page_url?: string;
   [key: string]: any;
 }
@@ -175,12 +180,12 @@ export interface PaginationMeta {
 
 // WebSocket Types
 export type WebSocketMessageType =
-  | 'message.chunk'
-  | 'message.complete'
-  | 'message.error'
-  | 'conversation.status_change'
-  | 'typing.start'
-  | 'typing.stop';
+  | "message.chunk"
+  | "message.complete"
+  | "message.error"
+  | "conversation.status_change"
+  | "typing.start"
+  | "typing.stop";
 
 export interface WebSocketMessage {
   type: WebSocketMessageType;
@@ -189,7 +194,7 @@ export interface WebSocketMessage {
 }
 
 export interface MessageChunk {
-  type: 'message.chunk';
+  type: "message.chunk";
   content: string;
   is_final?: boolean;
 }

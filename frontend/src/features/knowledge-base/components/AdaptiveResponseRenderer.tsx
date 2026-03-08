@@ -8,22 +8,14 @@
  * Part of Unified Knowledge & Insights integration.
  */
 
-import React from 'react';
-import {
-  FileText,
-  BarChart3,
-  Code,
-  Lightbulb,
-  Shield,
-  ChevronDown,
-  ChevronUp,
-} from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
-import { ChartRenderer } from '@/features/insights/components/ChartRenderer';
-import { QueryFeedback } from './QueryFeedback';
-import type { UnifiedQueryResponse } from '../types';
+import React from "react";
+import { FileText, BarChart3, Code, Lightbulb, Shield, ChevronDown, ChevronUp } from "lucide-react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { ChartRenderer } from "@/features/insights/components/ChartRenderer";
+import { QueryFeedback } from "./QueryFeedback";
+import type { UnifiedQueryResponse } from "../types";
 
 interface AdaptiveResponseRendererProps {
   response: UnifiedQueryResponse;
@@ -40,7 +32,7 @@ function renderAnswerWithSourceLinks(
   onSourceClick: (index: number) => void
 ): React.ReactNode {
   // Match (Sources 1, 2, 3), [Source 1, Source 2, Source 3], etc.
-  const pattern = /[(\[]Sources?\s+([^)\]]+)[)\]]/gi;
+  const pattern = /[([]Sources?\s+([^)\]]+)[)\]]/gi;
   const parts: React.ReactNode[] = [];
   let lastIndex = 0;
   let match;
@@ -51,20 +43,23 @@ function renderAnswerWithSourceLinks(
     }
 
     const open = match[0][0];
-    const close = open === '(' ? ')' : ']';
+    const close = open === "(" ? ")" : "]";
     const numbers = match[1].match(/\d+/g)?.map(Number) || [];
     if (numbers.length > 0) {
       parts.push(
         <span key={`src-${match.index}`}>
           {open}
-          {numbers.length > 1 ? 'Sources ' : 'Source '}
+          {numbers.length > 1 ? "Sources " : "Source "}
           {numbers.map((num, i) => (
             <React.Fragment key={num}>
-              {i > 0 && ', '}
+              {i > 0 && ", "}
               <button
                 type="button"
                 className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
-                onClick={(e) => { e.stopPropagation(); onSourceClick(num - 1); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSourceClick(num - 1);
+                }}
               >
                 {num}
               </button>
@@ -94,7 +89,7 @@ const IntentBadge: React.FC<{
   intentType: string;
   confidence: number;
 }> = ({ intentType, confidence }) => {
-  const isRAG = intentType === 'rag';
+  const isRAG = intentType === "rag";
   const confidencePercent = (confidence * 100).toFixed(0);
 
   return (
@@ -102,22 +97,16 @@ const IntentBadge: React.FC<{
       <Badge
         variant="outline"
         className={cn(
-          'gap-1',
+          "gap-1",
           isRAG
-            ? 'border-blue-200 bg-blue-50 text-blue-700'
-            : 'border-indigo-200 bg-indigo-50 text-indigo-700'
+            ? "border-blue-200 bg-blue-50 text-blue-700"
+            : "border-indigo-200 bg-indigo-50 text-indigo-700"
         )}
       >
-        {isRAG ? (
-          <FileText className="h-3 w-3" />
-        ) : (
-          <BarChart3 className="h-3 w-3" />
-        )}
-        {isRAG ? 'Document Q&A' : 'Data Analytics'}
+        {isRAG ? <FileText className="h-3 w-3" /> : <BarChart3 className="h-3 w-3" />}
+        {isRAG ? "Document Q&A" : "Data Analytics"}
       </Badge>
-      <span className="text-xs text-muted-foreground">
-        {confidencePercent}% confidence
-      </span>
+      <span className="text-xs text-muted-foreground">{confidencePercent}% confidence</span>
     </div>
   );
 };
@@ -126,7 +115,7 @@ const IntentBadge: React.FC<{
  * RAG Response Section - Answer with sources
  */
 const RAGResponseSection: React.FC<{
-  response: NonNullable<UnifiedQueryResponse['rag_response']>;
+  response: NonNullable<UnifiedQueryResponse["rag_response"]>;
 }> = ({ response }) => {
   const [showSources, setShowSources] = React.useState(false);
   const [highlightedIndex, setHighlightedIndex] = React.useState<number | null>(null);
@@ -136,7 +125,7 @@ const RAGResponseSection: React.FC<{
     setShowSources(true);
     setHighlightedIndex(sourceIndex);
     setTimeout(() => {
-      sourceCardRefs.current[sourceIndex]?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      sourceCardRefs.current[sourceIndex]?.scrollIntoView({ behavior: "smooth", block: "nearest" });
       setTimeout(() => setHighlightedIndex(null), 2000);
     }, 150);
   }, []);
@@ -160,12 +149,12 @@ const RAGResponseSection: React.FC<{
           <Badge
             variant="outline"
             className={cn(
-              'text-xs',
+              "text-xs",
               response.groundedness_score >= 0.8
-                ? 'border-green-200 bg-green-50 text-green-700'
+                ? "border-green-200 bg-green-50 text-green-700"
                 : response.groundedness_score >= 0.6
-                  ? 'border-yellow-200 bg-yellow-50 text-yellow-700'
-                  : 'border-red-200 bg-red-50 text-red-700'
+                  ? "border-yellow-200 bg-yellow-50 text-yellow-700"
+                  : "border-red-200 bg-red-50 text-red-700"
             )}
           >
             {(response.groundedness_score * 100).toFixed(0)}%
@@ -180,12 +169,8 @@ const RAGResponseSection: React.FC<{
             onClick={() => setShowSources(!showSources)}
             className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
-            {showSources ? (
-              <ChevronUp className="h-4 w-4" />
-            ) : (
-              <ChevronDown className="h-4 w-4" />
-            )}
-            {response.sources.length} source{response.sources.length !== 1 ? 's' : ''}
+            {showSources ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            {response.sources.length} source{response.sources.length !== 1 ? "s" : ""}
           </button>
 
           {showSources && (
@@ -193,7 +178,9 @@ const RAGResponseSection: React.FC<{
               {response.sources.map((source, index) => (
                 <Card
                   key={index}
-                  ref={(el: HTMLDivElement | null) => { sourceCardRefs.current[index] = el; }}
+                  ref={(el: HTMLDivElement | null) => {
+                    sourceCardRefs.current[index] = el;
+                  }}
                   className={cn(
                     "border-dashed transition-all duration-300",
                     highlightedIndex === index && "ring-2 ring-blue-400 border-blue-300"
@@ -233,14 +220,14 @@ const RAGResponseSection: React.FC<{
  * Analytics Response Section - Chart + SQL + Insights
  */
 const AnalyticsResponseSection: React.FC<{
-  response: NonNullable<UnifiedQueryResponse['analytics_response']>;
+  response: NonNullable<UnifiedQueryResponse["analytics_response"]>;
 }> = ({ response }) => {
   const [showSQL, setShowSQL] = React.useState(false);
 
   // Build chart config for ChartRenderer
   const chartConfig = response.chart_type
     ? {
-        type: response.chart_type as 'bar' | 'line' | 'pie' | 'table' | 'metric_card',
+        type: response.chart_type as "bar" | "line" | "pie" | "table" | "metric_card",
         config: response.chart_config || {},
         data: response.data as Record<string, any>[],
       }
@@ -260,7 +247,7 @@ const AnalyticsResponseSection: React.FC<{
         <div className="rounded-lg border bg-card p-4">
           <ChartRenderer
             chart={{
-              type: 'table',
+              type: "table",
               config: {},
               data: response.data as Record<string, any>[],
             }}
@@ -284,7 +271,7 @@ const AnalyticsResponseSection: React.FC<{
             className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <Code className="h-4 w-4" />
-            {showSQL ? 'Hide' : 'Show'} SQL Query
+            {showSQL ? "Hide" : "Show"} SQL Query
           </button>
 
           {showSQL && (
@@ -308,9 +295,9 @@ export const AdaptiveResponseRenderer: React.FC<AdaptiveResponseRendererProps> =
 }) => {
   const content = (
     <>
-      {response.intent_type === 'rag' && response.rag_response ? (
+      {response.intent_type === "rag" && response.rag_response ? (
         <RAGResponseSection response={response.rag_response} />
-      ) : response.intent_type === 'analytics' && response.analytics_response ? (
+      ) : response.intent_type === "analytics" && response.analytics_response ? (
         <AnalyticsResponseSection response={response.analytics_response} />
       ) : (
         <p className="text-sm text-muted-foreground">No response data available.</p>
@@ -320,7 +307,7 @@ export const AdaptiveResponseRenderer: React.FC<AdaptiveResponseRendererProps> =
       <div className="border-t pt-2 mt-3">
         <QueryFeedback
           queryId={response.id}
-          intentType={response.intent_type === 'analytics' ? 'analytics' : 'rag'}
+          intentType={response.intent_type === "analytics" ? "analytics" : "rag"}
         />
       </div>
     </>
@@ -328,39 +315,29 @@ export const AdaptiveResponseRenderer: React.FC<AdaptiveResponseRendererProps> =
 
   if (compact) {
     return (
-      <div className={cn('rounded-lg border bg-card', className)}>
+      <div className={cn("rounded-lg border bg-card", className)}>
         <div className="flex items-center justify-between px-3 py-2 border-b bg-muted/20">
-          <IntentBadge
-            intentType={response.intent_type}
-            confidence={response.confidence}
-          />
+          <IntentBadge intentType={response.intent_type} confidence={response.confidence} />
           <span className="text-[10px] text-muted-foreground">
             {new Date(response.created_at).toLocaleTimeString()}
           </span>
         </div>
-        <div className="px-3 py-2.5 space-y-3">
-          {content}
-        </div>
+        <div className="px-3 py-2.5 space-y-3">{content}</div>
       </div>
     );
   }
 
   return (
-    <Card className={cn('overflow-hidden', className)}>
+    <Card className={cn("overflow-hidden", className)}>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <IntentBadge
-            intentType={response.intent_type}
-            confidence={response.confidence}
-          />
+          <IntentBadge intentType={response.intent_type} confidence={response.confidence} />
           <span className="text-xs text-muted-foreground">
             {new Date(response.created_at).toLocaleTimeString()}
           </span>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {content}
-      </CardContent>
+      <CardContent className="space-y-4">{content}</CardContent>
     </Card>
   );
 };

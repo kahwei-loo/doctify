@@ -11,90 +11,82 @@
  * - Settings preview
  */
 
-import React, { useState, useEffect } from 'react';
-import { Settings, Save, Info, Zap, AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import React, { useState, useEffect } from "react";
+import { Settings, Save, Info, Zap, AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
-import type { KnowledgeBase, ChunkStrategy } from '../types';
+} from "@/components/ui/select";
+
+import { cn } from "@/lib/utils";
+import type { KnowledgeBase, ChunkStrategy } from "../types";
 
 interface KBSettingsProps {
   knowledgeBase: KnowledgeBase;
-  onSave?: (config: KnowledgeBase['config']) => void;
+  onSave?: (config: KnowledgeBase["config"]) => void;
   className?: string;
 }
 
 const CHUNK_STRATEGIES = [
   {
-    value: 'semantic' as ChunkStrategy,
-    label: 'Semantic',
-    description: 'Sentence-boundary-aware chunking (recommended)',
+    value: "semantic" as ChunkStrategy,
+    label: "Semantic",
+    description: "Sentence-boundary-aware chunking (recommended)",
   },
   {
-    value: 'recursive' as ChunkStrategy,
-    label: 'Recursive',
-    description: 'Hierarchical splitting by paragraph, sentence, then word',
+    value: "recursive" as ChunkStrategy,
+    label: "Recursive",
+    description: "Hierarchical splitting by paragraph, sentence, then word",
   },
   {
-    value: 'fixed' as ChunkStrategy,
-    label: 'Fixed',
-    description: 'Fixed token window (legacy)',
+    value: "fixed" as ChunkStrategy,
+    label: "Fixed",
+    description: "Fixed token window (legacy)",
   },
 ];
 
 const EMBEDDING_MODELS = [
   {
-    value: 'text-embedding-3-small',
-    label: 'OpenAI Text Embedding 3 Small',
+    value: "text-embedding-3-small",
+    label: "OpenAI Text Embedding 3 Small",
     dimensions: 1536,
-    description: 'Fast and cost-effective for most use cases',
+    description: "Fast and cost-effective for most use cases",
   },
   {
-    value: 'text-embedding-3-large',
-    label: 'OpenAI Text Embedding 3 Large',
+    value: "text-embedding-3-large",
+    label: "OpenAI Text Embedding 3 Large",
     dimensions: 3072,
-    description: 'Higher accuracy, better for complex queries',
+    description: "Higher accuracy, better for complex queries",
   },
 ];
 
 const CHUNK_SIZES = [
-  { value: 512, label: '512 tokens', description: 'Small chunks, more granular search' },
-  { value: 1024, label: '1024 tokens', description: 'Balanced (recommended)' },
-  { value: 2048, label: '2048 tokens', description: 'Large chunks, more context' },
+  { value: 512, label: "512 tokens", description: "Small chunks, more granular search" },
+  { value: 1024, label: "1024 tokens", description: "Balanced (recommended)" },
+  { value: 2048, label: "2048 tokens", description: "Large chunks, more context" },
 ];
 
 const OVERLAP_OPTIONS = [
-  { value: 0, label: 'No overlap', description: 'Distinct chunks, no redundancy' },
-  { value: 128, label: '128 tokens', description: 'Small overlap (recommended)' },
-  { value: 256, label: '256 tokens', description: 'Large overlap, better continuity' },
+  { value: 0, label: "No overlap", description: "Distinct chunks, no redundancy" },
+  { value: 128, label: "128 tokens", description: "Small overlap (recommended)" },
+  { value: 256, label: "256 tokens", description: "Large overlap, better continuity" },
 ];
 
-export const KBSettings: React.FC<KBSettingsProps> = ({
-  knowledgeBase,
-  onSave,
-  className,
-}) => {
+export const KBSettings: React.FC<KBSettingsProps> = ({ knowledgeBase, onSave, className }) => {
   const [embeddingModel, setEmbeddingModel] = useState<string>(
-    knowledgeBase.config.embedding_model || 'text-embedding-3-small'
+    knowledgeBase.config.embedding_model || "text-embedding-3-small"
   );
-  const [chunkSize, setChunkSize] = useState(
-    knowledgeBase.config.chunk_size?.toString() || '1024'
-  );
-  const [overlap, setOverlap] = useState(
-    knowledgeBase.config.chunk_overlap?.toString() || '128'
-  );
+  const [chunkSize, setChunkSize] = useState(knowledgeBase.config.chunk_size?.toString() || "1024");
+  const [overlap, setOverlap] = useState(knowledgeBase.config.chunk_overlap?.toString() || "128");
   const [chunkStrategy, setChunkStrategy] = useState<string>(
-    knowledgeBase.config.chunk_strategy || 'semantic'
+    knowledgeBase.config.chunk_strategy || "semantic"
   );
   const [hasChanges, setHasChanges] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -103,10 +95,10 @@ export const KBSettings: React.FC<KBSettingsProps> = ({
   // Track changes
   useEffect(() => {
     const changed =
-      embeddingModel !== (knowledgeBase.config.embedding_model || 'text-embedding-3-small') ||
+      embeddingModel !== (knowledgeBase.config.embedding_model || "text-embedding-3-small") ||
       parseInt(chunkSize) !== (knowledgeBase.config.chunk_size || 1024) ||
       parseInt(overlap) !== (knowledgeBase.config.chunk_overlap || 128) ||
-      chunkStrategy !== (knowledgeBase.config.chunk_strategy || 'semantic');
+      chunkStrategy !== (knowledgeBase.config.chunk_strategy || "semantic");
     setHasChanges(changed);
   }, [embeddingModel, chunkSize, overlap, chunkStrategy, knowledgeBase.config]);
 
@@ -117,11 +109,11 @@ export const KBSettings: React.FC<KBSettingsProps> = ({
     // Mock save to localStorage (Week 2)
     await new Promise((resolve) => setTimeout(resolve, 500));
 
-    const newConfig: KnowledgeBase['config'] = {
+    const newConfig: KnowledgeBase["config"] = {
       ...knowledgeBase.config,
-      embedding_model: embeddingModel as KnowledgeBase['config']['embedding_model'],
-      chunk_size: parseInt(chunkSize) as KnowledgeBase['config']['chunk_size'],
-      chunk_overlap: parseInt(overlap) as KnowledgeBase['config']['chunk_overlap'],
+      embedding_model: embeddingModel as KnowledgeBase["config"]["embedding_model"],
+      chunk_size: parseInt(chunkSize) as KnowledgeBase["config"]["chunk_size"],
+      chunk_overlap: parseInt(overlap) as KnowledgeBase["config"]["chunk_overlap"],
       chunk_strategy: chunkStrategy as ChunkStrategy,
     };
 
@@ -142,7 +134,7 @@ export const KBSettings: React.FC<KBSettingsProps> = ({
   const selectedOverlap = OVERLAP_OPTIONS.find((o) => o.value === parseInt(overlap));
 
   return (
-    <div className={cn('space-y-6', className)}>
+    <div className={cn("space-y-6", className)}>
       {/* Header */}
       <div>
         <h3 className="text-lg font-medium">Knowledge Base Settings</h3>
@@ -242,7 +234,7 @@ export const KBSettings: React.FC<KBSettingsProps> = ({
       <div className="flex items-center gap-3">
         <Button onClick={handleSave} disabled={!hasChanges || isSaving} className="gap-2">
           <Save className="h-4 w-4" />
-          {isSaving ? 'Saving...' : 'Save Settings'}
+          {isSaving ? "Saving..." : "Save Settings"}
         </Button>
         {hasChanges && (
           <span className="text-sm text-muted-foreground">You have unsaved changes</span>
@@ -326,7 +318,8 @@ export const KBSettings: React.FC<KBSettingsProps> = ({
               <h4 className="text-sm font-medium">Configuration Guide</h4>
               <ul className="text-xs text-muted-foreground space-y-1">
                 <li>
-                  <strong>Chunk Size:</strong> Larger chunks preserve context but reduce search precision
+                  <strong>Chunk Size:</strong> Larger chunks preserve context but reduce search
+                  precision
                 </li>
                 <li>
                   <strong>Overlap:</strong> Prevents information loss at chunk boundaries

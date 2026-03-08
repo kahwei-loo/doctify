@@ -7,8 +7,8 @@
  * Week 1 Task 1.2.2: Confirmation Dialogs
  */
 
-import React from 'react';
-import { AlertTriangle, Trash2 } from 'lucide-react';
+import React from "react";
+import { AlertTriangle, Trash2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,7 +18,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+} from "@/components/ui/alert-dialog";
 
 interface Project {
   project_id: string;
@@ -53,16 +53,14 @@ export const DeleteProjectDialog: React.FC<DeleteProjectDialogProps> = ({
           </AlertDialogTitle>
           <AlertDialogDescription asChild>
             <div className="space-y-4">
-              <p className="text-foreground">
-                This will permanently delete the following:
-              </p>
+              <p className="text-foreground">This will permanently delete the following:</p>
 
               {/* Impact Details */}
               <div className="bg-muted rounded-lg p-4 space-y-2">
                 <ul className="list-disc list-inside text-sm space-y-1.5">
                   <li>
-                    <strong className="font-semibold">{documentCount}</strong>{' '}
-                    {documentCount === 1 ? 'document' : 'documents'}
+                    <strong className="font-semibold">{documentCount}</strong>{" "}
+                    {documentCount === 1 ? "document" : "documents"}
                   </li>
                   <li>All extracted data and processing history</li>
                   <li>All project configuration and settings</li>
@@ -78,8 +76,8 @@ export const DeleteProjectDialog: React.FC<DeleteProjectDialogProps> = ({
                     This action cannot be undone
                   </p>
                   <p className="text-xs text-destructive/80 mt-1">
-                    All data associated with this project will be permanently deleted
-                    from our servers.
+                    All data associated with this project will be permanently deleted from our
+                    servers.
                   </p>
                 </div>
               </div>
@@ -88,8 +86,8 @@ export const DeleteProjectDialog: React.FC<DeleteProjectDialogProps> = ({
               {documentCount > 10 && (
                 <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-3">
                   <p className="text-sm text-orange-800 dark:text-orange-200 font-medium">
-                    ⚠️ This project contains {documentCount} documents. Consider exporting
-                    your data before deletion.
+                    ⚠️ This project contains {documentCount} documents. Consider exporting your data
+                    before deletion.
                   </p>
                 </div>
               )}

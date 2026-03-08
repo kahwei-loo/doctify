@@ -8,16 +8,8 @@
  * 2. Configuration - Configure selected type
  */
 
-import React, { useState } from 'react';
-import {
-  FileStack,
-  Globe,
-  FileText,
-  MessageSquare,
-  Database,
-  ArrowLeft,
-  ArrowRight,
-} from 'lucide-react';
+import React, { useState } from "react";
+import { FileStack, Globe, FileText, MessageSquare, Database, ArrowRight } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -25,10 +17,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import type { DataSourceType } from '../types';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import type { DataSourceType } from "../types";
 
 interface AddDataSourceDialogProps {
   open: boolean;
@@ -50,39 +42,39 @@ interface TypeOption {
 
 const TYPE_OPTIONS: TypeOption[] = [
   {
-    type: 'uploaded_docs',
-    label: 'Uploaded Documents',
-    description: 'Upload PDF, images, and documents to extract knowledge',
+    type: "uploaded_docs",
+    label: "Uploaded Documents",
+    description: "Upload PDF, images, and documents to extract knowledge",
     icon: <FileStack className="h-6 w-6" />,
-    iconBg: 'bg-blue-500/10 text-blue-600',
+    iconBg: "bg-blue-500/10 text-blue-600",
   },
   {
-    type: 'website',
-    label: 'Website Crawler',
-    description: 'Crawl and index content from websites automatically',
+    type: "website",
+    label: "Website Crawler",
+    description: "Crawl and index content from websites automatically",
     icon: <Globe className="h-6 w-6" />,
-    iconBg: 'bg-green-500/10 text-green-600',
+    iconBg: "bg-green-500/10 text-green-600",
   },
   {
-    type: 'text',
-    label: 'Text Input',
-    description: 'Directly input and format text content',
+    type: "text",
+    label: "Text Input",
+    description: "Directly input and format text content",
     icon: <FileText className="h-6 w-6" />,
-    iconBg: 'bg-purple-500/10 text-purple-600',
+    iconBg: "bg-purple-500/10 text-purple-600",
   },
   {
-    type: 'qa_pairs',
-    label: 'Q&A Pairs',
-    description: 'Create question and answer pairs for FAQ-style knowledge',
+    type: "qa_pairs",
+    label: "Q&A Pairs",
+    description: "Create question and answer pairs for FAQ-style knowledge",
     icon: <MessageSquare className="h-6 w-6" />,
-    iconBg: 'bg-orange-500/10 text-orange-600',
+    iconBg: "bg-orange-500/10 text-orange-600",
   },
   {
-    type: 'structured_data',
-    label: 'Structured Data',
-    description: 'Upload CSV or Excel datasets for natural language analytics queries',
+    type: "structured_data",
+    label: "Structured Data",
+    description: "Upload CSV or Excel datasets for natural language analytics queries",
     icon: <Database className="h-6 w-6" />,
-    iconBg: 'bg-indigo-500/10 text-indigo-600',
+    iconBg: "bg-indigo-500/10 text-indigo-600",
   },
 ];
 
@@ -100,16 +92,12 @@ const TypeCard: React.FC<TypeCardProps> = ({ option, selected, onClick }) => {
     <button
       onClick={onClick}
       className={cn(
-        'flex items-start gap-4 p-4 rounded-lg border-2 text-left transition-all w-full',
-        'hover:border-primary/50 hover:bg-muted/50',
-        selected
-          ? 'border-primary bg-primary/5'
-          : 'border-border'
+        "flex items-start gap-4 p-4 rounded-lg border-2 text-left transition-all w-full",
+        "hover:border-primary/50 hover:bg-muted/50",
+        selected ? "border-primary bg-primary/5" : "border-border"
       )}
     >
-      <div className={cn('rounded-lg p-3 shrink-0', option.iconBg)}>
-        {option.icon}
-      </div>
+      <div className={cn("rounded-lg p-3 shrink-0", option.iconBg)}>{option.icon}</div>
       <div className="flex-1 min-w-0">
         <h4 className="font-medium mb-1">{option.label}</h4>
         <p className="text-sm text-muted-foreground">{option.description}</p>
@@ -121,7 +109,7 @@ const TypeCard: React.FC<TypeCardProps> = ({ option, selected, onClick }) => {
 export const AddDataSourceDialog: React.FC<AddDataSourceDialogProps> = ({
   open,
   onOpenChange,
-  knowledgeBaseId,
+  knowledgeBaseId: _knowledgeBaseId,
   onTypeSelected,
 }) => {
   const [selectedType, setSelectedType] = useState<DataSourceType | null>(null);

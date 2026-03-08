@@ -6,15 +6,15 @@
 // Enums
 // ============================================
 
-export type DataType = 'string' | 'integer' | 'float' | 'datetime' | 'boolean';
+export type DataType = "string" | "integer" | "float" | "datetime" | "boolean";
 
-export type AggregationType = 'SUM' | 'COUNT' | 'AVG' | 'MIN' | 'MAX' | 'COUNT_DISTINCT';
+export type AggregationType = "SUM" | "COUNT" | "AVG" | "MIN" | "MAX" | "COUNT_DISTINCT";
 
-export type ChartType = 'metric_card' | 'bar' | 'line' | 'pie' | 'table';
+export type ChartType = "metric_card" | "bar" | "line" | "pie" | "table";
 
-export type DatasetStatus = 'pending' | 'processing' | 'ready' | 'error';
+export type DatasetStatus = "pending" | "processing" | "ready" | "error";
 
-export type QueryStatus = 'pending' | 'processing' | 'completed' | 'error';
+export type QueryStatus = "pending" | "processing" | "completed" | "error";
 
 // ============================================
 // Schema Definition Types

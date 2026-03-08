@@ -4,18 +4,18 @@
  * Configuration panel for AI model, OCR, language, and output format settings.
  */
 
-import React from 'react';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
+import React from "react";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import type { AIModel, OCRLanguage, OutputFormat } from '../types';
-import { AI_MODEL_LABELS, LANGUAGE_LABELS } from '../types';
+} from "@/components/ui/select";
+import type { AIModel, OCRLanguage, OutputFormat } from "../types";
+import { AI_MODEL_LABELS, LANGUAGE_LABELS } from "../types";
 
 interface ProcessingSettingsProps {
   ocrEnabled: boolean;
@@ -29,29 +29,19 @@ interface ProcessingSettingsProps {
 }
 
 const AI_MODELS: AIModel[] = [
-  'gpt-4',
-  'gpt-4-turbo',
-  'gpt-3.5-turbo',
-  'claude-3-opus',
-  'claude-3-sonnet',
+  "gpt-4",
+  "gpt-4-turbo",
+  "gpt-3.5-turbo",
+  "claude-3-opus",
+  "claude-3-sonnet",
 ];
 
-const OCR_LANGUAGES: OCRLanguage[] = [
-  'auto',
-  'en',
-  'es',
-  'fr',
-  'de',
-  'zh',
-  'ja',
-  'ko',
-  'ar',
-];
+const OCR_LANGUAGES: OCRLanguage[] = ["auto", "en", "es", "fr", "de", "zh", "ja", "ko", "ar"];
 
 const OUTPUT_FORMATS: { value: OutputFormat; label: string }[] = [
-  { value: 'json', label: 'JSON' },
-  { value: 'csv', label: 'CSV' },
-  { value: 'xlsx', label: 'Excel (XLSX)' },
+  { value: "json", label: "JSON" },
+  { value: "csv", label: "CSV" },
+  { value: "xlsx", label: "Excel (XLSX)" },
 ];
 
 export const ProcessingSettings: React.FC<ProcessingSettingsProps> = ({
@@ -84,11 +74,7 @@ export const ProcessingSettings: React.FC<ProcessingSettingsProps> = ({
               Enable optical character recognition for scanned documents and images.
             </p>
           </div>
-          <Switch
-            id="ocr-enabled"
-            checked={ocrEnabled}
-            onCheckedChange={onOcrEnabledChange}
-          />
+          <Switch id="ocr-enabled" checked={ocrEnabled} onCheckedChange={onOcrEnabledChange} />
         </div>
 
         {/* AI Model Selection */}

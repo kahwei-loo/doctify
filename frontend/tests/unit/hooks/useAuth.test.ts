@@ -4,13 +4,13 @@
  * Tests authentication, token management, and user state
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, waitFor, act } from '@testing-library/react';
-import { useAuth } from '@/features/auth/hooks/useAuth';
-import { authApi, tokenStorage } from '@/features/auth/services/api';
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { renderHook, waitFor, act } from "@testing-library/react";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { authApi, tokenStorage } from "@/features/auth/services/api";
 
 // Mock dependencies
-vi.mock('@/features/auth/services/api', () => ({
+vi.mock("@/features/auth/services/api", () => ({
   authApi: {
     login: vi.fn(),
     register: vi.fn(),
@@ -28,22 +28,22 @@ vi.mock('@/features/auth/services/api', () => ({
 }));
 
 const mockNavigate = vi.fn();
-vi.mock('react-router-dom', () => ({
+vi.mock("react-router-dom", () => ({
   useNavigate: () => mockNavigate,
 }));
 
 const mockAuthApi = vi.mocked(authApi);
 const mockTokenStorage = vi.mocked(tokenStorage);
 
-describe('useAuth Hook', () => {
+describe("useAuth Hook", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
     mockTokenStorage.isAuthenticated.mockReturnValue(false);
   });
 
-  describe('Initial State', () => {
-    it('initializes with no user when not authenticated', () => {
+  describe("Initial State", () => {
+    it("initializes with no user when not authenticated", () => {
       mockTokenStorage.isAuthenticated.mockReturnValue(false);
 
       const { result } = renderHook(() => useAuth());
@@ -54,7 +54,7 @@ describe('useAuth Hook', () => {
       expect(result.current.error).toBeNull();
     });
 
-    it('shows isAuthenticated as true when token exists', () => {
+    it("shows isAuthenticated as true when token exists", () => {
       mockTokenStorage.isAuthenticated.mockReturnValue(true);
 
       const { result } = renderHook(() => useAuth());
@@ -63,19 +63,19 @@ describe('useAuth Hook', () => {
     });
   });
 
-  describe('Login', () => {
-    it('logs in user successfully', async () => {
+  describe("Login", () => {
+    it("logs in user successfully", async () => {
       const mockUser = {
-        user_id: 'user-1',
-        email: 'test@example.com',
-        full_name: 'Test User',
+        user_id: "user-1",
+        email: "test@example.com",
+        full_name: "Test User",
       };
 
       const mockResponse = {
         success: true,
         data: {
-          access_token: 'access-token',
-          refresh_token: 'refresh-token',
+          access_token: "access-token",
+          refresh_token: "refresh-token",
           user: mockUser,
         },
       };
@@ -86,24 +86,21 @@ describe('useAuth Hook', () => {
 
       await act(async () => {
         await result.current.login({
-          email: 'test@example.com',
-          password: 'password123',
+          email: "test@example.com",
+          password: "password123",
         });
       });
 
       expect(mockAuthApi.login).toHaveBeenCalledWith({
-        email: 'test@example.com',
-        password: 'password123',
+        email: "test@example.com",
+        password: "password123",
       });
-      expect(mockTokenStorage.saveTokens).toHaveBeenCalledWith(
-        'access-token',
-        'refresh-token'
-      );
+      expect(mockTokenStorage.saveTokens).toHaveBeenCalledWith("access-token", "refresh-token");
       expect(result.current.user).toEqual(mockUser);
-      expect(mockNavigate).toHaveBeenCalledWith('/dashboard');
+      expect(mockNavigate).toHaveBeenCalledWith("/dashboard");
     });
 
-    it('sets loading state during login', async () => {
+    it("sets loading state during login", async () => {
       let resolvePromise: (value: any) => void;
       const pendingPromise = new Promise((resolve) => {
         resolvePromise = resolve;
@@ -114,8 +111,8 @@ describe('useAuth Hook', () => {
 
       act(() => {
         result.current.login({
-          email: 'test@example.com',
-          password: 'password',
+          email: "test@example.com",
+          password: "password",
         });
       });
 
@@ -125,9 +122,9 @@ describe('useAuth Hook', () => {
         resolvePromise!({
           success: true,
           data: {
-            access_token: 'token',
-            refresh_token: 'refresh',
-            user: { user_id: '1', email: 'test@example.com' },
+            access_token: "token",
+            refresh_token: "refresh",
+            user: { user_id: "1", email: "test@example.com" },
           },
         });
       });
@@ -135,9 +132,9 @@ describe('useAuth Hook', () => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    it('handles login error', async () => {
+    it("handles login error", async () => {
       mockAuthApi.login.mockRejectedValue({
-        response: { data: { detail: 'Invalid credentials' } },
+        response: { data: { detail: "Invalid credentials" } },
       });
 
       const { result } = renderHook(() => useAuth());
@@ -145,8 +142,8 @@ describe('useAuth Hook', () => {
       await act(async () => {
         try {
           await result.current.login({
-            email: 'test@example.com',
-            password: 'wrong-password',
+            email: "test@example.com",
+            password: "wrong-password",
           });
         } catch {
           // Expected to throw
@@ -154,22 +151,22 @@ describe('useAuth Hook', () => {
       });
 
       await waitFor(() => {
-        expect(result.current.error).toBe('Invalid credentials');
+        expect(result.current.error).toBe("Invalid credentials");
       });
       expect(result.current.isLoading).toBe(false);
       expect(result.current.user).toBeNull();
     });
 
-    it('uses default error message when detail is missing', async () => {
-      mockAuthApi.login.mockRejectedValue(new Error('Network error'));
+    it("uses default error message when detail is missing", async () => {
+      mockAuthApi.login.mockRejectedValue(new Error("Network error"));
 
       const { result } = renderHook(() => useAuth());
 
       await act(async () => {
         try {
           await result.current.login({
-            email: 'test@example.com',
-            password: 'password',
+            email: "test@example.com",
+            password: "password",
           });
         } catch {
           // Expected to throw
@@ -177,24 +174,24 @@ describe('useAuth Hook', () => {
       });
 
       await waitFor(() => {
-        expect(result.current.error).toBe('Login failed. Please try again.');
+        expect(result.current.error).toBe("Login failed. Please try again.");
       });
     });
   });
 
-  describe('Register', () => {
-    it('registers user successfully', async () => {
+  describe("Register", () => {
+    it("registers user successfully", async () => {
       const mockUser = {
-        user_id: 'new-user',
-        email: 'new@example.com',
-        full_name: 'New User',
+        user_id: "new-user",
+        email: "new@example.com",
+        full_name: "New User",
       };
 
       const mockResponse = {
         success: true,
         data: {
-          access_token: 'access-token',
-          refresh_token: 'refresh-token',
+          access_token: "access-token",
+          refresh_token: "refresh-token",
           user: mockUser,
         },
       };
@@ -205,25 +202,25 @@ describe('useAuth Hook', () => {
 
       await act(async () => {
         await result.current.register({
-          email: 'new@example.com',
-          password: 'password123',
-          full_name: 'New User',
+          email: "new@example.com",
+          password: "password123",
+          full_name: "New User",
         });
       });
 
       expect(mockAuthApi.register).toHaveBeenCalledWith({
-        email: 'new@example.com',
-        password: 'password123',
-        full_name: 'New User',
+        email: "new@example.com",
+        password: "password123",
+        full_name: "New User",
       });
       expect(mockTokenStorage.saveTokens).toHaveBeenCalled();
       expect(result.current.user).toEqual(mockUser);
-      expect(mockNavigate).toHaveBeenCalledWith('/dashboard');
+      expect(mockNavigate).toHaveBeenCalledWith("/dashboard");
     });
 
-    it('handles registration error', async () => {
+    it("handles registration error", async () => {
       mockAuthApi.register.mockRejectedValue({
-        response: { data: { detail: 'Email already exists' } },
+        response: { data: { detail: "Email already exists" } },
       });
 
       const { result } = renderHook(() => useAuth());
@@ -231,9 +228,9 @@ describe('useAuth Hook', () => {
       await act(async () => {
         try {
           await result.current.register({
-            email: 'existing@example.com',
-            password: 'password',
-            full_name: 'User',
+            email: "existing@example.com",
+            password: "password",
+            full_name: "User",
           });
         } catch {
           // Expected to throw
@@ -241,13 +238,13 @@ describe('useAuth Hook', () => {
       });
 
       await waitFor(() => {
-        expect(result.current.error).toBe('Email already exists');
+        expect(result.current.error).toBe("Email already exists");
       });
     });
   });
 
-  describe('Logout', () => {
-    it('logs out user successfully', async () => {
+  describe("Logout", () => {
+    it("logs out user successfully", async () => {
       mockAuthApi.logout.mockResolvedValue(undefined);
       mockTokenStorage.isAuthenticated.mockReturnValue(true);
 
@@ -259,11 +256,11 @@ describe('useAuth Hook', () => {
 
       expect(mockAuthApi.logout).toHaveBeenCalled();
       expect(result.current.user).toBeNull();
-      expect(mockNavigate).toHaveBeenCalledWith('/login');
+      expect(mockNavigate).toHaveBeenCalledWith("/login");
     });
 
-    it('clears tokens and redirects even if logout API fails', async () => {
-      mockAuthApi.logout.mockRejectedValue(new Error('API error'));
+    it("clears tokens and redirects even if logout API fails", async () => {
+      mockAuthApi.logout.mockRejectedValue(new Error("API error"));
       mockTokenStorage.isAuthenticated.mockReturnValue(true);
 
       const { result } = renderHook(() => useAuth());
@@ -274,16 +271,16 @@ describe('useAuth Hook', () => {
 
       expect(mockTokenStorage.clearTokens).toHaveBeenCalled();
       expect(result.current.user).toBeNull();
-      expect(mockNavigate).toHaveBeenCalledWith('/login');
+      expect(mockNavigate).toHaveBeenCalledWith("/login");
     });
   });
 
-  describe('Refresh User', () => {
-    it('fetches current user when authenticated', async () => {
+  describe("Refresh User", () => {
+    it("fetches current user when authenticated", async () => {
       const mockUser = {
-        user_id: 'user-1',
-        email: 'test@example.com',
-        full_name: 'Test User',
+        user_id: "user-1",
+        email: "test@example.com",
+        full_name: "Test User",
       };
 
       mockTokenStorage.isAuthenticated.mockReturnValue(true);
@@ -302,7 +299,7 @@ describe('useAuth Hook', () => {
       expect(result.current.user).toEqual(mockUser);
     });
 
-    it('does not fetch user when not authenticated', async () => {
+    it("does not fetch user when not authenticated", async () => {
       mockTokenStorage.isAuthenticated.mockReturnValue(false);
 
       const { result } = renderHook(() => useAuth());
@@ -315,10 +312,10 @@ describe('useAuth Hook', () => {
       expect(result.current.user).toBeNull();
     });
 
-    it('handles 401 error by clearing tokens and redirecting', async () => {
+    it("handles 401 error by clearing tokens and redirecting", async () => {
       mockTokenStorage.isAuthenticated.mockReturnValue(true);
       mockAuthApi.getCurrentUser.mockRejectedValue({
-        response: { status: 401, data: { detail: 'Token expired' } },
+        response: { status: 401, data: { detail: "Token expired" } },
       });
 
       const { result } = renderHook(() => useAuth());
@@ -329,61 +326,61 @@ describe('useAuth Hook', () => {
 
       expect(mockTokenStorage.clearTokens).toHaveBeenCalled();
       expect(result.current.user).toBeNull();
-      expect(mockNavigate).toHaveBeenCalledWith('/login');
+      expect(mockNavigate).toHaveBeenCalledWith("/login");
     });
   });
 
-  describe('Update Profile', () => {
-    it('updates user profile successfully', async () => {
+  describe("Update Profile", () => {
+    it("updates user profile successfully", async () => {
       const updatedUser = {
-        user_id: 'user-1',
-        email: 'test@example.com',
-        full_name: 'Updated Name',
+        user_id: "user-1",
+        email: "test@example.com",
+        full_name: "Updated Name",
       };
 
       mockAuthApi.updateProfile.mockResolvedValue({
         success: true,
         data: updatedUser,
-        message: 'Profile updated',
+        message: "Profile updated",
       });
 
       const { result } = renderHook(() => useAuth());
 
       await act(async () => {
-        await result.current.updateProfile({ full_name: 'Updated Name' });
+        await result.current.updateProfile({ full_name: "Updated Name" });
       });
 
       expect(mockAuthApi.updateProfile).toHaveBeenCalledWith({
-        full_name: 'Updated Name',
+        full_name: "Updated Name",
       });
       expect(result.current.user).toEqual(updatedUser);
     });
 
-    it('handles update profile error', async () => {
+    it("handles update profile error", async () => {
       mockAuthApi.updateProfile.mockRejectedValue({
-        response: { data: { detail: 'Update failed' } },
+        response: { data: { detail: "Update failed" } },
       });
 
       const { result } = renderHook(() => useAuth());
 
       await act(async () => {
         try {
-          await result.current.updateProfile({ full_name: 'New Name' });
+          await result.current.updateProfile({ full_name: "New Name" });
         } catch {
           // Expected to throw
         }
       });
 
       await waitFor(() => {
-        expect(result.current.error).toBe('Update failed');
+        expect(result.current.error).toBe("Update failed");
       });
     });
   });
 
-  describe('Clear Error', () => {
-    it('clears error state', async () => {
+  describe("Clear Error", () => {
+    it("clears error state", async () => {
       mockAuthApi.login.mockRejectedValue({
-        response: { data: { detail: 'Error' } },
+        response: { data: { detail: "Error" } },
       });
 
       const { result } = renderHook(() => useAuth());
@@ -391,8 +388,8 @@ describe('useAuth Hook', () => {
       await act(async () => {
         try {
           await result.current.login({
-            email: 'test@example.com',
-            password: 'password',
+            email: "test@example.com",
+            password: "password",
           });
         } catch {
           // Expected to throw
@@ -400,7 +397,7 @@ describe('useAuth Hook', () => {
       });
 
       await waitFor(() => {
-        expect(result.current.error).toBe('Error');
+        expect(result.current.error).toBe("Error");
       });
 
       act(() => {

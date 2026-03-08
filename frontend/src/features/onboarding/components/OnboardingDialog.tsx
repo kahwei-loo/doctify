@@ -5,17 +5,17 @@
  * Uses framer-motion for step transitions.
  */
 
-import React from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import React from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { ONBOARDING_STEPS } from '../constants';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { ONBOARDING_STEPS } from "../constants";
 
 interface OnboardingDialogProps {
   open: boolean;
@@ -39,7 +39,12 @@ export const OnboardingDialog: React.FC<OnboardingDialogProps> = ({
   const Icon = step.icon;
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onSkip(); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) onSkip();
+      }}
+    >
       <DialogContent className="sm:max-w-[480px]">
         <DialogHeader>
           <div className="flex items-center justify-between">
@@ -76,7 +81,7 @@ export const OnboardingDialog: React.FC<OnboardingDialogProps> = ({
             <div
               key={i}
               className={`h-1.5 rounded-full transition-all ${
-                i === currentStep ? 'w-6 bg-primary' : 'w-1.5 bg-muted-foreground/30'
+                i === currentStep ? "w-6 bg-primary" : "w-1.5 bg-muted-foreground/30"
               }`}
             />
           ))}
@@ -93,7 +98,7 @@ export const OnboardingDialog: React.FC<OnboardingDialogProps> = ({
               </Button>
             )}
             <Button size="sm" onClick={isLastStep ? onComplete : onNext}>
-              {isLastStep ? 'Get Started' : 'Next'}
+              {isLastStep ? "Get Started" : "Next"}
             </Button>
           </div>
         </DialogFooter>

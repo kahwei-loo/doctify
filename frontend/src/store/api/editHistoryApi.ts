@@ -4,7 +4,7 @@
  * RTK Query endpoints for document edit history management.
  */
 
-import { api } from './apiSlice';
+import { api } from "./apiSlice";
 
 // Edit history entry response
 export interface EditHistoryEntry {
@@ -76,11 +76,11 @@ export interface RollbackResponse {
 }
 
 // Valid edit types
-export const VALID_EDIT_TYPES = ['manual', 'bulk', 'rollback', 'ai_correction'] as const;
+export const VALID_EDIT_TYPES = ["manual", "bulk", "rollback", "ai_correction"] as const;
 export type EditType = (typeof VALID_EDIT_TYPES)[number];
 
 // Valid sources
-export const VALID_SOURCES = ['web', 'api', 'mobile'] as const;
+export const VALID_SOURCES = ["web", "api", "mobile"] as const;
 export type EditSource = (typeof VALID_SOURCES)[number];
 
 export const editHistoryApi = api.injectEndpoints({
@@ -91,57 +91,69 @@ export const editHistoryApi = api.injectEndpoints({
         url: `/edit-history/${documentId}`,
         params,
       }),
-      providesTags: (result, error, { documentId }) =>
-        result
+      providesTags: (_result, _error, { documentId }) =>
+        _result
           ? [
-              ...result.data.map(({ id }) => ({ type: 'EditHistory' as const, id })),
-              { type: 'EditHistory', id: `LIST-${documentId}` },
+              ..._result.data.map(({ id }) => ({ type: "EditHistory" as const, id })),
+              { type: "EditHistory", id: `LIST-${documentId}` },
             ]
-          : [{ type: 'EditHistory', id: `LIST-${documentId}` }],
+          : [{ type: "EditHistory", id: `LIST-${documentId}` }],
     }),
 
     // Query: Get single edit history entry
-    getEditHistoryEntry: builder.query<EditHistoryApiResponse, { documentId: string; entryId: string }>({
+    getEditHistoryEntry: builder.query<
+      EditHistoryApiResponse,
+      { documentId: string; entryId: string }
+    >({
       query: ({ documentId, entryId }) => `/edit-history/${documentId}/${entryId}`,
-      providesTags: (result, error, { entryId }) => [{ type: 'EditHistory', id: entryId }],
+      providesTags: (_result, _error, { entryId }) => [{ type: "EditHistory", id: entryId }],
     }),
 
     // Mutation: Track single modification
-    trackModification: builder.mutation<EditHistoryApiResponse, { documentId: string; modification: TrackModificationRequest }>({
+    trackModification: builder.mutation<
+      EditHistoryApiResponse,
+      { documentId: string; modification: TrackModificationRequest }
+    >({
       query: ({ documentId, modification }) => ({
         url: `/edit-history/${documentId}`,
-        method: 'POST',
+        method: "POST",
         body: modification,
       }),
-      invalidatesTags: (result, error, { documentId }) => [
-        { type: 'EditHistory', id: `LIST-${documentId}` },
-        { type: 'Documents', id: documentId },
+      invalidatesTags: (_result, _error, { documentId }) => [
+        { type: "EditHistory", id: `LIST-${documentId}` },
+        { type: "Documents", id: documentId },
       ],
     }),
 
     // Mutation: Track bulk modifications
-    trackBulkModifications: builder.mutation<EditHistoryListResponse, { documentId: string; modifications: BulkTrackModificationRequest }>({
+    trackBulkModifications: builder.mutation<
+      EditHistoryListResponse,
+      { documentId: string; modifications: BulkTrackModificationRequest }
+    >({
       query: ({ documentId, modifications }) => ({
         url: `/edit-history/${documentId}/bulk`,
-        method: 'POST',
+        method: "POST",
         body: modifications,
       }),
-      invalidatesTags: (result, error, { documentId }) => [
-        { type: 'EditHistory', id: `LIST-${documentId}` },
-        { type: 'Documents', id: documentId },
+      invalidatesTags: (_result, _error, { documentId }) => [
+        { type: "EditHistory", id: `LIST-${documentId}` },
+        { type: "Documents", id: documentId },
       ],
     }),
 
     // Mutation: Rollback changes
-    rollbackChanges: builder.mutation<RollbackResponse, { documentId: string; rollback: RollbackRequest }>({
+    rollbackChanges: builder.mutation<
+      RollbackResponse,
+      { documentId: string; rollback: RollbackRequest }
+    >({
       query: ({ documentId, rollback }) => ({
         url: `/edit-history/${documentId}/rollback`,
-        method: 'POST',
+        method: "POST",
         body: rollback,
       }),
-      invalidatesTags: (result, error, { documentId }) => [
-        { type: 'EditHistory', id: `LIST-${documentId}` },
-        { type: 'Documents', id: documentId },
+      invalidatesTags: (_result, _error, { documentId }) => [
+        { type: "EditHistory", id: `LIST-${documentId}` },
+        { type: "Documents", id: documentId },
       ],
     }),
   }),

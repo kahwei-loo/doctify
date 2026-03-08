@@ -13,7 +13,7 @@
  * - HTML sanitization for security
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from "react";
 import {
   Copy,
   Check,
@@ -27,21 +27,17 @@ import {
   FileText,
   AlertTriangle,
   Edit3,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
-import { ConfidenceBar } from '@/components/ui/confidence-bar';
-import { sanitizeAIOutput } from '@/shared/utils/sanitize';
-import type { ExtractionResult, ExtractedEntity, ExtractedTable } from '../types';
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ConfidenceBar } from "@/components/ui/confidence-bar";
+import { sanitizeAIOutput } from "@/shared/utils/sanitize";
+import type { ExtractionResult, ExtractedEntity, ExtractedTable } from "../types";
 
 interface ExtractedStructuredViewProps {
   /** Extraction result data */
@@ -49,7 +45,7 @@ interface ExtractedStructuredViewProps {
   /** Custom class name */
   className?: string;
   /** Callback when exporting data */
-  onExport?: (format: 'json' | 'csv') => void;
+  onExport?: (format: "json" | "csv") => void;
   /** Whether data is loading */
   isLoading?: boolean;
   /** Whether fields are editable */
@@ -67,18 +63,26 @@ const StructuredField: React.FC<{
   label: string;
   value: string | number | boolean | null | undefined;
   confidence?: number;
-  type?: 'text' | 'number' | 'date' | 'boolean';
+  type?: "text" | "number" | "date" | "boolean";
   editable?: boolean;
   fieldKey?: string;
   onChange?: (value: any) => void;
-}> = ({ label, value, confidence, type = 'text', editable = false, fieldKey, onChange }) => {
+}> = ({
+  label,
+  value,
+  confidence,
+  type = "text",
+  editable = false,
+  fieldKey: _fieldKey,
+  onChange,
+}) => {
   const [copied, setCopied] = useState(false);
   const [localValue, setLocalValue] = useState(value);
 
   const displayValue = useMemo(() => {
-    if (localValue === null || localValue === undefined) return '-';
-    if (typeof localValue === 'boolean') return localValue ? 'Yes' : 'No';
-    if (typeof localValue === 'string') {
+    if (localValue === null || localValue === undefined) return "-";
+    if (typeof localValue === "boolean") return localValue ? "Yes" : "No";
+    if (typeof localValue === "string") {
       // Sanitize string values from AI output
       return sanitizeAIOutput({ value: localValue }).value;
     }
@@ -86,7 +90,7 @@ const StructuredField: React.FC<{
   }, [localValue]);
 
   const copyValue = async () => {
-    if (displayValue && displayValue !== '-') {
+    if (displayValue && displayValue !== "-") {
       await navigator.clipboard.writeText(displayValue);
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
@@ -97,10 +101,10 @@ const StructuredField: React.FC<{
     let parsedValue: any = newValue;
 
     // Type conversion based on field type
-    if (type === 'number') {
-      parsedValue = newValue === '' ? null : parseFloat(newValue);
-    } else if (type === 'boolean') {
-      parsedValue = newValue === 'true' || newValue === 'Yes';
+    if (type === "number") {
+      parsedValue = newValue === "" ? null : parseFloat(newValue);
+    } else if (type === "boolean") {
+      parsedValue = newValue === "true" || newValue === "Yes";
     }
 
     setLocalValue(parsedValue);
@@ -114,17 +118,17 @@ const StructuredField: React.FC<{
 
         {editable ? (
           <div className="space-y-1">
-            {type === 'text' && displayValue.length > 50 ? (
+            {type === "text" && displayValue.length > 50 ? (
               <Textarea
-                value={displayValue === '-' ? '' : displayValue}
+                value={displayValue === "-" ? "" : displayValue}
                 onChange={(e) => handleChange(e.target.value)}
                 className="min-h-[60px] font-medium"
                 placeholder={`Enter ${label.toLowerCase()}`}
               />
             ) : (
               <Input
-                type={type === 'number' ? 'number' : 'text'}
-                value={displayValue === '-' ? '' : displayValue}
+                type={type === "number" ? "number" : "text"}
+                value={displayValue === "-" ? "" : displayValue}
                 onChange={(e) => handleChange(e.target.value)}
                 className="font-medium"
                 placeholder={`Enter ${label.toLowerCase()}`}
@@ -138,10 +142,12 @@ const StructuredField: React.FC<{
           </div>
         ) : (
           <>
-            <p className={cn(
-              'font-medium break-words',
-              displayValue === '-' && 'text-muted-foreground'
-            )}>
+            <p
+              className={cn(
+                "font-medium break-words",
+                displayValue === "-" && "text-muted-foreground"
+              )}
+            >
               {displayValue}
             </p>
             {confidence !== undefined && (
@@ -153,13 +159,8 @@ const StructuredField: React.FC<{
         )}
       </div>
 
-      {!editable && displayValue && displayValue !== '-' && (
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-7 w-7 flex-shrink-0"
-          onClick={copyValue}
-        >
+      {!editable && displayValue && displayValue !== "-" && (
+        <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0" onClick={copyValue}>
           {copied ? (
             <Check className="h-3.5 w-3.5 text-green-500" />
           ) : (
@@ -181,10 +182,12 @@ const EntityBadge: React.FC<{ entity: ExtractedEntity }> = ({ entity }) => {
     <Badge
       variant="secondary"
       className={cn(
-        'gap-1.5 py-1',
-        entity.confidence >= 0.9 && 'bg-green-500/10 border-green-500/20',
-        entity.confidence >= 0.7 && entity.confidence < 0.9 && 'bg-yellow-500/10 border-yellow-500/20',
-        entity.confidence < 0.7 && 'bg-red-500/10 border-red-500/20'
+        "gap-1.5 py-1",
+        entity.confidence >= 0.9 && "bg-green-500/10 border-green-500/20",
+        entity.confidence >= 0.7 &&
+          entity.confidence < 0.9 &&
+          "bg-yellow-500/10 border-yellow-500/20",
+        entity.confidence < 0.7 && "bg-red-500/10 border-red-500/20"
       )}
     >
       <Tag className="h-3 w-3" />
@@ -205,18 +208,13 @@ const TablePreview: React.FC<{
 
   // Sanitize table data
   const sanitizedRows = useMemo(() => {
-    return table.rows.map(row =>
-      row.map(cell => sanitizeAIOutput({ value: cell }).value)
-    );
+    return table.rows.map((row) => row.map((cell) => sanitizeAIOutput({ value: cell }).value));
   }, [table.rows]);
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <CollapsibleTrigger asChild>
-        <Button
-          variant="ghost"
-          className="w-full justify-between px-3 py-2 h-auto"
-        >
+        <Button variant="ghost" className="w-full justify-between px-3 py-2 h-auto">
           <div className="flex items-center gap-2">
             <Table2 className="h-4 w-4 text-muted-foreground" />
             <span>Table {index + 1}</span>
@@ -229,11 +227,7 @@ const TablePreview: React.FC<{
               </Badge>
             )}
           </div>
-          {isOpen ? (
-            <ChevronDown className="h-4 w-4" />
-          ) : (
-            <ChevronRight className="h-4 w-4" />
-          )}
+          {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
         </Button>
       </CollapsibleTrigger>
       <CollapsibleContent>
@@ -257,10 +251,7 @@ const TablePreview: React.FC<{
                   {sanitizedRows.slice(1).map((row, rowIdx) => (
                     <tr key={rowIdx}>
                       {row.map((cell, cellIdx) => (
-                        <td
-                          key={cellIdx}
-                          className="px-3 py-2 text-sm whitespace-nowrap"
-                        >
+                        <td key={cellIdx} className="px-3 py-2 text-sm whitespace-nowrap">
                           {cell}
                         </td>
                       ))}
@@ -290,12 +281,7 @@ const JSONView: React.FC<{
 
   return (
     <div className="relative">
-      <Button
-        variant="outline"
-        size="sm"
-        className="absolute right-2 top-2 z-10"
-        onClick={onCopy}
-      >
+      <Button variant="outline" size="sm" className="absolute right-2 top-2 z-10" onClick={onCopy}>
         {copied ? (
           <>
             <Check className="mr-2 h-4 w-4 text-green-500" />
@@ -319,7 +305,7 @@ const JSONView: React.FC<{
  * Empty State Component
  */
 const EmptyState: React.FC<{ message?: string }> = ({
-  message = 'No extraction results available',
+  message = "No extraction results available",
 }) => {
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -354,7 +340,7 @@ export const ExtractedStructuredView: React.FC<ExtractedStructuredViewProps> = (
   onChange,
   renderLineItems,
 }) => {
-  const [activeTab, setActiveTab] = useState<'structured' | 'json'>('structured');
+  const [activeTab, setActiveTab] = useState<"structured" | "json">("structured");
   const [jsonCopied, setJsonCopied] = useState(false);
 
   // Copy JSON to clipboard
@@ -378,9 +364,9 @@ export const ExtractedStructuredView: React.FC<ExtractedStructuredViewProps> = (
     if (!result?.metadata) return [];
 
     return Object.entries(result.metadata)
-      .filter(([key]) => !key.includes('line_items') && !key.includes('lineItems'))
+      .filter(([key]) => !key.includes("line_items") && !key.includes("lineItems"))
       .map(([key, value]) => ({
-        label: key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+        label: key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
         value,
         key,
       }));
@@ -388,7 +374,7 @@ export const ExtractedStructuredView: React.FC<ExtractedStructuredViewProps> = (
 
   if (isLoading) {
     return (
-      <div className={cn('h-full', className)}>
+      <div className={cn("h-full", className)}>
         <LoadingState />
       </div>
     );
@@ -396,17 +382,17 @@ export const ExtractedStructuredView: React.FC<ExtractedStructuredViewProps> = (
 
   if (!result) {
     return (
-      <div className={cn('h-full', className)}>
+      <div className={cn("h-full", className)}>
         <EmptyState />
       </div>
     );
   }
 
   return (
-    <div className={cn('h-full flex flex-col', className)}>
+    <div className={cn("h-full flex flex-col", className)}>
       <Tabs
         value={activeTab}
-        onValueChange={(v) => setActiveTab(v as 'structured' | 'json')}
+        onValueChange={(v) => setActiveTab(v as "structured" | "json")}
         className="flex-1 flex flex-col"
       >
         {/* Tab Header */}
@@ -425,19 +411,11 @@ export const ExtractedStructuredView: React.FC<ExtractedStructuredViewProps> = (
           {/* Actions */}
           {onExport && (
             <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onExport('json')}
-              >
+              <Button variant="outline" size="sm" onClick={() => onExport("json")}>
                 <Download className="mr-2 h-4 w-4" />
                 Export JSON
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onExport('csv')}
-              >
+              <Button variant="outline" size="sm" onClick={() => onExport("csv")}>
                 <Download className="mr-2 h-4 w-4" />
                 Export CSV
               </Button>
@@ -452,19 +430,12 @@ export const ExtractedStructuredView: React.FC<ExtractedStructuredViewProps> = (
             <div className="p-4 rounded-lg bg-muted/30 border">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Overall Confidence</span>
-                <ConfidenceBar
-                  value={result.confidence}
-                  size="md"
-                  showLabel
-                  labelPosition="left"
-                />
+                <ConfidenceBar value={result.confidence} size="md" showLabel labelPosition="left" />
               </div>
               {result.confidence < 0.7 && (
                 <div className="flex items-center gap-2 mt-2 text-yellow-600 dark:text-yellow-500">
                   <AlertTriangle className="h-4 w-4" />
-                  <span className="text-sm">
-                    Low confidence - manual review recommended
-                  </span>
+                  <span className="text-sm">Low confidence - manual review recommended</span>
                 </div>
               )}
             </div>

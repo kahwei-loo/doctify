@@ -1,28 +1,46 @@
-import React, { Suspense, lazy, useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { motion, useInView } from 'framer-motion';
-import { Sparkles, ArrowRight, Shield, Brain, Layers } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { blurFadeUp, staggerContainer } from './animations';
+import React, { Suspense, lazy, useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { motion, useInView } from "framer-motion";
+import { Sparkles, ArrowRight, Shield, Brain, Layers } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { blurFadeUp, staggerContainer } from "./animations";
 
-const ParticlesBackground = lazy(() => import('./ParticlesBackground'));
+const ParticlesBackground = lazy(() => import("./ParticlesBackground"));
 
 interface HeroSectionProps {
   onTryDemo: () => void;
 }
 
 const trustIndicators = [
-  { icon: Brain, label: 'Multi-AI Fallback' },
-  { icon: Layers, label: 'pgvector RAG' },
-  { icon: Shield, label: 'Enterprise Security' },
+  { icon: Brain, label: "Multi-AI Fallback" },
+  { icon: Layers, label: "pgvector RAG" },
+  { icon: Shield, label: "Enterprise Security" },
 ];
 
 const chartHeights = [40, 65, 45, 80, 55, 90, 70, 85, 60, 95, 75, 88];
 
 const stats = [
-  { label: 'Documents', value: 1247, suffix: '', color: 'text-landing-teal', sub: '+12% this week' },
-  { label: 'OCR Accuracy', value: 98.5, suffix: '%', color: 'text-landing-accent', sub: 'Multi-AI verified' },
-  { label: 'RAG Queries', value: 3891, suffix: '', color: 'text-landing-rose', sub: 'Grounded answers' },
+  {
+    label: "Documents",
+    value: 1247,
+    suffix: "",
+    color: "text-landing-teal",
+    sub: "+12% this week",
+  },
+  {
+    label: "OCR Accuracy",
+    value: 98.5,
+    suffix: "%",
+    color: "text-landing-accent",
+    sub: "Multi-AI verified",
+  },
+  {
+    label: "RAG Queries",
+    value: 3891,
+    suffix: "",
+    color: "text-landing-rose",
+    sub: "Grounded answers",
+  },
 ];
 
 function useCountUp(target: number, duration = 1800, start = false) {
@@ -44,8 +62,8 @@ function useCountUp(target: number, duration = 1800, start = false) {
   return value;
 }
 
-function formatStat(value: number, target: number, suffix: string) {
-  if (suffix === '%') return value.toFixed(1) + '%';
+function formatStat(value: number, _target: number, suffix: string) {
+  if (suffix === "%") return value.toFixed(1) + "%";
   return Math.round(value).toLocaleString() + suffix;
 }
 
@@ -77,11 +95,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onTryDemo }) => {
       <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-32 w-full">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Left: Text content */}
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={staggerContainer}
-          >
+          <motion.div initial="hidden" animate="visible" variants={staggerContainer}>
             <motion.div variants={blurFadeUp} className="mb-6">
               <span className="glass-card inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm text-muted-foreground">
                 <Sparkles className="h-3.5 w-3.5 text-landing-accent" />
@@ -93,7 +107,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onTryDemo }) => {
               variants={blurFadeUp}
               className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl leading-[1.1]"
             >
-              Turn Documents into{' '}
+              Turn Documents into{" "}
               <span className="bg-gradient-to-r from-landing-accent via-landing-teal to-landing-rose bg-clip-text text-transparent">
                 Intelligence
               </span>
@@ -103,15 +117,11 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onTryDemo }) => {
               variants={blurFadeUp}
               className="mt-6 max-w-lg text-lg text-muted-foreground/80 leading-relaxed"
             >
-              Upload documents, extract data with multi-provider AI, organize
-              into knowledge bases, and ask questions with RAG-powered answers
-              grounded in your sources.
+              Upload documents, extract data with multi-provider AI, organize into knowledge bases,
+              and ask questions with RAG-powered answers grounded in your sources.
             </motion.p>
 
-            <motion.div
-              variants={blurFadeUp}
-              className="mt-8 flex flex-col sm:flex-row gap-4"
-            >
+            <motion.div variants={blurFadeUp} className="mt-8 flex flex-col sm:flex-row gap-4">
               <Button
                 size="lg"
                 onClick={onTryDemo}
@@ -123,7 +133,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onTryDemo }) => {
               <Button
                 size="lg"
                 variant="outline"
-                onClick={() => navigate('/auth/register')}
+                onClick={() => navigate("/auth/register")}
                 className="border border-border hover:bg-accent transition-all duration-300"
               >
                 Sign Up Free
@@ -131,10 +141,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onTryDemo }) => {
             </motion.div>
 
             {/* Trust indicators */}
-            <motion.div
-              variants={blurFadeUp}
-              className="mt-10 flex flex-wrap gap-6"
-            >
+            <motion.div variants={blurFadeUp} className="mt-10 flex flex-wrap gap-6">
               {trustIndicators.map((item) => {
                 const Icon = item.icon;
                 return (
@@ -153,8 +160,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onTryDemo }) => {
           {/* Right: Animated product mockup */}
           <motion.div
             ref={mockupRef}
-            initial={{ opacity: 0, x: 60, filter: 'blur(10px)' }}
-            animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+            initial={{ opacity: 0, x: 60, filter: "blur(10px)" }}
+            animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
             transition={{ duration: 0.8, delay: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
             className="hidden lg:block"
           >
@@ -187,7 +194,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onTryDemo }) => {
                         key={i}
                         className="flex-1 rounded-t-sm bg-gradient-to-t from-landing-accent/40 to-landing-teal/40 transition-all duration-700 ease-out"
                         style={{
-                          height: animateChart ? `${h}%` : '0%',
+                          height: animateChart ? `${h}%` : "0%",
                           transitionDelay: `${i * 60}ms`,
                         }}
                       />
@@ -210,7 +217,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onTryDemo }) => {
               </div>
               <div
                 className="absolute -bottom-3 -left-4 glass-card rounded-xl p-3 shadow-glow-sm"
-                style={{ animation: 'float 6s ease-in-out 2s infinite' }}
+                style={{ animation: "float 6s ease-in-out 2s infinite" }}
               >
                 <div className="flex items-center gap-2">
                   <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-landing-accent to-purple-400 flex items-center justify-center">
@@ -231,17 +238,25 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onTryDemo }) => {
 };
 
 function AnimatedStat({
-  label, value, suffix, color, sub, animate,
+  label,
+  value,
+  suffix,
+  color,
+  sub,
+  animate,
 }: {
-  label: string; value: number; suffix: string; color: string; sub: string; animate: boolean;
+  label: string;
+  value: number;
+  suffix: string;
+  color: string;
+  sub: string;
+  animate: boolean;
 }) {
   const count = useCountUp(value, 1800, animate);
   return (
     <div className="glass-card rounded-xl p-4">
       <div className="text-xs text-muted-foreground/60">{label}</div>
-      <div className="text-2xl font-bold mt-1 tabular-nums">
-        {formatStat(count, value, suffix)}
-      </div>
+      <div className="text-2xl font-bold mt-1 tabular-nums">{formatStat(count, value, suffix)}</div>
       <div className={`text-xs ${color} mt-1`}>{sub}</div>
     </div>
   );

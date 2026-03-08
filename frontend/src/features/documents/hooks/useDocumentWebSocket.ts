@@ -5,8 +5,8 @@
  * Listens for document events and updates state accordingly.
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import type { WebSocketDocumentUpdate, DocumentStatus } from '../types';
+import { useState, useEffect, useCallback, useRef } from "react";
+import type { WebSocketDocumentUpdate, DocumentStatus } from "../types";
 
 interface UseDocumentWebSocketOptions {
   projectId?: string;
@@ -24,7 +24,7 @@ interface UseDocumentWebSocketReturn {
   disconnect: () => void;
 }
 
-const WS_BASE_URL = import.meta.env.VITE_WS_BASE_URL || 'ws://localhost:50080';
+const WS_BASE_URL = import.meta.env.VITE_WS_BASE_URL || "ws://localhost:50080";
 
 export const useDocumentWebSocket = (
   options: UseDocumentWebSocketOptions = {}
@@ -59,24 +59,24 @@ export const useDocumentWebSocket = (
 
         // Call appropriate callback based on event type
         switch (update.type) {
-          case 'document.status_change':
+          case "document.status_change":
             onStatusChange?.(update.data.document_id, update.data.status);
             break;
 
-          case 'document.completed':
+          case "document.completed":
             if (update.data.confidence !== undefined) {
               onDocumentCompleted?.(update.data.document_id, update.data.confidence);
             }
             break;
 
-          case 'document.failed':
+          case "document.failed":
             if (update.data.error) {
               onDocumentFailed?.(update.data.document_id, update.data.error);
             }
             break;
         }
       } catch (err) {
-        console.error('Failed to parse WebSocket message:', err);
+        console.error("Failed to parse WebSocket message:", err);
       }
     },
     [onStatusChange, onDocumentCompleted, onDocumentFailed]
@@ -102,20 +102,20 @@ export const useDocumentWebSocket = (
         setIsConnected(true);
         setError(null);
         reconnectAttemptsRef.current = 0;
-        console.log('WebSocket connected');
+        console.log("WebSocket connected");
       };
 
       ws.onmessage = handleMessage;
 
       ws.onerror = (event) => {
-        console.error('WebSocket error:', event);
-        setError('WebSocket connection error');
+        console.error("WebSocket error:", event);
+        setError("WebSocket connection error");
       };
 
       ws.onclose = () => {
         setIsConnected(false);
         wsRef.current = null;
-        console.log('WebSocket disconnected');
+        console.log("WebSocket disconnected");
 
         // Attempt reconnection if within retry limit
         if (reconnectAttemptsRef.current < MAX_RECONNECT_ATTEMPTS) {
@@ -128,14 +128,14 @@ export const useDocumentWebSocket = (
             connect();
           }, RECONNECT_DELAY);
         } else {
-          setError('Failed to connect after multiple attempts');
+          setError("Failed to connect after multiple attempts");
         }
       };
 
       wsRef.current = ws;
     } catch (err) {
-      console.error('Failed to create WebSocket connection:', err);
-      setError('Failed to establish connection');
+      console.error("Failed to create WebSocket connection:", err);
+      setError("Failed to establish connection");
     }
   }, [projectId, handleMessage]);
 

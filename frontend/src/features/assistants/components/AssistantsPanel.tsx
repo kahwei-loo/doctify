@@ -5,40 +5,36 @@
  * Similar to ProjectPanel in Documents page.
  */
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Bot,
   Plus,
-  Settings,
   TrendingUp,
   MessageSquare,
   Clock,
   CheckCircle2,
   Search,
-  Loader2,
   MoreVertical,
   Edit,
   Trash2,
-  Power,
-} from 'lucide-react';
-import { useGetAssistantsQuery, useGetAssistantStatsQuery } from '@/store/api/assistantsApi';
-import type { Assistant, AssistantFilters } from '../types';
-import { ErrorState } from './ErrorState';
-import { AssistantsPanelSkeleton } from './LoadingStates';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Switch } from '@/components/ui/switch';
+} from "lucide-react";
+import { useGetAssistantsQuery, useGetAssistantStatsQuery } from "@/store/api/assistantsApi";
+import type { Assistant, AssistantFilters } from "../types";
+import { ErrorState } from "./ErrorState";
+import { AssistantsPanelSkeleton } from "./LoadingStates";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
 interface AssistantsPanelProps {
   selectedAssistantId: string | null;
@@ -59,15 +55,15 @@ export const AssistantsPanel: React.FC<AssistantsPanelProps> = ({
   onToggleStatus,
   className,
 }) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'active' | 'inactive' | undefined>(undefined);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"active" | "inactive" | undefined>(undefined);
 
   // Fetch assistant stats
   const {
     data: stats,
     isLoading: statsLoading,
     isError: statsError,
-    refetch: refetchStats
+    refetch: refetchStats,
   } = useGetAssistantStatsQuery();
 
   // Fetch assistants with filters
@@ -80,7 +76,7 @@ export const AssistantsPanel: React.FC<AssistantsPanelProps> = ({
     data: assistantsResponse,
     isLoading: assistantsLoading,
     isError: assistantsError,
-    refetch: refetchAssistants
+    refetch: refetchAssistants,
   } = useGetAssistantsQuery(filters);
   const assistants = assistantsResponse?.data || [];
 
@@ -98,7 +94,7 @@ export const AssistantsPanel: React.FC<AssistantsPanelProps> = ({
   // Error state
   if (statsError || assistantsError) {
     return (
-      <div className={cn('flex flex-col h-full border-r bg-muted/30', className)}>
+      <div className={cn("flex flex-col h-full border-r bg-muted/30", className)}>
         <div className="p-4 border-b bg-background">
           <h2 className="text-lg font-semibold flex items-center gap-2">
             <Bot className="h-5 w-5" />
@@ -120,7 +116,12 @@ export const AssistantsPanel: React.FC<AssistantsPanelProps> = ({
   // Empty state: no assistants at all
   if (assistants.length === 0 && !searchQuery && !statusFilter) {
     return (
-      <div className={cn('flex flex-col h-full w-[280px] border border-border/60 bg-card/50 rounded-xl shadow-sm', className)}>
+      <div
+        className={cn(
+          "flex flex-col h-full w-[280px] border border-border/60 bg-card/50 rounded-xl shadow-sm",
+          className
+        )}
+      >
         <div className="p-4 border-b bg-background">
           <h2 className="text-lg font-semibold flex items-center gap-2">
             <Bot className="h-5 w-5" />
@@ -148,7 +149,12 @@ export const AssistantsPanel: React.FC<AssistantsPanelProps> = ({
   const hasActiveAssistants = assistants.some((a) => a.is_active);
 
   return (
-    <div className={cn('flex flex-col h-full w-[280px] border border-border/60 bg-card/50 rounded-xl shadow-sm', className)}>
+    <div
+      className={cn(
+        "flex flex-col h-full w-[280px] border border-border/60 bg-card/50 rounded-xl shadow-sm",
+        className
+      )}
+    >
       {/* Header with Stats */}
       <div className="p-4 border-b bg-background space-y-4">
         <div className="flex items-center justify-between">
@@ -207,7 +213,7 @@ export const AssistantsPanel: React.FC<AssistantsPanelProps> = ({
         {/* Status Filter */}
         <div className="flex gap-2">
           <Button
-            variant={statusFilter === undefined ? 'default' : 'outline'}
+            variant={statusFilter === undefined ? "default" : "outline"}
             size="sm"
             onClick={() => setStatusFilter(undefined)}
             className="flex-1"
@@ -215,17 +221,17 @@ export const AssistantsPanel: React.FC<AssistantsPanelProps> = ({
             All
           </Button>
           <Button
-            variant={statusFilter === 'active' ? 'default' : 'outline'}
+            variant={statusFilter === "active" ? "default" : "outline"}
             size="sm"
-            onClick={() => setStatusFilter('active')}
+            onClick={() => setStatusFilter("active")}
             className="flex-1"
           >
             Active
           </Button>
           <Button
-            variant={statusFilter === 'inactive' ? 'default' : 'outline'}
+            variant={statusFilter === "inactive" ? "default" : "outline"}
             size="sm"
-            onClick={() => setStatusFilter('inactive')}
+            onClick={() => setStatusFilter("inactive")}
             className="flex-1"
           >
             Inactive
@@ -237,7 +243,7 @@ export const AssistantsPanel: React.FC<AssistantsPanelProps> = ({
       <div className="flex-1 overflow-y-auto">
         {assistants.length === 0 ? (
           <div className="p-6 text-center">
-            {!hasActiveAssistants && statusFilter === 'active' ? (
+            {!hasActiveAssistants && statusFilter === "active" ? (
               <>
                 <Bot className="h-8 w-8 mx-auto text-muted-foreground/50 mb-2" />
                 <p className="text-sm font-medium mb-1">No Active Assistants</p>
@@ -248,9 +254,7 @@ export const AssistantsPanel: React.FC<AssistantsPanelProps> = ({
             ) : (
               <>
                 <Bot className="h-8 w-8 mx-auto text-muted-foreground/50 mb-2" />
-                <p className="text-sm text-muted-foreground">
-                  No assistants match your filters
-                </p>
+                <p className="text-sm text-muted-foreground">No assistants match your filters</p>
               </>
             )}
           </div>
@@ -283,7 +287,13 @@ interface StatsCardProps {
   iconClassName?: string;
 }
 
-const StatsCard: React.FC<StatsCardProps> = ({ icon: Icon, label, value, total, iconClassName }) => {
+const StatsCard: React.FC<StatsCardProps> = ({
+  icon: Icon,
+  label,
+  value,
+  total,
+  iconClassName,
+}) => {
   return (
     <div className="bg-card rounded-lg p-3 border">
       <div className="flex items-start justify-between">
@@ -294,7 +304,7 @@ const StatsCard: React.FC<StatsCardProps> = ({ icon: Icon, label, value, total, 
             {total !== undefined && <span className="text-xs text-muted-foreground">/{total}</span>}
           </p>
         </div>
-        <Icon className={cn('h-4 w-4', iconClassName)} />
+        <Icon className={cn("h-4 w-4", iconClassName)} />
       </div>
     </div>
   );
@@ -321,7 +331,7 @@ const AssistantCard: React.FC<AssistantCardProps> = ({
   const handleCardClick = (e: React.MouseEvent) => {
     // Don't select card if clicking on action buttons
     const target = e.target as HTMLElement;
-    if (target.closest('button') || target.closest('[role="menuitem"]')) {
+    if (target.closest("button") || target.closest('[role="menuitem"]')) {
       return;
     }
     onClick();
@@ -330,11 +340,11 @@ const AssistantCard: React.FC<AssistantCardProps> = ({
   return (
     <Card
       className={cn(
-        'cursor-pointer transition-all hover:shadow-md rounded-2xl border-2',
+        "cursor-pointer transition-all hover:shadow-md rounded-2xl border-2",
         isSelected
-          ? 'border-primary bg-primary/5 shadow-md'
-          : 'border-transparent hover:border-border',
-        !assistant.is_active && 'opacity-60'
+          ? "border-primary bg-primary/5 shadow-md"
+          : "border-transparent hover:border-border",
+        !assistant.is_active && "opacity-60"
       )}
       onClick={handleCardClick}
     >
@@ -349,9 +359,7 @@ const AssistantCard: React.FC<AssistantCardProps> = ({
                 </Badge>
               )}
             </div>
-            <p className="text-xs text-muted-foreground line-clamp-2">
-              {assistant.description}
-            </p>
+            <p className="text-xs text-muted-foreground line-clamp-2">{assistant.description}</p>
           </div>
 
           {/* Actions Menu */}

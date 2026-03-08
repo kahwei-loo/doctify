@@ -7,9 +7,9 @@
 
 // DocumentStatus matches backend domain entity (Single Source of Truth)
 // See: backend/app/domain/entities/document.py
-export type DocumentStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled';
+export type DocumentStatus = "pending" | "processing" | "completed" | "failed" | "cancelled";
 
-export type ExportFormat = 'json' | 'csv' | 'xml';
+export type ExportFormat = "json" | "csv" | "xml";
 
 export interface Document {
   document_id: string;
@@ -150,7 +150,7 @@ export interface DocumentState {
 }
 
 export interface WebSocketDocumentUpdate {
-  type: 'document.status_change' | 'document.completed' | 'document.failed';
+  type: "document.status_change" | "document.completed" | "document.failed";
   data: {
     document_id: string;
     status: DocumentStatus;

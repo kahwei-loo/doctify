@@ -4,7 +4,7 @@
  * RTK Query endpoints for project operations with automatic caching.
  */
 
-import { api } from './apiSlice';
+import { api } from "./apiSlice";
 
 // Types
 export interface Project {
@@ -106,7 +106,7 @@ export const projectsApi = api.injectEndpoints({
         }
 
         return {
-          url: '/projects/',
+          url: "/projects/",
           params: queryParams,
         };
       },
@@ -114,52 +114,54 @@ export const projectsApi = api.injectEndpoints({
         result
           ? [
               ...result.data.map(({ project_id }) => ({
-                type: 'Projects' as const,
+                type: "Projects" as const,
                 id: project_id,
               })),
-              { type: 'Projects', id: 'LIST' },
+              { type: "Projects", id: "LIST" },
             ]
-          : [{ type: 'Projects', id: 'LIST' }],
+          : [{ type: "Projects", id: "LIST" }],
     }),
 
     // Query: Get single project
     getProject: builder.query<ProjectResponse, string>({
       query: (projectId) => `/projects/${projectId}`,
-      providesTags: (result, error, projectId) => [{ type: 'Projects', id: projectId }],
+      providesTags: (_result, _error, projectId) => [{ type: "Projects", id: projectId }],
     }),
 
     // Query: Get project statistics
     getProjectStatistics: builder.query<ProjectStatisticsResponse, string>({
       query: (projectId) => `/projects/${projectId}/statistics`,
-      providesTags: (result, error, projectId) => [{ type: 'Projects', id: `${projectId}-stats` }],
+      providesTags: (_result, _error, projectId) => [
+        { type: "Projects", id: `${projectId}-stats` },
+      ],
     }),
 
     // Query: Get aggregate statistics across all projects
     getAggregateStats: builder.query<AggregateStatsResponse, void>({
-      query: () => '/projects/stats',
-      providesTags: [{ type: 'Projects', id: 'AGGREGATE_STATS' }],
+      query: () => "/projects/stats",
+      providesTags: [{ type: "Projects", id: "AGGREGATE_STATS" }],
     }),
 
     // Mutation: Create project
     createProject: builder.mutation<ProjectResponse, CreateProjectParams>({
       query: (body) => ({
-        url: '/projects/',
-        method: 'POST',
+        url: "/projects/",
+        method: "POST",
         body,
       }),
-      invalidatesTags: [{ type: 'Projects', id: 'LIST' }],
+      invalidatesTags: [{ type: "Projects", id: "LIST" }],
     }),
 
     // Mutation: Update project
     updateProject: builder.mutation<ProjectResponse, UpdateProjectParams>({
       query: ({ projectId, ...body }) => ({
         url: `/projects/${projectId}`,
-        method: 'PUT',
+        method: "PUT",
         body,
       }),
-      invalidatesTags: (result, error, { projectId }) => [
-        { type: 'Projects', id: projectId },
-        { type: 'Projects', id: 'LIST' },
+      invalidatesTags: (_result, _error, { projectId }) => [
+        { type: "Projects", id: projectId },
+        { type: "Projects", id: "LIST" },
       ],
     }),
 
@@ -167,12 +169,12 @@ export const projectsApi = api.injectEndpoints({
     deleteProject: builder.mutation<void, { projectId: string; permanent?: boolean }>({
       query: ({ projectId, permanent = false }) => ({
         url: `/projects/${projectId}`,
-        method: 'DELETE',
+        method: "DELETE",
         params: { permanent },
       }),
-      invalidatesTags: (result, error, { projectId }) => [
-        { type: 'Projects', id: projectId },
-        { type: 'Projects', id: 'LIST' },
+      invalidatesTags: (_result, _error, { projectId }) => [
+        { type: "Projects", id: projectId },
+        { type: "Projects", id: "LIST" },
       ],
     }),
 
@@ -183,10 +185,10 @@ export const projectsApi = api.injectEndpoints({
     >({
       query: ({ projectId, extractionConfig }) => ({
         url: `/projects/${projectId}/config`,
-        method: 'PUT',
+        method: "PUT",
         body: { config: extractionConfig },
       }),
-      invalidatesTags: (result, error, { projectId }) => [{ type: 'Projects', id: projectId }],
+      invalidatesTags: (_result, _error, { projectId }) => [{ type: "Projects", id: projectId }],
     }),
 
     // Query: Search projects (for CommandPalette global search)
@@ -205,7 +207,7 @@ export const projectsApi = api.injectEndpoints({
       { query: string; limit?: number }
     >({
       query: ({ query, limit = 10 }) => ({
-        url: '/projects/search',
+        url: "/projects/search",
         params: { q: query, limit },
       }),
       // Don't cache search results for too long

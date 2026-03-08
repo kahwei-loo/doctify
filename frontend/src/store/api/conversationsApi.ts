@@ -5,7 +5,7 @@
  * Connected to real backend API (Week 5 Phase 2).
  */
 
-import { api } from './apiSlice';
+import { api } from "./apiSlice";
 import type {
   ConversationListResponse,
   ConversationFilters,
@@ -15,7 +15,7 @@ import type {
   Message,
   SendMessageRequest,
   PaginationParams,
-} from '../../features/assistants/types';
+} from "../../features/assistants/types";
 
 // ============================================================================
 // Response Transformation Types (Backend → Frontend)
@@ -44,7 +44,7 @@ interface BackendConversationListResponse {
 interface BackendMessageResponse {
   id: string;
   conversation_id: string;
-  role: 'user' | 'assistant' | 'system';
+  role: "user" | "assistant" | "system";
   content: string;
   model_used: string | null;
   tokens_used: number | null;
@@ -76,7 +76,7 @@ const transformConversation = (backend: BackendConversationResponse): Conversati
   assistant_id: backend.assistant_id,
   status: backend.status,
   user_fingerprint: backend.session_id || undefined,
-  last_message_preview: backend.last_message_preview || '',
+  last_message_preview: backend.last_message_preview || "",
   last_message_at: backend.last_message_at,
   created_at: backend.created_at,
   resolved_at: backend.resolved_at || undefined,
@@ -93,7 +93,9 @@ const transformMessage = (backend: BackendMessageResponse): Message => ({
   role: backend.role,
   content: backend.content,
   created_at: backend.created_at,
-  metadata: backend.model_used ? { model_used: backend.model_used, tokens_used: backend.tokens_used } : undefined,
+  metadata: backend.model_used
+    ? { model_used: backend.model_used, tokens_used: backend.tokens_used }
+    : undefined,
 });
 
 // ============================================================================
@@ -110,29 +112,29 @@ export const conversationsApi = api.injectEndpoints({
       query: ({ filters = {}, pagination = { page: 1, per_page: 20 } }) => {
         if (!filters.assistant_id) {
           // Return empty response if no assistant selected
-          return { url: '', method: 'GET' };
+          return { url: "", method: "GET" };
         }
 
         const params = new URLSearchParams();
 
         if (filters.status) {
-          params.append('status', filters.status);
+          params.append("status", filters.status);
         }
         if (filters.search) {
-          params.append('search', filters.search);
+          params.append("search", filters.search);
         }
 
         // Convert page-based pagination to skip/limit
         const skip = (pagination.page - 1) * pagination.per_page;
-        params.append('skip', skip.toString());
-        params.append('limit', pagination.per_page.toString());
+        params.append("skip", skip.toString());
+        params.append("limit", pagination.per_page.toString());
 
         const queryString = params.toString();
-        return `/assistants/${filters.assistant_id}/conversations${queryString ? `?${queryString}` : ''}`;
+        return `/assistants/${filters.assistant_id}/conversations${queryString ? `?${queryString}` : ""}`;
       },
       transformResponse: (
         response: BackendSuccessResponse<BackendConversationListResponse>,
-        meta,
+        _meta,
         arg
       ): ConversationListResponse => {
         const { filters = {}, pagination = { page: 1, per_page: 20 } } = arg;
@@ -175,18 +177,20 @@ export const conversationsApi = api.injectEndpoints({
         result
           ? [
               ...result.data.map(({ conversation_id }) => ({
-                type: 'AssistantConversations' as const,
+                type: "AssistantConversations" as const,
                 id: conversation_id,
               })),
-              { type: 'AssistantConversations', id: 'LIST' },
+              { type: "AssistantConversations", id: "LIST" },
             ]
-          : [{ type: 'AssistantConversations', id: 'LIST' }],
+          : [{ type: "AssistantConversations", id: "LIST" }],
     }),
 
     // Query: Get conversation messages
     getConversationMessages: builder.query<MessageListResponse, string>({
       query: (conversationId) => `/assistants/conversations/${conversationId}/messages`,
-      transformResponse: (response: BackendSuccessResponse<BackendMessageListResponse>): MessageListResponse => {
+      transformResponse: (
+        response: BackendSuccessResponse<BackendMessageListResponse>
+      ): MessageListResponse => {
         const messages = response.data.messages.map(transformMessage);
 
         return {
@@ -195,8 +199,8 @@ export const conversationsApi = api.injectEndpoints({
           timestamp: new Date().toISOString(),
         };
       },
-      providesTags: (result, error, conversationId) => [
-        { type: 'ConversationMessages', id: conversationId },
+      providesTags: (_result, _error, conversationId) => [
+        { type: "ConversationMessages", id: conversationId },
       ],
     }),
 
@@ -207,16 +211,18 @@ export const conversationsApi = api.injectEndpoints({
     >({
       query: ({ conversationId, status }) => ({
         url: `/assistants/conversations/${conversationId}/status`,
-        method: 'PATCH',
+        method: "PATCH",
         body: { status },
       }),
-      transformResponse: (response: BackendSuccessResponse<BackendConversationResponse>): Conversation => {
+      transformResponse: (
+        response: BackendSuccessResponse<BackendConversationResponse>
+      ): Conversation => {
         return transformConversation(response.data);
       },
-      invalidatesTags: (result, error, { conversationId }) => [
-        { type: 'AssistantConversations', id: conversationId },
-        { type: 'AssistantConversations', id: 'LIST' },
-        { type: 'AssistantStats', id: 'STATS' },
+      invalidatesTags: (_result, _error, { conversationId }) => [
+        { type: "AssistantConversations", id: conversationId },
+        { type: "AssistantConversations", id: "LIST" },
+        { type: "AssistantStats", id: "STATS" },
       ],
     }),
 
@@ -224,15 +230,15 @@ export const conversationsApi = api.injectEndpoints({
     sendMessage: builder.mutation<Message, SendMessageRequest>({
       query: ({ conversation_id, content }) => ({
         url: `/assistants/conversations/${conversation_id}/messages`,
-        method: 'POST',
+        method: "POST",
         body: { content },
       }),
       transformResponse: (response: BackendSuccessResponse<BackendMessageResponse>): Message => {
         return transformMessage(response.data);
       },
-      invalidatesTags: (result, error, { conversation_id }) => [
-        { type: 'ConversationMessages', id: conversation_id },
-        { type: 'AssistantConversations', id: conversation_id },
+      invalidatesTags: (_result, _error, { conversation_id }) => [
+        { type: "ConversationMessages", id: conversation_id },
+        { type: "AssistantConversations", id: conversation_id },
       ],
     }),
 
@@ -240,12 +246,12 @@ export const conversationsApi = api.injectEndpoints({
     deleteConversation: builder.mutation<void, string>({
       query: (conversationId) => ({
         url: `/assistants/conversations/${conversationId}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
-      invalidatesTags: (result, error, conversationId) => [
-        { type: 'AssistantConversations', id: conversationId },
-        { type: 'AssistantConversations', id: 'LIST' },
-        { type: 'AssistantStats', id: 'STATS' },
+      invalidatesTags: (_result, _error, conversationId) => [
+        { type: "AssistantConversations", id: conversationId },
+        { type: "AssistantConversations", id: "LIST" },
+        { type: "AssistantStats", id: "STATS" },
       ],
     }),
   }),

@@ -4,41 +4,41 @@
  * Reusable button component with multiple variants and sizes.
  */
 
-import React from 'react';
-import './Button.css';
+import React from "react";
+import "./Button.css";
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
-  size?: 'small' | 'medium' | 'large';
+  variant?: "primary" | "secondary" | "danger" | "ghost";
+  size?: "small" | "medium" | "large";
   fullWidth?: boolean;
   loading?: boolean;
   icon?: React.ReactNode;
-  iconPosition?: 'left' | 'right';
+  iconPosition?: "left" | "right";
 }
 
 export const Button: React.FC<ButtonProps> = ({
   children,
-  variant = 'primary',
-  size = 'medium',
+  variant = "primary",
+  size = "medium",
   fullWidth = false,
   loading = false,
   disabled,
   icon,
-  iconPosition = 'left',
-  className = '',
+  iconPosition = "left",
+  className = "",
   ...props
 }) => {
   const classNames = [
-    'button',
+    "button",
     `button--${variant}`,
     `button--${size}`,
-    fullWidth && 'button--full-width',
-    loading && 'button--loading',
-    disabled && 'button--disabled',
+    fullWidth && "button--full-width",
+    loading && "button--loading",
+    disabled && "button--disabled",
     className,
   ]
     .filter(Boolean)
-    .join(' ');
+    .join(" ");
 
   // Determine if this is an icon-only button (no text children)
   const isIconOnly = !children && icon;
@@ -47,7 +47,7 @@ export const Button: React.FC<ButtonProps> = ({
     <button
       className={classNames}
       disabled={disabled || loading}
-      aria-busy={loading ? 'true' : undefined}
+      aria-busy={loading ? "true" : undefined}
       {...props}
     >
       {loading && (
@@ -59,16 +59,21 @@ export const Button: React.FC<ButtonProps> = ({
       )}
       {loading && <span className="sr-only">Loading</span>}
 
-      {!loading && icon && iconPosition === 'left' && (
-        <span className="button__icon button__icon--left" aria-hidden={!isIconOnly ? 'true' : undefined}>
+      {!loading && icon && iconPosition === "left" && (
+        <span
+          className="button__icon button__icon--left"
+          aria-hidden={!isIconOnly ? "true" : undefined}
+        >
           {icon}
         </span>
       )}
 
       {children && <span className="button__text">{children}</span>}
 
-      {!loading && icon && iconPosition === 'right' && (
-        <span className="button__icon button__icon--right" aria-hidden="true">{icon}</span>
+      {!loading && icon && iconPosition === "right" && (
+        <span className="button__icon button__icon--right" aria-hidden="true">
+          {icon}
+        </span>
       )}
     </button>
   );

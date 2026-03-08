@@ -8,21 +8,21 @@
  * Week 7 Task 1.3.3: Unified Error Handling Integration
  */
 
-import React from 'react';
-import { AlertCircle, RefreshCw, BookOpen, Upload, FileWarning } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
-import type { DocumentDetail } from '@/features/documents/types';
+import React from "react";
+import { AlertCircle, RefreshCw, BookOpen, Upload, FileWarning } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import type { DocumentDetail } from "@/features/documents/types";
 
 export type OCRErrorType =
-  | 'processing'
-  | 'quality'
-  | 'format'
-  | 'encrypted'
-  | 'corrupted'
-  | 'timeout'
-  | 'unknown';
+  | "processing"
+  | "quality"
+  | "format"
+  | "encrypted"
+  | "corrupted"
+  | "timeout"
+  | "unknown";
 
 interface OCRErrorStateProps {
   /** Document with error details */
@@ -49,104 +49,101 @@ const errorTypeConfig: Record<
   }
 > = {
   processing: {
-    title: 'OCR Processing Failed',
+    title: "OCR Processing Failed",
     icon: AlertCircle,
     possibleReasons: [
-      'The document may be too complex for automated extraction',
-      'Server encountered an unexpected error during processing',
-      'Processing was interrupted due to system maintenance',
+      "The document may be too complex for automated extraction",
+      "Server encountered an unexpected error during processing",
+      "Processing was interrupted due to system maintenance",
     ],
-    tips: [
-      'Try processing the document again',
-      'If the issue persists, contact support',
-    ],
+    tips: ["Try processing the document again", "If the issue persists, contact support"],
   },
   quality: {
-    title: 'Image Quality Issue',
+    title: "Image Quality Issue",
     icon: FileWarning,
     possibleReasons: [
-      'Poor image quality or low resolution (below 300 DPI recommended)',
-      'Blurry or out-of-focus images',
-      'Poor lighting or contrast in scanned documents',
+      "Poor image quality or low resolution (below 300 DPI recommended)",
+      "Blurry or out-of-focus images",
+      "Poor lighting or contrast in scanned documents",
     ],
     tips: [
-      'Ensure the document resolution is at least 300 DPI',
-      'Re-scan the document with better lighting',
-      'Use a higher quality camera or scanner',
+      "Ensure the document resolution is at least 300 DPI",
+      "Re-scan the document with better lighting",
+      "Use a higher quality camera or scanner",
     ],
   },
   format: {
-    title: 'Unsupported Format',
+    title: "Unsupported Format",
     icon: FileWarning,
     possibleReasons: [
-      'Unsupported document format or encoding',
-      'Text is handwritten or in an unsupported language',
-      'Document contains only images without extractable text',
+      "Unsupported document format or encoding",
+      "Text is handwritten or in an unsupported language",
+      "Document contains only images without extractable text",
     ],
     tips: [
-      'Try converting the document to PDF format',
-      'Ensure text is machine-readable (not handwritten)',
-      'Convert images to a supported format (PDF, PNG, JPG)',
+      "Try converting the document to PDF format",
+      "Ensure text is machine-readable (not handwritten)",
+      "Convert images to a supported format (PDF, PNG, JPG)",
     ],
   },
   encrypted: {
-    title: 'Document Protected',
+    title: "Document Protected",
     icon: AlertCircle,
     possibleReasons: [
-      'Document is encrypted or password-protected',
-      'Digital rights management (DRM) restrictions',
-      'Security settings prevent text extraction',
+      "Document is encrypted or password-protected",
+      "Digital rights management (DRM) restrictions",
+      "Security settings prevent text extraction",
     ],
     tips: [
-      'Remove password protection before uploading',
-      'Check if the document has DRM restrictions',
-      'Export to a new PDF without security settings',
+      "Remove password protection before uploading",
+      "Check if the document has DRM restrictions",
+      "Export to a new PDF without security settings",
     ],
   },
   corrupted: {
-    title: 'File Corrupted',
+    title: "File Corrupted",
     icon: FileWarning,
     possibleReasons: [
-      'File is corrupted or incomplete',
-      'File was damaged during upload',
-      'Incomplete or truncated download',
+      "File is corrupted or incomplete",
+      "File was damaged during upload",
+      "Incomplete or truncated download",
     ],
     tips: [
-      'Re-download the original file',
-      'Try uploading a different copy',
-      'Check if the original file opens correctly',
+      "Re-download the original file",
+      "Try uploading a different copy",
+      "Check if the original file opens correctly",
     ],
   },
   timeout: {
-    title: 'Processing Timeout',
+    title: "Processing Timeout",
     icon: AlertCircle,
     possibleReasons: [
-      'Document is too large for processing',
-      'Server load is high, causing delays',
-      'Complex document requiring extended processing time',
+      "Document is too large for processing",
+      "Server load is high, causing delays",
+      "Complex document requiring extended processing time",
     ],
     tips: [
-      'Try again during off-peak hours',
-      'Split large documents into smaller parts',
-      'Compress images before uploading',
+      "Try again during off-peak hours",
+      "Split large documents into smaller parts",
+      "Compress images before uploading",
     ],
   },
   unknown: {
-    title: 'OCR Processing Failed',
+    title: "OCR Processing Failed",
     icon: AlertCircle,
     possibleReasons: [
-      'Poor image quality or low resolution (below 300 DPI recommended)',
-      'Unsupported document format or encoding',
-      'Document is encrypted or password-protected',
-      'Text is handwritten or in an unsupported language',
-      'File is corrupted or incomplete',
-      'Document contains only images without extractable text',
+      "Poor image quality or low resolution (below 300 DPI recommended)",
+      "Unsupported document format or encoding",
+      "Document is encrypted or password-protected",
+      "Text is handwritten or in an unsupported language",
+      "File is corrupted or incomplete",
+      "Document contains only images without extractable text",
     ],
     tips: [
-      'Try converting the document to PDF format',
-      'Ensure the document resolution is at least 300 DPI',
-      'Check if the document is password-protected and remove it',
-      'Make sure the text is machine-readable (not handwritten)',
+      "Try converting the document to PDF format",
+      "Ensure the document resolution is at least 300 DPI",
+      "Check if the document is password-protected and remove it",
+      "Make sure the text is machine-readable (not handwritten)",
     ],
   },
 };
@@ -155,42 +152,38 @@ const errorTypeConfig: Record<
  * Detects error type from error message
  */
 function detectErrorType(errorMessage?: string | null): OCRErrorType {
-  if (!errorMessage) return 'unknown';
+  if (!errorMessage) return "unknown";
 
   const message = errorMessage.toLowerCase();
 
-  if (message.includes('timeout') || message.includes('timed out')) {
-    return 'timeout';
+  if (message.includes("timeout") || message.includes("timed out")) {
+    return "timeout";
   }
-  if (message.includes('corrupt') || message.includes('invalid file')) {
-    return 'corrupted';
-  }
-  if (
-    message.includes('encrypt') ||
-    message.includes('password') ||
-    message.includes('protected')
-  ) {
-    return 'encrypted';
+  if (message.includes("corrupt") || message.includes("invalid file")) {
+    return "corrupted";
   }
   if (
-    message.includes('format') ||
-    message.includes('unsupported') ||
-    message.includes('handwritten')
+    message.includes("encrypt") ||
+    message.includes("password") ||
+    message.includes("protected")
   ) {
-    return 'format';
+    return "encrypted";
   }
   if (
-    message.includes('quality') ||
-    message.includes('resolution') ||
-    message.includes('blur')
+    message.includes("format") ||
+    message.includes("unsupported") ||
+    message.includes("handwritten")
   ) {
-    return 'quality';
+    return "format";
   }
-  if (message.includes('processing') || message.includes('failed')) {
-    return 'processing';
+  if (message.includes("quality") || message.includes("resolution") || message.includes("blur")) {
+    return "quality";
+  }
+  if (message.includes("processing") || message.includes("failed")) {
+    return "processing";
   }
 
-  return 'unknown';
+  return "unknown";
 }
 
 export const OCRErrorState: React.FC<OCRErrorStateProps> = ({
@@ -206,7 +199,7 @@ export const OCRErrorState: React.FC<OCRErrorStateProps> = ({
   const Icon = config.icon;
 
   return (
-    <Card className={cn('border-destructive/50 bg-destructive/5', className)}>
+    <Card className={cn("border-destructive/50 bg-destructive/5", className)}>
       <CardContent className="pt-6">
         <div className="flex items-start gap-4">
           {/* Error Icon */}
@@ -221,7 +214,7 @@ export const OCRErrorState: React.FC<OCRErrorStateProps> = ({
             {/* Error Message */}
             <p className="text-muted-foreground mb-4">
               {document.error_message ||
-                'Unable to extract text from this document. The OCR processing encountered an error.'}
+                "Unable to extract text from this document. The OCR processing encountered an error."}
             </p>
 
             {/* Possible Reasons */}
@@ -247,8 +240,8 @@ export const OCRErrorState: React.FC<OCRErrorStateProps> = ({
             {/* Action Buttons */}
             <div className="flex gap-2 flex-wrap">
               <Button onClick={onRetry} disabled={isRetrying} className="gap-2">
-                <RefreshCw className={cn('h-4 w-4', isRetrying && 'animate-spin')} />
-                {isRetrying ? 'Retrying...' : 'Retry Processing'}
+                <RefreshCw className={cn("h-4 w-4", isRetrying && "animate-spin")} />
+                {isRetrying ? "Retrying..." : "Retry Processing"}
               </Button>
               {onReupload && (
                 <Button variant="outline" onClick={onReupload} className="gap-2">
@@ -259,7 +252,7 @@ export const OCRErrorState: React.FC<OCRErrorStateProps> = ({
               <Button
                 variant="outline"
                 className="gap-2"
-                onClick={() => window.open('/docs/ocr-troubleshooting', '_blank')}
+                onClick={() => window.open("/docs/ocr-troubleshooting", "_blank")}
               >
                 <BookOpen className="h-4 w-4" />
                 Troubleshooting Guide
@@ -294,7 +287,7 @@ export const OCRErrorCompact: React.FC<OCRErrorCompactProps> = ({
   const config = errorTypeConfig[errorType];
 
   return (
-    <div className={cn('flex items-center gap-2 text-destructive', className)}>
+    <div className={cn("flex items-center gap-2 text-destructive", className)}>
       <AlertCircle className="h-4 w-4 flex-shrink-0" />
       <span className="text-sm truncate">{config.title}</span>
       {onRetry && (
@@ -305,7 +298,7 @@ export const OCRErrorCompact: React.FC<OCRErrorCompactProps> = ({
           disabled={isRetrying}
           className="h-6 px-2 text-xs"
         >
-          <RefreshCw className={cn('h-3 w-3', isRetrying && 'animate-spin')} />
+          <RefreshCw className={cn("h-3 w-3", isRetrying && "animate-spin")} />
         </Button>
       )}
     </div>

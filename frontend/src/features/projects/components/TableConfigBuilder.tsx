@@ -12,19 +12,19 @@
  * - Drag and drop reordering (future enhancement)
  */
 
-import React, { useState, useCallback } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
+import React, { useState, useCallback } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -32,14 +32,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+} from "@/components/ui/dialog";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -47,35 +41,24 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import {
-  Plus,
-  Trash2,
-  Edit,
-  TableIcon,
-  Columns,
-  GripVertical,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import type { TableDefinition, ColumnDefinition, FieldType } from '../types';
-import { FIELD_TYPE_LABELS } from '../types';
+} from "@/components/ui/table";
+import { Plus, Trash2, Edit, TableIcon, Columns, GripVertical } from "lucide-react";
+import type { TableDefinition, ColumnDefinition, FieldType } from "../types";
+import { FIELD_TYPE_LABELS } from "../types";
 
 interface TableConfigBuilderProps {
   tables: TableDefinition[];
   onChange: (tables: TableDefinition[]) => void;
 }
 
-const COLUMN_TYPES: Array<{ value: Exclude<FieldType, 'array' | 'object'>; label: string }> = [
-  { value: 'text', label: 'Text' },
-  { value: 'number', label: 'Number' },
-  { value: 'date', label: 'Date' },
-  { value: 'boolean', label: 'Yes/No' },
+const COLUMN_TYPES: Array<{ value: Exclude<FieldType, "array" | "object">; label: string }> = [
+  { value: "text", label: "Text" },
+  { value: "number", label: "Number" },
+  { value: "date", label: "Date" },
+  { value: "boolean", label: "Yes/No" },
 ];
 
-export const TableConfigBuilder: React.FC<TableConfigBuilderProps> = ({
-  tables,
-  onChange,
-}) => {
+export const TableConfigBuilder: React.FC<TableConfigBuilderProps> = ({ tables, onChange }) => {
   const [isTableDialogOpen, setIsTableDialogOpen] = useState(false);
   const [isColumnDialogOpen, setIsColumnDialogOpen] = useState(false);
   const [editingTable, setEditingTable] = useState<TableDefinition | null>(null);
@@ -85,31 +68,31 @@ export const TableConfigBuilder: React.FC<TableConfigBuilderProps> = ({
   const [activeTableIndex, setActiveTableIndex] = useState<number | null>(null);
 
   // Table dialog form state
-  const [tableName, setTableName] = useState('');
-  const [tableDescription, setTableDescription] = useState('');
+  const [tableName, setTableName] = useState("");
+  const [tableDescription, setTableDescription] = useState("");
 
   // Column dialog form state
-  const [columnName, setColumnName] = useState('');
-  const [columnDescription, setColumnDescription] = useState('');
-  const [columnType, setColumnType] = useState<Exclude<FieldType, 'array' | 'object'>>('text');
+  const [columnName, setColumnName] = useState("");
+  const [columnDescription, setColumnDescription] = useState("");
+  const [columnType, setColumnType] = useState<Exclude<FieldType, "array" | "object">>("text");
   const [columnRequired, setColumnRequired] = useState(false);
-  const [columnDefaultValue, setColumnDefaultValue] = useState('');
+  const [columnDefaultValue, setColumnDefaultValue] = useState("");
 
   // Reset table form
   const resetTableForm = useCallback(() => {
-    setTableName('');
-    setTableDescription('');
+    setTableName("");
+    setTableDescription("");
     setEditingTable(null);
     setEditingTableIndex(null);
   }, []);
 
   // Reset column form
   const resetColumnForm = useCallback(() => {
-    setColumnName('');
-    setColumnDescription('');
-    setColumnType('text');
+    setColumnName("");
+    setColumnDescription("");
+    setColumnType("text");
     setColumnRequired(false);
-    setColumnDefaultValue('');
+    setColumnDefaultValue("");
     setEditingColumn(null);
     setEditingColumnIndex(null);
   }, []);
@@ -125,7 +108,7 @@ export const TableConfigBuilder: React.FC<TableConfigBuilderProps> = ({
     setEditingTable(table);
     setEditingTableIndex(index);
     setTableName(table.name);
-    setTableDescription(table.description || '');
+    setTableDescription(table.description || "");
     setIsTableDialogOpen(true);
   }, []);
 
@@ -151,38 +134,55 @@ export const TableConfigBuilder: React.FC<TableConfigBuilderProps> = ({
 
     setIsTableDialogOpen(false);
     resetTableForm();
-  }, [tableName, tableDescription, editingTable, editingTableIndex, tables, onChange, resetTableForm]);
+  }, [
+    tableName,
+    tableDescription,
+    editingTable,
+    editingTableIndex,
+    tables,
+    onChange,
+    resetTableForm,
+  ]);
 
   // Delete table
-  const handleDeleteTable = useCallback((index: number) => {
-    const updatedTables = tables.filter((_, i) => i !== index);
-    onChange(updatedTables);
-    if (activeTableIndex === index) {
-      setActiveTableIndex(null);
-    } else if (activeTableIndex !== null && activeTableIndex > index) {
-      setActiveTableIndex(activeTableIndex - 1);
-    }
-  }, [tables, activeTableIndex, onChange]);
+  const handleDeleteTable = useCallback(
+    (index: number) => {
+      const updatedTables = tables.filter((_, i) => i !== index);
+      onChange(updatedTables);
+      if (activeTableIndex === index) {
+        setActiveTableIndex(null);
+      } else if (activeTableIndex !== null && activeTableIndex > index) {
+        setActiveTableIndex(activeTableIndex - 1);
+      }
+    },
+    [tables, activeTableIndex, onChange]
+  );
 
   // Open column dialog for adding
-  const handleAddColumn = useCallback((tableIndex: number) => {
-    setActiveTableIndex(tableIndex);
-    resetColumnForm();
-    setIsColumnDialogOpen(true);
-  }, [resetColumnForm]);
+  const handleAddColumn = useCallback(
+    (tableIndex: number) => {
+      setActiveTableIndex(tableIndex);
+      resetColumnForm();
+      setIsColumnDialogOpen(true);
+    },
+    [resetColumnForm]
+  );
 
   // Open column dialog for editing
-  const handleEditColumn = useCallback((tableIndex: number, column: ColumnDefinition, columnIndex: number) => {
-    setActiveTableIndex(tableIndex);
-    setEditingColumn(column);
-    setEditingColumnIndex(columnIndex);
-    setColumnName(column.name);
-    setColumnDescription(column.description || '');
-    setColumnType(column.type);
-    setColumnRequired(column.required);
-    setColumnDefaultValue(column.default_value || '');
-    setIsColumnDialogOpen(true);
-  }, []);
+  const handleEditColumn = useCallback(
+    (tableIndex: number, column: ColumnDefinition, columnIndex: number) => {
+      setActiveTableIndex(tableIndex);
+      setEditingColumn(column);
+      setEditingColumnIndex(columnIndex);
+      setColumnName(column.name);
+      setColumnDescription(column.description || "");
+      setColumnType(column.type);
+      setColumnRequired(column.required);
+      setColumnDefaultValue(column.default_value || "");
+      setIsColumnDialogOpen(true);
+    },
+    []
+  );
 
   // Save column
   const handleSaveColumn = useCallback(() => {
@@ -214,16 +214,30 @@ export const TableConfigBuilder: React.FC<TableConfigBuilderProps> = ({
 
     setIsColumnDialogOpen(false);
     resetColumnForm();
-  }, [columnName, columnDescription, columnType, columnRequired, columnDefaultValue, activeTableIndex, editingColumnIndex, tables, onChange, resetColumnForm]);
+  }, [
+    columnName,
+    columnDescription,
+    columnType,
+    columnRequired,
+    columnDefaultValue,
+    activeTableIndex,
+    editingColumnIndex,
+    tables,
+    onChange,
+    resetColumnForm,
+  ]);
 
   // Delete column
-  const handleDeleteColumn = useCallback((tableIndex: number, columnIndex: number) => {
-    const updatedTables = [...tables];
-    const table = { ...updatedTables[tableIndex] };
-    table.columns = table.columns.filter((_, i) => i !== columnIndex);
-    updatedTables[tableIndex] = table;
-    onChange(updatedTables);
-  }, [tables, onChange]);
+  const handleDeleteColumn = useCallback(
+    (tableIndex: number, columnIndex: number) => {
+      const updatedTables = [...tables];
+      const table = { ...updatedTables[tableIndex] };
+      table.columns = table.columns.filter((_, i) => i !== columnIndex);
+      updatedTables[tableIndex] = table;
+      onChange(updatedTables);
+    },
+    [tables, onChange]
+  );
 
   return (
     <div className="space-y-4">
@@ -262,9 +276,7 @@ export const TableConfigBuilder: React.FC<TableConfigBuilderProps> = ({
                         {table.name}
                       </CardTitle>
                       {table.description && (
-                        <CardDescription className="mt-1">
-                          {table.description}
-                        </CardDescription>
+                        <CardDescription className="mt-1">{table.description}</CardDescription>
                       )}
                     </div>
                   </div>
@@ -292,9 +304,7 @@ export const TableConfigBuilder: React.FC<TableConfigBuilderProps> = ({
                 {table.columns.length === 0 ? (
                   <div className="text-center py-4 border border-dashed rounded">
                     <Columns className="h-8 w-8 mx-auto text-muted-foreground/50" />
-                    <p className="mt-2 text-sm text-muted-foreground">
-                      No columns defined
-                    </p>
+                    <p className="mt-2 text-sm text-muted-foreground">No columns defined</p>
                     <Button
                       variant="outline"
                       size="sm"
@@ -340,9 +350,7 @@ export const TableConfigBuilder: React.FC<TableConfigBuilderProps> = ({
                                   Required
                                 </span>
                               ) : (
-                                <span className="text-xs text-muted-foreground">
-                                  Optional
-                                </span>
+                                <span className="text-xs text-muted-foreground">Optional</span>
                               )}
                             </TableCell>
                             <TableCell>
@@ -390,9 +398,7 @@ export const TableConfigBuilder: React.FC<TableConfigBuilderProps> = ({
       <Dialog open={isTableDialogOpen} onOpenChange={setIsTableDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {editingTable ? 'Edit Table' : 'Add Table'}
-            </DialogTitle>
+            <DialogTitle>{editingTable ? "Edit Table" : "Add Table"}</DialogTitle>
             <DialogDescription>
               Define a table for extracting structured data like line items.
             </DialogDescription>
@@ -423,7 +429,7 @@ export const TableConfigBuilder: React.FC<TableConfigBuilderProps> = ({
               Cancel
             </Button>
             <Button onClick={handleSaveTable} disabled={!tableName.trim()}>
-              {editingTable ? 'Save Changes' : 'Add Table'}
+              {editingTable ? "Save Changes" : "Add Table"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -433,12 +439,8 @@ export const TableConfigBuilder: React.FC<TableConfigBuilderProps> = ({
       <Dialog open={isColumnDialogOpen} onOpenChange={setIsColumnDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {editingColumn ? 'Edit Column' : 'Add Column'}
-            </DialogTitle>
-            <DialogDescription>
-              Define a column for the table.
-            </DialogDescription>
+            <DialogTitle>{editingColumn ? "Edit Column" : "Add Column"}</DialogTitle>
+            <DialogDescription>Define a column for the table.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
@@ -461,7 +463,10 @@ export const TableConfigBuilder: React.FC<TableConfigBuilderProps> = ({
             </div>
             <div className="space-y-2">
               <Label htmlFor="columnType">Type</Label>
-              <Select value={columnType} onValueChange={(v) => setColumnType(v as Exclude<FieldType, 'array' | 'object'>)}>
+              <Select
+                value={columnType}
+                onValueChange={(v) => setColumnType(v as Exclude<FieldType, "array" | "object">)}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -497,7 +502,7 @@ export const TableConfigBuilder: React.FC<TableConfigBuilderProps> = ({
               Cancel
             </Button>
             <Button onClick={handleSaveColumn} disabled={!columnName.trim()}>
-              {editingColumn ? 'Save Changes' : 'Add Column'}
+              {editingColumn ? "Save Changes" : "Add Column"}
             </Button>
           </DialogFooter>
         </DialogContent>

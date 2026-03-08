@@ -4,7 +4,12 @@
  * Manages multiple WebSocket connections and provides a unified interface.
  */
 
-import { WebSocketClient, createWebSocketClient, WebSocketEventType, WebSocketEventHandler } from './client';
+import {
+  WebSocketClient,
+  createWebSocketClient,
+  WebSocketEventType,
+  WebSocketEventHandler,
+} from "./client";
 
 class WebSocketManager {
   private clients: Map<string, WebSocketClient> = new Map();
@@ -72,7 +77,7 @@ export const wsManager = new WebSocketManager();
 
 // Export WebSocket endpoints
 export const WS_ENDPOINTS = {
-  DOCUMENTS: '/api/v1/ws/documents',
-  PROJECTS: '/api/v1/ws/projects',
-  NOTIFICATIONS: '/api/v1/ws/notifications',
+  DOCUMENTS: "/api/v1/ws/documents",
+  PROJECTS: "/api/v1/ws/projects",
+  NOTIFICATIONS: "/api/v1/ws/notifications",
 } as const;

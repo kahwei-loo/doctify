@@ -1,9 +1,9 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { blurFadeDown, blurFadeUp, staggerContainer } from './animations';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { blurFadeDown, blurFadeUp, staggerContainer } from "./animations";
 
 interface CTASectionProps {
   onTryDemo: () => void;
@@ -23,7 +23,7 @@ const CTASection: React.FC<CTASectionProps> = ({ onTryDemo }) => {
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: '-100px' }}
+          viewport={{ once: true, margin: "-100px" }}
           variants={staggerContainer}
           className="glass-card rounded-3xl p-10 sm:p-14 text-center"
         >
@@ -54,7 +54,7 @@ const CTASection: React.FC<CTASectionProps> = ({ onTryDemo }) => {
             <Button
               size="lg"
               variant="outline"
-              onClick={() => navigate('/auth/register')}
+              onClick={() => navigate("/auth/register")}
               className="w-full sm:w-auto border-border dark:border-white/30 bg-transparent dark:bg-white/5 hover:bg-accent dark:hover:bg-white/10 transition-colors"
             >
               Sign Up Free

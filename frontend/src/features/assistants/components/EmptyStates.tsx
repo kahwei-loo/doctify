@@ -4,10 +4,10 @@
  * Reusable empty state displays for various scenarios in the Assistants feature.
  */
 
-import React from 'react';
-import { MessageSquare, Users, Inbox, Sparkles } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import React from "react";
+import { MessageSquare, Users, Inbox, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface EmptyStateProps {
   icon: React.ElementType;
@@ -54,7 +54,7 @@ export const NoAssistantsState: React.FC<{ onCreateAssistant: () => void }> = ({
       title="No AI Assistants Yet"
       description="Create your first AI assistant to start handling customer conversations automatically. Choose from different AI models and customize the behavior."
       action={{
-        label: 'Create Your First Assistant',
+        label: "Create Your First Assistant",
         onClick: onCreateAssistant,
       }}
     />
@@ -71,9 +71,7 @@ export const NoActiveAssistantsState: React.FC = () => {
   );
 };
 
-export const NoConversationsState: React.FC<{ assistantName?: string }> = ({
-  assistantName,
-}) => {
+export const NoConversationsState: React.FC<{ assistantName?: string }> = ({ assistantName }) => {
   return (
     <EmptyState
       icon={Inbox}
@@ -81,7 +79,7 @@ export const NoConversationsState: React.FC<{ assistantName?: string }> = ({
       description={
         assistantName
           ? `${assistantName} hasn't received any conversations yet. Share your public chat widget to start receiving messages.`
-          : 'Select an assistant to view its conversations.'
+          : "Select an assistant to view its conversations."
       }
     />
   );
@@ -127,7 +125,7 @@ export const FilterNoResultsState: React.FC<{ onClearFilters: () => void }> = ({
       title="No Results Found"
       description="No conversations match your current filters. Try adjusting your search or filter criteria."
       action={{
-        label: 'Clear Filters',
+        label: "Clear Filters",
         onClick: onClearFilters,
       }}
     />

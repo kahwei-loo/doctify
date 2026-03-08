@@ -4,7 +4,7 @@
  * Displays query history for a conversation in a sidebar format.
  */
 
-import React from 'react';
+import React from "react";
 import {
   MessageSquare,
   Clock,
@@ -13,11 +13,11 @@ import {
   Loader2,
   ChevronRight,
   BarChart3,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Badge } from '@/components/ui/badge';
-import { useGetQueryHistoryQuery } from '@/store/api/insightsApi';
-import type { QueryHistoryItem, QueryStatus } from '../types';
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { useGetQueryHistoryQuery } from "@/store/api/insightsApi";
+import type { QueryHistoryItem, QueryStatus } from "../types";
 
 interface ConversationHistoryProps {
   conversationId: string | null;
@@ -26,25 +26,22 @@ interface ConversationHistoryProps {
   className?: string;
 }
 
-const STATUS_CONFIG: Record<
-  QueryStatus,
-  { icon: React.ElementType; color: string }
-> = {
+const STATUS_CONFIG: Record<QueryStatus, { icon: React.ElementType; color: string }> = {
   completed: {
     icon: CheckCircle2,
-    color: 'text-green-500',
+    color: "text-green-500",
   },
   processing: {
     icon: Loader2,
-    color: 'text-blue-500',
+    color: "text-blue-500",
   },
   pending: {
     icon: Clock,
-    color: 'text-yellow-500',
+    color: "text-yellow-500",
   },
   error: {
     icon: AlertCircle,
-    color: 'text-red-500',
+    color: "text-red-500",
   },
 };
 
@@ -56,20 +53,20 @@ const formatTimestamp = (dateString: string): string => {
   const diffHours = Math.floor(diffMs / 3600000);
   const diffDays = Math.floor(diffMs / 86400000);
 
-  if (diffMins < 1) return 'Just now';
+  if (diffMins < 1) return "Just now";
   if (diffMins < 60) return `${diffMins}m ago`;
   if (diffHours < 24) return `${diffHours}h ago`;
   if (diffDays < 7) return `${diffDays}d ago`;
 
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
   });
 };
 
 const truncateText = (text: string, maxLength: number): string => {
   if (text.length <= maxLength) return text;
-  return text.slice(0, maxLength).trim() + '...';
+  return text.slice(0, maxLength).trim() + "...";
 };
 
 interface QueryItemProps {
@@ -88,23 +85,21 @@ const QueryItem: React.FC<QueryItemProps> = ({ query, isSelected, onSelect }) =>
       type="button"
       onClick={onSelect}
       className={cn(
-        'w-full text-left p-3 rounded-lg border transition-colors',
-        'hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-ring',
-        isSelected && 'border-primary bg-primary/5'
+        "w-full text-left p-3 rounded-lg border transition-colors",
+        "hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-ring",
+        isSelected && "border-primary bg-primary/5"
       )}
     >
       <div className="flex items-start gap-2">
         <MessageSquare className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium line-clamp-2">
-            {truncateText(query.user_input, 80)}
-          </p>
+          <p className="text-sm font-medium line-clamp-2">{truncateText(query.user_input, 80)}</p>
           <div className="flex items-center gap-2 mt-1.5">
             <StatusIcon
               className={cn(
-                'h-3 w-3',
+                "h-3 w-3",
                 statusConfig.color,
-                query.status === 'processing' && 'animate-spin'
+                query.status === "processing" && "animate-spin"
               )}
             />
             <span className="text-xs text-muted-foreground">
@@ -120,8 +115,8 @@ const QueryItem: React.FC<QueryItemProps> = ({ query, isSelected, onSelect }) =>
         </div>
         <ChevronRight
           className={cn(
-            'h-4 w-4 text-muted-foreground shrink-0 transition-colors',
-            isSelected && 'text-primary'
+            "h-4 w-4 text-muted-foreground shrink-0 transition-colors",
+            isSelected && "text-primary"
           )}
         />
       </div>
@@ -136,9 +131,7 @@ const EmptyState: React.FC = () => (
   <div className="flex flex-col items-center justify-center py-8 text-center px-4">
     <MessageSquare className="h-8 w-8 text-muted-foreground/30 mb-2" />
     <p className="text-sm text-muted-foreground">No queries yet</p>
-    <p className="text-xs text-muted-foreground mt-1">
-      Ask a question to get started
-    </p>
+    <p className="text-xs text-muted-foreground mt-1">Ask a question to get started</p>
   </div>
 );
 
@@ -168,9 +161,7 @@ const NoConversationState: React.FC = () => (
   <div className="flex flex-col items-center justify-center py-8 text-center px-4">
     <MessageSquare className="h-8 w-8 text-muted-foreground/30 mb-2" />
     <p className="text-sm text-muted-foreground">Select a dataset</p>
-    <p className="text-xs text-muted-foreground mt-1">
-      Query history will appear here
-    </p>
+    <p className="text-xs text-muted-foreground mt-1">Query history will appear here</p>
   </div>
 );
 
@@ -180,10 +171,7 @@ export const ConversationHistory: React.FC<ConversationHistoryProps> = ({
   onSelectQuery,
   className,
 }) => {
-  const {
-    data: historyResponse,
-    isLoading,
-  } = useGetQueryHistoryQuery(
+  const { data: historyResponse, isLoading } = useGetQueryHistoryQuery(
     { conversationId: conversationId! },
     { skip: !conversationId }
   );
@@ -192,7 +180,7 @@ export const ConversationHistory: React.FC<ConversationHistoryProps> = ({
 
   if (!conversationId) {
     return (
-      <div className={cn('border rounded-lg', className)}>
+      <div className={cn("border rounded-lg", className)}>
         <div className="p-3 border-b">
           <h3 className="text-sm font-medium flex items-center gap-2">
             <Clock className="h-4 w-4" />
@@ -205,7 +193,7 @@ export const ConversationHistory: React.FC<ConversationHistoryProps> = ({
   }
 
   return (
-    <div className={cn('border rounded-lg flex flex-col', className)}>
+    <div className={cn("border rounded-lg flex flex-col", className)}>
       <div className="p-3 border-b shrink-0">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-medium flex items-center gap-2">

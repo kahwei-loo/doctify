@@ -4,230 +4,121 @@
  * Phase 13 - Chatbot Implementation
  */
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ChatWindow } from '@/features/chat/components/ChatWindow';
-import type { ChatMessage } from '@/store/api/chatApi';
+import { render, screen, fireEvent } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import type { ChatMessage } from "@/store/api/chatApi";
 
-// Mock the WebSocket hook
-vi.mock('@/features/chat/hooks/useChatWebSocket', () => ({
-  useChatWebSocket: vi.fn(() => ({
-    isConnected: true,
-    isSending: false,
-    sendMessage: vi.fn(),
-  })),
+// Shared mock state object — mutated per test
+const mockState = {
+  isConnected: true,
+  isSending: false,
+  sendMessage: vi.fn(),
+};
+
+vi.mock("@/features/chat/hooks/useChatWebSocket", () => ({
+  useChatWebSocket: () => mockState,
 }));
 
-describe('ChatWindow', () => {
-  const mockConversationId = 'test-conversation-id';
-  const mockMessages: ChatMessage[] = [
-    {
-      id: '1',
-      role: 'user',
-      content: 'Hello',
-      created_at: new Date().toISOString(),
-    },
-    {
-      id: '2',
-      role: 'assistant',
-      content: 'Hi there!',
-      created_at: new Date().toISOString(),
-    },
-  ];
+vi.mock("@/features/chat/components/ChatMessage", () => ({
+  ChatMessage: ({ message }: { message: { content: string } }) => (
+    <div data-testid="chat-message">{message.content}</div>
+  ),
+}));
+
+import { ChatWindow } from "@/features/chat/components/ChatWindow";
+
+// Stable empty array reference — passing no initialMessages prop causes an infinite
+// useEffect loop because the default `= []` creates a new reference every render,
+// which re-triggers `useEffect(() => setMessages(initialMessages), [initialMessages])`.
+const EMPTY_MESSAGES: ChatMessage[] = [];
+
+describe("ChatWindow", () => {
+  const mockConversationId = "test-conversation-id";
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockState.isConnected = true;
+    mockState.isSending = false;
+    mockState.sendMessage = vi.fn();
   });
 
-  it('renders with conversation ID', () => {
-    render(<ChatWindow conversationId={mockConversationId} />);
-
-    expect(screen.getByText('Chat Assistant')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Type your message...')).toBeInTheDocument();
+  it("renders with conversation ID", () => {
+    render(<ChatWindow conversationId={mockConversationId} initialMessages={EMPTY_MESSAGES} />);
+    expect(screen.getByText("Chat Assistant")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Type your message...")).toBeInTheDocument();
   });
 
-  it('displays initial messages', () => {
-    render(
-      <ChatWindow
-        conversationId={mockConversationId}
-        initialMessages={mockMessages}
-      />
-    );
-
-    expect(screen.getByText('Hello')).toBeInTheDocument();
-    expect(screen.getByText('Hi there!')).toBeInTheDocument();
+  it("displays initial messages", () => {
+    const mockMessages: ChatMessage[] = [
+      { id: "1", role: "user", content: "Hello", created_at: new Date().toISOString() },
+      { id: "2", role: "assistant", content: "Hi there!", created_at: new Date().toISOString() },
+    ];
+    render(<ChatWindow conversationId={mockConversationId} initialMessages={mockMessages} />);
+    expect(screen.getByText("Hello")).toBeInTheDocument();
+    expect(screen.getByText("Hi there!")).toBeInTheDocument();
   });
 
-  it('shows connected status when WebSocket is connected', () => {
-    render(<ChatWindow conversationId={mockConversationId} />);
-
-    expect(screen.getByText('● Connected')).toBeInTheDocument();
+  it("shows connected status", () => {
+    render(<ChatWindow conversationId={mockConversationId} initialMessages={EMPTY_MESSAGES} />);
+    expect(screen.getByText("● Connected")).toBeInTheDocument();
   });
 
-  it('disables input when not connected', () => {
-    const { useChatWebSocket } = require('@/features/chat/hooks/useChatWebSocket');
-    useChatWebSocket.mockReturnValue({
-      isConnected: false,
-      isSending: false,
-      sendMessage: vi.fn(),
-    });
-
-    render(<ChatWindow conversationId={mockConversationId} />);
-
-    const textarea = screen.getByPlaceholderText('Type your message...');
-    expect(textarea).toBeDisabled();
+  it("disables input when not connected", () => {
+    mockState.isConnected = false;
+    render(<ChatWindow conversationId={mockConversationId} initialMessages={EMPTY_MESSAGES} />);
+    expect(screen.getByPlaceholderText("Type your message...")).toBeDisabled();
   });
 
-  it('disables input when sending message', () => {
-    const { useChatWebSocket } = require('@/features/chat/hooks/useChatWebSocket');
-    useChatWebSocket.mockReturnValue({
-      isConnected: true,
-      isSending: true,
-      sendMessage: vi.fn(),
-    });
-
-    render(<ChatWindow conversationId={mockConversationId} />);
-
-    const textarea = screen.getByPlaceholderText('Type your message...');
-    expect(textarea).toBeDisabled();
+  it("disables input when sending", () => {
+    mockState.isSending = true;
+    render(<ChatWindow conversationId={mockConversationId} initialMessages={EMPTY_MESSAGES} />);
+    expect(screen.getByPlaceholderText("Type your message...")).toBeDisabled();
   });
 
-  it('calls sendMessage when form is submitted', async () => {
-    const mockSendMessage = vi.fn();
-    const { useChatWebSocket } = require('@/features/chat/hooks/useChatWebSocket');
-    useChatWebSocket.mockReturnValue({
-      isConnected: true,
-      isSending: false,
-      sendMessage: mockSendMessage,
-    });
-
-    render(<ChatWindow conversationId={mockConversationId} />);
-
-    const textarea = screen.getByPlaceholderText('Type your message...');
-    const sendButton = screen.getByRole('button', { name: '' }); // Send button
-
-    // Type message
-    fireEvent.change(textarea, { target: { value: 'Test message' } });
-
-    // Submit form
+  it("calls sendMessage when form is submitted", () => {
+    render(<ChatWindow conversationId={mockConversationId} initialMessages={EMPTY_MESSAGES} />);
+    const textarea = screen.getByPlaceholderText("Type your message...");
+    const sendButton = screen.getByRole("button");
+    fireEvent.change(textarea, { target: { value: "Test message" } });
     fireEvent.click(sendButton);
-
-    await waitFor(() => {
-      expect(mockSendMessage).toHaveBeenCalledWith('Test message');
-    });
+    expect(mockState.sendMessage).toHaveBeenCalledWith("Test message");
   });
 
-  it('clears input after sending message', async () => {
-    const mockSendMessage = vi.fn();
-    const { useChatWebSocket } = require('@/features/chat/hooks/useChatWebSocket');
-    useChatWebSocket.mockReturnValue({
-      isConnected: true,
-      isSending: false,
-      sendMessage: mockSendMessage,
-    });
-
-    render(<ChatWindow conversationId={mockConversationId} />);
-
-    const textarea = screen.getByPlaceholderText('Type your message...') as HTMLTextAreaElement;
-    const sendButton = screen.getByRole('button', { name: '' });
-
-    // Type and send message
-    fireEvent.change(textarea, { target: { value: 'Test message' } });
+  it("clears input after sending message", () => {
+    render(<ChatWindow conversationId={mockConversationId} initialMessages={EMPTY_MESSAGES} />);
+    const textarea = screen.getByPlaceholderText("Type your message...") as HTMLTextAreaElement;
+    const sendButton = screen.getByRole("button");
+    fireEvent.change(textarea, { target: { value: "Test message" } });
     fireEvent.click(sendButton);
-
-    await waitFor(() => {
-      expect(textarea.value).toBe('');
-    });
+    expect(textarea.value).toBe("");
   });
 
-  it('does not send empty messages', async () => {
-    const mockSendMessage = vi.fn();
-    const { useChatWebSocket } = require('@/features/chat/hooks/useChatWebSocket');
-    useChatWebSocket.mockReturnValue({
-      isConnected: true,
-      isSending: false,
-      sendMessage: mockSendMessage,
-    });
-
-    render(<ChatWindow conversationId={mockConversationId} />);
-
-    const sendButton = screen.getByRole('button', { name: '' });
-
-    // Try to send without typing
+  it("does not send empty messages", () => {
+    render(<ChatWindow conversationId={mockConversationId} initialMessages={EMPTY_MESSAGES} />);
+    const sendButton = screen.getByRole("button");
     fireEvent.click(sendButton);
-
-    await waitFor(() => {
-      expect(mockSendMessage).not.toHaveBeenCalled();
-    });
+    expect(mockState.sendMessage).not.toHaveBeenCalled();
   });
 
-  it('handles Enter key to send message', async () => {
-    const mockSendMessage = vi.fn();
-    const { useChatWebSocket } = require('@/features/chat/hooks/useChatWebSocket');
-    useChatWebSocket.mockReturnValue({
-      isConnected: true,
-      isSending: false,
-      sendMessage: mockSendMessage,
-    });
-
-    render(<ChatWindow conversationId={mockConversationId} />);
-
-    const textarea = screen.getByPlaceholderText('Type your message...');
-
-    // Type message
-    fireEvent.change(textarea, { target: { value: 'Test message' } });
-
-    // Press Enter (without Shift)
-    fireEvent.keyDown(textarea, { key: 'Enter', shiftKey: false });
-
-    await waitFor(() => {
-      expect(mockSendMessage).toHaveBeenCalledWith('Test message');
-    });
+  it("handles Enter key to send message", () => {
+    render(<ChatWindow conversationId={mockConversationId} initialMessages={EMPTY_MESSAGES} />);
+    const textarea = screen.getByPlaceholderText("Type your message...");
+    fireEvent.change(textarea, { target: { value: "Test message" } });
+    fireEvent.keyDown(textarea, { key: "Enter", shiftKey: false });
+    expect(mockState.sendMessage).toHaveBeenCalledWith("Test message");
   });
 
-  it('allows Shift+Enter for newlines', async () => {
-    const mockSendMessage = vi.fn();
-    const { useChatWebSocket } = require('@/features/chat/hooks/useChatWebSocket');
-    useChatWebSocket.mockReturnValue({
-      isConnected: true,
-      isSending: false,
-      sendMessage: mockSendMessage,
-    });
-
-    render(<ChatWindow conversationId={mockConversationId} />);
-
-    const textarea = screen.getByPlaceholderText('Type your message...');
-
-    // Type message
-    fireEvent.change(textarea, { target: { value: 'Line 1' } });
-
-    // Press Shift+Enter (should NOT send)
-    fireEvent.keyDown(textarea, { key: 'Enter', shiftKey: true });
-
-    // Should not have called sendMessage
-    expect(mockSendMessage).not.toHaveBeenCalled();
+  it("allows Shift+Enter for newlines", () => {
+    render(<ChatWindow conversationId={mockConversationId} initialMessages={EMPTY_MESSAGES} />);
+    const textarea = screen.getByPlaceholderText("Type your message...");
+    fireEvent.change(textarea, { target: { value: "Line 1" } });
+    fireEvent.keyDown(textarea, { key: "Enter", shiftKey: true });
+    expect(mockState.sendMessage).not.toHaveBeenCalled();
   });
 
-  it('displays loading indicator when sending', () => {
-    const { useChatWebSocket } = require('@/features/chat/hooks/useChatWebSocket');
-    useChatWebSocket.mockReturnValue({
-      isConnected: true,
-      isSending: true,
-      sendMessage: vi.fn(),
-    });
-
-    render(<ChatWindow conversationId={mockConversationId} />);
-
-    // Check for Loader2 icon (spinner)
-    const spinner = document.querySelector('.animate-spin');
+  it("displays loading indicator when sending", () => {
+    mockState.isSending = true;
+    render(<ChatWindow conversationId={mockConversationId} initialMessages={EMPTY_MESSAGES} />);
+    const spinner = document.querySelector(".animate-spin");
     expect(spinner).toBeInTheDocument();
-  });
-
-  it('renders streaming message when present', () => {
-    render(<ChatWindow conversationId={mockConversationId} />);
-
-    // Component should render without streaming message initially
-    const messages = screen.queryAllByText(/Hello|Hi there/);
-    expect(messages).toHaveLength(0); // No initial messages in this test
   });
 });

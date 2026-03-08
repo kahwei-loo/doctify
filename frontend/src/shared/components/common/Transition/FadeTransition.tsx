@@ -7,8 +7,8 @@
  * Week 7 Task 3.2: UI/UX Polish - Animations and Transitions
  */
 
-import React from 'react';
-import { cn } from '@/lib/utils';
+import React from "react";
+import { cn } from "@/lib/utils";
 
 interface FadeTransitionProps {
   /** Whether the content should be visible */
@@ -65,11 +65,7 @@ export const FadeTransition: React.FC<FadeTransitionProps> = ({
 
   return (
     <div
-      className={cn(
-        'transition-opacity',
-        isVisible ? 'opacity-100' : 'opacity-0',
-        className
-      )}
+      className={cn("transition-opacity", isVisible ? "opacity-100" : "opacity-0", className)}
       style={{
         transitionDuration: `${duration}ms`,
         transitionDelay: delay > 0 ? `${delay}ms` : undefined,
@@ -85,7 +81,7 @@ export const FadeTransition: React.FC<FadeTransitionProps> = ({
  */
 interface SlideTransitionProps extends FadeTransitionProps {
   /** Direction of the slide */
-  direction?: 'up' | 'down' | 'left' | 'right';
+  direction?: "up" | "down" | "left" | "right";
   /** Distance to slide in pixels */
   distance?: number;
 }
@@ -97,7 +93,7 @@ export const SlideTransition: React.FC<SlideTransitionProps> = ({
   className,
   unmountOnHide = false,
   delay = 0,
-  direction = 'up',
+  direction = "up",
   distance = 10,
 }) => {
   const [shouldRender, setShouldRender] = React.useState(show);
@@ -122,24 +118,24 @@ export const SlideTransition: React.FC<SlideTransitionProps> = ({
   }
 
   const getTransform = () => {
-    if (isVisible) return 'translate(0, 0)';
+    if (isVisible) return "translate(0, 0)";
     switch (direction) {
-      case 'up':
+      case "up":
         return `translateY(${distance}px)`;
-      case 'down':
+      case "down":
         return `translateY(-${distance}px)`;
-      case 'left':
+      case "left":
         return `translateX(${distance}px)`;
-      case 'right':
+      case "right":
         return `translateX(-${distance}px)`;
       default:
-        return 'translate(0, 0)';
+        return "translate(0, 0)";
     }
   };
 
   return (
     <div
-      className={cn('transition-all', className)}
+      className={cn("transition-all", className)}
       style={{
         opacity: isVisible ? 1 : 0,
         transform: getTransform(),
@@ -192,10 +188,10 @@ export const ScaleTransition: React.FC<ScaleTransitionProps> = ({
 
   return (
     <div
-      className={cn('transition-all', className)}
+      className={cn("transition-all", className)}
       style={{
         opacity: isVisible ? 1 : 0,
-        transform: isVisible ? 'scale(1)' : `scale(${initialScale})`,
+        transform: isVisible ? "scale(1)" : `scale(${initialScale})`,
         transitionDuration: `${duration}ms`,
         transitionDelay: delay > 0 ? `${delay}ms` : undefined,
       }}

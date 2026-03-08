@@ -2,30 +2,30 @@
  * Custom hook for WebSocket connection to document list updates
  * Subscribes to document.list_update and document.progress events
  */
-import { useEffect, useRef, useCallback, useState } from 'react';
-import { WebSocketFactory, WebSocketManager } from '@/shared/utils/websocket';
-import type { DocumentListItem } from '../types';
+import { useEffect, useRef, useCallback, useState } from "react";
+import { WebSocketFactory, WebSocketManager } from "@/shared/utils/websocket";
+import type { DocumentListItem } from "../types";
 
 // Simple logger
 const logger = {
-  info: (message: string, data?: unknown) => console.log(`[WS Hook] ${message}`, data || ''),
-  warn: (message: string, data?: unknown) => console.warn(`[WS Hook] ${message}`, data || ''),
-  error: (message: string, data?: unknown) => console.error(`[WS Hook] ${message}`, data || ''),
+  info: (message: string, data?: unknown) => console.log(`[WS Hook] ${message}`, data || ""),
+  warn: (message: string, data?: unknown) => console.warn(`[WS Hook] ${message}`, data || ""),
+  error: (message: string, data?: unknown) => console.error(`[WS Hook] ${message}`, data || ""),
   debug: (message: string, data?: unknown) => {
     if (import.meta.env.DEV) {
-      console.debug(`[WS Hook] ${message}`, data || '');
+      console.debug(`[WS Hook] ${message}`, data || "");
     }
   },
 };
 
 export interface DocumentListUpdateEvent {
-  event: 'document.list_update';
+  event: "document.list_update";
   data: DocumentListItem;
   timestamp: string;
 }
 
 export interface DocumentProgressEvent {
-  event: 'document.progress';
+  event: "document.progress";
   data: {
     document_id: string;
     progress: number;
@@ -35,7 +35,7 @@ export interface DocumentProgressEvent {
 }
 
 export interface ExportProgressEvent {
-  event: 'export.progress';
+  event: "export.progress";
   data: {
     export_id: string;
     progress: number;
@@ -45,7 +45,7 @@ export interface ExportProgressEvent {
 }
 
 export interface ExportDoneEvent {
-  event: 'export.done';
+  event: "export.done";
   data: {
     export_id: string;
     download_url: string;
@@ -63,9 +63,9 @@ type WebSocketEvent =
 export interface UseDocumentListWebSocketOptions {
   enabled?: boolean;
   onDocumentUpdate?: (document: DocumentListItem) => void;
-  onDocumentProgress?: (data: DocumentProgressEvent['data']) => void;
-  onExportProgress?: (data: ExportProgressEvent['data']) => void;
-  onExportDone?: (data: ExportDoneEvent['data']) => void;
+  onDocumentProgress?: (data: DocumentProgressEvent["data"]) => void;
+  onExportProgress?: (data: ExportProgressEvent["data"]) => void;
+  onExportDone?: (data: ExportDoneEvent["data"]) => void;
   onConnectionChange?: (connected: boolean) => void;
 }
 
@@ -121,7 +121,9 @@ export function useDocumentListWebSocket(options: UseDocumentListWebSocketOption
 
     // Prevent duplicate connection attempts
     if (isConnectingRef.current || wsRef.current?.isConnected()) {
-      logger.warn(`⚠️ [WS Hook] Skipping - already connecting (${isConnectingRef.current}) or connected (${wsRef.current?.isConnected()})`);
+      logger.warn(
+        `⚠️ [WS Hook] Skipping - already connecting (${isConnectingRef.current}) or connected (${wsRef.current?.isConnected()})`
+      );
       return;
     }
 
@@ -134,38 +136,40 @@ export function useDocumentListWebSocket(options: UseDocumentListWebSocketOption
     const handleMessage = (event: MessageEvent) => {
       try {
         const message = JSON.parse(event.data) as WebSocketEvent;
-        logger.debug('WebSocket message received:', message);
+        logger.debug("WebSocket message received:", message);
 
         switch (message.event) {
-          case 'document.list_update':
+          case "document.list_update":
             callbacksRef.current.onDocumentUpdate?.(message.data as DocumentListItem);
             break;
 
-          case 'document.progress':
-            callbacksRef.current.onDocumentProgress?.(message.data as DocumentProgressEvent['data']);
+          case "document.progress":
+            callbacksRef.current.onDocumentProgress?.(
+              message.data as DocumentProgressEvent["data"]
+            );
             break;
 
-          case 'export.progress':
-            callbacksRef.current.onExportProgress?.(message.data as ExportProgressEvent['data']);
+          case "export.progress":
+            callbacksRef.current.onExportProgress?.(message.data as ExportProgressEvent["data"]);
             break;
 
-          case 'export.done':
-            callbacksRef.current.onExportDone?.(message.data as ExportDoneEvent['data']);
+          case "export.done":
+            callbacksRef.current.onExportDone?.(message.data as ExportDoneEvent["data"]);
             break;
 
-          case 'document.list_connected':
-            logger.info('Document list WebSocket connected');
+          case "document.list_connected":
+            logger.info("Document list WebSocket connected");
             break;
 
-          case 'system.pong':
+          case "system.pong":
             // Heartbeat response, no action needed
             break;
 
           default:
-            logger.debug('Unknown WebSocket event:', message.event);
+            logger.debug("Unknown WebSocket event:", message.event);
         }
       } catch (error) {
-        logger.error('Failed to parse WebSocket message:', error);
+        logger.error("Failed to parse WebSocket message:", error);
       }
     };
 
@@ -178,7 +182,7 @@ export function useDocumentListWebSocket(options: UseDocumentListWebSocketOption
         setIsConnected(true);
         setConnectionError(null);
         callbacksRef.current.onConnectionChange?.(true);
-        logger.info('✅ [WS Hook] Document list WebSocket connected');
+        logger.info("✅ [WS Hook] Document list WebSocket connected");
       },
       onMessage: handleMessage,
       onClose: () => {
@@ -187,14 +191,14 @@ export function useDocumentListWebSocket(options: UseDocumentListWebSocketOption
         isConnectingRef.current = false; // Reset on close to allow reconnection
         setIsConnected(false);
         callbacksRef.current.onConnectionChange?.(false);
-        logger.info('👋 [WS Hook] Document list WebSocket disconnected');
+        logger.info("👋 [WS Hook] Document list WebSocket disconnected");
       },
       onError: (error) => {
         if (cancelled) return; // Ignore if connection was cancelled
         logger.error(`❌ [WS Hook] onError callback fired - connection error`);
         isConnectingRef.current = false; // Reset on error to allow reconnection
-        setConnectionError('WebSocket connection failed');
-        logger.error('❌ [WS Hook] Document list WebSocket error:', error);
+        setConnectionError("WebSocket connection failed");
+        logger.error("❌ [WS Hook] Document list WebSocket error:", error);
       },
       autoReconnect: true,
     });
@@ -207,8 +211,8 @@ export function useDocumentListWebSocket(options: UseDocumentListWebSocketOption
       if (cancelled) return; // Ignore if connection was cancelled
       logger.error(`❌ [WS Hook] ws.connect() promise rejected`);
       isConnectingRef.current = false; // Reset on connection failure
-      setConnectionError('Failed to connect to WebSocket');
-      logger.error('❌ [WS Hook] Failed to connect document list WebSocket:', error);
+      setConnectionError("Failed to connect to WebSocket");
+      logger.error("❌ [WS Hook] Failed to connect document list WebSocket:", error);
     });
 
     return () => {
@@ -259,17 +263,12 @@ export interface UseDocumentProgressWebSocketOptions {
 }
 
 export function useDocumentProgressWebSocket(options: UseDocumentProgressWebSocketOptions) {
-  const {
-    documentId,
-    enabled = true,
-    onProgress,
-    onConnectionChange,
-  } = options;
+  const { documentId, enabled = true, onProgress, onConnectionChange } = options;
 
   const wsRef = useRef<WebSocketManager | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [status, setStatus] = useState<string>('');
+  const [status, setStatus] = useState<string>("");
 
   const callbacksRef = useRef({ onProgress, onConnectionChange });
 
@@ -284,16 +283,16 @@ export function useDocumentProgressWebSocket(options: UseDocumentProgressWebSock
       try {
         const message = JSON.parse(event.data);
 
-        if (message.event === 'document.progress') {
+        if (message.event === "document.progress") {
           const { progress: newProgress, status: newStatus } = message.data;
           setProgress(newProgress);
           setStatus(newStatus);
           callbacksRef.current.onProgress?.(newProgress, newStatus);
-        } else if (message.event === 'document.connection_established') {
+        } else if (message.event === "document.connection_established") {
           logger.info(`Document ${documentId} WebSocket connected`);
         }
       } catch (error) {
-        logger.error('Failed to parse document progress message:', error);
+        logger.error("Failed to parse document progress message:", error);
       }
     };
 

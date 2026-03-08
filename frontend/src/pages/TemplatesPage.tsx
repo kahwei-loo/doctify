@@ -12,7 +12,7 @@
  * - Template preview
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from "react";
 import {
   FileText,
   Plus,
@@ -29,17 +29,11 @@ import {
   LayoutGrid,
   List,
   RefreshCw,
-} from 'lucide-react';
-import toast from 'react-hot-toast';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+} from "lucide-react";
+import toast from "react-hot-toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -47,7 +41,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -55,9 +49,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   useGetTemplatesQuery,
   useDeleteTemplateMutation,
@@ -68,18 +62,18 @@ import {
   type CreateTemplateRequest,
   type UpdateTemplateRequest,
   VALID_DOCUMENT_TYPES,
-} from '@/store/api/templatesApi';
-import { TemplateFormModal } from '@/features/templates/components';
-import { cn } from '@/lib/utils';
+} from "@/store/api/templatesApi";
+import { TemplateFormModal } from "@/features/templates/components";
+import { cn } from "@/lib/utils";
 
-type ViewMode = 'grid' | 'list';
-type VisibilityFilter = 'all' | 'mine' | 'public';
+type ViewMode = "grid" | "list";
+type VisibilityFilter = "all" | "mine" | "public";
 
 /**
  * Format document type for display
  */
 const formatDocumentType = (type: string | null): string => {
-  if (!type) return 'Custom';
+  if (!type) return "Custom";
   return type.charAt(0).toUpperCase() + type.slice(1);
 };
 
@@ -88,9 +82,9 @@ const formatDocumentType = (type: string | null): string => {
  */
 const VisibilityIcon: React.FC<{ visibility: string }> = ({ visibility }) => {
   switch (visibility) {
-    case 'public':
+    case "public":
       return <Globe className="h-4 w-4 text-green-500" />;
-    case 'organization':
+    case "organization":
       return <Users className="h-4 w-4 text-blue-500" />;
     default:
       return <Lock className="h-4 w-4 text-muted-foreground" />;
@@ -107,12 +101,7 @@ interface TemplateCardProps {
   onDuplicate: (template: TemplateListItem) => void;
 }
 
-const TemplateCard: React.FC<TemplateCardProps> = ({
-  template,
-  onEdit,
-  onDelete,
-  onDuplicate,
-}) => {
+const TemplateCard: React.FC<TemplateCardProps> = ({ template, onEdit, onDelete, onDuplicate }) => {
   return (
     <Card className="group hover:shadow-md transition-all duration-200">
       <CardHeader className="pb-3">
@@ -124,7 +113,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
               <VisibilityIcon visibility={template.visibility} />
             </div>
             <CardDescription className="line-clamp-2">
-              {template.description || 'No description'}
+              {template.description || "No description"}
             </CardDescription>
           </div>
         </div>
@@ -158,9 +147,6 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
               <FileText className="h-3.5 w-3.5" />
               <span>{template.usage_count} uses</span>
             </div>
-            <div className="text-xs">
-              v{template.version}
-            </div>
           </div>
 
           {/* Tags */}
@@ -181,27 +167,14 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
 
           {/* Actions */}
           <div className="flex items-center gap-2 pt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onEdit(template)}
-              className="flex-1"
-            >
+            <Button variant="outline" size="sm" onClick={() => onEdit(template)} className="flex-1">
               <Edit className="h-3.5 w-3.5 mr-1.5" />
               Edit
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onDuplicate(template)}
-            >
+            <Button variant="outline" size="sm" onClick={() => onDuplicate(template)}>
               <Copy className="h-3.5 w-3.5" />
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onDelete(template)}
-            >
+            <Button variant="outline" size="sm" onClick={() => onDelete(template)}>
               <Trash2 className="h-3.5 w-3.5" />
             </Button>
           </div>
@@ -293,7 +266,7 @@ const DeleteTemplateDialog: React.FC<DeleteTemplateDialogProps> = ({
               Deleting...
             </>
           ) : (
-            'Delete Template'
+            "Delete Template"
           )}
         </Button>
       </DialogFooter>
@@ -305,11 +278,11 @@ const DeleteTemplateDialog: React.FC<DeleteTemplateDialogProps> = ({
  * Main TemplatesPage component
  */
 const TemplatesPage: React.FC = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [visibilityFilter, setVisibilityFilter] = useState<VisibilityFilter>('all');
-  const [documentTypeFilter, setDocumentTypeFilter] = useState<string>('all');
-  const [viewMode, setViewMode] = useState<ViewMode>('grid');
-  const [page, setPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [visibilityFilter, setVisibilityFilter] = useState<VisibilityFilter>("all");
+  const [documentTypeFilter, setDocumentTypeFilter] = useState<string>("all");
+  const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [page, _setPage] = useState(1);
 
   // Delete dialog state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -321,9 +294,14 @@ const TemplatesPage: React.FC = () => {
   const [isDuplicating, setIsDuplicating] = useState(false);
 
   // Fetch templates
-  const { data: templatesResponse, isLoading, isFetching, refetch } = useGetTemplatesQuery({
-    visibility: visibilityFilter === 'all' ? undefined : visibilityFilter,
-    document_type: documentTypeFilter === 'all' ? undefined : documentTypeFilter,
+  const {
+    data: templatesResponse,
+    isLoading,
+    isFetching,
+    refetch,
+  } = useGetTemplatesQuery({
+    visibility: visibilityFilter === "all" ? undefined : visibilityFilter,
+    document_type: documentTypeFilter === "all" ? undefined : documentTypeFilter,
     search: searchQuery || undefined,
     page,
     page_size: 50,
@@ -341,9 +319,7 @@ const TemplatesPage: React.FC = () => {
 
     const query = searchQuery.toLowerCase();
     return templates.filter(
-      (t) =>
-        t.name.toLowerCase().includes(query) ||
-        t.description?.toLowerCase().includes(query)
+      (t) => t.name.toLowerCase().includes(query) || t.description?.toLowerCase().includes(query)
     );
   }, [templatesResponse?.data, searchQuery]);
 
@@ -371,19 +347,19 @@ const TemplatesPage: React.FC = () => {
 
     try {
       await deleteTemplate(templateToDelete.id).unwrap();
-      toast.success('Template deleted successfully');
+      toast.success("Template deleted successfully");
       setDeleteDialogOpen(false);
       setTemplateToDelete(null);
     } catch (error) {
-      toast.error('Failed to delete template');
-      console.error('Delete error:', error);
+      toast.error("Failed to delete template");
+      console.error("Delete error:", error);
     }
   };
 
   const handleDuplicate = (template: TemplateListItem) => {
     // Convert TemplateListItem to Template and open in duplicate mode
     setTemplateToEdit({
-      ...template as Template,
+      ...(template as Template),
       name: `${template.name} (Copy)`,
     });
     setIsDuplicating(true);
@@ -398,24 +374,26 @@ const TemplatesPage: React.FC = () => {
           id: templateToEdit.id,
           updates: data as UpdateTemplateRequest,
         }).unwrap();
-        toast.success('Template updated successfully');
+        toast.success("Template updated successfully");
       } else {
         // Create mode (including duplicate)
         await createTemplate(data as CreateTemplateRequest).unwrap();
-        toast.success(isDuplicating ? 'Template duplicated successfully' : 'Template created successfully');
+        toast.success(
+          isDuplicating ? "Template duplicated successfully" : "Template created successfully"
+        );
       }
       setFormModalOpen(false);
       setTemplateToEdit(null);
       setIsDuplicating(false);
     } catch (error) {
-      toast.error('Failed to save template');
-      console.error('Save error:', error);
+      toast.error("Failed to save template");
+      console.error("Save error:", error);
     }
   };
 
   const handleRefresh = () => {
     refetch();
-    toast.success('Templates refreshed');
+    toast.success("Templates refreshed");
   };
 
   return (
@@ -433,7 +411,7 @@ const TemplatesPage: React.FC = () => {
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isFetching}>
-            <RefreshCw className={cn('h-4 w-4', isFetching && 'animate-spin')} />
+            <RefreshCw className={cn("h-4 w-4", isFetching && "animate-spin")} />
           </Button>
           <Button onClick={handleCreate} className="gap-2">
             <Plus className="h-5 w-5" />
@@ -456,7 +434,10 @@ const TemplatesPage: React.FC = () => {
         </div>
 
         {/* Visibility filter */}
-        <Tabs value={visibilityFilter} onValueChange={(v) => setVisibilityFilter(v as VisibilityFilter)}>
+        <Tabs
+          value={visibilityFilter}
+          onValueChange={(v) => setVisibilityFilter(v as VisibilityFilter)}
+        >
           <TabsList>
             <TabsTrigger value="all">All</TabsTrigger>
             <TabsTrigger value="mine">My Templates</TabsTrigger>
@@ -469,15 +450,15 @@ const TemplatesPage: React.FC = () => {
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="gap-2">
               <Filter className="h-4 w-4" />
-              {documentTypeFilter === 'all' ? 'All Types' : formatDocumentType(documentTypeFilter)}
+              {documentTypeFilter === "all" ? "All Types" : formatDocumentType(documentTypeFilter)}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Document Type</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuCheckboxItem
-              checked={documentTypeFilter === 'all'}
-              onCheckedChange={() => setDocumentTypeFilter('all')}
+              checked={documentTypeFilter === "all"}
+              onCheckedChange={() => setDocumentTypeFilter("all")}
             >
               All Types
             </DropdownMenuCheckboxItem>
@@ -508,22 +489,22 @@ const TemplatesPage: React.FC = () => {
 
       {/* Templates grid/list */}
       {isLoading ? (
-        <div className={cn(
-          'grid gap-4',
-          viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'
-        )}>
+        <div
+          className={cn(
+            "grid gap-4",
+            viewMode === "grid" ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"
+          )}
+        >
           {Array.from({ length: 6 }).map((_, i) => (
             <TemplateCardSkeleton key={i} />
           ))}
         </div>
       ) : filteredTemplates.length === 0 ? (
-        searchQuery || visibilityFilter !== 'all' || documentTypeFilter !== 'all' ? (
+        searchQuery || visibilityFilter !== "all" || documentTypeFilter !== "all" ? (
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
               <FileText className="h-12 w-12 text-muted-foreground/50 mb-4" />
-              <p className="text-muted-foreground text-center">
-                No templates match your filters
-              </p>
+              <p className="text-muted-foreground text-center">No templates match your filters</p>
               <p className="text-sm text-muted-foreground/70 mt-1">
                 Try adjusting your search or filters
               </p>
@@ -534,10 +515,12 @@ const TemplatesPage: React.FC = () => {
         )
       ) : (
         <>
-          <div className={cn(
-            'grid gap-4',
-            viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'
-          )}>
+          <div
+            className={cn(
+              "grid gap-4",
+              viewMode === "grid" ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"
+            )}
+          >
             {filteredTemplates.map((template) => (
               <TemplateCard
                 key={template.id}

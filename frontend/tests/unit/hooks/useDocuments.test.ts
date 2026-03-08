@@ -4,13 +4,13 @@
  * Tests document fetching, filtering, deletion, and state management
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { renderHook, waitFor, act } from '@testing-library/react';
-import { useDocuments } from '@/features/documents/hooks/useDocuments';
-import { documentApi } from '@/features/documents/services/api';
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { renderHook, waitFor, act } from "@testing-library/react";
+import { useDocuments } from "@/features/documents/hooks/useDocuments";
+import { documentApi } from "@/features/documents/services/api";
 
 // Mock the documentApi
-vi.mock('@/features/documents/services/api', () => ({
+vi.mock("@/features/documents/services/api", () => ({
   documentApi: {
     list: vi.fn(),
     getById: vi.fn(),
@@ -20,7 +20,7 @@ vi.mock('@/features/documents/services/api', () => ({
 
 const mockDocumentApi = vi.mocked(documentApi);
 
-describe('useDocuments Hook', () => {
+describe("useDocuments Hook", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Default mock for list to prevent errors
@@ -34,8 +34,8 @@ describe('useDocuments Hook', () => {
     vi.clearAllMocks();
   });
 
-  describe('Initialization', () => {
-    it('returns initial state correctly', async () => {
+  describe("Initialization", () => {
+    it("returns initial state correctly", async () => {
       const { result } = renderHook(() => useDocuments(false));
 
       expect(result.current.documents).toEqual([]);
@@ -46,9 +46,9 @@ describe('useDocuments Hook', () => {
       expect(result.current.filters).toEqual({});
     });
 
-    it('auto-fetches documents on mount when autoFetch is true', async () => {
+    it("auto-fetches documents on mount when autoFetch is true", async () => {
       mockDocumentApi.list.mockResolvedValue({
-        data: [{ document_id: '1', filename: 'doc1.pdf', status: 'completed' }],
+        data: [{ document_id: "1", filename: "doc1.pdf", status: "completed" }],
         pagination: { page: 1, per_page: 20, total: 1, total_pages: 1 },
       });
 
@@ -59,7 +59,7 @@ describe('useDocuments Hook', () => {
       });
     });
 
-    it('does not auto-fetch when autoFetch is false', async () => {
+    it("does not auto-fetch when autoFetch is false", async () => {
       renderHook(() => useDocuments(false));
 
       // Wait a bit to ensure no fetch happens
@@ -69,11 +69,11 @@ describe('useDocuments Hook', () => {
     });
   });
 
-  describe('Fetching Documents', () => {
-    it('fetches documents successfully', async () => {
+  describe("Fetching Documents", () => {
+    it("fetches documents successfully", async () => {
       const mockDocuments = [
-        { document_id: '1', filename: 'doc1.pdf', status: 'completed' },
-        { document_id: '2', filename: 'doc2.pdf', status: 'pending' },
+        { document_id: "1", filename: "doc1.pdf", status: "completed" },
+        { document_id: "2", filename: "doc2.pdf", status: "pending" },
       ];
 
       mockDocumentApi.list.mockResolvedValue({
@@ -92,9 +92,9 @@ describe('useDocuments Hook', () => {
       expect(result.current.error).toBeNull();
     });
 
-    it('handles fetch error', async () => {
+    it("handles fetch error", async () => {
       mockDocumentApi.list.mockRejectedValue({
-        response: { data: { detail: 'Failed to fetch documents' } },
+        response: { data: { detail: "Failed to fetch documents" } },
       });
 
       const { result } = renderHook(() => useDocuments(false));
@@ -103,11 +103,11 @@ describe('useDocuments Hook', () => {
         await result.current.fetchDocuments();
       });
 
-      expect(result.current.error).toBe('Failed to fetch documents');
+      expect(result.current.error).toBe("Failed to fetch documents");
       expect(result.current.isLoading).toBe(false);
     });
 
-    it('sets loading state during fetch', async () => {
+    it("sets loading state during fetch", async () => {
       // Create a promise that we control
       let resolvePromise: (value: any) => void;
       const pendingPromise = new Promise((resolve) => {
@@ -136,7 +136,7 @@ describe('useDocuments Hook', () => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    it('fetches documents with custom pagination', async () => {
+    it("fetches documents with custom pagination", async () => {
       mockDocumentApi.list.mockResolvedValue({
         data: [],
         pagination: { page: 2, per_page: 10, total: 0, total_pages: 1 },
@@ -152,13 +152,13 @@ describe('useDocuments Hook', () => {
     });
   });
 
-  describe('Fetching Single Document', () => {
-    it('fetches document by ID successfully', async () => {
+  describe("Fetching Single Document", () => {
+    it("fetches document by ID successfully", async () => {
       const mockDocument = {
-        document_id: '1',
-        filename: 'doc1.pdf',
-        status: 'completed',
-        content: 'Document content',
+        document_id: "1",
+        filename: "doc1.pdf",
+        status: "completed",
+        content: "Document content",
       };
 
       mockDocumentApi.getById.mockResolvedValue({
@@ -168,41 +168,41 @@ describe('useDocuments Hook', () => {
       const { result } = renderHook(() => useDocuments(false));
 
       await act(async () => {
-        await result.current.fetchDocument('1');
+        await result.current.fetchDocument("1");
       });
 
       expect(result.current.currentDocument).toEqual(mockDocument);
       expect(result.current.error).toBeNull();
     });
 
-    it('handles fetch document error', async () => {
+    it("handles fetch document error", async () => {
       mockDocumentApi.getById.mockRejectedValue({
-        response: { data: { detail: 'Document not found' } },
+        response: { data: { detail: "Document not found" } },
       });
 
       const { result } = renderHook(() => useDocuments(false));
 
       await act(async () => {
-        await result.current.fetchDocument('invalid-id');
+        await result.current.fetchDocument("invalid-id");
       });
 
-      expect(result.current.error).toBe('Document not found');
+      expect(result.current.error).toBe("Document not found");
       expect(result.current.currentDocument).toBeNull();
     });
   });
 
-  describe('Filtering', () => {
-    it('updates filters correctly', async () => {
+  describe("Filtering", () => {
+    it("updates filters correctly", async () => {
       const { result } = renderHook(() => useDocuments(false));
 
       act(() => {
-        result.current.setFilters({ status: 'completed' });
+        result.current.setFilters({ status: "completed" });
       });
 
-      expect(result.current.filters).toEqual({ status: 'completed' });
+      expect(result.current.filters).toEqual({ status: "completed" });
     });
 
-    it('fetches with new filters when autoFetch is enabled', async () => {
+    it("fetches with new filters when autoFetch is enabled", async () => {
       mockDocumentApi.list.mockResolvedValue({
         data: [],
         pagination: { page: 1, per_page: 20, total: 0, total_pages: 1 },
@@ -219,7 +219,7 @@ describe('useDocuments Hook', () => {
 
       // Update filters
       act(() => {
-        result.current.setFilters({ project_id: 'project-123' });
+        result.current.setFilters({ project_id: "project-123" });
       });
 
       // Wait for filter-triggered fetch
@@ -229,10 +229,10 @@ describe('useDocuments Hook', () => {
 
       // Check the last call included the filter
       const lastCall = mockDocumentApi.list.mock.calls[mockDocumentApi.list.mock.calls.length - 1];
-      expect(lastCall[0]).toEqual({ project_id: 'project-123' });
+      expect(lastCall[0]).toEqual({ project_id: "project-123" });
     });
 
-    it('passes filters to fetchDocuments', async () => {
+    it("passes filters to fetchDocuments", async () => {
       mockDocumentApi.list.mockResolvedValue({
         data: [],
         pagination: { page: 1, per_page: 20, total: 0, total_pages: 1 },
@@ -241,21 +241,21 @@ describe('useDocuments Hook', () => {
       const { result } = renderHook(() => useDocuments(false));
 
       await act(async () => {
-        await result.current.fetchDocuments({ status: 'processing' });
+        await result.current.fetchDocuments({ status: "processing" });
       });
 
       expect(mockDocumentApi.list).toHaveBeenCalledWith(
-        { status: 'processing' },
+        { status: "processing" },
         { page: 1, per_page: 20 }
       );
     });
   });
 
-  describe('Document Deletion', () => {
-    it('deletes document successfully', async () => {
+  describe("Document Deletion", () => {
+    it("deletes document successfully", async () => {
       const mockDocuments = [
-        { document_id: '1', filename: 'doc1.pdf', status: 'completed' },
-        { document_id: '2', filename: 'doc2.pdf', status: 'completed' },
+        { document_id: "1", filename: "doc1.pdf", status: "completed" },
+        { document_id: "2", filename: "doc2.pdf", status: "completed" },
       ];
 
       mockDocumentApi.list.mockResolvedValue({
@@ -275,21 +275,21 @@ describe('useDocuments Hook', () => {
 
       // Mock the list call after deletion to return updated list
       mockDocumentApi.list.mockResolvedValue({
-        data: [{ document_id: '2', filename: 'doc2.pdf', status: 'completed' }],
+        data: [{ document_id: "2", filename: "doc2.pdf", status: "completed" }],
         pagination: { page: 1, per_page: 20, total: 1, total_pages: 1 },
       });
 
       // Delete document
       await act(async () => {
-        await result.current.deleteDocument('1');
+        await result.current.deleteDocument("1");
       });
 
-      expect(mockDocumentApi.delete).toHaveBeenCalledWith('1');
+      expect(mockDocumentApi.delete).toHaveBeenCalledWith("1");
     });
 
-    it('handles deletion error', async () => {
+    it("handles deletion error", async () => {
       mockDocumentApi.delete.mockRejectedValue({
-        response: { data: { detail: 'Failed to delete document' } },
+        response: { data: { detail: "Failed to delete document" } },
       });
 
       const { result } = renderHook(() => useDocuments(false));
@@ -297,7 +297,7 @@ describe('useDocuments Hook', () => {
       // The hook throws the error after setting state, so we need to catch it
       await act(async () => {
         try {
-          await result.current.deleteDocument('1');
+          await result.current.deleteDocument("1");
         } catch {
           // Expected to throw
         }
@@ -305,14 +305,14 @@ describe('useDocuments Hook', () => {
 
       // Wait for the error state to be set
       await waitFor(() => {
-        expect(result.current.error).toBe('Failed to delete document');
+        expect(result.current.error).toBe("Failed to delete document");
       });
     });
 
-    it('removes document from local state immediately', async () => {
+    it("removes document from local state immediately", async () => {
       const mockDocuments = [
-        { document_id: '1', filename: 'doc1.pdf', status: 'completed' },
-        { document_id: '2', filename: 'doc2.pdf', status: 'completed' },
+        { document_id: "1", filename: "doc1.pdf", status: "completed" },
+        { document_id: "2", filename: "doc2.pdf", status: "completed" },
       ];
 
       mockDocumentApi.list.mockResolvedValue({
@@ -332,27 +332,27 @@ describe('useDocuments Hook', () => {
 
       // Mock list for refresh after delete
       mockDocumentApi.list.mockResolvedValue({
-        data: [{ document_id: '2', filename: 'doc2.pdf', status: 'completed' }],
+        data: [{ document_id: "2", filename: "doc2.pdf", status: "completed" }],
         pagination: { page: 1, per_page: 20, total: 1, total_pages: 1 },
       });
 
       // Delete document
       await act(async () => {
-        await result.current.deleteDocument('1');
+        await result.current.deleteDocument("1");
       });
 
       // Check document was removed
       await waitFor(() => {
-        const doc1 = result.current.documents.find((d) => d.document_id === '1');
+        const doc1 = result.current.documents.find((d) => d.document_id === "1");
         expect(doc1).toBeUndefined();
       });
     });
   });
 
-  describe('Error Handling', () => {
-    it('clears error with clearError', async () => {
+  describe("Error Handling", () => {
+    it("clears error with clearError", async () => {
       mockDocumentApi.list.mockRejectedValue({
-        response: { data: { detail: 'Some error' } },
+        response: { data: { detail: "Some error" } },
       });
 
       const { result } = renderHook(() => useDocuments(false));
@@ -361,7 +361,7 @@ describe('useDocuments Hook', () => {
         await result.current.fetchDocuments();
       });
 
-      expect(result.current.error).toBe('Some error');
+      expect(result.current.error).toBe("Some error");
 
       act(() => {
         result.current.clearError();
@@ -370,8 +370,8 @@ describe('useDocuments Hook', () => {
       expect(result.current.error).toBeNull();
     });
 
-    it('uses default error message when detail is missing', async () => {
-      mockDocumentApi.list.mockRejectedValue(new Error('Network error'));
+    it("uses default error message when detail is missing", async () => {
+      mockDocumentApi.list.mockRejectedValue(new Error("Network error"));
 
       const { result } = renderHook(() => useDocuments(false));
 
@@ -379,12 +379,12 @@ describe('useDocuments Hook', () => {
         await result.current.fetchDocuments();
       });
 
-      expect(result.current.error).toBe('Failed to fetch documents');
+      expect(result.current.error).toBe("Failed to fetch documents");
     });
   });
 
-  describe('Pagination', () => {
-    it('stores pagination metadata from response', async () => {
+  describe("Pagination", () => {
+    it("stores pagination metadata from response", async () => {
       const mockPagination = {
         page: 2,
         per_page: 10,

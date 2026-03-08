@@ -4,7 +4,7 @@
  * RTK Query endpoints for document operations with automatic caching.
  */
 
-import { api } from './apiSlice';
+import { api } from "./apiSlice";
 import type {
   DocumentListResponse,
   DocumentDetail,
@@ -14,7 +14,7 @@ import type {
   QualityValidation,
   ConfirmDocumentRequest,
   ConfirmDocumentResponse,
-} from '../../features/documents/types';
+} from "../../features/documents/types";
 
 export const documentsApi = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -38,7 +38,7 @@ export const documentsApi = api.injectEndpoints({
         }
 
         return {
-          url: '/documents',
+          url: "/documents",
           params,
         };
       },
@@ -46,37 +46,34 @@ export const documentsApi = api.injectEndpoints({
         result
           ? [
               ...result.data.map(({ document_id }) => ({
-                type: 'Documents' as const,
+                type: "Documents" as const,
                 id: document_id,
               })),
-              { type: 'Documents', id: 'LIST' },
+              { type: "Documents", id: "LIST" },
             ]
-          : [{ type: 'Documents', id: 'LIST' }],
+          : [{ type: "Documents", id: "LIST" }],
     }),
 
     // Query: Get single document
     getDocument: builder.query<{ success: boolean; data: DocumentDetail }, string>({
       query: (documentId) => `/documents/${documentId}`,
-      providesTags: (result, error, documentId) => [{ type: 'Documents', id: documentId }],
+      providesTags: (_result, _error, documentId) => [{ type: "Documents", id: documentId }],
     }),
 
     // Mutation: Upload document
-    uploadDocument: builder.mutation<
-      DocumentUploadResponse,
-      { file: File; projectId: string }
-    >({
+    uploadDocument: builder.mutation<DocumentUploadResponse, { file: File; projectId: string }>({
       query: ({ file, projectId }) => {
         const formData = new FormData();
-        formData.append('file', file);
+        formData.append("file", file);
 
         return {
-          url: '/documents/upload',
-          method: 'POST',
+          url: "/documents/upload",
+          method: "POST",
           body: formData,
           params: { project_id: projectId },
         };
       },
-      invalidatesTags: [{ type: 'Documents', id: 'LIST' }],
+      invalidatesTags: [{ type: "Documents", id: "LIST" }],
     }),
 
     // Mutation: Process document
@@ -86,34 +83,28 @@ export const documentsApi = api.injectEndpoints({
     >({
       query: ({ documentId, extractionConfig }) => ({
         url: `/documents/${documentId}/process`,
-        method: 'POST',
+        method: "POST",
         body: { extraction_config: extractionConfig },
       }),
-      invalidatesTags: (result, error, { documentId }) => [{ type: 'Documents', id: documentId }],
+      invalidatesTags: (_result, _error, { documentId }) => [{ type: "Documents", id: documentId }],
     }),
 
     // Mutation: Cancel processing
-    cancelProcessing: builder.mutation<
-      { success: boolean; message: string },
-      string
-    >({
+    cancelProcessing: builder.mutation<{ success: boolean; message: string }, string>({
       query: (documentId) => ({
         url: `/documents/${documentId}/cancel`,
-        method: 'POST',
+        method: "POST",
       }),
-      invalidatesTags: (result, error, documentId) => [{ type: 'Documents', id: documentId }],
+      invalidatesTags: (_result, _error, documentId) => [{ type: "Documents", id: documentId }],
     }),
 
     // Mutation: Retry processing
-    retryProcessing: builder.mutation<
-      { success: boolean; data: any; message: string },
-      string
-    >({
+    retryProcessing: builder.mutation<{ success: boolean; data: any; message: string }, string>({
       query: (documentId) => ({
         url: `/documents/${documentId}/retry`,
-        method: 'POST',
+        method: "POST",
       }),
-      invalidatesTags: (result, error, documentId) => [{ type: 'Documents', id: documentId }],
+      invalidatesTags: (_result, _error, documentId) => [{ type: "Documents", id: documentId }],
     }),
 
     // Query: Validate quality
@@ -131,11 +122,11 @@ export const documentsApi = api.injectEndpoints({
     deleteDocument: builder.mutation<void, string>({
       query: (documentId) => ({
         url: `/documents/${documentId}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
-      invalidatesTags: (result, error, documentId) => [
-        { type: 'Documents', id: documentId },
-        { type: 'Documents', id: 'LIST' },
+      invalidatesTags: (_result, _error, documentId) => [
+        { type: "Documents", id: documentId },
+        { type: "Documents", id: "LIST" },
       ],
     }),
 
@@ -143,12 +134,12 @@ export const documentsApi = api.injectEndpoints({
     confirmDocument: builder.mutation<ConfirmDocumentResponse, ConfirmDocumentRequest>({
       query: ({ documentId, data }) => ({
         url: `/documents/${documentId}/confirm`,
-        method: 'POST',
+        method: "POST",
         body: data,
       }),
-      invalidatesTags: (result, error, { documentId }) => [
-        { type: 'Documents', id: documentId },
-        { type: 'Documents', id: 'LIST' },
+      invalidatesTags: (_result, _error, { documentId }) => [
+        { type: "Documents", id: documentId },
+        { type: "Documents", id: "LIST" },
       ],
     }),
 
@@ -157,7 +148,7 @@ export const documentsApi = api.injectEndpoints({
       Blob,
       { documentId: string; format?: string; includeMetadata?: boolean }
     >({
-      query: ({ documentId, format = 'json', includeMetadata = true }) => ({
+      query: ({ documentId, format = "json", includeMetadata = true }) => ({
         url: `/documents/${documentId}/export`,
         params: {
           export_format: format,
@@ -184,7 +175,7 @@ export const documentsApi = api.injectEndpoints({
       { query: string; limit?: number }
     >({
       query: ({ query, limit = 10 }) => ({
-        url: '/documents/search',
+        url: "/documents/search",
         params: { q: query, limit },
       }),
       // Don't cache search results for too long

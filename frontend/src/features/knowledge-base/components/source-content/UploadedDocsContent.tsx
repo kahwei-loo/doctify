@@ -7,7 +7,7 @@
  * - PDFs: inline embedded viewer, click to open full viewer
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   File,
   FileText,
@@ -18,17 +18,12 @@ import {
   Loader2,
   Maximize2,
   AlertCircle,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { cn } from '@/lib/utils';
-import { knowledgeBaseApi } from '../..';
-import type { DataSource, DocumentMeta } from '../../types';
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
+import { knowledgeBaseApi } from "../..";
+import type { DataSource, DocumentMeta } from "../../types";
 
 interface UploadedDocsContentProps {
   source: DataSource;
@@ -42,19 +37,19 @@ function formatFileSize(bytes: number): string {
 
 function isTextFile(mimeType: string): boolean {
   return (
-    mimeType.startsWith('text/') ||
-    mimeType === 'application/json' ||
-    mimeType === 'application/xml' ||
-    mimeType === 'application/csv'
+    mimeType.startsWith("text/") ||
+    mimeType === "application/json" ||
+    mimeType === "application/xml" ||
+    mimeType === "application/csv"
   );
 }
 
 function isImageFile(mimeType: string): boolean {
-  return mimeType.startsWith('image/');
+  return mimeType.startsWith("image/");
 }
 
 function isPdfFile(mimeType: string): boolean {
-  return mimeType === 'application/pdf';
+  return mimeType === "application/pdf";
 }
 
 function getFileIcon(mimeType: string) {
@@ -126,7 +121,9 @@ const InlineTextPreview: React.FC<{ documentId: string; filename: string }> = ({
         if (!cancelled) setLoading(false);
       });
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [documentId]);
 
   if (loading) {
@@ -141,7 +138,7 @@ const InlineTextPreview: React.FC<{ documentId: string; filename: string }> = ({
   if (error || !content) return null;
 
   const isLong = content.length > 500;
-  const displayContent = isLong && !expanded ? content.slice(0, 500) + '...' : content;
+  const displayContent = isLong && !expanded ? content.slice(0, 500) + "..." : content;
 
   return (
     <div className="rounded-lg border bg-muted/20 overflow-hidden">
@@ -159,7 +156,15 @@ const InlineTextPreview: React.FC<{ documentId: string; filename: string }> = ({
             onClick={() => setExpanded(!expanded)}
             className="h-6 px-2 mt-2 text-xs text-muted-foreground gap-1"
           >
-            {expanded ? <><ChevronUp className="h-3 w-3" /> Show less</> : <><ChevronDown className="h-3 w-3" /> Show full content</>}
+            {expanded ? (
+              <>
+                <ChevronUp className="h-3 w-3" /> Show less
+              </>
+            ) : (
+              <>
+                <ChevronDown className="h-3 w-3" /> Show full content
+              </>
+            )}
           </Button>
         )}
       </div>
@@ -198,11 +203,7 @@ const InlineImagePreview: React.FC<{
       className="relative group rounded-lg border bg-muted/10 overflow-hidden cursor-pointer"
       onClick={onClickExpand}
     >
-      <img
-        src={blobUrl}
-        alt={filename}
-        className="w-full max-h-[300px] object-contain"
-      />
+      <img src={blobUrl} alt={filename} className="w-full max-h-[300px] object-contain" />
       {/* Expand overlay on hover */}
       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
         <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 text-white rounded-full p-2">
@@ -241,11 +242,7 @@ const InlinePdfPreview: React.FC<{
 
   return (
     <div className="relative group rounded-lg border overflow-hidden">
-      <iframe
-        src={blobUrl}
-        className="w-full h-[300px] border-0"
-        title={filename}
-      />
+      <iframe src={blobUrl} className="w-full h-[300px] border-0" title={filename} />
       {/* Expand button overlay */}
       <button
         onClick={onClickExpand}
@@ -284,11 +281,19 @@ const FileViewerDialog: React.FC<{
 
     knowledgeBaseApi
       .getDocumentBlobUrl(document.id)
-      .then((url) => { if (!cancelled) setBlobUrl(url); })
-      .catch(() => { if (!cancelled) setError('Failed to load file preview'); })
-      .finally(() => { if (!cancelled) setLoading(false); });
+      .then((url) => {
+        if (!cancelled) setBlobUrl(url);
+      })
+      .catch(() => {
+        if (!cancelled) setError("Failed to load file preview");
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [open, document.id]);
 
   const handleDownload = () => {
@@ -331,7 +336,11 @@ const FileViewerDialog: React.FC<{
               <iframe src={blobUrl} className="w-full h-full border-0" title={document.filename} />
             ) : isImageFile(document.type) ? (
               <div className="w-full h-full flex items-center justify-center p-4 bg-muted/10">
-                <img src={blobUrl} alt={document.filename} className="max-w-full max-h-full object-contain" />
+                <img
+                  src={blobUrl}
+                  alt={document.filename}
+                  className="max-w-full max-h-full object-contain"
+                />
               </div>
             ) : (
               <div className="p-4 text-center text-sm text-muted-foreground">
@@ -364,21 +373,27 @@ const DocumentCard: React.FC<{ doc: DocumentMeta }> = ({ doc }) => {
         {/* File metadata card */}
         <div
           className={cn(
-            'flex items-center gap-2.5 rounded-lg border bg-card p-2.5',
-            canPreviewInDialog && 'cursor-pointer hover:border-primary/30 transition-colors'
+            "flex items-center gap-2.5 rounded-lg border bg-card p-2.5",
+            canPreviewInDialog && "cursor-pointer hover:border-primary/30 transition-colors"
           )}
           onClick={canPreviewInDialog ? () => setViewerOpen(true) : undefined}
         >
           <div
             className={cn(
-              'flex items-center justify-center h-8 w-8 rounded-md shrink-0',
-              isText ? 'bg-blue-50' : isPdf ? 'bg-red-50' : isImage ? 'bg-purple-50' : 'bg-gray-50'
+              "flex items-center justify-center h-8 w-8 rounded-md shrink-0",
+              isText ? "bg-blue-50" : isPdf ? "bg-red-50" : isImage ? "bg-purple-50" : "bg-gray-50"
             )}
           >
             <Icon
               className={cn(
-                'h-4 w-4',
-                isText ? 'text-blue-600' : isPdf ? 'text-red-600' : isImage ? 'text-purple-600' : 'text-gray-600'
+                "h-4 w-4",
+                isText
+                  ? "text-blue-600"
+                  : isPdf
+                    ? "text-red-600"
+                    : isImage
+                      ? "text-purple-600"
+                      : "text-gray-600"
               )}
             />
           </div>
@@ -396,9 +411,7 @@ const DocumentCard: React.FC<{ doc: DocumentMeta }> = ({ doc }) => {
         </div>
 
         {/* Inline previews by type */}
-        {isText && (
-          <InlineTextPreview documentId={doc.id} filename={doc.filename} />
-        )}
+        {isText && <InlineTextPreview documentId={doc.id} filename={doc.filename} />}
         {isImage && (
           <InlineImagePreview
             documentId={doc.id}
@@ -417,11 +430,7 @@ const DocumentCard: React.FC<{ doc: DocumentMeta }> = ({ doc }) => {
 
       {/* Full viewer dialog */}
       {canPreviewInDialog && (
-        <FileViewerDialog
-          open={viewerOpen}
-          onOpenChange={setViewerOpen}
-          document={doc}
-        />
+        <FileViewerDialog open={viewerOpen} onOpenChange={setViewerOpen} document={doc} />
       )}
     </>
   );
@@ -434,15 +443,13 @@ export const UploadedDocsContent: React.FC<UploadedDocsContentProps> = ({ source
   const docCount = source.document_count || docs.length || source.config.document_ids?.length || 0;
 
   if (docCount === 0 && docs.length === 0) {
-    return (
-      <p className="text-sm text-muted-foreground italic">No documents uploaded</p>
-    );
+    return <p className="text-sm text-muted-foreground italic">No documents uploaded</p>;
   }
 
   return (
     <div className="space-y-2">
       <div className="text-xs text-muted-foreground mb-2">
-        {docCount} document{docCount !== 1 ? 's' : ''} uploaded
+        {docCount} document{docCount !== 1 ? "s" : ""} uploaded
       </div>
 
       {docs.length > 0 ? (
@@ -455,7 +462,7 @@ export const UploadedDocsContent: React.FC<UploadedDocsContentProps> = ({ source
         <div className="rounded-lg border bg-card p-3 text-center">
           <File className="h-6 w-6 text-muted-foreground/50 mx-auto mb-1" />
           <p className="text-xs text-muted-foreground">
-            {docCount} file{docCount !== 1 ? 's' : ''} uploaded (metadata not available)
+            {docCount} file{docCount !== 1 ? "s" : ""} uploaded (metadata not available)
           </p>
         </div>
       )}

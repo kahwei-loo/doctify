@@ -4,7 +4,7 @@
  * RTK Query endpoints for template management.
  */
 
-import { api } from './apiSlice';
+import { api } from "./apiSlice";
 
 // Field definition for extraction config
 export interface FieldDefinition {
@@ -42,7 +42,7 @@ export interface Template {
   name: string;
   description: string | null;
   user_id: string;
-  visibility: 'private' | 'public' | 'organization';
+  visibility: "private" | "public" | "organization";
   document_type: string | null;
   extraction_config: ExtractionConfig;
   category: string | null;
@@ -60,7 +60,7 @@ export interface TemplateListItem {
   name: string;
   description: string | null;
   document_type: string | null;
-  visibility: 'private' | 'public' | 'organization';
+  visibility: "private" | "public" | "organization";
   category: string | null;
   tags: string[] | null;
   usage_count: number;
@@ -73,7 +73,7 @@ export interface CreateTemplateRequest {
   name: string;
   description?: string;
   document_type?: string;
-  visibility?: 'private' | 'public' | 'organization';
+  visibility?: "private" | "public" | "organization";
   extraction_config?: ExtractionConfig;
   category?: string;
   tags?: string[];
@@ -84,7 +84,7 @@ export interface UpdateTemplateRequest {
   name?: string;
   description?: string;
   document_type?: string;
-  visibility?: 'private' | 'public' | 'organization';
+  visibility?: "private" | "public" | "organization";
   extraction_config?: ExtractionConfig;
   category?: string;
   tags?: string[];
@@ -92,7 +92,7 @@ export interface UpdateTemplateRequest {
 
 // List templates params
 export interface ListTemplatesParams {
-  visibility?: 'all' | 'mine' | 'public';
+  visibility?: "all" | "mine" | "public";
   category?: string;
   document_type?: string;
   search?: string;
@@ -123,53 +123,63 @@ export interface ApplyTemplateResponse {
 }
 
 // Valid values
-export const VALID_VISIBILITIES = ['private', 'public', 'organization'] as const;
-export const VALID_DOCUMENT_TYPES = ['invoice', 'receipt', 'contract', 'form', 'report', 'custom'] as const;
-export const VALID_FIELD_TYPES = ['string', 'number', 'date', 'boolean', 'array'] as const;
+export const VALID_VISIBILITIES = ["private", "public", "organization"] as const;
+export const VALID_DOCUMENT_TYPES = [
+  "invoice",
+  "receipt",
+  "contract",
+  "form",
+  "report",
+  "custom",
+] as const;
+export const VALID_FIELD_TYPES = ["string", "number", "date", "boolean", "array"] as const;
 
 export const templatesApi = api.injectEndpoints({
   endpoints: (builder) => ({
     // Query: List templates
     getTemplates: builder.query<TemplateListResponse, ListTemplatesParams | void>({
       query: (params) => ({
-        url: '/templates',
+        url: "/templates",
         params: params || {},
       }),
       providesTags: (result) =>
         result
           ? [
-              ...result.data.map(({ id }) => ({ type: 'Templates' as const, id })),
-              { type: 'Templates', id: 'LIST' },
+              ...result.data.map(({ id }) => ({ type: "Templates" as const, id })),
+              { type: "Templates", id: "LIST" },
             ]
-          : [{ type: 'Templates', id: 'LIST' }],
+          : [{ type: "Templates", id: "LIST" }],
     }),
 
     // Query: Get single template
     getTemplate: builder.query<TemplateResponse, string>({
       query: (id) => `/templates/${id}`,
-      providesTags: (result, error, id) => [{ type: 'Templates', id }],
+      providesTags: (_result, _error, id) => [{ type: "Templates", id }],
     }),
 
     // Mutation: Create template
     createTemplate: builder.mutation<TemplateResponse, CreateTemplateRequest>({
       query: (body) => ({
-        url: '/templates',
-        method: 'POST',
+        url: "/templates",
+        method: "POST",
         body,
       }),
-      invalidatesTags: [{ type: 'Templates', id: 'LIST' }],
+      invalidatesTags: [{ type: "Templates", id: "LIST" }],
     }),
 
     // Mutation: Update template
-    updateTemplate: builder.mutation<TemplateResponse, { id: string; updates: UpdateTemplateRequest }>({
+    updateTemplate: builder.mutation<
+      TemplateResponse,
+      { id: string; updates: UpdateTemplateRequest }
+    >({
       query: ({ id, updates }) => ({
         url: `/templates/${id}`,
-        method: 'PATCH',
+        method: "PATCH",
         body: updates,
       }),
-      invalidatesTags: (result, error, { id }) => [
-        { type: 'Templates', id },
-        { type: 'Templates', id: 'LIST' },
+      invalidatesTags: (_result, _error, { id }) => [
+        { type: "Templates", id },
+        { type: "Templates", id: "LIST" },
       ],
     }),
 
@@ -177,24 +187,25 @@ export const templatesApi = api.injectEndpoints({
     deleteTemplate: builder.mutation<void, string>({
       query: (id) => ({
         url: `/templates/${id}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
-      invalidatesTags: (result, error, id) => [
-        { type: 'Templates', id },
-        { type: 'Templates', id: 'LIST' },
+      invalidatesTags: (_result, _error, id) => [
+        { type: "Templates", id },
+        { type: "Templates", id: "LIST" },
       ],
     }),
 
     // Mutation: Apply template to project
-    applyTemplate: builder.mutation<ApplyTemplateResponse, { templateId: string; projectId: string }>({
+    applyTemplate: builder.mutation<
+      ApplyTemplateResponse,
+      { templateId: string; projectId: string }
+    >({
       query: ({ templateId, projectId }) => ({
         url: `/templates/${templateId}/apply`,
-        method: 'POST',
+        method: "POST",
         body: { project_id: projectId },
       }),
-      invalidatesTags: (result, error, { projectId }) => [
-        { type: 'Projects', id: projectId },
-      ],
+      invalidatesTags: (_result, _error, { projectId }) => [{ type: "Projects", id: projectId }],
     }),
   }),
 });

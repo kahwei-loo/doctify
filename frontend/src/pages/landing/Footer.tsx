@@ -1,6 +1,6 @@
-import React from 'react';
-import { Zap } from 'lucide-react';
-import { footerLinks } from './constants';
+import React from "react";
+import { Zap } from "lucide-react";
+import { footerLinks } from "./constants";
 
 const Footer: React.FC = () => {
   return (
@@ -73,8 +73,8 @@ const Footer: React.FC = () => {
                 <li key={link.label}>
                   <a
                     href={link.href}
-                    target={link.external ? '_blank' : undefined}
-                    rel={link.external ? 'noopener noreferrer' : undefined}
+                    target={link.external ? "_blank" : undefined}
+                    rel={link.external ? "noopener noreferrer" : undefined}
                     className="text-sm text-muted-foreground/70 hover:text-foreground transition-colors"
                   >
                     {link.label}
@@ -89,7 +89,7 @@ const Footer: React.FC = () => {
         <div className="border-t border-border/50 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-muted-foreground/60">
           <p>Built with FastAPI, React, PostgreSQL, and pgvector</p>
           <p>
-            By{' '}
+            By{" "}
             <a
               href="https://github.com/kahwei-loo"
               target="_blank"

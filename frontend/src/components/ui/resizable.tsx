@@ -1,35 +1,28 @@
-import * as React from "react"
-import { GripVertical } from "lucide-react"
-import * as ResizablePrimitive from "react-resizable-panels"
+import * as React from "react";
+import { GripVertical } from "lucide-react";
+import * as ResizablePrimitive from "react-resizable-panels";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 type ResizablePanelGroupProps = React.ComponentPropsWithoutRef<typeof ResizablePrimitive.Group> & {
   direction?: "horizontal" | "vertical";
-}
+};
 
-function ResizablePanelGroup({
-  className,
-  direction,
-  ...props
-}: ResizablePanelGroupProps) {
+function ResizablePanelGroup({ className, direction, ...props }: ResizablePanelGroupProps) {
   return (
     <ResizablePrimitive.Group
-      className={cn(
-        "flex h-full w-full data-[panel-group-direction=vertical]:flex-col",
-        className
-      )}
+      className={cn("flex h-full w-full data-[panel-group-direction=vertical]:flex-col", className)}
       orientation={direction}
       {...props}
     />
-  )
+  );
 }
 
 function ResizablePanel({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<typeof ResizablePrimitive.Panel>) {
-  return <ResizablePrimitive.Panel className={className} {...props} />
+  return <ResizablePrimitive.Panel className={className} {...props} />;
 }
 
 function ResizableHandle({
@@ -37,7 +30,7 @@ function ResizableHandle({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<typeof ResizablePrimitive.Separator> & {
-  withHandle?: boolean
+  withHandle?: boolean;
 }) {
   return (
     <ResizablePrimitive.Separator
@@ -53,7 +46,7 @@ function ResizableHandle({
         </div>
       )}
     </ResizablePrimitive.Separator>
-  )
+  );
 }
 
-export { ResizablePanelGroup, ResizablePanel, ResizableHandle }
+export { ResizablePanelGroup, ResizablePanel, ResizableHandle };

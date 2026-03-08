@@ -3,9 +3,9 @@
  * Displays at the top of the screen when demo mode is active
  */
 
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { DemoExitModal } from './DemoExitModal';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { DemoExitModal } from "./DemoExitModal";
 
 export const DemoModeBanner: React.FC = () => {
   const navigate = useNavigate();
@@ -16,7 +16,7 @@ export const DemoModeBanner: React.FC = () => {
   };
 
   const handleSignUp = () => {
-    navigate('/auth/register');
+    navigate("/auth/register");
   };
 
   return (
@@ -27,9 +27,7 @@ export const DemoModeBanner: React.FC = () => {
             <div className="flex items-center gap-3">
               <span className="text-2xl">🎭</span>
               <div>
-                <p className="text-sm font-semibold text-gray-900">
-                  Demo Mode Active
-                </p>
+                <p className="text-sm font-semibold text-gray-900">Demo Mode Active</p>
                 <p className="text-xs text-gray-700">
                   Exploring with sample data - No data will be saved
                 </p>

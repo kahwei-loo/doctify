@@ -12,20 +12,11 @@
  * - Loading and empty states
  */
 
-import React, { useMemo } from 'react';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  Cell,
-} from 'recharts';
-import { cn } from '@/lib/utils';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart3 } from 'lucide-react';
-import { getProjectColor } from '@/components/ui/project-avatar';
+import React, { useMemo } from "react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BarChart3 } from "lucide-react";
+import { getProjectColor } from "@/components/ui/project-avatar";
 
 export interface TokenUsageByProject {
   projectId: string;
@@ -78,15 +69,10 @@ const CustomTooltip: React.FC<{
     return (
       <div className="bg-popover border rounded-lg shadow-lg px-3 py-2">
         <div className="flex items-center gap-2">
-          <div
-            className="w-3 h-3 rounded-full"
-            style={{ backgroundColor: data.color }}
-          />
+          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: data.color }} />
           <span className="font-medium">{data.name}</span>
         </div>
-        <p className="text-sm text-muted-foreground mt-1">
-          {data.tokens.toLocaleString()} tokens
-        </p>
+        <p className="text-sm text-muted-foreground mt-1">{data.tokens.toLocaleString()} tokens</p>
       </div>
     );
   }
@@ -117,10 +103,7 @@ const ChartSkeleton: React.FC<{ height: number }> = ({ height }) => {
  */
 const EmptyState: React.FC<{ height: number }> = ({ height }) => {
   return (
-    <div
-      className="flex flex-col items-center justify-center text-center"
-      style={{ height }}
-    >
+    <div className="flex flex-col items-center justify-center text-center" style={{ height }}>
       <BarChart3 className="h-12 w-12 text-muted-foreground/30 mb-2" />
       <p className="text-sm text-muted-foreground">No token usage data</p>
     </div>
@@ -142,9 +125,8 @@ const ChartContent: React.FC<{
       .sort((a, b) => b.tokens - a.tokens)
       .slice(0, maxProjects)
       .map((item) => ({
-        name: item.projectName.length > 15
-          ? `${item.projectName.slice(0, 15)}...`
-          : item.projectName,
+        name:
+          item.projectName.length > 15 ? `${item.projectName.slice(0, 15)}...` : item.projectName,
         fullName: item.projectName,
         tokens: item.tokens,
         color: getProjectColor(item.projectName),
@@ -168,7 +150,8 @@ const ChartContent: React.FC<{
     <div>
       {/* Summary */}
       <div className="mb-4 text-sm text-muted-foreground">
-        Total: <span className="font-medium text-foreground">{formatTokens(totalTokens)}</span> tokens
+        Total: <span className="font-medium text-foreground">{formatTokens(totalTokens)}</span>{" "}
+        tokens
         {data.length > maxProjects && (
           <span className="ml-2">
             (showing top {maxProjects} of {data.length} projects)
@@ -198,13 +181,8 @@ const ChartContent: React.FC<{
             axisLine={false}
             width={80}
           />
-          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
-          <Bar
-            dataKey="tokens"
-            radius={[0, 4, 4, 0]}
-            animationBegin={0}
-            animationDuration={800}
-          >
+          <Tooltip content={<CustomTooltip />} cursor={{ fill: "transparent" }} />
+          <Bar dataKey="tokens" radius={[0, 4, 4, 0]} animationBegin={0} animationDuration={800}>
             {chartData.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={entry.color} />
             ))}
@@ -218,7 +196,7 @@ const ChartContent: React.FC<{
 export const TokenUsageChart: React.FC<TokenUsageChartProps> = ({
   data,
   isLoading = false,
-  title = 'Token Usage by Project',
+  title = "Token Usage by Project",
   className,
   showCard = true,
   height = 200,
@@ -244,12 +222,7 @@ export const TokenUsageChart: React.FC<TokenUsageChartProps> = ({
 
   return (
     <div className={className}>
-      <ChartContent
-        data={data}
-        isLoading={isLoading}
-        height={height}
-        maxProjects={maxProjects}
-      />
+      <ChartContent data={data} isLoading={isLoading} height={height} maxProjects={maxProjects} />
     </div>
   );
 };

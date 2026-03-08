@@ -5,15 +5,10 @@
  * Supports various card layouts and content types.
  */
 
-import React from 'react';
-import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from '@/components/ui/card';
-import { cn } from '@/lib/utils';
+import React from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 interface CardSkeletonProps {
   /** Show card header area */
@@ -39,12 +34,10 @@ export const CardSkeleton: React.FC<CardSkeletonProps> = ({
   className,
 }) => {
   return (
-    <Card className={cn('animate-pulse', className)}>
+    <Card className={cn("animate-pulse", className)}>
       {showHeader && (
         <CardHeader className="flex flex-row items-start gap-4 space-y-0 pb-3">
-          {showAvatar && (
-            <Skeleton className="h-12 w-12 rounded-lg shrink-0" />
-          )}
+          {showAvatar && <Skeleton className="h-12 w-12 rounded-lg shrink-0" />}
           <div className="flex-1 space-y-2">
             <Skeleton className="h-5 w-2/3" />
             <Skeleton className="h-4 w-full" />
@@ -54,10 +47,7 @@ export const CardSkeleton: React.FC<CardSkeletonProps> = ({
       )}
       <CardContent className="space-y-2">
         {Array.from({ length: contentLines }).map((_, i) => (
-          <Skeleton
-            key={i}
-            className={cn('h-4', i === contentLines - 1 ? 'w-3/4' : 'w-full')}
-          />
+          <Skeleton key={i} className={cn("h-4", i === contentLines - 1 ? "w-3/4" : "w-full")} />
         ))}
       </CardContent>
       {showFooter && (
@@ -83,7 +73,7 @@ interface CardGridSkeletonProps {
   /** Grid columns configuration */
   columns?: 1 | 2 | 3 | 4;
   /** Card configuration */
-  cardProps?: Omit<CardSkeletonProps, 'className'>;
+  cardProps?: Omit<CardSkeletonProps, "className">;
   /** Additional class names */
   className?: string;
 }
@@ -95,14 +85,14 @@ export const CardGridSkeleton: React.FC<CardGridSkeletonProps> = ({
   className,
 }) => {
   const gridCols = {
-    1: 'grid-cols-1',
-    2: 'md:grid-cols-2',
-    3: 'md:grid-cols-2 lg:grid-cols-3',
-    4: 'md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4',
+    1: "grid-cols-1",
+    2: "md:grid-cols-2",
+    3: "md:grid-cols-2 lg:grid-cols-3",
+    4: "md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4",
   };
 
   return (
-    <div className={cn('grid gap-4', gridCols[columns], className)}>
+    <div className={cn("grid gap-4", gridCols[columns], className)}>
       {Array.from({ length: count }).map((_, i) => (
         <CardSkeleton key={i} {...cardProps} />
       ))}

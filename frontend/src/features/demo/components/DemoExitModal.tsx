@@ -3,9 +3,9 @@
  * Confirmation modal when exiting demo mode
  */
 
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { AlertTriangle } from 'lucide-react';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { AlertTriangle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -13,9 +13,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { useDemoMode } from '../hooks/useDemoMode';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { useDemoMode } from "../hooks/useDemoMode";
 
 interface DemoExitModalProps {
   open: boolean;
@@ -33,13 +33,13 @@ export const DemoExitModal: React.FC<DemoExitModalProps> = ({ open, onOpenChange
   const handleExitToHome = () => {
     exitDemo();
     onOpenChange(false);
-    navigate('/');
+    navigate("/");
   };
 
   const handleExitAndSignUp = () => {
     exitDemo();
     onOpenChange(false);
-    navigate('/auth/register');
+    navigate("/auth/register");
   };
 
   return (

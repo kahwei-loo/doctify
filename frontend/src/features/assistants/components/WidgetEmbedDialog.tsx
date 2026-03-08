@@ -5,26 +5,26 @@
  * Includes copy-to-clipboard, position/color config, and demo link.
  */
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Check, Copy, ExternalLink } from 'lucide-react';
-import type { Assistant } from '../types';
+} from "@/components/ui/select";
+import { Check, Copy, ExternalLink } from "lucide-react";
+import type { Assistant } from "../types";
 
 interface WidgetEmbedDialogProps {
   open: boolean;
@@ -37,11 +37,9 @@ export const WidgetEmbedDialog: React.FC<WidgetEmbedDialogProps> = ({
   onClose,
   assistant,
 }) => {
-  const [position, setPosition] = useState(
-    assistant.widget_config?.position || 'bottom-right'
-  );
+  const [position, setPosition] = useState(assistant.widget_config?.position || "bottom-right");
   const [primaryColor, setPrimaryColor] = useState(
-    assistant.widget_config?.primary_color || '#3b82f6'
+    assistant.widget_config?.primary_color || "#3b82f6"
   );
   const [copied, setCopied] = useState(false);
 
@@ -63,10 +61,7 @@ export const WidgetEmbedDialog: React.FC<WidgetEmbedDialogProps> = ({
   };
 
   const handleOpenDemo = () => {
-    window.open(
-      `/public-chat-demo?assistantId=${assistant.assistant_id}`,
-      '_blank'
-    );
+    window.open(`/public-chat-demo?assistantId=${assistant.assistant_id}`, "_blank");
   };
 
   return (

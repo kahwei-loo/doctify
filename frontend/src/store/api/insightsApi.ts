@@ -4,7 +4,7 @@
  * RTK Query endpoints for NL-to-Insights feature with automatic caching.
  */
 
-import { api } from './apiSlice';
+import { api } from "./apiSlice";
 import type {
   Dataset,
   DatasetListResponse,
@@ -19,7 +19,7 @@ import type {
   QueryRequest,
   QueryResponse,
   QueryHistoryResponse,
-} from '../../features/insights/types';
+} from "../../features/insights/types";
 
 export const insightsApi = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -28,32 +28,27 @@ export const insightsApi = api.injectEndpoints({
     // ============================================
 
     // Query: Get datasets list
-    getDatasets: builder.query<
-      DatasetListResponse,
-      { skip?: number; limit?: number }
-    >({
+    getDatasets: builder.query<DatasetListResponse, { skip?: number; limit?: number }>({
       query: ({ skip = 0, limit = 20 } = {}) => ({
-        url: '/insights/datasets',
+        url: "/insights/datasets",
         params: { skip, limit },
       }),
       providesTags: (result) =>
         result
           ? [
               ...result.datasets.map(({ id }) => ({
-                type: 'Datasets' as const,
+                type: "Datasets" as const,
                 id,
               })),
-              { type: 'Datasets', id: 'LIST' },
+              { type: "Datasets", id: "LIST" },
             ]
-          : [{ type: 'Datasets', id: 'LIST' }],
+          : [{ type: "Datasets", id: "LIST" }],
     }),
 
     // Query: Get single dataset
     getDataset: builder.query<Dataset, string>({
       query: (datasetId) => `/insights/datasets/${datasetId}`,
-      providesTags: (result, error, datasetId) => [
-        { type: 'Datasets', id: datasetId },
-      ],
+      providesTags: (_result, _error, datasetId) => [{ type: "Datasets", id: datasetId }],
     }),
 
     // Mutation: Upload dataset
@@ -63,19 +58,19 @@ export const insightsApi = api.injectEndpoints({
     >({
       query: ({ file, name, description }) => {
         const formData = new FormData();
-        formData.append('file', file);
-        formData.append('name', name);
+        formData.append("file", file);
+        formData.append("name", name);
         if (description) {
-          formData.append('description', description);
+          formData.append("description", description);
         }
 
         return {
-          url: '/insights/datasets',
-          method: 'POST',
+          url: "/insights/datasets",
+          method: "POST",
           body: formData,
         };
       },
-      invalidatesTags: [{ type: 'Datasets', id: 'LIST' }],
+      invalidatesTags: [{ type: "Datasets", id: "LIST" }],
     }),
 
     // Mutation: Update dataset schema
@@ -85,24 +80,22 @@ export const insightsApi = api.injectEndpoints({
     >({
       query: ({ datasetId, schema }) => ({
         url: `/insights/datasets/${datasetId}/schema`,
-        method: 'PUT',
+        method: "PUT",
         body: schema,
       }),
-      invalidatesTags: (result, error, { datasetId }) => [
-        { type: 'Datasets', id: datasetId },
-      ],
+      invalidatesTags: (_result, _error, { datasetId }) => [{ type: "Datasets", id: datasetId }],
     }),
 
     // Mutation: Delete dataset
     deleteDataset: builder.mutation<void, string>({
       query: (datasetId) => ({
         url: `/insights/datasets/${datasetId}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
-      invalidatesTags: (result, error, datasetId) => [
-        { type: 'Datasets', id: datasetId },
-        { type: 'Datasets', id: 'LIST' },
-        { type: 'Conversations', id: 'LIST' }, // Deleting dataset affects conversations
+      invalidatesTags: (_result, _error, datasetId) => [
+        { type: "Datasets", id: datasetId },
+        { type: "Datasets", id: "LIST" },
+        { type: "Conversations", id: "LIST" }, // Deleting dataset affects conversations
       ],
     }),
 
@@ -121,7 +114,7 @@ export const insightsApi = api.injectEndpoints({
     inferSchemaSemantics: builder.query<SchemaInferenceResponse, string>({
       query: (datasetId) => ({
         url: `/insights/datasets/${datasetId}/infer-schema`,
-        method: 'POST',
+        method: "POST",
       }),
     }),
 
@@ -140,7 +133,7 @@ export const insightsApi = api.injectEndpoints({
           params.dataset_id = datasetId;
         }
         return {
-          url: '/insights/conversations',
+          url: "/insights/conversations",
           params,
         };
       },
@@ -148,42 +141,42 @@ export const insightsApi = api.injectEndpoints({
         result
           ? [
               ...result.conversations.map(({ id }) => ({
-                type: 'Conversations' as const,
+                type: "Conversations" as const,
                 id,
               })),
-              { type: 'Conversations', id: 'LIST' },
+              { type: "Conversations", id: "LIST" },
             ]
-          : [{ type: 'Conversations', id: 'LIST' }],
+          : [{ type: "Conversations", id: "LIST" }],
     }),
 
     // Query: Get single conversation
     getConversation: builder.query<Conversation, string>({
       query: (conversationId) => `/insights/conversations/${conversationId}`,
-      providesTags: (result, error, conversationId) => [
-        { type: 'Conversations', id: conversationId },
+      providesTags: (_result, _error, conversationId) => [
+        { type: "Conversations", id: conversationId },
       ],
     }),
 
     // Mutation: Create conversation
     createConversation: builder.mutation<Conversation, ConversationCreateRequest>({
       query: (request) => ({
-        url: '/insights/conversations',
-        method: 'POST',
+        url: "/insights/conversations",
+        method: "POST",
         body: request,
       }),
-      invalidatesTags: [{ type: 'Conversations', id: 'LIST' }],
+      invalidatesTags: [{ type: "Conversations", id: "LIST" }],
     }),
 
     // Mutation: Delete conversation
     deleteConversation: builder.mutation<void, string>({
       query: (conversationId) => ({
         url: `/insights/conversations/${conversationId}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
-      invalidatesTags: (result, error, conversationId) => [
-        { type: 'Conversations', id: conversationId },
-        { type: 'Conversations', id: 'LIST' },
-        { type: 'Queries', id: `CONV_${conversationId}` }, // Queries for this conversation
+      invalidatesTags: (_result, _error, conversationId) => [
+        { type: "Conversations", id: conversationId },
+        { type: "Conversations", id: "LIST" },
+        { type: "Queries", id: `CONV_${conversationId}` }, // Queries for this conversation
       ],
     }),
 
@@ -192,18 +185,15 @@ export const insightsApi = api.injectEndpoints({
     // ============================================
 
     // Mutation: Send a natural language query
-    sendQuery: builder.mutation<
-      QueryResponse,
-      { conversationId: string; request: QueryRequest }
-    >({
+    sendQuery: builder.mutation<QueryResponse, { conversationId: string; request: QueryRequest }>({
       query: ({ conversationId, request }) => ({
         url: `/insights/conversations/${conversationId}/query`,
-        method: 'POST',
+        method: "POST",
         body: request,
       }),
-      invalidatesTags: (result, error, { conversationId }) => [
-        { type: 'Queries', id: `CONV_${conversationId}` },
-        { type: 'Conversations', id: conversationId }, // Update conversation context
+      invalidatesTags: (_result, _error, { conversationId }) => [
+        { type: "Queries", id: `CONV_${conversationId}` },
+        { type: "Conversations", id: conversationId }, // Update conversation context
       ],
     }),
 
@@ -216,8 +206,8 @@ export const insightsApi = api.injectEndpoints({
         url: `/insights/conversations/${conversationId}/history`,
         params: { skip, limit },
       }),
-      providesTags: (result, error, { conversationId }) => [
-        { type: 'Queries', id: `CONV_${conversationId}` },
+      providesTags: (_result, _error, { conversationId }) => [
+        { type: "Queries", id: `CONV_${conversationId}` },
       ],
     }),
   }),

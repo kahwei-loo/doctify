@@ -1,7 +1,7 @@
-import React from 'react';
-import { motion, useMotionValue, useMotionTemplate } from 'framer-motion';
-import { blurFadeUp, staggerContainer } from './animations';
-import { features } from './constants';
+import React from "react";
+import { motion, useMotionValue, useMotionTemplate } from "framer-motion";
+import { blurFadeUp, staggerContainer } from "./animations";
+import { features } from "./constants";
 
 interface FeatureCardProps {
   feature: (typeof features)[number];
@@ -50,15 +50,13 @@ const FeatureCard: React.FC<FeatureCardProps> = ({ feature }) => {
       <motion.div
         className={`mb-5 inline-flex rounded-xl p-3 bg-gradient-to-br ${feature.gradient} shadow-lg`}
         whileHover={{ scale: 1.1, rotate: -5 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+        transition={{ type: "spring", stiffness: 400, damping: 15 }}
       >
         <Icon className="h-6 w-6 text-white" />
       </motion.div>
 
       <h3 className="text-lg font-semibold">{feature.title}</h3>
-      <p className="mt-2 text-sm text-muted-foreground/80 leading-relaxed">
-        {feature.description}
-      </p>
+      <p className="mt-2 text-sm text-muted-foreground/80 leading-relaxed">{feature.description}</p>
 
       <span className="mt-4 inline-block text-xs px-3 py-1 rounded-full bg-muted text-muted-foreground/70 font-medium">
         {feature.tech}
@@ -77,11 +75,11 @@ const FeaturesSection: React.FC = () => {
           className="text-center mb-16"
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: '-100px' }}
+          viewport={{ once: true, margin: "-100px" }}
           variants={blurFadeUp}
         >
           <h2 className="text-3xl sm:text-4xl font-bold">
-            Everything you need for{' '}
+            Everything you need for{" "}
             <span className="bg-gradient-to-r from-landing-accent to-landing-teal bg-clip-text text-transparent">
               document intelligence
             </span>
@@ -95,7 +93,7 @@ const FeaturesSection: React.FC = () => {
           className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4"
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: '-100px' }}
+          viewport={{ once: true, margin: "-100px" }}
           variants={staggerContainer}
         >
           {features.map((feature) => (

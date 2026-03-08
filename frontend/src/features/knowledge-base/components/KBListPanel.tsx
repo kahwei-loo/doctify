@@ -11,8 +11,8 @@
  * - Collapsible sidebar
  */
 
-import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Plus,
   Database,
@@ -21,22 +21,17 @@ import {
   Loader2,
   Search,
   BarChart3,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { Badge } from '@/components/ui/badge';
-import type { KnowledgeBase } from '../types';
-import { knowledgeBaseApi, isMockMode } from '../services/mockData';
-import { KBListSkeleton } from './KBListSkeleton';
-import { ErrorState } from './ErrorState';
-import { CreateKBDialog } from './CreateKBDialog';
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
+import type { KnowledgeBase } from "../types";
+import { knowledgeBaseApi, isMockMode } from "../services/mockData";
+import { KBListSkeleton } from "./KBListSkeleton";
+import { ErrorState } from "./ErrorState";
+import { CreateKBDialog } from "./CreateKBDialog";
 
 interface KBListPanelProps {
   selectedKbId: string | null;
@@ -60,36 +55,34 @@ const KBItem: React.FC<KBItemProps> = ({ kb, isSelected, onSelect }) => {
     <div
       onClick={onSelect}
       className={cn(
-        'group flex flex-col gap-1.5 px-3 py-2.5 rounded-2xl cursor-pointer transition-all',
-        'hover:bg-muted/50',
-        isSelected && 'bg-primary/10 text-primary shadow-sm'
+        "group flex flex-col gap-1.5 px-3 py-2.5 rounded-2xl cursor-pointer transition-all",
+        "hover:bg-muted/50",
+        isSelected && "bg-primary/10 text-primary shadow-sm"
       )}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-start gap-2 flex-1 min-w-0">
           <Database
             className={cn(
-              'h-4 w-4 mt-0.5 shrink-0',
-              isSelected ? 'text-primary' : 'text-muted-foreground'
+              "h-4 w-4 mt-0.5 shrink-0",
+              isSelected ? "text-primary" : "text-muted-foreground"
             )}
           />
           <div className="flex-1 min-w-0">
             <h4
               className={cn(
-                'text-sm font-medium truncate',
-                isSelected ? 'text-primary' : 'text-foreground'
+                "text-sm font-medium truncate",
+                isSelected ? "text-primary" : "text-foreground"
               )}
             >
               {kb.name}
             </h4>
             {kb.description && (
-              <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
-                {kb.description}
-              </p>
+              <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{kb.description}</p>
             )}
           </div>
         </div>
-        {kb.status === 'processing' && (
+        {kb.status === "processing" && (
           <Loader2 className="h-3 w-3 animate-spin text-blue-500 shrink-0" />
         )}
       </div>
@@ -112,7 +105,7 @@ export const KBListPanel: React.FC<KBListPanelProps> = ({
   onToggleCollapse,
 }) => {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBase[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -127,13 +120,10 @@ export const KBListPanel: React.FC<KBListPanelProps> = ({
       const response = await knowledgeBaseApi.listKnowledgeBases();
       setKnowledgeBases(response.data);
       // Calculate total embedding count across all KBs
-      const totalEmbeddings = response.data.reduce(
-        (sum, kb) => sum + (kb.embedding_count || 0),
-        0
-      );
+      const totalEmbeddings = response.data.reduce((sum, kb) => sum + (kb.embedding_count || 0), 0);
       setTotalEmbeddingCount(totalEmbeddings);
     } catch (err) {
-      setError('Failed to load knowledge bases');
+      setError("Failed to load knowledge bases");
     } finally {
       setIsLoading(false);
     }
@@ -148,9 +138,7 @@ export const KBListPanel: React.FC<KBListPanelProps> = ({
     if (!searchQuery.trim()) return knowledgeBases;
     const query = searchQuery.toLowerCase();
     return knowledgeBases.filter(
-      (kb) =>
-        kb.name.toLowerCase().includes(query) ||
-        kb.description?.toLowerCase().includes(query)
+      (kb) => kb.name.toLowerCase().includes(query) || kb.description?.toLowerCase().includes(query)
     );
   }, [knowledgeBases, searchQuery]);
 
@@ -170,21 +158,16 @@ export const KBListPanel: React.FC<KBListPanelProps> = ({
       <TooltipProvider delayDuration={0}>
         <div
           className={cn(
-            'flex flex-col items-center py-4 w-16 h-full',
-            'border border-border/60 bg-card/50',
-            'rounded-xl shadow-sm',
-            'transition-all duration-200',
+            "flex flex-col items-center py-4 w-16 h-full",
+            "border border-border/60 bg-card/50",
+            "rounded-xl shadow-sm",
+            "transition-all duration-200",
             className
           )}
         >
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onToggleCollapse}
-                className="mb-4"
-              >
+              <Button variant="ghost" size="icon" onClick={onToggleCollapse} className="mb-4">
                 <ChevronRight className="h-4 w-4" />
                 <span className="sr-only">Expand knowledge base panel</span>
               </Button>
@@ -200,14 +183,14 @@ export const KBListPanel: React.FC<KBListPanelProps> = ({
                 <button
                   onClick={() => onSelectKb(kb.id)}
                   className={cn(
-                    'mb-2 rounded-lg p-2 transition-colors',
-                    selectedKbId === kb.id && 'bg-primary/10 ring-2 ring-primary ring-offset-2'
+                    "mb-2 rounded-lg p-2 transition-colors",
+                    selectedKbId === kb.id && "bg-primary/10 ring-2 ring-primary ring-offset-2"
                   )}
                 >
                   <Database
                     className={cn(
-                      'h-5 w-5',
-                      selectedKbId === kb.id ? 'text-primary' : 'text-muted-foreground'
+                      "h-5 w-5",
+                      selectedKbId === kb.id ? "text-primary" : "text-muted-foreground"
                     )}
                   />
                 </button>
@@ -228,10 +211,10 @@ export const KBListPanel: React.FC<KBListPanelProps> = ({
   return (
     <div
       className={cn(
-        'flex flex-col w-[280px] h-full',
-        'border border-border/60 bg-card/50',
-        'rounded-xl shadow-sm',
-        'transition-all duration-200',
+        "flex flex-col w-[280px] h-full",
+        "border border-border/60 bg-card/50",
+        "rounded-xl shadow-sm",
+        "transition-all duration-200",
         className
       )}
     >
@@ -304,15 +287,10 @@ export const KBListPanel: React.FC<KBListPanelProps> = ({
           <div className="text-center py-8">
             <Database className="h-8 w-8 mx-auto text-muted-foreground/50" />
             <p className="mt-2 text-sm text-muted-foreground">
-              {searchQuery ? 'No matching knowledge bases' : 'No knowledge bases yet'}
+              {searchQuery ? "No matching knowledge bases" : "No knowledge bases yet"}
             </p>
             {!searchQuery && (
-              <Button
-                variant="link"
-                size="sm"
-                onClick={handleCreateKB}
-                className="mt-2"
-              >
+              <Button variant="link" size="sm" onClick={handleCreateKB} className="mt-2">
                 Create your first KB
               </Button>
             )}
@@ -324,36 +302,31 @@ export const KBListPanel: React.FC<KBListPanelProps> = ({
           <div className="mb-3">
             <div
               onClick={() => {
-                navigate('/knowledge-base');
+                navigate("/knowledge-base");
                 onSelectKb(null);
               }}
               className={cn(
-                'group flex flex-col gap-1.5 px-3 py-3 rounded-lg cursor-pointer transition-colors',
-                'hover:bg-muted/50 border-2',
-                !selectedKbId
-                  ? 'bg-primary/10 border-primary/20'
-                  : 'border-border/50'
+                "group flex flex-col gap-1.5 px-3 py-3 rounded-lg cursor-pointer transition-colors",
+                "hover:bg-muted/50 border-2",
+                !selectedKbId ? "bg-primary/10 border-primary/20" : "border-border/50"
               )}
             >
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <div
-                    className={cn(
-                      'p-1.5 rounded-md',
-                      !selectedKbId ? 'bg-primary/20' : 'bg-muted'
-                    )}
+                    className={cn("p-1.5 rounded-md", !selectedKbId ? "bg-primary/20" : "bg-muted")}
                   >
                     <BarChart3
                       className={cn(
-                        'h-4 w-4',
-                        !selectedKbId ? 'text-primary' : 'text-muted-foreground'
+                        "h-4 w-4",
+                        !selectedKbId ? "text-primary" : "text-muted-foreground"
                       )}
                     />
                   </div>
                   <h4
                     className={cn(
-                      'text-sm font-semibold',
-                      !selectedKbId ? 'text-primary' : 'text-foreground'
+                      "text-sm font-semibold",
+                      !selectedKbId ? "text-primary" : "text-foreground"
                     )}
                   >
                     Overall View
@@ -392,12 +365,7 @@ export const KBListPanel: React.FC<KBListPanelProps> = ({
 
       {/* Footer */}
       <div className="p-3 border-t">
-        <Button
-          variant="outline"
-          size="sm"
-          className="w-full"
-          onClick={handleCreateKB}
-        >
+        <Button variant="outline" size="sm" className="w-full" onClick={handleCreateKB}>
           <Plus className="mr-2 h-4 w-4" />
           New Knowledge Base
         </Button>

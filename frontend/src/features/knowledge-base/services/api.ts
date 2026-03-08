@@ -5,7 +5,7 @@
  * Calls FastAPI backend endpoints at /api/v1/knowledge-bases, /api/v1/data-sources, /api/v1/embeddings
  */
 
-import { apiClient } from '@/services/api';
+import { apiClient } from "@/services/api";
 import type {
   KnowledgeBase,
   KnowledgeBaseStats,
@@ -15,14 +15,13 @@ import type {
   DataSource,
   DataSourceListResponse,
   DataSourceCreateRequest,
-  Embedding,
   EmbeddingListResponse,
   TestQueryRequest,
   TestQueryResponse,
   GenerateEmbeddingsResponse,
   CrawlStatusResponse,
   PaginationParams,
-} from '../types';
+} from "../types";
 
 /**
  * Knowledge Base API endpoints
@@ -32,7 +31,7 @@ export const realKnowledgeBaseApi = {
    * Get overall Knowledge Base statistics
    */
   async getStats(): Promise<{ data: KnowledgeBaseStats }> {
-    const response = await apiClient.get('/knowledge-bases/stats');
+    const response = await apiClient.get("/knowledge-bases/stats");
     return { data: response.data };
   },
 
@@ -43,7 +42,7 @@ export const realKnowledgeBaseApi = {
     skip?: number;
     limit?: number;
   }): Promise<KnowledgeBaseListResponse> {
-    const response = await apiClient.get('/knowledge-bases', { params });
+    const response = await apiClient.get("/knowledge-bases", { params });
     return {
       success: true,
       data: response.data.items || [],
@@ -62,10 +61,8 @@ export const realKnowledgeBaseApi = {
   /**
    * Create a new Knowledge Base
    */
-  async createKnowledgeBase(
-    request: KnowledgeBaseCreateRequest
-  ): Promise<{ data: KnowledgeBase }> {
-    const response = await apiClient.post('/knowledge-bases', request);
+  async createKnowledgeBase(request: KnowledgeBaseCreateRequest): Promise<{ data: KnowledgeBase }> {
+    const response = await apiClient.post("/knowledge-bases", request);
     return { data: response.data };
   },
 
@@ -109,7 +106,7 @@ export const realKnowledgeBaseApi = {
    * Create a new Data Source
    */
   async createDataSource(request: DataSourceCreateRequest): Promise<{ data: DataSource }> {
-    const response = await apiClient.post('/data-sources', request);
+    const response = await apiClient.post("/data-sources", request);
     return { data: response.data };
   },
 
@@ -122,7 +119,7 @@ export const realKnowledgeBaseApi = {
     files: File[]
   ): Promise<{ data: { document_ids: string[] } }> {
     const formData = new FormData();
-    files.forEach(file => formData.append('files', file));
+    files.forEach((file) => formData.append("files", file));
 
     const response = await apiClient.post(
       `/knowledge-bases/${knowledgeBaseId}/data-sources/${dataSourceId}/upload`,
@@ -146,7 +143,7 @@ export const realKnowledgeBaseApi = {
     name?: string
   ): Promise<{ data: DataSource }> {
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append("file", file);
 
     const params: Record<string, string> = {};
     if (name) params.name = name;
@@ -163,10 +160,7 @@ export const realKnowledgeBaseApi = {
   /**
    * Update an existing Data Source
    */
-  async updateDataSource(
-    id: string,
-    updates: Partial<DataSource>
-  ): Promise<{ data: DataSource }> {
+  async updateDataSource(id: string, updates: Partial<DataSource>): Promise<{ data: DataSource }> {
     const response = await apiClient.patch(`/data-sources/${id}`, updates);
     return { data: response.data };
   },
@@ -194,10 +188,7 @@ export const realKnowledgeBaseApi = {
   /**
    * Get crawl status for a Data Source
    */
-  async getCrawlStatus(
-    dsId: string,
-    taskId?: string
-  ): Promise<CrawlStatusResponse> {
+  async getCrawlStatus(dsId: string, taskId?: string): Promise<CrawlStatusResponse> {
     const response = await apiClient.get(`/data-sources/${dsId}/crawl-status`, {
       params: taskId ? { task_id: taskId } : undefined,
     });
@@ -215,10 +206,7 @@ export const realKnowledgeBaseApi = {
   /**
    * List embeddings for a Knowledge Base
    */
-  async listEmbeddings(
-    kbId: string,
-    params: PaginationParams
-  ): Promise<EmbeddingListResponse> {
+  async listEmbeddings(kbId: string, params: PaginationParams): Promise<EmbeddingListResponse> {
     const skip = (params.page - 1) * params.per_page;
     const response = await apiClient.get(`/knowledge-bases/${kbId}/embeddings`, {
       params: {
@@ -269,10 +257,7 @@ export const realKnowledgeBaseApi = {
   /**
    * Test query on Knowledge Base
    */
-  async testQuery(
-    kbId: string,
-    request: TestQueryRequest
-  ): Promise<TestQueryResponse> {
+  async testQuery(kbId: string, request: TestQueryRequest): Promise<TestQueryResponse> {
     const response = await apiClient.post(`/knowledge-bases/${kbId}/test-query`, request);
     return {
       success: true,
@@ -298,7 +283,7 @@ export const realKnowledgeBaseApi = {
    */
   async getDocumentTextContent(documentId: string): Promise<string> {
     const response = await apiClient.get(`/documents/${documentId}/file/preview`, {
-      responseType: 'text',
+      responseType: "text",
       // Override the default JSON transform so we get raw text
       transformResponse: [(data: string) => data],
     });
@@ -311,7 +296,7 @@ export const realKnowledgeBaseApi = {
    */
   async getDocumentBlobUrl(documentId: string): Promise<string> {
     const response = await apiClient.get(`/documents/${documentId}/file/preview`, {
-      responseType: 'blob',
+      responseType: "blob",
     });
     return URL.createObjectURL(response.data);
   },
@@ -321,10 +306,10 @@ export const realKnowledgeBaseApi = {
    */
   async downloadDocument(documentId: string, filename: string): Promise<void> {
     const response = await apiClient.get(`/documents/${documentId}/file/download`, {
-      responseType: 'blob',
+      responseType: "blob",
     });
     const url = URL.createObjectURL(response.data);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = filename;
     a.click();
@@ -335,7 +320,7 @@ export const realKnowledgeBaseApi = {
    * Get the preview URL for a document (for reference only — needs auth header).
    */
   getDocumentPreviewUrl(documentId: string): string {
-    const baseUrl = apiClient.defaults.baseURL || '';
+    const baseUrl = apiClient.defaults.baseURL || "";
     return `${baseUrl}/documents/${documentId}/file/preview`;
   },
 
@@ -343,7 +328,7 @@ export const realKnowledgeBaseApi = {
    * Get the download URL for a document (for reference only — needs auth header).
    */
   getDocumentDownloadUrl(documentId: string): string {
-    const baseUrl = apiClient.defaults.baseURL || '';
+    const baseUrl = apiClient.defaults.baseURL || "";
     return `${baseUrl}/documents/${documentId}/file/download`;
   },
 

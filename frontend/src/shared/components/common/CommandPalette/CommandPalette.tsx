@@ -10,21 +10,18 @@
  * npm install cmdk
  */
 
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState, useCallback, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   FileText,
   FolderKanban,
-  Database,
-  Bot,
   Plus,
   Upload,
   Settings,
   Search,
   Clock,
-  ArrowRight,
   Loader2,
-} from 'lucide-react';
+} from "lucide-react";
 import {
   CommandDialog,
   CommandInput,
@@ -33,12 +30,11 @@ import {
   CommandGroup,
   CommandItem,
   CommandSeparator,
-  CommandShortcut,
-} from '@/components/ui/command';
-import { useGetProjectsQuery } from '@/store/api/projectsApi';
-import { useGetDocumentsQuery } from '@/store/api/documentsApi';
+} from "@/components/ui/command";
+import { useGetProjectsQuery } from "@/store/api/projectsApi";
+import { useGetDocumentsQuery } from "@/store/api/documentsApi";
 
-export type SearchResultType = 'document' | 'project' | 'kb' | 'assistant' | 'action';
+export type SearchResultType = "document" | "project" | "kb" | "assistant" | "action";
 
 export interface SearchResult {
   id: string;
@@ -56,37 +52,26 @@ interface CommandPaletteProps {
 }
 
 /**
- * Icon mapping for result types
- */
-const typeIcons: Record<SearchResultType, React.FC<{ className?: string }>> = {
-  document: FileText,
-  project: FolderKanban,
-  kb: Database,
-  assistant: Bot,
-  action: ArrowRight,
-};
-
-/**
  * Custom hook for global keyboard shortcut
  */
 const useCommandK = (callback: () => void) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
         callback();
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [callback]);
 };
 
 /**
  * Recent items stored in localStorage
  */
-const RECENT_KEY = 'commandPalette_recent';
+const RECENT_KEY = "commandPalette_recent";
 const MAX_RECENT = 5;
 
 const getRecentItems = (): string[] => {
@@ -111,7 +96,7 @@ const addRecentItem = (id: string) => {
 export const CommandPalette: React.FC<CommandPaletteProps> = ({ className }) => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
 
   // Toggle with Cmd+K / Ctrl+K
   useCommandK(() => setOpen((prev) => !prev));
@@ -131,45 +116,42 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ className }) => 
   const isLoading = isLoadingProjects || isLoadingDocuments;
 
   // Handle result selection
-  const handleSelect = useCallback(
-    (result: SearchResult) => {
-      addRecentItem(result.id);
-      result.action();
-      setOpen(false);
-      setSearch('');
-    },
-    []
-  );
+  const handleSelect = useCallback((result: SearchResult) => {
+    addRecentItem(result.id);
+    result.action();
+    setOpen(false);
+    setSearch("");
+  }, []);
 
   // Quick actions
   const quickActions: SearchResult[] = useMemo(
     () => [
       {
-        id: 'action-new-project',
-        type: 'action',
-        title: 'Create New Project',
-        subtitle: 'Start a new document collection',
+        id: "action-new-project",
+        type: "action",
+        title: "Create New Project",
+        subtitle: "Start a new document collection",
         icon: <Plus className="h-4 w-4" />,
-        action: () => navigate('/projects?create=true'),
-        keywords: ['new', 'create', 'project', 'add'],
+        action: () => navigate("/projects?create=true"),
+        keywords: ["new", "create", "project", "add"],
       },
       {
-        id: 'action-upload',
-        type: 'action',
-        title: 'Upload Document',
-        subtitle: 'Upload files for processing',
+        id: "action-upload",
+        type: "action",
+        title: "Upload Document",
+        subtitle: "Upload files for processing",
         icon: <Upload className="h-4 w-4" />,
-        action: () => navigate('/documents?upload=true'),
-        keywords: ['upload', 'document', 'file', 'add'],
+        action: () => navigate("/documents?upload=true"),
+        keywords: ["upload", "document", "file", "add"],
       },
       {
-        id: 'action-settings',
-        type: 'action',
-        title: 'Settings',
-        subtitle: 'Manage your account',
+        id: "action-settings",
+        type: "action",
+        title: "Settings",
+        subtitle: "Manage your account",
         icon: <Settings className="h-4 w-4" />,
-        action: () => navigate('/settings'),
-        keywords: ['settings', 'preferences', 'account', 'config'],
+        action: () => navigate("/settings"),
+        keywords: ["settings", "preferences", "account", "config"],
       },
     ],
     [navigate]
@@ -180,12 +162,12 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ className }) => 
     () =>
       projects.map((project) => ({
         id: `project-${project.project_id}`,
-        type: 'project' as const,
+        type: "project" as const,
         title: project.name,
-        subtitle: project.description || 'No description',
+        subtitle: project.description || "No description",
         icon: <FolderKanban className="h-4 w-4" />,
         action: () => navigate(`/documents?project=${project.project_id}`),
-        keywords: [project.name.toLowerCase(), project.description?.toLowerCase() || ''],
+        keywords: [project.name.toLowerCase(), project.description?.toLowerCase() || ""],
       })),
     [projects, navigate]
   );
@@ -195,12 +177,12 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ className }) => 
     () =>
       documents.map((doc) => ({
         id: `document-${doc.document_id}`,
-        type: 'document' as const,
+        type: "document" as const,
         title: doc.filename,
-        subtitle: doc.project_name || 'No project',
+        subtitle: doc.project_name || "No project",
         icon: <FileText className="h-4 w-4" />,
         action: () => navigate(`/documents/${doc.document_id}`),
-        keywords: [doc.filename.toLowerCase(), doc.project_name?.toLowerCase() || ''],
+        keywords: [doc.filename.toLowerCase(), doc.project_name?.toLowerCase() || ""],
       })),
     [documents, navigate]
   );
@@ -232,8 +214,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ className }) => 
     const query = search.toLowerCase();
     return documentResults.filter(
       (doc) =>
-        doc.title.toLowerCase().includes(query) ||
-        doc.subtitle?.toLowerCase().includes(query)
+        doc.title.toLowerCase().includes(query) || doc.subtitle?.toLowerCase().includes(query)
     );
   }, [documentResults, search]);
 
@@ -247,9 +228,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ className }) => 
   }, [projectResults, documentResults]);
 
   const hasResults =
-    filteredActions.length > 0 ||
-    filteredProjects.length > 0 ||
-    filteredDocuments.length > 0;
+    filteredActions.length > 0 || filteredProjects.length > 0 || filteredDocuments.length > 0;
 
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
@@ -281,11 +260,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ className }) => 
               <>
                 <CommandGroup heading="Recent">
                   {recentItems.map((item) => (
-                    <CommandItem
-                      key={item.id}
-                      value={item.id}
-                      onSelect={() => handleSelect(item)}
-                    >
+                    <CommandItem key={item.id} value={item.id} onSelect={() => handleSelect(item)}>
                       <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
                       <span>{item.title}</span>
                       <span className="ml-2 text-xs text-muted-foreground truncate">
@@ -348,11 +323,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ className }) => 
             {filteredDocuments.length > 0 && (
               <CommandGroup heading="Documents">
                 {filteredDocuments.map((doc) => (
-                  <CommandItem
-                    key={doc.id}
-                    value={doc.id}
-                    onSelect={() => handleSelect(doc)}
-                  >
+                  <CommandItem key={doc.id} value={doc.id} onSelect={() => handleSelect(doc)}>
                     {doc.icon}
                     <span className="ml-2 truncate">{doc.title}</span>
                     <span className="ml-2 text-xs text-muted-foreground truncate">
@@ -372,26 +343,26 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ className }) => 
           <span>
             <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
               ↑↓
-            </kbd>{' '}
+            </kbd>{" "}
             Navigate
           </span>
           <span>
             <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
               ↵
-            </kbd>{' '}
+            </kbd>{" "}
             Select
           </span>
           <span>
             <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
               Esc
-            </kbd>{' '}
+            </kbd>{" "}
             Close
           </span>
         </div>
         <div>
           <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
             ⌘K
-          </kbd>{' '}
+          </kbd>{" "}
           to open
         </div>
       </div>

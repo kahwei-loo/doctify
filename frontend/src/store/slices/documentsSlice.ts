@@ -4,14 +4,14 @@
  * Redux slice for documents state management.
  */
 
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type {
   DocumentListItem,
   DocumentDetail,
   DocumentFilters,
   PaginationMeta,
-} from '../../features/documents/types';
-import { documentsApi } from '../api/documentsApi';
+} from "../../features/documents/types";
+import { documentsApi } from "../api/documentsApi";
 
 interface DocumentsState {
   documents: DocumentListItem[];
@@ -34,7 +34,7 @@ const initialState: DocumentsState = {
 };
 
 const documentsSlice = createSlice({
-  name: 'documents',
+  name: "documents",
   initialState,
   reducers: {
     setFilters: (state, action: PayloadAction<DocumentFilters>) => {
@@ -120,7 +120,7 @@ const documentsSlice = createSlice({
       })
       .addMatcher(documentsApi.endpoints.getDocuments.matchRejected, (state, action) => {
         state.isLoading = false;
-        state.error = (action.payload as any)?.data?.detail || 'Failed to fetch documents';
+        state.error = (action.payload as any)?.data?.detail || "Failed to fetch documents";
       });
 
     // Handle getDocument
@@ -135,7 +135,7 @@ const documentsSlice = createSlice({
       })
       .addMatcher(documentsApi.endpoints.getDocument.matchRejected, (state, action) => {
         state.isLoading = false;
-        state.error = (action.payload as any)?.data?.detail || 'Failed to fetch document';
+        state.error = (action.payload as any)?.data?.detail || "Failed to fetch document";
       });
 
     // Handle uploadDocument
@@ -149,7 +149,7 @@ const documentsSlice = createSlice({
       })
       .addMatcher(documentsApi.endpoints.uploadDocument.matchRejected, (state, action) => {
         state.isLoading = false;
-        state.error = (action.payload as any)?.data?.detail || 'Upload failed';
+        state.error = (action.payload as any)?.data?.detail || "Upload failed";
       });
 
     // Handle deleteDocument
@@ -166,7 +166,7 @@ const documentsSlice = createSlice({
         }
       })
       .addMatcher(documentsApi.endpoints.deleteDocument.matchRejected, (state, action) => {
-        state.error = (action.payload as any)?.data?.detail || 'Failed to delete document';
+        state.error = (action.payload as any)?.data?.detail || "Failed to delete document";
       });
   },
 });

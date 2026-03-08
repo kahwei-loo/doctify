@@ -4,8 +4,8 @@
  * Memoized selectors for UI state with reselect.
  */
 
-import { createSelector } from '@reduxjs/toolkit';
-import type { RootState } from '../index';
+import { createSelector } from "@reduxjs/toolkit";
+import type { RootState } from "../index";
 
 // Base selectors
 export const selectUIState = (state: RootState) => state.ui;
@@ -19,10 +19,7 @@ export const selectModals = createSelector([selectUIState], (ui) => ui.modals);
 
 export const selectToasts = createSelector([selectUIState], (ui) => ui.toasts);
 
-export const selectIsGlobalLoading = createSelector(
-  [selectUIState],
-  (ui) => ui.isGlobalLoading
-);
+export const selectIsGlobalLoading = createSelector([selectUIState], (ui) => ui.isGlobalLoading);
 
 // Derived selectors
 export const selectIsModalOpen = (modalId: string) =>

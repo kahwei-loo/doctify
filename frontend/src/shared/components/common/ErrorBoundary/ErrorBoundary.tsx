@@ -5,9 +5,9 @@
  * Integrates with Sentry for error tracking.
  */
 
-import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { captureException, setContext } from '../../../../config/sentry';
-import './ErrorBoundary.css';
+import { Component, ErrorInfo, ReactNode } from "react";
+import { captureException, setContext } from "../../../../config/sentry";
+import "./ErrorBoundary.css";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -37,10 +37,10 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    console.error("ErrorBoundary caught an error:", error, errorInfo);
 
     // Report error to Sentry with component stack trace
-    setContext('react', {
+    setContext("react", {
       componentStack: errorInfo.componentStack,
     });
     captureException(error, {

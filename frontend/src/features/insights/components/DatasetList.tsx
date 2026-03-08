@@ -4,7 +4,7 @@
  * Displays a list of user's datasets with selection and management.
  */
 
-import React from 'react';
+import React from "react";
 import {
   Database,
   FileSpreadsheet,
@@ -14,17 +14,17 @@ import {
   Loader2,
   CheckCircle2,
   MoreVertical,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,9 +34,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { useGetDatasetsQuery, useDeleteDatasetMutation } from '@/store/api/insightsApi';
-import type { Dataset, DatasetStatus } from '../types';
+} from "@/components/ui/alert-dialog";
+import { useGetDatasetsQuery, useDeleteDatasetMutation } from "@/store/api/insightsApi";
+import type { Dataset, DatasetStatus } from "../types";
 
 interface DatasetListProps {
   selectedDatasetId?: string | null;
@@ -50,23 +50,23 @@ const STATUS_CONFIG: Record<
 > = {
   ready: {
     icon: CheckCircle2,
-    color: 'text-green-500',
-    label: 'Ready',
+    color: "text-green-500",
+    label: "Ready",
   },
   processing: {
     icon: Loader2,
-    color: 'text-blue-500',
-    label: 'Processing',
+    color: "text-blue-500",
+    label: "Processing",
   },
   pending: {
     icon: Clock,
-    color: 'text-yellow-500',
-    label: 'Pending',
+    color: "text-yellow-500",
+    label: "Pending",
   },
   error: {
     icon: AlertCircle,
-    color: 'text-red-500',
-    label: 'Error',
+    color: "text-red-500",
+    label: "Error",
   },
 };
 
@@ -78,10 +78,10 @@ const formatFileSize = (bytes: number): string => {
 
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
   });
 };
 
@@ -92,49 +92,38 @@ interface DatasetItemProps {
   onDelete: (dataset: Dataset) => void;
 }
 
-const DatasetItem: React.FC<DatasetItemProps> = ({
-  dataset,
-  isSelected,
-  onSelect,
-  onDelete,
-}) => {
+const DatasetItem: React.FC<DatasetItemProps> = ({ dataset, isSelected, onSelect, onDelete }) => {
   const statusConfig = STATUS_CONFIG[dataset.status];
   const StatusIcon = statusConfig.icon;
-  const isClickable = dataset.status === 'ready';
+  const isClickable = dataset.status === "ready";
 
   return (
     <div
       className={cn(
-        'flex items-center gap-3 p-3 rounded-lg border transition-colors',
-        isClickable && 'cursor-pointer hover:bg-muted/50',
-        isSelected && 'border-primary bg-primary/5',
-        !isClickable && 'opacity-60'
+        "flex items-center gap-3 p-3 rounded-lg border transition-colors",
+        isClickable && "cursor-pointer hover:bg-muted/50",
+        isSelected && "border-primary bg-primary/5",
+        !isClickable && "opacity-60"
       )}
       onClick={() => isClickable && onSelect(dataset)}
     >
       <div
         className={cn(
-          'flex items-center justify-center h-10 w-10 rounded-lg',
-          isSelected ? 'bg-primary/10' : 'bg-muted'
+          "flex items-center justify-center h-10 w-10 rounded-lg",
+          isSelected ? "bg-primary/10" : "bg-muted"
         )}
       >
         <FileSpreadsheet
-          className={cn('h-5 w-5', isSelected ? 'text-primary' : 'text-muted-foreground')}
+          className={cn("h-5 w-5", isSelected ? "text-primary" : "text-muted-foreground")}
         />
       </div>
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <p className="font-medium text-sm truncate">{dataset.name}</p>
-          <Badge
-            variant="secondary"
-            className={cn('shrink-0', statusConfig.color)}
-          >
+          <Badge variant="secondary" className={cn("shrink-0", statusConfig.color)}>
             <StatusIcon
-              className={cn(
-                'h-3 w-3 mr-1',
-                dataset.status === 'processing' && 'animate-spin'
-              )}
+              className={cn("h-3 w-3 mr-1", dataset.status === "processing" && "animate-spin")}
             />
             {statusConfig.label}
           </Badge>
@@ -142,7 +131,7 @@ const DatasetItem: React.FC<DatasetItemProps> = ({
         <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
           <span>{formatFileSize(dataset.file_info.size_bytes)}</span>
           <span>•</span>
-          <span>{dataset.row_count?.toLocaleString() || '?'} rows</span>
+          <span>{dataset.row_count?.toLocaleString() || "?"} rows</span>
           <span>•</span>
           <span>{formatDate(dataset.created_at)}</span>
         </div>
@@ -190,7 +179,7 @@ export const DatasetList: React.FC<DatasetListProps> = ({
       await deleteDataset(datasetToDelete.id).unwrap();
       setDatasetToDelete(null);
     } catch (err) {
-      console.error('Failed to delete dataset:', err);
+      console.error("Failed to delete dataset:", err);
     }
   };
 
@@ -285,9 +274,9 @@ export const DatasetList: React.FC<DatasetListProps> = ({
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Dataset</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{datasetToDelete?.name}"? This will also
-              delete all conversations and query history associated with this dataset.
-              This action cannot be undone.
+              Are you sure you want to delete "{datasetToDelete?.name}"? This will also delete all
+              conversations and query history associated with this dataset. This action cannot be
+              undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -303,7 +292,7 @@ export const DatasetList: React.FC<DatasetListProps> = ({
                   Deleting...
                 </>
               ) : (
-                'Delete'
+                "Delete"
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

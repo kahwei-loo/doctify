@@ -2,9 +2,4 @@
  * VirtualList Component Exports
  */
 
-export {
-  VirtualList,
-  SimpleVirtualList,
-  useVirtualListScroll,
-  default,
-} from './VirtualList';
+export { VirtualList, SimpleVirtualList, useVirtualListScroll, default } from "./VirtualList";

@@ -17,9 +17,9 @@
  * }
  */
 
-import { useCallback } from 'react';
-import toast from 'react-hot-toast';
-import type { ErrorType } from '@/shared/components/common/ErrorState';
+import { useCallback } from "react";
+import toast from "react-hot-toast";
+import type { ErrorType } from "@/shared/components/common/ErrorState";
 
 // Common API error shape
 interface ApiErrorResponse {
@@ -67,12 +67,12 @@ interface UseApiErrorReturn {
  * Extracts the HTTP status code from various error formats
  */
 function getStatusCode(error: unknown): number | undefined {
-  if (!error || typeof error !== 'object') return undefined;
+  if (!error || typeof error !== "object") return undefined;
 
   const err = error as FetchError & ApiErrorResponse;
 
   // RTK Query error format
-  if (typeof err.status === 'number') return err.status;
+  if (typeof err.status === "number") return err.status;
 
   // Fetch/Axios error format
   if (err.response?.status) return err.response.status;
@@ -84,19 +84,19 @@ function getStatusCode(error: unknown): number | undefined {
  * Extracts a user-friendly message from various error formats
  */
 function extractMessage(error: unknown): string {
-  if (!error) return 'An unexpected error occurred';
+  if (!error) return "An unexpected error occurred";
 
-  if (typeof error === 'string') return error;
+  if (typeof error === "string") return error;
 
   if (error instanceof Error) {
     // Network error (no response)
-    if (error.message === 'Failed to fetch' || error.name === 'TypeError') {
-      return 'Unable to connect to the server. Please check your internet connection.';
+    if (error.message === "Failed to fetch" || error.name === "TypeError") {
+      return "Unable to connect to the server. Please check your internet connection.";
     }
     return error.message;
   }
 
-  if (typeof error === 'object') {
+  if (typeof error === "object") {
     const err = error as ApiErrorResponse & FetchError;
 
     // RTK Query error format
@@ -112,7 +112,7 @@ function extractMessage(error: unknown): string {
     if (err.statusText) return err.statusText;
   }
 
-  return 'An unexpected error occurred';
+  return "An unexpected error occurred";
 }
 
 /**
@@ -125,35 +125,35 @@ function mapErrorType(error: unknown): ErrorType {
     // No status = network error
     if (error instanceof Error) {
       if (
-        error.message === 'Failed to fetch' ||
-        error.name === 'TypeError' ||
-        error.message.toLowerCase().includes('network')
+        error.message === "Failed to fetch" ||
+        error.name === "TypeError" ||
+        error.message.toLowerCase().includes("network")
       ) {
-        return 'network';
+        return "network";
       }
-      if (error.message.toLowerCase().includes('timeout')) {
-        return 'timeout';
+      if (error.message.toLowerCase().includes("timeout")) {
+        return "timeout";
       }
     }
-    return 'unknown';
+    return "unknown";
   }
 
   // Map HTTP status codes to error types
   switch (status) {
     case 401:
     case 403:
-      return 'unauthorized';
+      return "unauthorized";
     case 404:
-      return 'not-found';
+      return "not-found";
     case 408:
     case 504:
-      return 'timeout';
+      return "timeout";
     case 500:
     case 502:
     case 503:
-      return 'server';
+      return "server";
     default:
-      return 'unknown';
+      return "unknown";
   }
 }
 
@@ -167,7 +167,7 @@ export function useApiError(): UseApiErrorReturn {
   }, []);
 
   const isNetworkError = useCallback((error: unknown): boolean => {
-    return mapErrorType(error) === 'network';
+    return mapErrorType(error) === "network";
   }, []);
 
   const isAuthError = useCallback((error: unknown): boolean => {
@@ -175,65 +175,56 @@ export function useApiError(): UseApiErrorReturn {
     return status === 401 || status === 403;
   }, []);
 
-  const handleError = useCallback(
-    (error: unknown, options: HandleErrorOptions = {}) => {
-      const {
-        showToast = true,
-        customMessage,
-        retryFn,
-        toastDuration = 4000,
-        onError,
-      } = options;
+  const handleError = useCallback((error: unknown, options: HandleErrorOptions = {}) => {
+    const { showToast = true, customMessage, retryFn, toastDuration = 4000, onError } = options;
 
-      const message = customMessage || extractMessage(error);
-      const errorType = mapErrorType(error);
+    const message = customMessage || extractMessage(error);
+    const errorType = mapErrorType(error);
 
-      // Log error for debugging (only in development)
-      if (process.env.NODE_ENV === 'development') {
-        console.error('[API Error]', {
-          type: errorType,
-          message,
-          error,
+    // Log error for debugging (only in development)
+    if (process.env.NODE_ENV === "development") {
+      console.error("[API Error]", {
+        type: errorType,
+        message,
+        error,
+      });
+    }
+
+    // Show toast notification
+    if (showToast) {
+      if (retryFn) {
+        // Toast with retry action
+        toast.error(
+          (t) => (
+            <div className="flex items-center gap-3">
+              <span>{message}</span>
+              <button
+                onClick={() => {
+                  toast.dismiss(t.id);
+                  retryFn();
+                }}
+                className="text-xs underline text-destructive-foreground hover:no-underline"
+              >
+                Retry
+              </button>
+            </div>
+          ),
+          {
+            duration: toastDuration,
+          }
+        );
+      } else {
+        toast.error(message, {
+          duration: toastDuration,
         });
       }
+    }
 
-      // Show toast notification
-      if (showToast) {
-        if (retryFn) {
-          // Toast with retry action
-          toast.error(
-            (t) => (
-              <div className="flex items-center gap-3">
-                <span>{message}</span>
-                <button
-                  onClick={() => {
-                    toast.dismiss(t.id);
-                    retryFn();
-                  }}
-                  className="text-xs underline text-destructive-foreground hover:no-underline"
-                >
-                  Retry
-                </button>
-              </div>
-            ),
-            {
-              duration: toastDuration,
-            }
-          );
-        } else {
-          toast.error(message, {
-            duration: toastDuration,
-          });
-        }
-      }
-
-      // Call optional error callback
-      if (onError) {
-        onError(errorType, message);
-      }
-    },
-    []
-  );
+    // Call optional error callback
+    if (onError) {
+      onError(errorType, message);
+    }
+  }, []);
 
   return {
     handleError,

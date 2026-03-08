@@ -5,7 +5,7 @@
  * Only active when VITE_SENTRY_DSN is configured.
  */
 
-import * as Sentry from '@sentry/react';
+import * as Sentry from "@sentry/react";
 
 /**
  * Check if Sentry is configured and should be enabled
@@ -20,13 +20,13 @@ export const isSentryEnabled = (): boolean => {
  */
 export const initSentry = (): void => {
   if (!isSentryEnabled()) {
-    console.info('[Sentry] Disabled - No DSN configured');
+    console.info("[Sentry] Disabled - No DSN configured");
     return;
   }
 
-  const environment = import.meta.env.VITE_APP_ENV || 'development';
-  const release = `doctify-frontend@${import.meta.env.VITE_APP_VERSION || '1.0.0'}`;
-  const enablePerformance = import.meta.env.VITE_ENABLE_PERFORMANCE_MONITORING === 'true';
+  const environment = import.meta.env.VITE_APP_ENV || "development";
+  const release = `doctify-frontend@${import.meta.env.VITE_APP_VERSION || "1.0.0"}`;
+  const enablePerformance = import.meta.env.VITE_ENABLE_PERFORMANCE_MONITORING === "true";
 
   Sentry.init({
     dsn: import.meta.env.VITE_SENTRY_DSN,
@@ -40,26 +40,26 @@ export const initSentry = (): void => {
 
     // Set tracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring
     // Adjust in production to a lower rate (e.g., 0.1 for 10%)
-    tracesSampleRate: environment === 'production' ? 0.1 : 1.0,
+    tracesSampleRate: environment === "production" ? 0.1 : 1.0,
 
     // Session Replay
-    replaysSessionSampleRate: environment === 'production' ? 0.1 : 0,
-    replaysOnErrorSampleRate: environment === 'production' ? 1.0 : 0,
+    replaysSessionSampleRate: environment === "production" ? 0.1 : 0,
+    replaysOnErrorSampleRate: environment === "production" ? 1.0 : 0,
 
     // Only send errors in non-development environments by default
-    enabled: environment !== 'development' || import.meta.env.VITE_DEBUG === 'true',
+    enabled: environment !== "development" || import.meta.env.VITE_DEBUG === "true",
 
     // Filter out certain errors
     beforeSend(event, hint) {
       const error = hint.originalException;
 
       // Filter out network errors that users can't control
-      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+      if (error instanceof TypeError && error.message.includes("Failed to fetch")) {
         return null;
       }
 
       // Filter out cancelled requests
-      if (error instanceof Error && error.name === 'AbortError') {
+      if (error instanceof Error && error.name === "AbortError") {
         return null;
       }
 
@@ -82,7 +82,7 @@ export const captureException = (
   context?: Record<string, unknown>
 ): string | undefined => {
   if (!isSentryEnabled()) {
-    console.error('[Sentry] Error captured (disabled):', error, context);
+    console.error("[Sentry] Error captured (disabled):", error, context);
     return undefined;
   }
 
@@ -96,7 +96,7 @@ export const captureException = (
  */
 export const captureMessage = (
   message: string,
-  level: Sentry.SeverityLevel = 'info',
+  level: Sentry.SeverityLevel = "info",
   context?: Record<string, unknown>
 ): string | undefined => {
   if (!isSentryEnabled()) {

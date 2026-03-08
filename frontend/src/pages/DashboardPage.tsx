@@ -5,8 +5,8 @@
  * Week 6 Dashboard Optimization
  */
 
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { useNavigate } from "react-router-dom";
 import {
   FileText,
   FolderKanban,
@@ -21,7 +21,7 @@ import {
   Bot,
   MessageSquare,
   Loader2,
-} from 'lucide-react';
+} from "lucide-react";
 import {
   LineChart,
   Line,
@@ -31,32 +31,26 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
-} from 'recharts';
-import { useAppSelector } from '@/store';
-import { selectUser } from '@/store/selectors/authSelectors';
+} from "recharts";
+import { useAppSelector } from "@/store";
+import { selectUser } from "@/store/selectors/authSelectors";
 import {
   useGetUnifiedStatsQuery,
   useGetDashboardTrendsQuery,
   useInvalidateDashboardCacheMutation,
-} from '@/store/api/dashboardApi';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { cn } from '@/lib/utils';
+} from "@/store/api/dashboardApi";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 // Onboarding
-import { OnboardingDialog, useOnboarding } from '@/features/onboarding';
+import { OnboardingDialog, useOnboarding } from "@/features/onboarding";
 
 // Import new dashboard components
-import StatCardWithTrend from '@/features/dashboard/components/StatCardWithTrend';
-import ProjectDistributionChart from '@/features/dashboard/components/ProjectDistributionChart';
-import RecentActivityList from '@/features/dashboard/components/RecentActivityList';
-import WelcomeEmptyState from '@/features/dashboard/components/WelcomeEmptyState';
+import StatCardWithTrend from "@/features/dashboard/components/StatCardWithTrend";
+import ProjectDistributionChart from "@/features/dashboard/components/ProjectDistributionChart";
+import RecentActivityList from "@/features/dashboard/components/RecentActivityList";
+import WelcomeEmptyState from "@/features/dashboard/components/WelcomeEmptyState";
 
 // Standard stat card for metrics without trends
 interface StatCardProps {
@@ -64,7 +58,7 @@ interface StatCardProps {
   value: number | string;
   icon: React.ElementType;
   description: string;
-  variant?: 'default' | 'primary' | 'success' | 'warning' | 'danger';
+  variant?: "default" | "primary" | "success" | "warning" | "danger";
   isLoading?: boolean;
 }
 
@@ -73,15 +67,15 @@ const StatCard: React.FC<StatCardProps> = ({
   value,
   icon: Icon,
   description,
-  variant = 'default',
+  variant = "default",
   isLoading = false,
 }) => {
   const variantStyles = {
-    default: 'bg-muted/50',
-    primary: 'bg-primary/10 text-primary',
-    success: 'bg-green-500/10 text-green-600',
-    warning: 'bg-yellow-500/10 text-yellow-600',
-    danger: 'bg-red-500/10 text-red-600',
+    default: "bg-muted/50",
+    primary: "bg-primary/10 text-primary",
+    success: "bg-green-500/10 text-green-600",
+    warning: "bg-yellow-500/10 text-yellow-600",
+    danger: "bg-red-500/10 text-red-600",
   };
 
   return (
@@ -97,7 +91,7 @@ const StatCard: React.FC<StatCardProps> = ({
             )}
             <p className="text-xs text-muted-foreground mt-1">{description}</p>
           </div>
-          <div className={cn('p-3 rounded-lg', variantStyles[variant])}>
+          <div className={cn("p-3 rounded-lg", variantStyles[variant])}>
             <Icon className="h-6 w-6" />
           </div>
         </div>
@@ -109,7 +103,8 @@ const StatCard: React.FC<StatCardProps> = ({
 const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const user = useAppSelector(selectUser);
-  const { showOnboarding, currentStep, nextStep, prevStep, completeOnboarding, skipOnboarding } = useOnboarding();
+  const { showOnboarding, currentStep, nextStep, prevStep, completeOnboarding, skipOnboarding } =
+    useOnboarding();
 
   // Fetch unified stats with 30-second auto-refresh
   const {
@@ -139,16 +134,16 @@ const DashboardPage: React.FC = () => {
 
   const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Good morning';
-    if (hour < 18) return 'Good afternoon';
-    return 'Good evening';
+    if (hour < 12) return "Good morning";
+    if (hour < 18) return "Good afternoon";
+    return "Good evening";
   };
 
   const formatChartDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
     });
   };
 
@@ -164,10 +159,10 @@ const DashboardPage: React.FC = () => {
     ? {
         percent: stats.trend_comparison.documents_change_percent,
         direction: (stats.trend_comparison.documents_change_percent > 0
-          ? 'up'
+          ? "up"
           : stats.trend_comparison.documents_change_percent < 0
-          ? 'down'
-          : 'neutral') as 'up' | 'down' | 'neutral',
+            ? "down"
+            : "neutral") as "up" | "down" | "neutral",
       }
     : undefined;
 
@@ -175,10 +170,10 @@ const DashboardPage: React.FC = () => {
     ? {
         percent: stats.trend_comparison.conversations_change_percent,
         direction: (stats.trend_comparison.conversations_change_percent > 0
-          ? 'up'
+          ? "up"
           : stats.trend_comparison.conversations_change_percent < 0
-          ? 'down'
-          : 'neutral') as 'up' | 'down' | 'neutral',
+            ? "down"
+            : "neutral") as "up" | "down" | "neutral",
       }
     : undefined;
 
@@ -188,7 +183,7 @@ const DashboardPage: React.FC = () => {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">
-            {getGreeting()}, {user?.full_name?.split(' ')[0] || 'there'}
+            {getGreeting()}, {user?.full_name?.split(" ")[0] || "there"}
           </h1>
           <p className="text-muted-foreground mt-1">
             Here's what's happening with your documents today.
@@ -201,14 +196,16 @@ const DashboardPage: React.FC = () => {
             onClick={handleRefresh}
             disabled={isInvalidating || isFetchingStats}
           >
-            <RefreshCw className={cn('mr-2 h-4 w-4', (isInvalidating || isFetchingStats) && 'animate-spin')} />
+            <RefreshCw
+              className={cn("mr-2 h-4 w-4", (isInvalidating || isFetchingStats) && "animate-spin")}
+            />
             Refresh
           </Button>
-          <Button variant="outline" onClick={() => navigate('/assistants/new')}>
+          <Button variant="outline" onClick={() => navigate("/assistants/new")}>
             <Bot className="mr-2 h-4 w-4" />
             New Assistant
           </Button>
-          <Button onClick={() => navigate('/documents')}>
+          <Button onClick={() => navigate("/documents")}>
             <Upload className="mr-2 h-4 w-4" />
             Upload Document
           </Button>
@@ -218,7 +215,7 @@ const DashboardPage: React.FC = () => {
       {/* Show welcome state for new users */}
       {isNewUser && (
         <WelcomeEmptyState
-          userName={user?.full_name?.split(' ')[0]}
+          userName={user?.full_name?.split(" ")[0]}
           hasDocuments={stats.total_documents > 0}
           hasKnowledgeBases={stats.total_knowledge_bases > 0}
           hasAssistants={stats.total_assistants > 0}
@@ -303,7 +300,7 @@ const DashboardPage: React.FC = () => {
       <div className="grid gap-4 md:grid-cols-2">
         <StatCard
           title="Total Tokens Used"
-          value={stats?.total_tokens_used?.toLocaleString() || '0'}
+          value={stats?.total_tokens_used?.toLocaleString() || "0"}
           icon={TrendingUp}
           description="AI processing tokens"
           variant="default"
@@ -311,7 +308,7 @@ const DashboardPage: React.FC = () => {
         />
         <StatCard
           title="Estimated Cost"
-          value={`$${stats?.estimated_cost?.toFixed(2) || '0.00'}`}
+          value={`$${stats?.estimated_cost?.toFixed(2) || "0.00"}`}
           icon={DollarSign}
           description="Based on token usage"
           variant="default"
@@ -340,10 +337,7 @@ const DashboardPage: React.FC = () => {
             ) : trends && trends.data.length > 0 ? (
               <div className="h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart
-                    data={trends.data}
-                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                  >
+                  <LineChart data={trends.data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                     <XAxis
                       dataKey="date"
@@ -354,9 +348,9 @@ const DashboardPage: React.FC = () => {
                     <YAxis tick={{ fontSize: 12 }} className="text-muted-foreground" />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: 'hsl(var(--background))',
-                        border: '1px solid hsl(var(--border))',
-                        borderRadius: '8px',
+                        backgroundColor: "hsl(var(--background))",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "8px",
                       }}
                       labelFormatter={(label) => formatChartDate(label as string)}
                     />
@@ -425,7 +419,7 @@ const DashboardPage: React.FC = () => {
       <div className="grid gap-4 md:grid-cols-4">
         <Card
           className="cursor-pointer hover:bg-muted/50 transition-colors"
-          onClick={() => navigate('/documents')}
+          onClick={() => navigate("/documents")}
         >
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
@@ -434,9 +428,7 @@ const DashboardPage: React.FC = () => {
               </div>
               <div>
                 <h3 className="font-semibold">Upload Document</h3>
-                <p className="text-sm text-muted-foreground">
-                  Process with AI
-                </p>
+                <p className="text-sm text-muted-foreground">Process with AI</p>
               </div>
             </div>
           </CardContent>
@@ -444,7 +436,7 @@ const DashboardPage: React.FC = () => {
 
         <Card
           className="cursor-pointer hover:bg-muted/50 transition-colors"
-          onClick={() => navigate('/knowledge-base')}
+          onClick={() => navigate("/knowledge-base")}
         >
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
@@ -453,9 +445,7 @@ const DashboardPage: React.FC = () => {
               </div>
               <div>
                 <h3 className="font-semibold">Knowledge Base</h3>
-                <p className="text-sm text-muted-foreground">
-                  Organize documents
-                </p>
+                <p className="text-sm text-muted-foreground">Organize documents</p>
               </div>
             </div>
           </CardContent>
@@ -463,7 +453,7 @@ const DashboardPage: React.FC = () => {
 
         <Card
           className="cursor-pointer hover:bg-muted/50 transition-colors"
-          onClick={() => navigate('/assistants')}
+          onClick={() => navigate("/assistants")}
         >
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
@@ -472,9 +462,7 @@ const DashboardPage: React.FC = () => {
               </div>
               <div>
                 <h3 className="font-semibold">AI Assistants</h3>
-                <p className="text-sm text-muted-foreground">
-                  Build & manage
-                </p>
+                <p className="text-sm text-muted-foreground">Build & manage</p>
               </div>
             </div>
           </CardContent>
@@ -482,7 +470,7 @@ const DashboardPage: React.FC = () => {
 
         <Card
           className="cursor-pointer hover:bg-muted/50 transition-colors"
-          onClick={() => navigate('/chat')}
+          onClick={() => navigate("/chat")}
         >
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
@@ -491,9 +479,7 @@ const DashboardPage: React.FC = () => {
               </div>
               <div>
                 <h3 className="font-semibold">Start Chat</h3>
-                <p className="text-sm text-muted-foreground">
-                  Query your docs
-                </p>
+                <p className="text-sm text-muted-foreground">Query your docs</p>
               </div>
             </div>
           </CardContent>

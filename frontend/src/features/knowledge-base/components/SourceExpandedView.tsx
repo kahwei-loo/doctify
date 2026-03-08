@@ -6,26 +6,21 @@
  * Renders inside SourcesPanel, replacing the source list.
  */
 
-import React from 'react';
-import {
-  ArrowLeft,
-  Pencil,
-  RefreshCw,
-  Trash2,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { cn } from '@/lib/utils';
-import { getSourceTypeConfig, isEditableType } from '../utils/sourceTypeConfig';
-import { TextContent } from './source-content/TextContent';
-import { QAPairsContent } from './source-content/QAPairsContent';
-import { UploadedDocsContent } from './source-content/UploadedDocsContent';
-import { WebsiteContent } from './source-content/WebsiteContent';
-import { StructuredDataContent } from './source-content/StructuredDataContent';
-import { ChunksSection } from './source-content/ChunksSection';
-import type { DataSource, Embedding } from '../types';
-import type { SourceAction } from './SourcesPanel';
+import React from "react";
+import { ArrowLeft, Pencil, RefreshCw, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
+import { getSourceTypeConfig, isEditableType } from "../utils/sourceTypeConfig";
+import { TextContent } from "./source-content/TextContent";
+import { QAPairsContent } from "./source-content/QAPairsContent";
+import { UploadedDocsContent } from "./source-content/UploadedDocsContent";
+import { WebsiteContent } from "./source-content/WebsiteContent";
+import { StructuredDataContent } from "./source-content/StructuredDataContent";
+import { ChunksSection } from "./source-content/ChunksSection";
+import type { DataSource, Embedding } from "../types";
+import type { SourceAction } from "./SourcesPanel";
 
 interface SourceExpandedViewProps {
   source: DataSource;
@@ -37,15 +32,15 @@ interface SourceExpandedViewProps {
 
 const SourceContentView: React.FC<{ source: DataSource }> = ({ source }) => {
   switch (source.type) {
-    case 'text':
+    case "text":
       return <TextContent source={source} />;
-    case 'qa_pairs':
+    case "qa_pairs":
       return <QAPairsContent source={source} />;
-    case 'uploaded_docs':
+    case "uploaded_docs":
       return <UploadedDocsContent source={source} />;
-    case 'website':
+    case "website":
       return <WebsiteContent source={source} />;
-    case 'structured_data':
+    case "structured_data":
       return <StructuredDataContent source={source} />;
     default:
       return <p className="text-sm text-muted-foreground">Unknown source type</p>;
@@ -67,20 +62,20 @@ export const SourceExpandedView: React.FC<SourceExpandedViewProps> = ({
       {/* Header */}
       <div className="px-4 py-3 border-b bg-muted/30 shrink-0">
         <div className="flex items-center gap-2 mb-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onBack}
-            className="h-7 gap-1 -ml-1 text-xs"
-          >
+          <Button variant="ghost" size="sm" onClick={onBack} className="h-7 gap-1 -ml-1 text-xs">
             <ArrowLeft className="h-3.5 w-3.5" />
             Sources
           </Button>
         </div>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 min-w-0">
-            <div className={cn('flex items-center justify-center h-7 w-7 rounded-md shrink-0', config.bgColor)}>
-              <Icon className={cn('h-3.5 w-3.5', config.iconColor)} />
+            <div
+              className={cn(
+                "flex items-center justify-center h-7 w-7 rounded-md shrink-0",
+                config.bgColor
+              )}
+            >
+              <Icon className={cn("h-3.5 w-3.5", config.iconColor)} />
             </div>
             <div className="min-w-0">
               <h3 className="text-sm font-semibold truncate">{source.name}</h3>
@@ -90,19 +85,19 @@ export const SourceExpandedView: React.FC<SourceExpandedViewProps> = ({
           <Badge
             variant="outline"
             className={cn(
-              'text-xs shrink-0',
-              source.type === 'structured_data'
-                ? 'text-purple-600 border-purple-200'
-                : source.status === 'active'
-                  ? 'text-green-600 border-green-200'
-                  : source.status === 'syncing'
-                    ? 'text-blue-600 border-blue-200'
-                    : source.status === 'error'
-                      ? 'text-red-600 border-red-200'
-                      : ''
+              "text-xs shrink-0",
+              source.type === "structured_data"
+                ? "text-purple-600 border-purple-200"
+                : source.status === "active"
+                  ? "text-green-600 border-green-200"
+                  : source.status === "syncing"
+                    ? "text-blue-600 border-blue-200"
+                    : source.status === "error"
+                      ? "text-red-600 border-red-200"
+                      : ""
             )}
           >
-            {source.type === 'structured_data' ? 'Analytics' : source.status}
+            {source.type === "structured_data" ? "Analytics" : source.status}
           </Badge>
         </div>
 
@@ -112,28 +107,28 @@ export const SourceExpandedView: React.FC<SourceExpandedViewProps> = ({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => onAction('edit')}
+              onClick={() => onAction("edit")}
               className="h-7 gap-1 text-xs"
             >
               <Pencil className="h-3 w-3" />
               Edit
             </Button>
           )}
-          {source.type !== 'structured_data' && (
+          {source.type !== "structured_data" && (
             <Button
               variant="outline"
               size="sm"
-              onClick={() => onAction('regenerate')}
+              onClick={() => onAction("regenerate")}
               className="h-7 gap-1 text-xs"
             >
               <RefreshCw className="h-3 w-3" />
-              {source.type === 'website' ? 'Crawl & Embed' : 'Re-embed'}
+              {source.type === "website" ? "Crawl & Embed" : "Re-embed"}
             </Button>
           )}
           <Button
             variant="outline"
             size="sm"
-            onClick={() => onAction('delete')}
+            onClick={() => onAction("delete")}
             className="h-7 gap-1 text-xs text-destructive hover:text-destructive"
           >
             <Trash2 className="h-3 w-3" />

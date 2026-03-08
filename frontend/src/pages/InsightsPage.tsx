@@ -5,24 +5,12 @@
  * Allows users to upload datasets and query them using natural language.
  */
 
-import React, { useState, useCallback } from 'react';
-import {
-  Lightbulb,
-  Plus,
-  PanelLeftClose,
-  PanelLeft,
-  RefreshCw,
-} from 'lucide-react';
-import toast from 'react-hot-toast';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import React, { useState, useCallback } from "react";
+import { Lightbulb, Plus, PanelLeftClose, PanelLeft, RefreshCw } from "lucide-react";
+import toast from "react-hot-toast";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -30,21 +18,26 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+} from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   DatasetUploader,
   DatasetList,
   QueryInput,
   ResultsPanel,
   ConversationHistory,
-} from '@/features/insights/components';
+} from "@/features/insights/components";
 import {
   useCreateConversationMutation,
   useSendQueryMutation,
   useGetConversationsQuery,
-} from '@/store/api/insightsApi';
-import type { Dataset, QueryResponse, QueryHistoryItem, Conversation } from '@/features/insights/types';
+} from "@/store/api/insightsApi";
+import type {
+  Dataset,
+  QueryResponse,
+  QueryHistoryItem,
+  Conversation,
+} from "@/features/insights/types";
 
 // Type for display - can be full response or history item
 type DisplayableQueryResult = QueryResponse | QueryHistoryItem;
@@ -64,7 +57,7 @@ const InsightsPage: React.FC = () => {
 
   // Fetch conversations for selected dataset
   const { data: conversationsResponse, refetch: refetchConversations } = useGetConversationsQuery(
-    { datasetId: selectedDataset?.id || '' },
+    { datasetId: selectedDataset?.id || "" },
     { skip: !selectedDataset }
   );
 
@@ -82,9 +75,9 @@ const InsightsPage: React.FC = () => {
   }, []);
 
   // Handle dataset upload success
-  const handleUploadSuccess = useCallback((datasetId: string) => {
+  const handleUploadSuccess = useCallback((_datasetId: string) => {
     setIsUploadDialogOpen(false);
-    toast.success('Dataset uploaded successfully');
+    toast.success("Dataset uploaded successfully");
   }, []);
 
   // Handle dataset upload error
@@ -93,39 +86,42 @@ const InsightsPage: React.FC = () => {
   }, []);
 
   // Handle query submission
-  const handleSubmitQuery = useCallback(async (query: string, language: string) => {
-    if (!selectedDataset) {
-      toast.error('Please select a dataset first');
-      return;
-    }
-
-    try {
-      let conversationId = activeConversation?.id;
-
-      // Create a new conversation if one doesn't exist
-      if (!conversationId) {
-        const newConversation = await createConversation({
-          dataset_id: selectedDataset.id,
-          title: query.slice(0, 50) + (query.length > 50 ? '...' : ''),
-        }).unwrap();
-        conversationId = newConversation.id;
-        setActiveConversation(newConversation);
-        refetchConversations();
+  const handleSubmitQuery = useCallback(
+    async (query: string, language: string) => {
+      if (!selectedDataset) {
+        toast.error("Please select a dataset first");
+        return;
       }
 
-      // Send the query
-      const result = await sendQuery({
-        conversationId,
-        request: { message: query, language },
-      }).unwrap();
+      try {
+        let conversationId = activeConversation?.id;
 
-      setCurrentResult(result);
-      setSelectedQueryId(result.id);
-    } catch (error: any) {
-      const errorMessage = error?.data?.detail || 'Failed to process query';
-      toast.error(errorMessage);
-    }
-  }, [selectedDataset, activeConversation, createConversation, sendQuery, refetchConversations]);
+        // Create a new conversation if one doesn't exist
+        if (!conversationId) {
+          const newConversation = await createConversation({
+            dataset_id: selectedDataset.id,
+            title: query.slice(0, 50) + (query.length > 50 ? "..." : ""),
+          }).unwrap();
+          conversationId = newConversation.id;
+          setActiveConversation(newConversation);
+          refetchConversations();
+        }
+
+        // Send the query
+        const result = await sendQuery({
+          conversationId,
+          request: { message: query, language },
+        }).unwrap();
+
+        setCurrentResult(result);
+        setSelectedQueryId(result.id);
+      } catch (error: any) {
+        const errorMessage = error?.data?.detail || "Failed to process query";
+        toast.error(errorMessage);
+      }
+    },
+    [selectedDataset, activeConversation, createConversation, sendQuery, refetchConversations]
+  );
 
   // Handle selecting a query from history
   const handleSelectQuery = useCallback((query: QueryHistoryItem) => {
@@ -145,8 +141,8 @@ const InsightsPage: React.FC = () => {
       {/* Left Panel - Dataset List */}
       <div
         className={cn(
-          'border-r bg-muted/30 transition-all duration-300 flex flex-col',
-          isPanelCollapsed ? 'w-0 overflow-hidden' : 'w-72'
+          "border-r bg-muted/30 transition-all duration-300 flex flex-col",
+          isPanelCollapsed ? "w-0 overflow-hidden" : "w-72"
         )}
       >
         <div className="p-4 border-b flex items-center justify-between shrink-0">
@@ -180,10 +176,7 @@ const InsightsPage: React.FC = () => {
                   Upload a CSV, XLSX, or JSON file to analyze with natural language queries.
                 </DialogDescription>
               </DialogHeader>
-              <DatasetUploader
-                onSuccess={handleUploadSuccess}
-                onError={handleUploadError}
-              />
+              <DatasetUploader onSuccess={handleUploadSuccess} onError={handleUploadError} />
             </DialogContent>
           </Dialog>
 
@@ -206,13 +199,13 @@ const InsightsPage: React.FC = () => {
                     type="button"
                     onClick={() => handleSelectConversation(conversation)}
                     className={cn(
-                      'w-full text-left px-3 py-2 rounded-md text-sm transition-colors',
-                      'hover:bg-muted',
-                      activeConversation?.id === conversation.id && 'bg-primary/10 text-primary'
+                      "w-full text-left px-3 py-2 rounded-md text-sm transition-colors",
+                      "hover:bg-muted",
+                      activeConversation?.id === conversation.id && "bg-primary/10 text-primary"
                     )}
                   >
                     <p className="truncate font-medium">
-                      {conversation.title || 'Untitled Conversation'}
+                      {conversation.title || "Untitled Conversation"}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {new Date(conversation.updated_at).toLocaleDateString()}
@@ -231,22 +224,18 @@ const InsightsPage: React.FC = () => {
         <div className="p-4 border-b flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             {isPanelCollapsed && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsPanelCollapsed(false)}
-              >
+              <Button variant="ghost" size="icon" onClick={() => setIsPanelCollapsed(false)}>
                 <PanelLeft className="h-4 w-4" />
               </Button>
             )}
             <div>
               <h1 className="text-xl font-bold">
-                {selectedDataset ? selectedDataset.name : 'Data Insights'}
+                {selectedDataset ? selectedDataset.name : "Data Insights"}
               </h1>
               <p className="text-sm text-muted-foreground">
                 {selectedDataset
-                  ? `${selectedDataset.row_count?.toLocaleString() || '?'} rows • ${selectedDataset.schema_definition.columns.length} columns`
-                  : 'Select a dataset to start querying'}
+                  ? `${selectedDataset.row_count?.toLocaleString() || "?"} rows • ${selectedDataset.schema_definition.columns.length} columns`
+                  : "Select a dataset to start querying"}
               </p>
             </div>
           </div>
@@ -277,21 +266,18 @@ const InsightsPage: React.FC = () => {
                   <QueryInput
                     onSubmit={handleSubmitQuery}
                     isLoading={isQueryLoading}
-                    disabled={selectedDataset.status !== 'ready'}
+                    disabled={selectedDataset.status !== "ready"}
                     placeholder={
-                      selectedDataset.status === 'ready'
+                      selectedDataset.status === "ready"
                         ? `Ask a question about ${selectedDataset.name}...`
-                        : 'Dataset is being processed...'
+                        : "Dataset is being processed..."
                     }
                   />
                 </div>
 
                 {/* Results Panel */}
                 <div className="flex-1 overflow-y-auto">
-                  <ResultsPanel
-                    result={currentResult}
-                    isLoading={isQueryLoading}
-                  />
+                  <ResultsPanel result={currentResult} isLoading={isQueryLoading} />
                 </div>
               </>
             ) : (
@@ -327,7 +313,8 @@ const InsightsPage: React.FC = () => {
                         <DialogHeader>
                           <DialogTitle>Upload Dataset</DialogTitle>
                           <DialogDescription>
-                            Upload a CSV, XLSX, or JSON file to analyze with natural language queries.
+                            Upload a CSV, XLSX, or JSON file to analyze with natural language
+                            queries.
                           </DialogDescription>
                         </DialogHeader>
                         <DatasetUploader

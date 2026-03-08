@@ -7,23 +7,19 @@
  * Week 5 Phase 2 - WebSocket Real-time Updates
  */
 
-import { useEffect, useRef, useState, useCallback } from 'react';
-import { useSelector } from 'react-redux';
-import type { RootState } from '@/store';
+import { useEffect, useRef, useState, useCallback } from "react";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store";
 
 // WebSocket Event Types
 export interface AssistantWebSocketEvent {
-  type:
-    | 'conversation.created'
-    | 'conversation.updated'
-    | 'message.created'
-    | 'heartbeat';
+  type: "conversation.created" | "conversation.updated" | "message.created" | "heartbeat";
   data: Record<string, unknown>;
   timestamp: string;
 }
 
 export interface ConversationCreatedEvent extends AssistantWebSocketEvent {
-  type: 'conversation.created';
+  type: "conversation.created";
   data: {
     assistant_id: string;
     conversation_id: string;
@@ -32,7 +28,7 @@ export interface ConversationCreatedEvent extends AssistantWebSocketEvent {
 }
 
 export interface ConversationUpdatedEvent extends AssistantWebSocketEvent {
-  type: 'conversation.updated';
+  type: "conversation.updated";
   data: {
     assistant_id: string;
     conversation_id: string;
@@ -42,11 +38,11 @@ export interface ConversationUpdatedEvent extends AssistantWebSocketEvent {
 }
 
 export interface MessageCreatedEvent extends AssistantWebSocketEvent {
-  type: 'message.created';
+  type: "message.created";
   data: {
     conversation_id: string;
     message_id: string;
-    role: 'user' | 'assistant';
+    role: "user" | "assistant";
     content: string;
   };
 }
@@ -71,7 +67,7 @@ interface UseAssistantWebSocketReturn {
   disconnect: () => void;
 }
 
-const WS_BASE_URL = import.meta.env.VITE_WS_BASE_URL || 'ws://localhost:50080';
+const WS_BASE_URL = import.meta.env.VITE_WS_BASE_URL || "ws://localhost:50080";
 
 /**
  * Hook for subscribing to real-time assistant/conversation updates via WebSocket.
@@ -147,16 +143,16 @@ export function useAssistantWebSocket({
           setLastEvent(parsed);
 
           // Call event handler if provided
-          if (onEventRef.current && parsed.type !== 'heartbeat') {
+          if (onEventRef.current && parsed.type !== "heartbeat") {
             onEventRef.current(parsed);
           }
         } catch (error) {
-          console.error('[AssistantWS] Failed to parse message:', error);
+          console.error("[AssistantWS] Failed to parse message:", error);
         }
       };
 
       ws.onerror = (error) => {
-        console.error('[AssistantWS] WebSocket error:', error);
+        console.error("[AssistantWS] WebSocket error:", error);
       };
 
       ws.onclose = (event) => {
@@ -165,14 +161,12 @@ export function useAssistantWebSocket({
         wsRef.current = null;
 
         // Attempt reconnection if enabled and not intentionally closed
-        if (
-          shouldConnectRef.current &&
-          reconnectCountRef.current < 5 &&
-          event.code !== 1000
-        ) {
+        if (shouldConnectRef.current && reconnectCountRef.current < 5 && event.code !== 1000) {
           reconnectCountRef.current += 1;
           const delay = Math.min(1000 * Math.pow(2, reconnectCountRef.current), 30000);
-          console.log(`[AssistantWS] Reconnecting in ${delay}ms (attempt ${reconnectCountRef.current})`);
+          console.log(
+            `[AssistantWS] Reconnecting in ${delay}ms (attempt ${reconnectCountRef.current})`
+          );
 
           reconnectTimeoutRef.current = setTimeout(() => {
             connect();
@@ -185,16 +179,16 @@ export function useAssistantWebSocket({
       // Send periodic heartbeat to keep connection alive
       const heartbeatInterval = setInterval(() => {
         if (ws.readyState === WebSocket.OPEN) {
-          ws.send(JSON.stringify({ type: 'ping' }));
+          ws.send(JSON.stringify({ type: "ping" }));
         }
       }, 30000);
 
       // Clean up heartbeat on close
-      ws.addEventListener('close', () => {
+      ws.addEventListener("close", () => {
         clearInterval(heartbeatInterval);
       });
     } catch (error) {
-      console.error('[AssistantWS] Failed to create WebSocket:', error);
+      console.error("[AssistantWS] Failed to create WebSocket:", error);
     }
   }, [getWsUrl, enabled, assistantId, conversationId]);
 
@@ -210,7 +204,7 @@ export function useAssistantWebSocket({
     }
 
     if (wsRef.current) {
-      wsRef.current.close(1000, 'Client disconnect');
+      wsRef.current.close(1000, "Client disconnect");
       wsRef.current = null;
     }
 
@@ -231,7 +225,6 @@ export function useAssistantWebSocket({
       shouldConnectRef.current = false;
       disconnect();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [assistantId, conversationId, token, enabled]);
 
   return {

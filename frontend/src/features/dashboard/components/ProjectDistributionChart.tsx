@@ -6,37 +6,29 @@
  * Week 6 Dashboard Optimization
  */
 
-import React from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
-import { FolderKanban, Loader2 } from 'lucide-react';
-import { useGetProjectDistributionQuery } from '@/store/api/dashboardApi';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import React from "react";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
+import { FolderKanban, Loader2 } from "lucide-react";
+import { useGetProjectDistributionQuery } from "@/store/api/dashboardApi";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 // Color palette for pie chart segments
 const COLORS = [
-  'hsl(var(--primary))',
-  '#22c55e', // green
-  '#3b82f6', // blue
-  '#f59e0b', // amber
-  '#8b5cf6', // violet
-  '#ec4899', // pink
-  '#06b6d4', // cyan
-  '#f97316', // orange
+  "hsl(var(--primary))",
+  "#22c55e", // green
+  "#3b82f6", // blue
+  "#f59e0b", // amber
+  "#8b5cf6", // violet
+  "#ec4899", // pink
+  "#06b6d4", // cyan
+  "#f97316", // orange
 ];
 
 interface ProjectDistributionChartProps {
   className?: string;
 }
 
-const ProjectDistributionChart: React.FC<ProjectDistributionChartProps> = ({
-  className,
-}) => {
+const ProjectDistributionChart: React.FC<ProjectDistributionChartProps> = ({ className }) => {
   const { data: response, isLoading, error } = useGetProjectDistributionQuery();
 
   const distribution = response?.data || [];
@@ -49,7 +41,13 @@ const ProjectDistributionChart: React.FC<ProjectDistributionChartProps> = ({
     color: COLORS[index % COLORS.length],
   }));
 
-  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: typeof chartData[0] }> }) => {
+  const CustomTooltip = ({
+    active,
+    payload,
+  }: {
+    active?: boolean;
+    payload?: Array<{ payload: (typeof chartData)[0] }>;
+  }) => {
     if (!active || !payload || !payload.length) return null;
 
     const data = payload[0].payload;
@@ -66,21 +64,16 @@ const ProjectDistributionChart: React.FC<ProjectDistributionChartProps> = ({
   const renderLegend = () => {
     return (
       <div className="flex flex-wrap justify-center gap-3 mt-4">
-        {chartData.slice(0, 5).map((entry, index) => (
+        {chartData.slice(0, 5).map((entry, _index) => (
           <div key={entry.name} className="flex items-center gap-1.5">
-            <div
-              className="w-3 h-3 rounded-full"
-              style={{ backgroundColor: entry.color }}
-            />
+            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }} />
             <span className="text-xs text-muted-foreground truncate max-w-[100px]">
               {entry.name}
             </span>
           </div>
         ))}
         {chartData.length > 5 && (
-          <span className="text-xs text-muted-foreground">
-            +{chartData.length - 5} more
-          </span>
+          <span className="text-xs text-muted-foreground">+{chartData.length - 5} more</span>
         )}
       </div>
     );
@@ -93,9 +86,7 @@ const ProjectDistributionChart: React.FC<ProjectDistributionChartProps> = ({
           <FolderKanban className="h-5 w-5" />
           Project Distribution
         </CardTitle>
-        <CardDescription>
-          How documents are distributed across your projects
-        </CardDescription>
+        <CardDescription>How documents are distributed across your projects</CardDescription>
       </CardHeader>
       <CardContent>
         {isLoading ? (
