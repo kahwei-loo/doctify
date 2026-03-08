@@ -5,33 +5,33 @@
  * Provides jsdom environment, path aliases, coverage reporting, and proper test setup.
  */
 
-import { defineConfig } from 'vitest/config';
-import react from '@vitejs/plugin-react';
-import path from 'path';
+import { defineConfig } from "vitest/config";
+import react from "@vitejs/plugin-react";
+import path from "path";
 
 export default defineConfig({
   plugins: [react()],
 
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
-      '@components': path.resolve(__dirname, './src/shared/components'),
-      '@features': path.resolve(__dirname, './src/features'),
-      '@hooks': path.resolve(__dirname, './src/shared/hooks'),
-      '@utils': path.resolve(__dirname, './src/shared/utils'),
-      '@types': path.resolve(__dirname, './src/shared/types'),
-      '@services': path.resolve(__dirname, './src/services'),
-      '@store': path.resolve(__dirname, './src/store'),
-      '@config': path.resolve(__dirname, './src/config'),
+      "@": path.resolve(__dirname, "./src"),
+      "@components": path.resolve(__dirname, "./src/shared/components"),
+      "@features": path.resolve(__dirname, "./src/features"),
+      "@hooks": path.resolve(__dirname, "./src/shared/hooks"),
+      "@utils": path.resolve(__dirname, "./src/shared/utils"),
+      "@types": path.resolve(__dirname, "./src/shared/types"),
+      "@services": path.resolve(__dirname, "./src/services"),
+      "@store": path.resolve(__dirname, "./src/store"),
+      "@config": path.resolve(__dirname, "./src/config"),
     },
   },
 
   test: {
     // Test environment
-    environment: 'jsdom',
+    environment: "jsdom",
 
     // Setup files to run before each test file
-    setupFiles: ['./tests/setup.ts'],
+    setupFiles: ["./tests/setup.ts"],
 
     // Global test timeout (10 seconds)
     testTimeout: 10000,
@@ -40,16 +40,13 @@ export default defineConfig({
     hookTimeout: 10000,
 
     // Include/exclude patterns
-    include: [
-      'tests/**/*.{test,spec}.{ts,tsx}',
-      'src/**/*.{test,spec}.{ts,tsx}',
-    ],
+    include: ["tests/**/*.{test,spec}.{ts,tsx}", "src/**/*.{test,spec}.{ts,tsx}"],
     exclude: [
-      'node_modules',
-      'dist',
-      'e2e/**/*',
-      'tests/e2e/**/*',
-      '**/*.e2e.{test,spec}.{ts,tsx}',
+      "node_modules",
+      "dist",
+      "e2e/**/*",
+      "tests/e2e/**/*",
+      "**/*.e2e.{test,spec}.{ts,tsx}",
     ],
 
     // Enable globals (describe, it, expect, etc.)
@@ -61,34 +58,34 @@ export default defineConfig({
     },
 
     // Reporter configuration
-    reporters: ['verbose'],
+    reporters: ["verbose"],
 
     // Coverage configuration
     coverage: {
       // Coverage provider
-      provider: 'v8',
+      provider: "v8",
 
       // Coverage reporters
-      reporter: ['text', 'text-summary', 'json', 'html', 'lcov'],
+      reporter: ["text", "text-summary", "json", "html", "lcov"],
 
       // Coverage output directory
-      reportsDirectory: './coverage',
+      reportsDirectory: "./coverage",
 
       // Include patterns for coverage
-      include: ['src/**/*.{ts,tsx}'],
+      include: ["src/**/*.{ts,tsx}"],
 
       // Exclude patterns from coverage
       exclude: [
-        'src/**/*.d.ts',
-        'src/**/*.test.{ts,tsx}',
-        'src/**/*.spec.{ts,tsx}',
-        'src/main.tsx',
-        'src/vite-env.d.ts',
-        'src/**/__mocks__/**',
-        'src/**/__tests__/**',
-        'src/**/types/**',
-        'src/**/constants/**',
-        'node_modules/**',
+        "src/**/*.d.ts",
+        "src/**/*.test.{ts,tsx}",
+        "src/**/*.spec.{ts,tsx}",
+        "src/main.tsx",
+        "src/vite-env.d.ts",
+        "src/**/__mocks__/**",
+        "src/**/__tests__/**",
+        "src/**/types/**",
+        "src/**/constants/**",
+        "node_modules/**",
       ],
 
       // Coverage thresholds (target: 70%)
@@ -110,10 +107,10 @@ export default defineConfig({
 
     // Watch configuration — disabled in CI so the process exits after tests complete
     watch: !process.env.CI,
-    watchExclude: ['node_modules', 'dist'],
+    watchExclude: ["node_modules", "dist"],
 
     // Thread configuration for performance
-    pool: 'threads',
+    pool: "threads",
     poolOptions: {
       threads: {
         singleThread: false,
@@ -149,7 +146,7 @@ export default defineConfig({
     server: {
       deps: {
         // Inline modules that need transformation
-        inline: ['@testing-library/react'],
+        inline: ["@testing-library/react"],
       },
     },
   },
