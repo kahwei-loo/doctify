@@ -25,6 +25,11 @@ const MainLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-muted/30">
+      {/* Skip to main content link for accessibility */}
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
+
       {/* Global Command Palette (Cmd+K / Ctrl+K) */}
       <CommandPalette />
 
@@ -39,6 +44,7 @@ const MainLayout: React.FC = () => {
 
       {/* Main content area */}
       <main
+        id="main-content"
         className={cn("transition-all duration-300 ease-in-out", "min-h-screen bg-background")}
         style={{
           marginLeft: currentSidebarWidth,

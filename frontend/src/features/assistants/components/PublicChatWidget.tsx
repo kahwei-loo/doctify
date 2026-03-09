@@ -205,6 +205,7 @@ export const PublicChatWidget: React.FC<PublicChatWidgetProps> = ({
                 size="icon"
                 className="h-8 w-8 text-white hover:bg-white/20"
                 onClick={() => setIsMinimized(!isMinimized)}
+                aria-label={isMinimized ? "Maximize chat window" : "Minimize chat window"}
               >
                 {isMinimized ? (
                   <Maximize2 className="h-4 w-4" />
@@ -217,6 +218,7 @@ export const PublicChatWidget: React.FC<PublicChatWidgetProps> = ({
                 size="icon"
                 className="h-8 w-8 text-white hover:bg-white/20"
                 onClick={() => setIsOpen(false)}
+                aria-label="Close chat window"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -344,12 +346,14 @@ export const PublicChatWidget: React.FC<PublicChatWidgetProps> = ({
                     onKeyDown={handleKeyDown}
                     disabled={isSending || isRateLimited}
                     className="min-h-[44px] max-h-[100px] resize-none text-sm"
+                    aria-label="Message input"
                     rows={1}
                   />
                   <Button
                     onClick={handleSendMessage}
                     disabled={!messageInput.trim() || isSending || isRateLimited}
                     size="icon"
+                    aria-label="Send message"
                     className="self-end h-[44px] w-[44px]"
                     style={{ backgroundColor: primaryColor }}
                   >

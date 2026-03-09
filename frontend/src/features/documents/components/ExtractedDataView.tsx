@@ -155,8 +155,9 @@ const BusinessField: React.FC<{
             <Button
               variant="ghost"
               size="icon"
-              className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+              className="h-6 w-6 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity flex-shrink-0"
               onClick={copyValue}
+              aria-label="Copy value"
             >
               {copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
             </Button>
@@ -378,7 +379,8 @@ export const ExtractedDataView: React.FC<ExtractedDataViewProps> = ({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="h-7 w-7 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
+                    aria-label="Copy line items"
                     onClick={(e) => {
                       e.stopPropagation();
                       // Copy line items as TSV
@@ -401,7 +403,8 @@ export const ExtractedDataView: React.FC<ExtractedDataViewProps> = ({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="h-7 w-7 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
+                    aria-label="Export line items"
                     onClick={(e) => {
                       e.stopPropagation();
                       // Export functionality would go here

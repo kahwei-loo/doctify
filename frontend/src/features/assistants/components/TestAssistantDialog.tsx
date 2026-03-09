@@ -189,11 +189,12 @@ export const TestAssistantDialog: React.FC<TestAssistantDialogProps> = ({
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Type a message..."
+              aria-label="Message input"
               rows={1}
               className="flex-1 resize-none rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               disabled={isSending}
             />
-            <Button onClick={handleSend} disabled={!input.trim() || isSending} size="icon">
+            <Button onClick={handleSend} disabled={!input.trim() || isSending} size="icon" aria-label="Send message">
               <Send className="h-4 w-4" />
             </Button>
           </div>

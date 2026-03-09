@@ -73,12 +73,21 @@ export const SourceCard: React.FC<SourceCardProps> = ({
 
   return (
     <div
+      role="button"
+      tabIndex={0}
       className={cn(
         "group relative rounded-lg border border-l-4 p-3 cursor-pointer transition-all hover:shadow-sm hover:bg-accent/50",
         config.borderColor,
         isSelected && "ring-2 ring-primary/50 bg-accent/50"
       )}
       onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick?.();
+        }
+      }}
+      aria-label={`${source.name} - ${config.label}`}
     >
       <div className="flex items-start justify-between gap-2">
         {/* Left: Icon + Name + Type */}
@@ -118,8 +127,9 @@ export const SourceCard: React.FC<SourceCardProps> = ({
             <Button
               variant="ghost"
               size="icon"
-              className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+              className="h-6 w-6 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity shrink-0"
               onClick={(e) => e.stopPropagation()}
+              aria-label="Source options"
             >
               <MoreVertical className="h-3.5 w-3.5" />
             </Button>

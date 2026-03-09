@@ -54,7 +54,17 @@ export const ProjectPanelItem: React.FC<ProjectPanelItemProps> = ({
 
   return (
     <div
+      role="button"
+      tabIndex={0}
       onClick={() => onSelect(projectId)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onSelect(projectId);
+        }
+      }}
+      aria-label={`Project: ${name}`}
+      aria-selected={isSelected}
       className={cn(
         "group flex items-center gap-3 px-3 py-2.5 rounded-2xl cursor-pointer transition-all",
         isSelected ? "bg-primary/10 text-primary shadow-sm" : "hover:bg-muted/50 text-foreground"

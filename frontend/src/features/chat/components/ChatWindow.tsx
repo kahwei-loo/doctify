@@ -140,6 +140,7 @@ export function ChatWindow({ conversationId, initialMessages = [] }: ChatWindowP
             <Button
               type="submit"
               size="icon"
+              aria-label="Send message"
               disabled={isSending || !input.trim() || (!isConnected && !isDemoMode)}
             >
               {isSending ? (

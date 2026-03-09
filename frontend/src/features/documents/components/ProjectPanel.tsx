@@ -271,7 +271,17 @@ export const ProjectPanel: React.FC<ProjectPanelProps> = ({
             {/* All Projects Option - Visually separated */}
             <div className="px-2 pt-2 pb-3 border-b">
               <div
+                role="button"
+                tabIndex={0}
                 onClick={handleSelectAll}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    handleSelectAll();
+                  }
+                }}
+                aria-label="All Projects"
+                aria-selected={selectedProjectId === null}
                 className={cn(
                   "flex items-center justify-between px-3 py-2.5 rounded-2xl cursor-pointer transition-all",
                   selectedProjectId === null
