@@ -60,6 +60,7 @@ export function ChatWindow({ conversationId, initialMessages = [] }: ChatWindowP
   const { isConnected, isSending, sendMessage } = useChatWebSocket({
     conversationId,
     onChunk: handleChunk,
+    enabled: !isDemoMode,
   });
 
   useEffect(() => {

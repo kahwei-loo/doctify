@@ -16,9 +16,10 @@ interface UseChatWebSocketOptions {
   conversationId: string;
   onChunk: (chunk: StreamChunk) => void;
   token?: string;
+  enabled?: boolean;
 }
 
-export function useChatWebSocket({ conversationId, onChunk, token }: UseChatWebSocketOptions) {
+export function useChatWebSocket({ conversationId, onChunk, token, enabled = true }: UseChatWebSocketOptions) {
   const ws = useRef<WebSocket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [isSending, setIsSending] = useState(false);
@@ -32,6 +33,8 @@ export function useChatWebSocket({ conversationId, onChunk, token }: UseChatWebS
   }, [onChunk]);
 
   useEffect(() => {
+    if (!enabled) return;
+
     // Use environment variable for WebSocket URL
     const wsBaseUrl = import.meta.env.VITE_WS_BASE_URL || "ws://localhost:50080";
     const wsUrl = `${wsBaseUrl}/api/v1/chat/ws/${conversationId}${token ? `?token=${token}` : ""}`;
@@ -78,7 +81,7 @@ export function useChatWebSocket({ conversationId, onChunk, token }: UseChatWebS
       cancelled = true; // Mark as cancelled to ignore all pending callbacks
       ws.current?.close();
     };
-  }, [conversationId, token]); // Removed onChunk from dependencies
+  }, [conversationId, token, enabled]); // Removed onChunk from dependencies
 
   const sendMessage = useCallback((message: string) => {
     if (ws.current?.readyState === WebSocket.OPEN && message.trim()) {
