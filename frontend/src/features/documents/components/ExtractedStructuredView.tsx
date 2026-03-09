@@ -160,7 +160,7 @@ const StructuredField: React.FC<{
       </div>
 
       {!editable && displayValue && displayValue !== "-" && (
-        <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0" onClick={copyValue}>
+        <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0" onClick={copyValue} aria-label="Copy value">
           {copied ? (
             <Check className="h-3.5 w-3.5 text-green-500" />
           ) : (

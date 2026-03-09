@@ -75,6 +75,12 @@ export default {
           "Segoe UI",
           "sans-serif",
         ],
+        mono: [
+          "JetBrains Mono",
+          "ui-monospace",
+          "SFMono-Regular",
+          "monospace",
+        ],
       },
       keyframes: {
         "accordion-down": {

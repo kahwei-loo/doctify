@@ -167,6 +167,7 @@ export const DocumentSplitView: React.FC<DocumentSplitViewProps> = ({
                             size="icon"
                             className="h-7 w-7"
                             onClick={handleCollapseLeft}
+                            aria-label="Collapse left panel"
                           >
                             <PanelLeftClose className="h-4 w-4" />
                           </Button>
@@ -184,6 +185,7 @@ export const DocumentSplitView: React.FC<DocumentSplitViewProps> = ({
                             size="icon"
                             className="h-7 w-7"
                             onClick={handleCollapseLeft}
+                            aria-label="Expand left panel"
                           >
                             <Maximize2 className="h-4 w-4" />
                           </Button>
@@ -225,6 +227,7 @@ export const DocumentSplitView: React.FC<DocumentSplitViewProps> = ({
                             size="icon"
                             className="h-7 w-7"
                             onClick={handleCollapseRight}
+                            aria-label="Collapse right panel"
                           >
                             <PanelRightClose className="h-4 w-4" />
                           </Button>
@@ -242,6 +245,7 @@ export const DocumentSplitView: React.FC<DocumentSplitViewProps> = ({
                             size="icon"
                             className="h-7 w-7"
                             onClick={handleCollapseRight}
+                            aria-label="Expand right panel"
                           >
                             <Maximize2 className="h-4 w-4" />
                           </Button>

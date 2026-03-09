@@ -84,7 +84,7 @@ const StatCardWithTrend: React.FC<StatCardWithTrendProps> = ({
               <div className="h-9 w-16 bg-muted animate-pulse rounded mt-1" />
             ) : (
               <div className="flex items-center gap-2 mt-1">
-                <p className="text-3xl font-bold">{value}</p>
+                <p className="text-3xl font-bold tabular-nums">{value}</p>
                 {trend && trend.percent !== 0 && (
                   <span
                     className={cn(

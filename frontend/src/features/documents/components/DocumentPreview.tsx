@@ -201,6 +201,7 @@ const PDFPreview: React.FC<{
               className="h-8 w-8"
               onClick={prevPage}
               disabled={pageNumber <= 1}
+              aria-label="Previous page"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -212,6 +213,7 @@ const PDFPreview: React.FC<{
                 onBlur={handlePageInputBlur}
                 onKeyDown={handlePageInputKeyDown}
                 className="h-8 w-12 text-center text-sm"
+                aria-label="Page number"
               />
               <span className="text-sm text-muted-foreground">/ {numPages || "?"}</span>
             </div>
@@ -221,6 +223,7 @@ const PDFPreview: React.FC<{
               className="h-8 w-8"
               onClick={nextPage}
               disabled={!numPages || pageNumber >= numPages}
+              aria-label="Next page"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -237,6 +240,7 @@ const PDFPreview: React.FC<{
                     className="h-8 w-8"
                     onClick={zoomOut}
                     disabled={scale <= 0.5}
+                    aria-label="Zoom out"
                   >
                     <ZoomOut className="h-4 w-4" />
                   </Button>
@@ -258,6 +262,7 @@ const PDFPreview: React.FC<{
                     className="h-8 w-8"
                     onClick={zoomIn}
                     disabled={scale >= 3}
+                    aria-label="Zoom in"
                   >
                     <ZoomIn className="h-4 w-4" />
                   </Button>
@@ -271,7 +276,7 @@ const PDFPreview: React.FC<{
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={rotate}>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={rotate} aria-label="Rotate">
                     <RotateCw className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
@@ -283,7 +288,7 @@ const PDFPreview: React.FC<{
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onDownload}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onDownload} aria-label="Download document">
                       <Download className="h-4 w-4" />
                     </Button>
                   </TooltipTrigger>
@@ -409,6 +414,7 @@ const ImagePreview: React.FC<{
                     className="h-8 w-8"
                     onClick={zoomOut}
                     disabled={scale <= 0.25}
+                    aria-label="Zoom out"
                   >
                     <ZoomOut className="h-4 w-4" />
                   </Button>
@@ -430,6 +436,7 @@ const ImagePreview: React.FC<{
                     className="h-8 w-8"
                     onClick={zoomIn}
                     disabled={scale >= 3}
+                    aria-label="Zoom in"
                   >
                     <ZoomIn className="h-4 w-4" />
                   </Button>
@@ -443,7 +450,7 @@ const ImagePreview: React.FC<{
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={rotate}>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={rotate} aria-label="Rotate">
                     <RotateCw className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
@@ -455,7 +462,7 @@ const ImagePreview: React.FC<{
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onDownload}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onDownload} aria-label="Download document">
                       <Download className="h-4 w-4" />
                     </Button>
                   </TooltipTrigger>
