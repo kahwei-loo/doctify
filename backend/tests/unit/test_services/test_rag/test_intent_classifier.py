@@ -23,12 +23,14 @@ def _make_function_call_response(
     reasoning: str = "Test reasoning",
 ):
     """Helper to create a mock OpenAI function call response."""
-    args = json.dumps({
-        "intent": intent,
-        "confidence": confidence,
-        "dataset_id": dataset_id,
-        "reasoning": reasoning,
-    })
+    args = json.dumps(
+        {
+            "intent": intent,
+            "confidence": confidence,
+            "dataset_id": dataset_id,
+            "reasoning": reasoning,
+        }
+    )
     mock_response = MagicMock()
     mock_response.choices = [MagicMock()]
     mock_response.choices[0].message.function_call = MagicMock()
@@ -233,9 +235,7 @@ class TestIntentClassifier:
             new_callable=AsyncMock,
             return_value=mock_resp,
         ):
-            result = await classifier.classify(
-                "按产品类别统计总收入", data_sources
-            )
+            result = await classifier.classify("按产品类别统计总收入", data_sources)
             assert result.intent == IntentType.ANALYTICS
             assert result.confidence >= 0.9
 
@@ -254,9 +254,7 @@ class TestIntentClassifier:
             new_callable=AsyncMock,
             return_value=mock_resp,
         ):
-            result = await classifier.classify(
-                "什么是退货政策？", data_sources
-            )
+            result = await classifier.classify("什么是退货政策？", data_sources)
             assert result.intent == IntentType.RAG
 
     async def test_classify_mixed_language_query(self, classifier):
