@@ -97,7 +97,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onTryDemo }) => {
           {/* Left: Text content */}
           <motion.div initial="hidden" animate="visible" variants={staggerContainer}>
             <motion.div variants={blurFadeUp} className="mb-6">
-              <span className="glass-card inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm text-muted-foreground">
+              <span className="glass-card inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-mono text-muted-foreground">
                 <Sparkles className="h-3.5 w-3.5 text-landing-accent" />
                 AI-Powered Document Intelligence
               </span>
@@ -105,7 +105,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onTryDemo }) => {
 
             <motion.h1
               variants={blurFadeUp}
-              className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl leading-[1.1]"
+              className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl leading-[1.1] text-balance"
             >
               Turn Documents into{" "}
               <span className="bg-gradient-to-r from-landing-accent via-landing-teal to-landing-rose bg-clip-text text-transparent">
@@ -115,7 +115,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onTryDemo }) => {
 
             <motion.p
               variants={blurFadeUp}
-              className="mt-6 max-w-lg text-lg text-muted-foreground/80 leading-relaxed"
+              className="mt-6 max-w-lg text-lg text-muted-foreground/80 leading-relaxed text-pretty"
             >
               Upload documents, extract data with multi-provider AI, organize into knowledge bases,
               and ask questions with RAG-powered answers grounded in your sources.
