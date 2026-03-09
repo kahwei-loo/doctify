@@ -19,14 +19,17 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 // Supported file types and their MIME types
+// Must match backend ALLOWED_EXTENSIONS in services/document/upload.py
 const ACCEPTED_FILE_TYPES = {
   "application/pdf": [".pdf"],
   "image/png": [".png"],
   "image/jpeg": [".jpg", ".jpeg"],
-  "text/plain": [".txt"],
-  "text/markdown": [".md"],
-  "text/csv": [".csv"],
-  "application/json": [".json"],
+  "image/tiff": [".tiff"],
+  "image/bmp": [".bmp"],
+  "application/msword": [".doc"],
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
+  "application/vnd.ms-excel": [".xls"],
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
 };
 
 // Max file size: 10MB
@@ -120,7 +123,7 @@ export const DocumentUploadZone: React.FC<DocumentUploadZoneProps> = ({
                 : "Drop files here"
               : "Drag & drop files"}
           </p>
-          <p className="text-xs text-muted-foreground">PDF, TXT, MD, CSV, PNG, JPG up to 10MB</p>
+          <p className="text-xs text-muted-foreground">PDF, DOC, DOCX, XLS, XLSX, PNG, JPG up to 10MB</p>
         </div>
         <Button type="button" variant="outline" size="sm" onClick={open} disabled={disabled}>
           Browse
@@ -180,15 +183,11 @@ export const DocumentUploadZone: React.FC<DocumentUploadZoneProps> = ({
         </div>
         <div className="flex items-center gap-1.5 text-muted-foreground">
           <FileText className="h-4 w-4" />
-          <span className="text-xs">TXT</span>
+          <span className="text-xs">DOC/DOCX</span>
         </div>
         <div className="flex items-center gap-1.5 text-muted-foreground">
           <FileText className="h-4 w-4" />
-          <span className="text-xs">MD</span>
-        </div>
-        <div className="flex items-center gap-1.5 text-muted-foreground">
-          <FileText className="h-4 w-4" />
-          <span className="text-xs">CSV</span>
+          <span className="text-xs">XLS/XLSX</span>
         </div>
         <div className="flex items-center gap-1.5 text-muted-foreground">
           <Image className="h-4 w-4" />

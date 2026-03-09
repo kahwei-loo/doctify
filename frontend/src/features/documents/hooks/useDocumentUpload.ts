@@ -98,7 +98,13 @@ export const useDocumentUpload = (): UseDocumentUploadReturn => {
 
         return response;
       } catch (err: any) {
-        const errorMessage = err.response?.data?.detail || "Upload failed";
+        const rawDetail = err.response?.data?.detail;
+        let errorMessage = "Upload failed";
+        if (typeof rawDetail === "string") {
+          errorMessage = rawDetail;
+        } else if (Array.isArray(rawDetail) && rawDetail.length > 0) {
+          errorMessage = rawDetail[0]?.msg || "Validation error";
+        }
 
         // Update to error status
         updateUploadProgress(fileId, {

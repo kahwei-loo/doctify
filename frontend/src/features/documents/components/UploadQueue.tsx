@@ -134,7 +134,7 @@ const UploadQueueItem: React.FC<{
             {status === "uploading" && `${progress}%`}
             {status === "completed" && "Uploaded"}
             {status === "pending" && "Waiting..."}
-            {status === "error" && (error || "Failed")}
+            {status === "error" && (typeof error === "string" ? error : "Upload failed")}
           </span>
         </div>
       </div>
