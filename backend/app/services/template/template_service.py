@@ -196,7 +196,11 @@ class TemplateService:
 
         for field, value in update_data.items():
             if field == "extraction_config" and value is not None:
-                setattr(template, field, value.model_dump() if hasattr(value, 'model_dump') else value)
+                setattr(
+                    template,
+                    field,
+                    value.model_dump() if hasattr(value, "model_dump") else value,
+                )
             else:
                 setattr(template, field, value)
 

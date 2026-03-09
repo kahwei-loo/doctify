@@ -16,7 +16,10 @@ from app.services.ai import get_ai_gateway, ModelPurpose
 from app.services.rag.retrieval_service import RetrievalService
 from app.services.rag.embedding_service import EmbeddingService
 from app.services.rag.security import RAGSecurityValidator
-from app.services.rag.groundedness_service import GroundednessService, GroundednessResult
+from app.services.rag.groundedness_service import (
+    GroundednessService,
+    GroundednessResult,
+)
 from app.services.rag.cache_service import SemanticCacheService, CachedRAGResponse
 from app.core.exceptions import ValidationError, DatabaseError
 
@@ -24,6 +27,7 @@ from app.core.exceptions import ValidationError, DatabaseError
 @dataclass
 class RAGResponse:
     """RAG generation response with metadata."""
+
     answer: str
     sources: List[Dict[str, Any]]
     model_used: str
@@ -57,9 +61,7 @@ class GenerationService:
         self.gateway = get_ai_gateway()
 
     def _build_rag_prompt(
-        self,
-        question: str,
-        context_chunks: List[Dict[str, Any]]
+        self, question: str, context_chunks: List[Dict[str, Any]]
     ) -> str:
         """
         Build RAG prompt with retrieved context.
@@ -156,7 +158,9 @@ ANSWER:"""
             question_embedding: Optional[List[float]] = None
             if user_id:
                 try:
-                    question_embedding = await self.embedding_service.generate_embedding(question)
+                    question_embedding = (
+                        await self.embedding_service.generate_embedding(question)
+                    )
                     cached = await self.cache_service.get_cached(
                         question=question,
                         embedding=question_embedding,
@@ -197,7 +201,7 @@ ANSWER:"""
                     model_used="none",
                     tokens_used=0,
                     confidence_score=0.0,
-                    context_used=0
+                    context_used=0,
                 )
 
             # Step 2: Build prompt
@@ -210,12 +214,9 @@ ANSWER:"""
                     messages=[
                         {
                             "role": "system",
-                            "content": "You are a helpful document assistant that provides accurate answers based on document context."
+                            "content": "You are a helpful document assistant that provides accurate answers based on document context.",
                         },
-                        {
-                            "role": "user",
-                            "content": prompt
-                        }
+                        {"role": "user", "content": prompt},
                     ],
                     temperature=0.3,  # Lower temperature for more factual responses
                     max_tokens=1000,
@@ -235,14 +236,19 @@ ANSWER:"""
                         response = await self.gateway.acompletion(
                             model=fallback_model,
                             messages=[
-                                {"role": "system", "content": "You are a helpful document assistant."},
-                                {"role": "user", "content": prompt}
+                                {
+                                    "role": "system",
+                                    "content": "You are a helpful document assistant.",
+                                },
+                                {"role": "user", "content": prompt},
                             ],
                             temperature=0.3,
                             max_tokens=1000,
                         )
                         answer_text = response.choices[0].message.content or ""
-                        tokens_used = response.usage.total_tokens if response.usage else 0
+                        tokens_used = (
+                            response.usage.total_tokens if response.usage else 0
+                        )
                         model_to_use = fallback_model
                     except Exception:
                         raise DatabaseError(f"LLM generation failed: {str(llm_error)}")
@@ -250,8 +256,12 @@ ANSWER:"""
                     raise DatabaseError(f"LLM generation failed: {str(llm_error)}")
 
             # Step 4: Calculate confidence score based on source relevance
-            avg_similarity = sum(c["similarity_score"] for c in context_chunks) / len(context_chunks)
-            confidence_score = min(avg_similarity * 1.1, 1.0)  # Slight boost, capped at 1.0
+            avg_similarity = sum(c["similarity_score"] for c in context_chunks) / len(
+                context_chunks
+            )
+            confidence_score = min(
+                avg_similarity * 1.1, 1.0
+            )  # Slight boost, capped at 1.0
 
             # Step 5: Groundedness check (P2.2)
             groundedness_result: Optional[GroundednessResult] = None
@@ -277,8 +287,16 @@ ANSWER:"""
                             tokens_used=tokens_used,
                             confidence_score=round(confidence_score, 3),
                             context_used=len(context_chunks),
-                            groundedness_score=groundedness_result.score if groundedness_result else None,
-                            unsupported_claims=groundedness_result.unsupported_claims if groundedness_result else None,
+                            groundedness_score=(
+                                groundedness_result.score
+                                if groundedness_result
+                                else None
+                            ),
+                            unsupported_claims=(
+                                groundedness_result.unsupported_claims
+                                if groundedness_result
+                                else None
+                            ),
                         ),
                         user_id=str(user_id),
                     )
@@ -293,8 +311,14 @@ ANSWER:"""
                 tokens_used=tokens_used,
                 confidence_score=round(confidence_score, 3),
                 context_used=len(context_chunks),
-                groundedness_score=groundedness_result.score if groundedness_result else None,
-                unsupported_claims=groundedness_result.unsupported_claims if groundedness_result else None,
+                groundedness_score=(
+                    groundedness_result.score if groundedness_result else None
+                ),
+                unsupported_claims=(
+                    groundedness_result.unsupported_claims
+                    if groundedness_result
+                    else None
+                ),
             )
 
         except Exception as e:
@@ -358,9 +382,16 @@ ANSWER:"""
             yield f"data: {json.dumps({'type': 'sources', 'data': context_chunks})}\n\n"
 
             if not context_chunks:
-                no_docs_msg = "I don't have any relevant documents to answer this question."
+                no_docs_msg = (
+                    "I don't have any relevant documents to answer this question."
+                )
                 yield f"data: {json.dumps({'type': 'token', 'data': no_docs_msg})}\n\n"
-                done_data = {'model_used': 'none', 'tokens_used': 0, 'confidence_score': 0.0, 'context_used': 0}
+                done_data = {
+                    "model_used": "none",
+                    "tokens_used": 0,
+                    "confidence_score": 0.0,
+                    "context_used": 0,
+                }
                 yield f"data: {json.dumps({'type': 'done', 'data': done_data})}\n\n"
                 return
 
@@ -393,7 +424,9 @@ ANSWER:"""
             full_answer = self.security_validator.sanitize_llm_output(full_answer)
 
             # Step 4: Calculate confidence
-            avg_similarity = sum(c["similarity_score"] for c in context_chunks) / len(context_chunks)
+            avg_similarity = sum(c["similarity_score"] for c in context_chunks) / len(
+                context_chunks
+            )
             confidence_score = min(avg_similarity * 1.1, 1.0)
 
             # Step 5: Emit done signal with metadata
@@ -437,7 +470,10 @@ Rewrite the follow-up as a standalone question (output ONLY the rewritten questi
             response = await self.gateway.acompletion(
                 purpose=ModelPurpose.CHAT_FAST,
                 messages=[
-                    {"role": "system", "content": "You rewrite follow-up questions into standalone questions."},
+                    {
+                        "role": "system",
+                        "content": "You rewrite follow-up questions into standalone questions.",
+                    },
                     {"role": "user", "content": rewrite_prompt},
                 ],
                 temperature=0.0,

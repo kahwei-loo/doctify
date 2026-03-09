@@ -202,9 +202,9 @@ class DocumentDimensions:
             "unit": self.unit,
             "aspect_ratio": self.get_aspect_ratio(),
             "orientation": (
-                "portrait" if self.is_portrait()
-                else "landscape" if self.is_landscape()
-                else "square"
+                "portrait"
+                if self.is_portrait()
+                else "landscape" if self.is_landscape() else "square"
             ),
         }
 

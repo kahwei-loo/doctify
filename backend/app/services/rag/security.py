@@ -24,24 +24,24 @@ class RAGSecurityValidator:
 
     # Patterns that indicate potential prompt injection
     FORBIDDEN_PATTERNS = [
-        r'ignore\s+(previous|above|all)\s+instructions?',
-        r'system\s+prompt',
-        r'act\s+as\s+if',
-        r'pretend\s+you\s+are',
-        r'you\s+are\s+now',
-        r'disregard\s+(previous|all|above)',
-        r'forget\s+(everything|all|previous)',
-        r'new\s+instructions?',
+        r"ignore\s+(previous|above|all)\s+instructions?",
+        r"system\s+prompt",
+        r"act\s+as\s+if",
+        r"pretend\s+you\s+are",
+        r"you\s+are\s+now",
+        r"disregard\s+(previous|all|above)",
+        r"forget\s+(everything|all|previous)",
+        r"new\s+instructions?",
     ]
 
     # PII patterns to redact before embedding
     PII_PATTERNS = {
-        'email': r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b',
-        'ssn': r'\b\d{3}-\d{2}-\d{4}\b',
-        'phone': r'\b\d{3}[-.]?\d{3}[-.]?\d{4}\b',
-        'credit_card': r'\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b',
-        'nric_sg': r'\b[STFG]\d{7}[A-Z]\b',  # Singapore NRIC
-        'nric_my': r'\b\d{6}-\d{2}-\d{4}\b',  # Malaysia IC
+        "email": r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b",
+        "ssn": r"\b\d{3}-\d{2}-\d{4}\b",
+        "phone": r"\b\d{3}[-.]?\d{3}[-.]?\d{4}\b",
+        "credit_card": r"\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b",
+        "nric_sg": r"\b[STFG]\d{7}[A-Z]\b",  # Singapore NRIC
+        "nric_my": r"\b\d{6}-\d{2}-\d{4}\b",  # Malaysia IC
     }
 
     def validate_query_safety(self, query: str) -> bool:
@@ -75,11 +75,7 @@ class RAGSecurityValidator:
 
         return True
 
-    def sanitize_text_before_embedding(
-        self,
-        text: str,
-        redact_pii: bool = True
-    ) -> str:
+    def sanitize_text_before_embedding(self, text: str, redact_pii: bool = True) -> str:
         """
         Sanitize text before generating embeddings.
 
@@ -100,11 +96,7 @@ class RAGSecurityValidator:
         # Redact PII if enabled
         if redact_pii:
             for pii_type, pattern in self.PII_PATTERNS.items():
-                sanitized = re.sub(
-                    pattern,
-                    f'[{pii_type.upper()}_REDACTED]',
-                    sanitized
-                )
+                sanitized = re.sub(pattern, f"[{pii_type.upper()}_REDACTED]", sanitized)
 
         return sanitized
 
@@ -124,11 +116,7 @@ class RAGSecurityValidator:
             return ""
 
         # Remove all HTML tags and attributes
-        sanitized = bleach.clean(
-            text,
-            tags=[],  # No tags allowed
-            strip=True
-        )
+        sanitized = bleach.clean(text, tags=[], strip=True)  # No tags allowed
 
         return sanitized
 
@@ -136,7 +124,7 @@ class RAGSecurityValidator:
         self,
         text: str,
         min_length: int = 10,
-        max_length: int = 10_000_000  # 10MB worth of text
+        max_length: int = 10_000_000,  # 10MB worth of text
     ) -> bool:
         """
         Validate document text before processing.
@@ -170,9 +158,7 @@ class RAGSecurityValidator:
         return True
 
     def check_content_appropriateness(
-        self,
-        text: str,
-        strict: bool = False
+        self, text: str, strict: bool = False
     ) -> tuple[bool, Optional[str]]:
         """
         Check if content is appropriate for processing.
@@ -192,9 +178,9 @@ class RAGSecurityValidator:
         # Basic checks for obviously inappropriate content
         # Add more sophisticated checks if needed
         inappropriate_indicators = [
-            r'<script',  # HTML injection
-            r'javascript:',  # XSS attempts
-            r'data:text/html',  # Data URI XSS
+            r"<script",  # HTML injection
+            r"javascript:",  # XSS attempts
+            r"data:text/html",  # Data URI XSS
         ]
 
         text_lower = text.lower()
@@ -227,9 +213,7 @@ class RAGRateLimiter:
         self.redis_client = redis_client
 
     async def check_embedding_quota(
-        self,
-        user_id: str,
-        chunks_to_embed: int
+        self, user_id: str, chunks_to_embed: int
     ) -> tuple[bool, Optional[str]]:
         """
         Check if user has quota for embedding generation.
@@ -245,10 +229,7 @@ class RAGRateLimiter:
         # For now, just return True (implement Redis integration later)
         return True, None
 
-    async def check_query_quota(
-        self,
-        user_id: str
-    ) -> tuple[bool, Optional[str]]:
+    async def check_query_quota(self, user_id: str) -> tuple[bool, Optional[str]]:
         """
         Check if user has quota for RAG queries.
 

@@ -15,6 +15,7 @@ from app.services.ai import get_ai_gateway, ModelPurpose
 @dataclass
 class GroundednessResult:
     """Result of groundedness evaluation."""
+
     score: float  # 0.0 - 1.0
     unsupported_claims: List[str]
 

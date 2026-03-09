@@ -31,6 +31,7 @@ settings = get_settings()
 # SQLAlchemy Base Model
 # =============================================================================
 
+
 class Base(DeclarativeBase):
     """
     Base class for all SQLAlchemy ORM models.
@@ -38,6 +39,7 @@ class Base(DeclarativeBase):
     All models should inherit from this class to be included
     in Alembic migrations and database operations.
     """
+
     pass
 
 
@@ -63,9 +65,7 @@ def get_engine() -> AsyncEngine:
         RuntimeError: If engine is not initialized
     """
     if _engine is None:
-        raise RuntimeError(
-            "Database engine not initialized. Call init_db() first."
-        )
+        raise RuntimeError("Database engine not initialized. Call init_db() first.")
     return _engine
 
 
@@ -80,15 +80,14 @@ def get_session_factory() -> async_sessionmaker[AsyncSession]:
         RuntimeError: If session factory is not initialized
     """
     if _async_session_factory is None:
-        raise RuntimeError(
-            "Session factory not initialized. Call init_db() first."
-        )
+        raise RuntimeError("Session factory not initialized. Call init_db() first.")
     return _async_session_factory
 
 
 # =============================================================================
 # Database Initialization and Shutdown
 # =============================================================================
+
 
 async def init_db() -> None:
     """
@@ -204,6 +203,7 @@ async def check_db_health() -> dict:
 # Dependency Injection for FastAPI
 # =============================================================================
 
+
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """
     FastAPI dependency that provides a database session.
@@ -264,6 +264,7 @@ async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
 # =============================================================================
 # Utility Functions
 # =============================================================================
+
 
 async def create_all_tables() -> None:
     """

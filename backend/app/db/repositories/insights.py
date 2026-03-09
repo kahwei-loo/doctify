@@ -79,7 +79,9 @@ class InsightsDatasetRepository(BaseRepository[InsightsDataset]):
             DatabaseError: If database operation fails
         """
         try:
-            dataset_uuid = uuid.UUID(dataset_id) if isinstance(dataset_id, str) else dataset_id
+            dataset_uuid = (
+                uuid.UUID(dataset_id) if isinstance(dataset_id, str) else dataset_id
+            )
             user_uuid = uuid.UUID(user_id) if isinstance(user_id, str) else user_id
 
             stmt = select(InsightsDataset).where(
@@ -205,7 +207,9 @@ class InsightsConversationRepository(BaseRepository[InsightsConversation]):
         Raises:
             DatabaseError: If database operation fails
         """
-        filters = {"user_id": uuid.UUID(user_id) if isinstance(user_id, str) else user_id}
+        filters = {
+            "user_id": uuid.UUID(user_id) if isinstance(user_id, str) else user_id
+        }
 
         return await self.list(
             filters=filters,
@@ -238,7 +242,9 @@ class InsightsConversationRepository(BaseRepository[InsightsConversation]):
             DatabaseError: If database operation fails
         """
         try:
-            dataset_uuid = uuid.UUID(dataset_id) if isinstance(dataset_id, str) else dataset_id
+            dataset_uuid = (
+                uuid.UUID(dataset_id) if isinstance(dataset_id, str) else dataset_id
+            )
             user_uuid = uuid.UUID(user_id) if isinstance(user_id, str) else user_id
 
             stmt = (
@@ -279,7 +285,11 @@ class InsightsConversationRepository(BaseRepository[InsightsConversation]):
             DatabaseError: If database operation fails
         """
         try:
-            conv_uuid = uuid.UUID(conversation_id) if isinstance(conversation_id, str) else conversation_id
+            conv_uuid = (
+                uuid.UUID(conversation_id)
+                if isinstance(conversation_id, str)
+                else conversation_id
+            )
             user_uuid = uuid.UUID(user_id) if isinstance(user_id, str) else user_id
 
             stmt = select(InsightsConversation).where(
@@ -314,7 +324,11 @@ class InsightsConversationRepository(BaseRepository[InsightsConversation]):
             DatabaseError: If database operation fails
         """
         try:
-            conv_uuid = uuid.UUID(conversation_id) if isinstance(conversation_id, str) else conversation_id
+            conv_uuid = (
+                uuid.UUID(conversation_id)
+                if isinstance(conversation_id, str)
+                else conversation_id
+            )
             user_uuid = uuid.UUID(user_id) if isinstance(user_id, str) else user_id
 
             stmt = (
@@ -387,7 +401,9 @@ class InsightsConversationRepository(BaseRepository[InsightsConversation]):
         Raises:
             DatabaseError: If database operation fails
         """
-        dataset_uuid = uuid.UUID(dataset_id) if isinstance(dataset_id, str) else dataset_id
+        dataset_uuid = (
+            uuid.UUID(dataset_id) if isinstance(dataset_id, str) else dataset_id
+        )
         return await self.delete_many({"dataset_id": dataset_uuid})
 
 
@@ -418,7 +434,11 @@ class InsightsQueryRepository(BaseRepository[InsightsQuery]):
             DatabaseError: If database operation fails
         """
         try:
-            conv_uuid = uuid.UUID(conversation_id) if isinstance(conversation_id, str) else conversation_id
+            conv_uuid = (
+                uuid.UUID(conversation_id)
+                if isinstance(conversation_id, str)
+                else conversation_id
+            )
 
             stmt = (
                 select(InsightsQuery)
@@ -546,7 +566,9 @@ class InsightsQueryRepository(BaseRepository[InsightsQuery]):
         Raises:
             DatabaseError: If database operation fails
         """
-        filters = {"user_id": uuid.UUID(user_id) if isinstance(user_id, str) else user_id}
+        filters = {
+            "user_id": uuid.UUID(user_id) if isinstance(user_id, str) else user_id
+        }
 
         return await self.list(
             filters=filters,
@@ -574,7 +596,9 @@ class InsightsQueryRepository(BaseRepository[InsightsQuery]):
 
             # Get status breakdown
             status_stmt = (
-                select(InsightsQuery.status, func.count(InsightsQuery.id).label("count"))
+                select(
+                    InsightsQuery.status, func.count(InsightsQuery.id).label("count")
+                )
                 .where(InsightsQuery.user_id == user_uuid)
                 .group_by(InsightsQuery.status)
             )
@@ -597,14 +621,11 @@ class InsightsQueryRepository(BaseRepository[InsightsQuery]):
                 stats["total"] += count
 
             # Get average execution time
-            avg_time_stmt = (
-                select(func.avg(InsightsQuery.execution_time_ms))
-                .where(
-                    and_(
-                        InsightsQuery.user_id == user_uuid,
-                        InsightsQuery.status == "completed",
-                        InsightsQuery.execution_time_ms.isnot(None),
-                    )
+            avg_time_stmt = select(func.avg(InsightsQuery.execution_time_ms)).where(
+                and_(
+                    InsightsQuery.user_id == user_uuid,
+                    InsightsQuery.status == "completed",
+                    InsightsQuery.execution_time_ms.isnot(None),
                 )
             )
 
@@ -613,29 +634,27 @@ class InsightsQueryRepository(BaseRepository[InsightsQuery]):
             stats["avg_execution_time_ms"] = int(avg_time) if avg_time else 0
 
             # Get total tokens used
-            total_tokens_stmt = (
-                select(
-                    func.coalesce(
-                        func.sum(
-                            func.cast(
-                                InsightsQuery.token_usage["total_tokens"].astext,
-                                Integer
-                            )
-                        ),
-                        0
-                    )
+            total_tokens_stmt = select(
+                func.coalesce(
+                    func.sum(
+                        func.cast(
+                            InsightsQuery.token_usage["total_tokens"].astext, Integer
+                        )
+                    ),
+                    0,
                 )
-                .where(
-                    and_(
-                        InsightsQuery.user_id == user_uuid,
-                        InsightsQuery.token_usage.isnot(None),
-                    )
+            ).where(
+                and_(
+                    InsightsQuery.user_id == user_uuid,
+                    InsightsQuery.token_usage.isnot(None),
                 )
             )
 
             # Note: JSONB field access might need adjustment based on actual data structure
             # For now, we'll calculate this differently
-            stats["total_tokens"] = 0  # Can be calculated from individual queries if needed
+            stats["total_tokens"] = (
+                0  # Can be calculated from individual queries if needed
+            )
 
             return stats
 
@@ -655,7 +674,11 @@ class InsightsQueryRepository(BaseRepository[InsightsQuery]):
         Raises:
             DatabaseError: If database operation fails
         """
-        conv_uuid = uuid.UUID(conversation_id) if isinstance(conversation_id, str) else conversation_id
+        conv_uuid = (
+            uuid.UUID(conversation_id)
+            if isinstance(conversation_id, str)
+            else conversation_id
+        )
         return await self.delete_many({"conversation_id": conv_uuid})
 
     async def count_by_conversation(self, conversation_id: str) -> int:
@@ -671,5 +694,9 @@ class InsightsQueryRepository(BaseRepository[InsightsQuery]):
         Raises:
             DatabaseError: If database operation fails
         """
-        conv_uuid = uuid.UUID(conversation_id) if isinstance(conversation_id, str) else conversation_id
+        conv_uuid = (
+            uuid.UUID(conversation_id)
+            if isinstance(conversation_id, str)
+            else conversation_id
+        )
         return await self.count({"conversation_id": conv_uuid})

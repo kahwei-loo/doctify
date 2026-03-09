@@ -12,7 +12,10 @@ from app.db.database import get_session_factory
 from app.db.repositories.document import DocumentRepository
 from app.db.models.document import Document
 from app.services.document.export import DocumentExportService
-from app.services.notification.redis_events import RedisEventService, RedisNotificationService
+from app.services.notification.redis_events import (
+    RedisEventService,
+    RedisNotificationService,
+)
 from app.core.exceptions import (
     ValidationError,
     NotFoundError,
@@ -25,6 +28,7 @@ logger = logging.getLogger(__name__)
 # =============================================================================
 # Task Helper Functions
 # =============================================================================
+
 
 async def get_export_services():
     """
@@ -56,6 +60,7 @@ async def get_export_services():
 # =============================================================================
 # Document Export Tasks
 # =============================================================================
+
 
 @celery_app.task(
     bind=True,
@@ -191,7 +196,11 @@ async def _export_document_async(
                     "format": export_format,
                     "size_bytes": len(exported_data) if exported_data else 0,
                     "user_id": user_id or (str(document.user_id) if document else None),
-                    "project_id": str(document.project_id) if document and document.project_id else None,
+                    "project_id": (
+                        str(document.project_id)
+                        if document and document.project_id
+                        else None
+                    ),
                 },
             )
 
@@ -226,6 +235,7 @@ async def _export_document_async(
 # =============================================================================
 # Batch Export Tasks
 # =============================================================================
+
 
 @celery_app.task(
     bind=True,
@@ -268,10 +278,12 @@ def batch_export_documents_task(
             include_metadata=include_metadata,
             user_id=user_id,
         )
-        task_ids.append({
-            "document_id": document_id,
-            "task_id": result.id,
-        })
+        task_ids.append(
+            {
+                "document_id": document_id,
+                "task_id": result.id,
+            }
+        )
 
     logger.info(
         f"Queued {len(task_ids)} export tasks",
@@ -289,6 +301,7 @@ def batch_export_documents_task(
 # =============================================================================
 # Project Export Tasks
 # =============================================================================
+
 
 @celery_app.task(
     bind=True,
@@ -374,10 +387,7 @@ async def _export_project_async(
             )
 
             # Filter for completed documents only
-            completed_docs = [
-                doc for doc in documents
-                if doc.status == "completed"
-            ]
+            completed_docs = [doc for doc in documents if doc.status == "completed"]
 
             if not completed_docs:
                 raise ValidationError(
@@ -393,10 +403,12 @@ async def _export_project_async(
                     include_metadata=include_metadata,
                     user_id=user_id,
                 )
-                task_ids.append({
-                    "document_id": str(document.id),
-                    "task_id": result.id,
-                })
+                task_ids.append(
+                    {
+                        "document_id": str(document.id),
+                        "task_id": result.id,
+                    }
+                )
 
             # Notify project export started
             await notification_service.notify_project_event(
@@ -439,6 +451,7 @@ async def _export_project_async(
 # =============================================================================
 # Export Cleanup Tasks
 # =============================================================================
+
 
 @celery_app.task(
     bind=True,

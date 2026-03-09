@@ -99,16 +99,20 @@ def create_access_token(
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = datetime.utcnow() + timedelta(
+            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
+        )
 
     # Add unique JWT ID for revocation support
     jti = str(uuid.uuid4())
 
-    to_encode.update({
-        "exp": expire,
-        "iat": datetime.utcnow(),
-        "jti": jti,
-    })
+    to_encode.update(
+        {
+            "exp": expire,
+            "iat": datetime.utcnow(),
+            "jti": jti,
+        }
+    )
 
     encoded_jwt = jwt.encode(
         to_encode,
@@ -143,12 +147,14 @@ def create_refresh_token(
     # Add unique JWT ID for revocation support
     jti = str(uuid.uuid4())
 
-    to_encode.update({
-        "exp": expire,
-        "iat": datetime.utcnow(),
-        "type": "refresh",
-        "jti": jti,
-    })
+    to_encode.update(
+        {
+            "exp": expire,
+            "iat": datetime.utcnow(),
+            "type": "refresh",
+            "jti": jti,
+        }
+    )
 
     encoded_jwt = jwt.encode(
         to_encode,
@@ -238,8 +244,7 @@ async def verify_token_with_blacklist(token: str) -> Dict[str, Any]:
 
     if is_revoked:
         raise AuthenticationError(
-            "Token has been revoked",
-            details={"jti": payload.get("jti")}
+            "Token has been revoked", details={"jti": payload.get("jti")}
         )
 
     return payload
@@ -334,7 +339,7 @@ def sanitize_filename(filename: str) -> str:
     import os
 
     # Unicode normalization (prevent homoglyph attacks)
-    filename = unicodedata.normalize('NFKD', filename)
+    filename = unicodedata.normalize("NFKD", filename)
 
     # Get just the basename (remove any path components)
     filename = os.path.basename(filename)
@@ -343,19 +348,19 @@ def sanitize_filename(filename: str) -> str:
     filename = filename.replace("../", "").replace("..\\", "")
 
     # Remove NULL bytes (prevent truncation attacks)
-    filename = filename.replace('\x00', '')
+    filename = filename.replace("\x00", "")
 
     # Replace unsafe characters with underscore
-    unsafe_chars = ['<', '>', ':', '"', '/', '\\', '|', '?', '*']
+    unsafe_chars = ["<", ">", ":", '"', "/", "\\", "|", "?", "*"]
     for char in unsafe_chars:
-        filename = filename.replace(char, '_')
+        filename = filename.replace(char, "_")
 
     # Remove any remaining non-printable characters
-    filename = ''.join(char if char.isprintable() else '_' for char in filename)
+    filename = "".join(char if char.isprintable() else "_" for char in filename)
 
     # Prevent hidden files (files starting with .)
-    if filename.startswith('.'):
-        filename = '_' + filename
+    if filename.startswith("."):
+        filename = "_" + filename
 
     # Limit length (leave room for file extension)
     max_length = 255
@@ -365,13 +370,15 @@ def sanitize_filename(filename: str) -> str:
         filename = f"{name[:max_name_length]}.{ext}" if ext else name[:max_length]
 
     # Final safety check: ensure we have a valid filename
-    if not filename or filename in ['.', '..']:
-        filename = 'unnamed_file'
+    if not filename or filename in [".", ".."]:
+        filename = "unnamed_file"
 
     return filename
 
 
-def validate_file_content(file_content: bytes, allowed_mime_types: list[str]) -> tuple[bool, str]:
+def validate_file_content(
+    file_content: bytes, allowed_mime_types: list[str]
+) -> tuple[bool, str]:
     """
     Validate file content using magic bytes (MIME type detection).
 
@@ -413,15 +420,14 @@ def validate_file_content(file_content: bytes, allowed_mime_types: list[str]) ->
 
     except Exception as e:
         raise ValidationError(
-            f"Failed to validate file content: {str(e)}",
-            details={"error": str(e)}
+            f"Failed to validate file content: {str(e)}", details={"error": str(e)}
         )
 
 
 def validate_file_stream_size(
     file_stream,
     max_size: int = 50 * 1024 * 1024,  # 50MB default
-    chunk_size: int = 8192  # 8KB chunks
+    chunk_size: int = 8192,  # 8KB chunks
 ) -> tuple[bytes, int]:
     """
     Validate file size while streaming (prevents memory exhaustion).
@@ -460,13 +466,13 @@ def validate_file_stream_size(
                 max_size_mb = max_size / (1024 * 1024)
                 raise ValidationError(
                     f"File size exceeds maximum allowed size of {max_size_mb}MB",
-                    details={"size": total_size, "max_size": max_size}
+                    details={"size": total_size, "max_size": max_size},
                 )
 
             chunks.append(chunk)
 
         # Combine all chunks
-        file_content = b''.join(chunks)
+        file_content = b"".join(chunks)
 
         return (file_content, total_size)
 
@@ -474,22 +480,21 @@ def validate_file_stream_size(
         raise
     except Exception as e:
         raise ValidationError(
-            f"Failed to read file stream: {str(e)}",
-            details={"error": str(e)}
+            f"Failed to read file stream: {str(e)}", details={"error": str(e)}
         )
 
 
 # Allowed MIME types mapping for validation
 ALLOWED_MIME_TYPES = {
-    'application/pdf': ['pdf'],
-    'image/jpeg': ['jpg', 'jpeg'],
-    'image/png': ['png'],
-    'image/tiff': ['tiff', 'tif'],
-    'image/bmp': ['bmp'],
-    'application/msword': ['doc'],
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['docx'],
-    'application/vnd.ms-excel': ['xls'],
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['xlsx'],
+    "application/pdf": ["pdf"],
+    "image/jpeg": ["jpg", "jpeg"],
+    "image/png": ["png"],
+    "image/tiff": ["tiff", "tif"],
+    "image/bmp": ["bmp"],
+    "application/msword": ["doc"],
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": ["docx"],
+    "application/vnd.ms-excel": ["xls"],
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": ["xlsx"],
 }
 
 

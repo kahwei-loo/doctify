@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 class FieldType(str, Enum):
     """Supported field types for Schema Builder."""
+
     TEXT = "text"
     NUMBER = "number"
     BOOLEAN = "boolean"
@@ -26,30 +27,32 @@ class FieldType(str, Enum):
 
 
 # Security: Reserved names that could be used for prototype pollution or injection
-RESERVED_NAMES = frozenset([
-    "__proto__",
-    "constructor",
-    "prototype",
-    "eval",
-    "function",
-    "this",
-    "window",
-    "document",
-    "global",
-    "process",
-    "__class__",
-    "__bases__",
-    "__mro__",
-    "__subclasses__",
-    "__init__",
-    "__new__",
-    "__del__",
-    "__dict__",
-    "__globals__",
-    "__builtins__",
-    "__import__",
-    "__code__",
-])
+RESERVED_NAMES = frozenset(
+    [
+        "__proto__",
+        "constructor",
+        "prototype",
+        "eval",
+        "function",
+        "this",
+        "window",
+        "document",
+        "global",
+        "process",
+        "__class__",
+        "__bases__",
+        "__mro__",
+        "__subclasses__",
+        "__init__",
+        "__new__",
+        "__del__",
+        "__dict__",
+        "__globals__",
+        "__builtins__",
+        "__import__",
+        "__code__",
+    ]
+)
 
 # Valid field name pattern: starts with letter, alphanumeric + underscore, max 64 chars
 FIELD_NAME_PATTERN = re.compile(r"^[a-zA-Z][a-zA-Z0-9_]{0,63}$")
@@ -58,6 +61,7 @@ FIELD_NAME_PATTERN = re.compile(r"^[a-zA-Z][a-zA-Z0-9_]{0,63}$")
 @dataclass
 class FieldDefinition:
     """Definition of a single field in the schema."""
+
     name: str
     type: FieldType
     description: Optional[str] = None
@@ -80,6 +84,7 @@ class FieldDefinition:
 @dataclass
 class TableConfig:
     """Configuration for the line items table."""
+
     description: str
     columns: List[FieldDefinition] = field(default_factory=list)
 
@@ -94,6 +99,7 @@ class TableConfig:
 @dataclass
 class ProjectSchema:
     """Complete schema definition for a project."""
+
     title: str
     description: str
     fields: List[FieldDefinition] = field(default_factory=list)
@@ -133,7 +139,9 @@ def validate_field_name(name: str) -> bool:
     return True
 
 
-def validate_project_schema(schema_dict: Dict[str, Any]) -> tuple[bool, Optional[ProjectSchema], Optional[str]]:
+def validate_project_schema(
+    schema_dict: Dict[str, Any],
+) -> tuple[bool, Optional[ProjectSchema], Optional[str]]:
     """
     Validate and parse a project schema dictionary.
 
@@ -230,8 +238,7 @@ class SchemaValidator:
             self._column_map = {c.name: c for c in schema.table_config.columns}
 
     def validate_extracted_fields(
-        self,
-        fields: Dict[str, Any]
+        self, fields: Dict[str, Any]
     ) -> tuple[bool, Dict[str, Any], List[str]]:
         """
         Validate extracted fields against schema.
@@ -272,8 +279,7 @@ class SchemaValidator:
         return len(errors) == 0, coerced, errors
 
     def validate_line_items(
-        self,
-        items: List[Dict[str, Any]]
+        self, items: List[Dict[str, Any]]
     ) -> tuple[bool, List[Dict[str, Any]], List[str]]:
         """
         Validate line items against table config.
@@ -315,8 +321,7 @@ class SchemaValidator:
         return len(errors) == 0, coerced_items, errors
 
     def validate_extracted_result(
-        self,
-        result: Dict[str, Any]
+        self, result: Dict[str, Any]
     ) -> tuple[bool, Dict[str, Any], List[str]]:
         """
         Validate complete extracted result (fields + line items).

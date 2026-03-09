@@ -21,6 +21,7 @@ class ExportFormat(str, Enum):
     Using enum prevents path traversal and arbitrary format injection attacks.
     Only these specific formats are allowed.
     """
+
     JSON = "json"
     CSV = "csv"
     XML = "xml"
@@ -30,7 +31,7 @@ class ExportFormat(str, Enum):
     HTML = "html"
 
     @classmethod
-    def get_mime_type(cls, format: 'ExportFormat') -> str:
+    def get_mime_type(cls, format: "ExportFormat") -> str:
         """Get MIME type for export format."""
         mime_types = {
             cls.JSON: "application/json",
@@ -44,7 +45,7 @@ class ExportFormat(str, Enum):
         return mime_types.get(format, "application/octet-stream")
 
     @classmethod
-    def get_file_extension(cls, format: 'ExportFormat') -> str:
+    def get_file_extension(cls, format: "ExportFormat") -> str:
         """Get file extension for export format."""
         extensions = {
             cls.JSON: ".json",
@@ -64,6 +65,7 @@ class ExportFormat(str, Enum):
 
 class DocumentCategory(str, Enum):
     """Document category classification."""
+
     INVOICE = "invoice"
     CONTRACT = "contract"
     RECEIPT = "receipt"
@@ -77,27 +79,15 @@ class DocumentUploadRequest(BaseModel):
     """Request model for document upload."""
 
     title: Optional[str] = Field(
-        None,
-        min_length=1,
-        max_length=255,
-        description="Document title"
+        None, min_length=1, max_length=255, description="Document title"
     )
     description: Optional[str] = Field(
-        None,
-        max_length=1000,
-        description="Document description"
+        None, max_length=1000, description="Document description"
     )
-    category: Optional[DocumentCategory] = Field(
-        None,
-        description="Document category"
-    )
-    tags: Optional[List[str]] = Field(
-        None,
-        max_items=20,
-        description="Document tags"
-    )
+    category: Optional[DocumentCategory] = Field(None, description="Document category")
+    tags: Optional[List[str]] = Field(None, max_items=20, description="Document tags")
 
-    @validator('tags')
+    @validator("tags")
     def validate_tags(cls, v):
         """Validate tags."""
         if v:
@@ -106,7 +96,7 @@ class DocumentUploadRequest(BaseModel):
                 if not isinstance(tag, str) or len(tag) > 50:
                     raise ValueError("Each tag must be a string with max 50 characters")
                 # Prevent dangerous characters
-                if any(c in tag for c in ['<', '>', '{', '}', '$', '..', '/']):
+                if any(c in tag for c in ["<", ">", "{", "}", "$", "..", "/"]):
                     raise ValueError("Tags cannot contain dangerous characters")
         return v
 
@@ -116,7 +106,7 @@ class DocumentUploadRequest(BaseModel):
                 "title": "Invoice 2024-001",
                 "description": "Q1 Invoice for services",
                 "category": "invoice",
-                "tags": ["q1", "2024", "services"]
+                "tags": ["q1", "2024", "services"],
             }
         }
 
@@ -125,16 +115,13 @@ class DocumentExportRequest(BaseModel):
     """Request model for document export."""
 
     export_format: ExportFormat = Field(
-        ExportFormat.JSON,
-        description="Export format (enum-validated for security)"
+        ExportFormat.JSON, description="Export format (enum-validated for security)"
     )
     include_metadata: bool = Field(
-        True,
-        description="Whether to include metadata in export"
+        True, description="Whether to include metadata in export"
     )
     include_content: bool = Field(
-        True,
-        description="Whether to include document content"
+        True, description="Whether to include document content"
     )
 
     class Config:
@@ -143,7 +130,7 @@ class DocumentExportRequest(BaseModel):
             "example": {
                 "export_format": "pdf",
                 "include_metadata": True,
-                "include_content": True
+                "include_content": True,
             }
         }
 
@@ -152,38 +139,23 @@ class DocumentUpdateRequest(BaseModel):
     """Request model for updating document."""
 
     title: Optional[str] = Field(
-        None,
-        min_length=1,
-        max_length=255,
-        description="Document title"
+        None, min_length=1, max_length=255, description="Document title"
     )
     description: Optional[str] = Field(
-        None,
-        max_length=1000,
-        description="Document description"
+        None, max_length=1000, description="Document description"
     )
-    category: Optional[DocumentCategory] = Field(
-        None,
-        description="Document category"
-    )
-    tags: Optional[List[str]] = Field(
-        None,
-        max_items=20,
-        description="Document tags"
-    )
-    status: Optional[DocumentStatus] = Field(
-        None,
-        description="Document status"
-    )
+    category: Optional[DocumentCategory] = Field(None, description="Document category")
+    tags: Optional[List[str]] = Field(None, max_items=20, description="Document tags")
+    status: Optional[DocumentStatus] = Field(None, description="Document status")
 
-    @validator('tags')
+    @validator("tags")
     def validate_tags(cls, v):
         """Validate tags."""
         if v:
             for tag in v:
                 if not isinstance(tag, str) or len(tag) > 50:
                     raise ValueError("Each tag must be a string with max 50 characters")
-                if any(c in tag for c in ['<', '>', '{', '}', '$', '..', '/']):
+                if any(c in tag for c in ["<", ">", "{", "}", "$", "..", "/"]):
                     raise ValueError("Tags cannot contain dangerous characters")
         return v
 
@@ -194,13 +166,14 @@ class DocumentUpdateRequest(BaseModel):
                 "description": "Updated Q1 Invoice",
                 "category": "invoice",
                 "tags": ["q1", "2024", "updated"],
-                "status": "completed"
+                "status": "completed",
             }
         }
 
 
 class FieldChange(BaseModel):
     """Field change tracking for audit."""
+
     field: str = Field(..., description="Field path (e.g., 'metadata.invoice_number')")
     original_value: Any = Field(..., description="Original extracted value")
     new_value: Any = Field(..., description="User-corrected value")
@@ -212,7 +185,7 @@ class FieldChange(BaseModel):
                 "field": "metadata.invoice_number",
                 "original_value": "INV-2024-001",
                 "new_value": "INV-2024-001-CORRECTED",
-                "timestamp": "2024-01-15T10:30:00Z"
+                "timestamp": "2024-01-15T10:30:00Z",
             }
         }
 
@@ -224,17 +197,13 @@ class DocumentConfirmRequest(BaseModel):
     Used when user reviews and confirms (with optional corrections)
     the extracted OCR data.
     """
+
     ocr_data: Dict[str, Any] = Field(
-        ...,
-        description="User-corrected OCR data (complete extraction result)"
+        ..., description="User-corrected OCR data (complete extraction result)"
     )
-    user_confirmed: bool = Field(
-        default=True,
-        description="Confirmation flag"
-    )
+    user_confirmed: bool = Field(default=True, description="Confirmation flag")
     field_changes: Optional[List[FieldChange]] = Field(
-        None,
-        description="Optional list of field changes for audit trail"
+        None, description="Optional list of field changes for audit trail"
     )
 
     class Config:
@@ -246,8 +215,8 @@ class DocumentConfirmRequest(BaseModel):
                     "total": 1250.00,
                     "line_items": [
                         {"description": "Service A", "amount": 1000.00},
-                        {"description": "Service B", "amount": 250.00}
-                    ]
+                        {"description": "Service B", "amount": 250.00},
+                    ],
                 },
                 "user_confirmed": True,
                 "field_changes": [
@@ -255,9 +224,9 @@ class DocumentConfirmRequest(BaseModel):
                         "field": "total",
                         "original_value": 1200.00,
                         "new_value": 1250.00,
-                        "timestamp": "2024-01-15T10:30:00Z"
+                        "timestamp": "2024-01-15T10:30:00Z",
                     }
-                ]
+                ],
             }
         }
 
@@ -291,6 +260,6 @@ class DocumentResponse(BaseModel):
                 "page_count": 3,
                 "tags": ["q1", "2024", "services"],
                 "created_at": "2024-01-15T10:00:00Z",
-                "updated_at": "2024-01-15T10:05:00Z"
+                "updated_at": "2024-01-15T10:05:00Z",
             }
         }

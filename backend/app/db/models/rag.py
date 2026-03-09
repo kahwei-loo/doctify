@@ -91,15 +91,12 @@ class DocumentEmbedding(BaseModel):
         CheckConstraint(
             "(document_id IS NOT NULL AND data_source_id IS NULL) OR "
             "(document_id IS NULL AND data_source_id IS NOT NULL)",
-            name="check_embedding_source"
+            name="check_embedding_source",
         ),
         # Chunk index must be non-negative
-        CheckConstraint(
-            "chunk_index >= 0",
-            name="check_chunk_index_valid"
-        ),
+        CheckConstraint("chunk_index >= 0", name="check_chunk_index_valid"),
         # Vector index for similarity search (created in migration)
-        Index('ix_embeddings_document_id', 'document_id'),
+        Index("ix_embeddings_document_id", "document_id"),
     )
 
     def __repr__(self) -> str:
@@ -130,7 +127,9 @@ class RAGConversation(BaseModel):
 
     # Relationships
     user = relationship("User")
-    queries = relationship("RAGQuery", back_populates="conversation", order_by="RAGQuery.created_at")
+    queries = relationship(
+        "RAGQuery", back_populates="conversation", order_by="RAGQuery.created_at"
+    )
 
     def __repr__(self) -> str:
         return f"<RAGConversation(id={self.id}, title='{self.title[:30]}')>"
@@ -257,10 +256,10 @@ class RAGQuery(BaseModel):
     # Table constraints
     __table_args__ = (
         CheckConstraint(
-            'feedback_rating IS NULL OR (feedback_rating BETWEEN 1 AND 5)',
-            name='check_feedback_rating'
+            "feedback_rating IS NULL OR (feedback_rating BETWEEN 1 AND 5)",
+            name="check_feedback_rating",
         ),
-        Index('ix_rag_queries_created_at', 'created_at'),
+        Index("ix_rag_queries_created_at", "created_at"),
     )
 
     def __repr__(self) -> str:
@@ -285,7 +284,9 @@ class RAGEvaluation(BaseModel):
 
     # Evaluation metadata
     sample_size: Mapped[int] = mapped_column(Integer, nullable=False)
-    queries_with_feedback: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    queries_with_feedback: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0
+    )
     average_groundedness: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
 
     # Optional: user scope (None = system-wide)

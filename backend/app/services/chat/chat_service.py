@@ -9,7 +9,10 @@ from typing import List, Dict, Any, AsyncGenerator
 from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.repositories.chat_repository import ChatConversationRepository, ChatMessageRepository
+from app.db.repositories.chat_repository import (
+    ChatConversationRepository,
+    ChatMessageRepository,
+)
 from app.domain.entities.chat import ChatConversation, ChatMessage
 from app.services.chat.intent_classifier import IntentClassifier, IntentType
 from app.services.rag.generation_service import GenerationService
@@ -27,25 +30,22 @@ class ChatService:
         self.tool_router = ToolRouter(session)
         self.generation_service = GenerationService(session)
 
-    async def create_conversation(self, user_id: UUID, title: str = None) -> ChatConversation:
+    async def create_conversation(
+        self, user_id: UUID, title: str = None
+    ) -> ChatConversation:
         """Create a new conversation."""
-        return await self.conversation_repo.create({
-            "user_id": user_id,
-            "title": title or "New Conversation"
-        })
+        return await self.conversation_repo.create(
+            {"user_id": user_id, "title": title or "New Conversation"}
+        )
 
     async def get_conversation_history(
-        self,
-        conversation_id: UUID,
-        limit: int = 50
+        self, conversation_id: UUID, limit: int = 50
     ) -> List[ChatMessage]:
         """Get conversation message history."""
         return await self.message_repo.get_by_conversation_id(conversation_id, limit)
 
     def _build_context_window(
-        self,
-        conversation_history: List[ChatMessage],
-        window_size: int = 10
+        self, conversation_history: List[ChatMessage], window_size: int = 10
     ) -> List[Dict[str, str]]:
         """
         Build context window for LLM from recent messages.
@@ -57,20 +57,16 @@ class ChatService:
         Returns:
             List of {"role": "user"|"assistant", "content": str}
         """
-        recent_messages = conversation_history[-window_size:] if len(conversation_history) > window_size else conversation_history
+        recent_messages = (
+            conversation_history[-window_size:]
+            if len(conversation_history) > window_size
+            else conversation_history
+        )
 
-        return [
-            {
-                "role": msg.role,
-                "content": msg.content
-            }
-            for msg in recent_messages
-        ]
+        return [{"role": msg.role, "content": msg.content} for msg in recent_messages]
 
     async def process_message_streaming(
-        self,
-        conversation_id: UUID,
-        user_message: str
+        self, conversation_id: UUID, user_message: str
     ) -> AsyncGenerator[Dict[str, Any], None]:
         """
         Process user message with streaming response.
@@ -90,11 +86,13 @@ class ChatService:
         - {"type": "complete", "data": message_id}
         """
         # Step 1: Save user message
-        user_msg = await self.message_repo.create({
-            "conversation_id": conversation_id,
-            "role": "user",
-            "content": user_message
-        })
+        user_msg = await self.message_repo.create(
+            {
+                "conversation_id": conversation_id,
+                "role": "user",
+                "content": user_message,
+            }
+        )
         await self.session.flush()
 
         # Step 2: Get conversation history for context
@@ -103,8 +101,7 @@ class ChatService:
 
         # Step 3: Classify intent
         intent: IntentType = await self.intent_classifier.classify_intent(
-            user_message,
-            conversation_context={"history": context_window}
+            user_message, conversation_context={"history": context_window}
         )
 
         yield {"type": "intent", "data": intent}
@@ -123,7 +120,7 @@ class ChatService:
             tool_result = {
                 "sources": rag_response.sources,
                 "model": rag_response.model_used,
-                "tokens": rag_response.tokens_used
+                "tokens": rag_response.tokens_used,
             }
 
             yield {"type": "tool_result", "data": tool_result}
@@ -131,7 +128,9 @@ class ChatService:
         else:
             # Route to appropriate tool via ToolRouter
             yield {"type": "tool_start", "data": intent}
-            tool_result = await self.tool_router.execute_tool(intent, user_message, context_window)
+            tool_result = await self.tool_router.execute_tool(
+                intent, user_message, context_window
+            )
             response_text = tool_result.get("response", "I've completed that action.")
 
             yield {"type": "tool_result", "data": tool_result}
@@ -143,13 +142,15 @@ class ChatService:
             yield {"type": "chunk", "data": chunk}
 
         # Step 6: Save assistant response
-        assistant_msg = await self.message_repo.create({
-            "conversation_id": conversation_id,
-            "role": "assistant",
-            "content": response_text,
-            "tool_used": intent,
-            "tool_result": tool_result
-        })
+        assistant_msg = await self.message_repo.create(
+            {
+                "conversation_id": conversation_id,
+                "role": "assistant",
+                "content": response_text,
+                "tool_used": intent,
+                "tool_result": tool_result,
+            }
+        )
         await self.session.commit()
 
         yield {"type": "complete", "data": str(assistant_msg.id)}

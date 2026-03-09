@@ -91,15 +91,21 @@ class AssistantService:
             widget_config_dict.update(data.widget_config.model_dump())
 
         # Create assistant
-        assistant = await self.assistant_repo.create({
-            "user_id": user_id,
-            "name": data.name.strip(),
-            "description": data.description.strip() if data.description else None,
-            "model_config": model_config_dict,
-            "widget_config": widget_config_dict,
-            "knowledge_base_id": uuid.UUID(data.knowledge_base_id) if data.knowledge_base_id else None,
-            "is_active": True,
-        })
+        assistant = await self.assistant_repo.create(
+            {
+                "user_id": user_id,
+                "name": data.name.strip(),
+                "description": data.description.strip() if data.description else None,
+                "model_config": model_config_dict,
+                "widget_config": widget_config_dict,
+                "knowledge_base_id": (
+                    uuid.UUID(data.knowledge_base_id)
+                    if data.knowledge_base_id
+                    else None
+                ),
+                "is_active": True,
+            }
+        )
 
         logger.info(f"Created assistant {assistant.id} for user {user_id}")
 
@@ -156,20 +162,26 @@ class AssistantService:
 
         assistant_list = []
         for item in assistants_with_stats:
-            assistant_list.append(AssistantWithStats(
-                id=str(item["assistant_id"]),
-                user_id=str(item["user_id"]),
-                name=item["name"],
-                description=item["description"],
-                model_configuration=item["model_config"],
-                widget_config=item["widget_config"],
-                is_active=item["is_active"],
-                knowledge_base_id=str(item["knowledge_base_id"]) if item["knowledge_base_id"] else None,
-                total_conversations=item["total_conversations"],
-                unresolved_count=item["unresolved_count"],
-                created_at=item["created_at"],
-                updated_at=item["updated_at"],
-            ))
+            assistant_list.append(
+                AssistantWithStats(
+                    id=str(item["assistant_id"]),
+                    user_id=str(item["user_id"]),
+                    name=item["name"],
+                    description=item["description"],
+                    model_configuration=item["model_config"],
+                    widget_config=item["widget_config"],
+                    is_active=item["is_active"],
+                    knowledge_base_id=(
+                        str(item["knowledge_base_id"])
+                        if item["knowledge_base_id"]
+                        else None
+                    ),
+                    total_conversations=item["total_conversations"],
+                    unresolved_count=item["unresolved_count"],
+                    created_at=item["created_at"],
+                    updated_at=item["updated_at"],
+                )
+            )
 
         return AssistantListResponse(
             assistants=assistant_list,
@@ -419,7 +431,9 @@ class AssistantService:
             raise NotFoundError("Conversation not found")
 
         # Verify ownership of the assistant
-        if not await self.assistant_repo.check_ownership(conversation.assistant_id, user_id):
+        if not await self.assistant_repo.check_ownership(
+            conversation.assistant_id, user_id
+        ):
             raise AuthorizationError("Not authorized to access this conversation")
 
         return self._conversation_to_response(conversation)
@@ -451,7 +465,9 @@ class AssistantService:
             raise NotFoundError("Conversation not found")
 
         # Verify ownership of the assistant
-        if not await self.assistant_repo.check_ownership(conversation.assistant_id, user_id):
+        if not await self.assistant_repo.check_ownership(
+            conversation.assistant_id, user_id
+        ):
             raise AuthorizationError("Not authorized to update this conversation")
 
         updated = await self.conversation_repo.update_status(conversation_id, status)
@@ -481,7 +497,9 @@ class AssistantService:
             raise NotFoundError("Conversation not found")
 
         # Verify ownership of the assistant
-        if not await self.assistant_repo.check_ownership(conversation.assistant_id, user_id):
+        if not await self.assistant_repo.check_ownership(
+            conversation.assistant_id, user_id
+        ):
             raise AuthorizationError("Not authorized to delete this conversation")
 
         await self.conversation_repo.delete(conversation_id)
@@ -519,7 +537,9 @@ class AssistantService:
             raise NotFoundError("Conversation not found")
 
         # Verify ownership of the assistant
-        if not await self.assistant_repo.check_ownership(conversation.assistant_id, user_id):
+        if not await self.assistant_repo.check_ownership(
+            conversation.assistant_id, user_id
+        ):
             raise AuthorizationError("Not authorized to access this conversation")
 
         messages = await self.message_repo.get_by_conversation(
@@ -564,8 +584,12 @@ class AssistantService:
             raise NotFoundError("Conversation not found")
 
         # Verify ownership of the assistant
-        if not await self.assistant_repo.check_ownership(conversation.assistant_id, user_id):
-            raise AuthorizationError("Not authorized to send messages to this conversation")
+        if not await self.assistant_repo.check_ownership(
+            conversation.assistant_id, user_id
+        ):
+            raise AuthorizationError(
+                "Not authorized to send messages to this conversation"
+            )
 
         # Create the message
         message = await self.message_repo.create_message(
@@ -604,12 +628,18 @@ class AssistantService:
             model_configuration=assistant.model_config or {},
             widget_config=assistant.widget_config or {},
             is_active=assistant.is_active,
-            knowledge_base_id=str(assistant.knowledge_base_id) if assistant.knowledge_base_id else None,
+            knowledge_base_id=(
+                str(assistant.knowledge_base_id)
+                if assistant.knowledge_base_id
+                else None
+            ),
             created_at=assistant.created_at,
             updated_at=assistant.updated_at,
         )
 
-    def _conversation_to_response(self, conversation: AssistantConversation) -> ConversationResponse:
+    def _conversation_to_response(
+        self, conversation: AssistantConversation
+    ) -> ConversationResponse:
         """Convert conversation model to response."""
         return ConversationResponse(
             id=str(conversation.id),

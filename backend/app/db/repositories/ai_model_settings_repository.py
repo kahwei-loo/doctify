@@ -53,9 +53,11 @@ class AIModelSettingsRepository(BaseRepository[AIModelSetting]):
             await self.session.refresh(existing)
             return existing
 
-        return await self.create({
-            "purpose": purpose,
-            "model_name": model_name,
-            "display_name": display_name,
-            "description": description,
-        })
+        return await self.create(
+            {
+                "purpose": purpose,
+                "model_name": model_name,
+                "display_name": display_name,
+                "description": description,
+            }
+        )

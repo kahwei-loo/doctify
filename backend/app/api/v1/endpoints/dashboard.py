@@ -33,6 +33,7 @@ router = APIRouter()
 # Dependencies
 # =============================================================================
 
+
 async def get_dashboard_service(
     db: AsyncSession = Depends(get_db),
 ) -> DashboardService:
@@ -48,6 +49,7 @@ async def get_dashboard_service(
 # =============================================================================
 # Dashboard Endpoints
 # =============================================================================
+
 
 @router.get("/stats", response_model=StatsResponse)
 async def get_dashboard_stats(

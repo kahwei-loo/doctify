@@ -22,9 +22,10 @@ logger = logging.getLogger(__name__)
 
 class SearchMode(str, Enum):
     """Search mode for retrieval."""
-    SEMANTIC = "semantic"   # Pure vector similarity (original)
-    KEYWORD = "keyword"     # Pure BM25 text search
-    HYBRID = "hybrid"       # Combined vector + BM25 with RRF
+
+    SEMANTIC = "semantic"  # Pure vector similarity (original)
+    KEYWORD = "keyword"  # Pure BM25 text search
+    HYBRID = "hybrid"  # Combined vector + BM25 with RRF
 
 
 class RetrievalService:
@@ -102,7 +103,9 @@ class RetrievalService:
 
             elif search_mode == SearchMode.HYBRID:
                 # Hybrid: vector + BM25 with RRF
-                query_embedding = await self.embedding_service.generate_embedding(question)
+                query_embedding = await self.embedding_service.generate_embedding(
+                    question
+                )
                 # Fetch more for reranking if enabled
                 fetch_k = top_k * 4 if use_reranking else top_k
                 hybrid_results = await self.embedding_repo.hybrid_search(
@@ -114,11 +117,15 @@ class RetrievalService:
                     data_source_ids=data_source_ids,
                 )
                 # Use RRF for ranking, vector cosine for display
-                search_results = [(emb, rrf, vs) for emb, rrf, vs, _ts in hybrid_results]
+                search_results = [
+                    (emb, rrf, vs) for emb, rrf, vs, _ts in hybrid_results
+                ]
 
             else:
                 # Pure vector search (original)
-                query_embedding = await self.embedding_service.generate_embedding(question)
+                query_embedding = await self.embedding_service.generate_embedding(
+                    question
+                )
                 fetch_k = top_k * 4 if use_reranking else top_k
                 search_results = await self.embedding_repo.search_by_embedding(
                     query_embedding=query_embedding,
@@ -130,7 +137,10 @@ class RetrievalService:
             if not search_results:
                 logger.warning(
                     "No chunks retrieved",
-                    extra={"threshold": similarity_threshold, "search_mode": search_mode}
+                    extra={
+                        "threshold": similarity_threshold,
+                        "search_mode": search_mode,
+                    },
                 )
                 return []
 
@@ -155,7 +165,7 @@ class RetrievalService:
                     "search_mode": search_mode,
                     "avg_score": round(sum(rank_scores) / len(rank_scores), 4),
                     "max_score": round(max(rank_scores), 4),
-                }
+                },
             )
 
             # Enrich with document metadata and filter by user_id
@@ -184,7 +194,11 @@ class RetrievalService:
                 context_entry = {
                     "chunk_text": embedding.chunk_text,
                     "document_id": doc_id_str or "",
-                    "data_source_id": str(embedding.data_source_id) if embedding.data_source_id else None,
+                    "data_source_id": (
+                        str(embedding.data_source_id)
+                        if embedding.data_source_id
+                        else None
+                    ),
                     "document_name": doc_name,
                     "document_title": doc_title,
                     "chunk_index": embedding.chunk_index,
@@ -203,6 +217,7 @@ class RetrievalService:
             if use_reranking and len(context_list) > top_k:
                 try:
                     from app.services.rag.reranker_service import RerankerService
+
                     reranker = RerankerService()
                     context_list = await reranker.rerank(
                         query=question,
@@ -213,7 +228,9 @@ class RetrievalService:
                     # Reranker not yet available, just truncate
                     context_list = context_list[:top_k]
                 except Exception as e:
-                    logger.warning(f"Reranking failed, falling back to original order: {e}")
+                    logger.warning(
+                        f"Reranking failed, falling back to original order: {e}"
+                    )
                     context_list = context_list[:top_k]
             else:
                 context_list = context_list[:top_k]
@@ -230,7 +247,7 @@ class RetrievalService:
         question: str,
         document_ids: List[uuid.UUID],
         top_k: int = 5,
-        similarity_threshold: float = 0.5  # Changed from 0.7 - better for text-embedding-3-small
+        similarity_threshold: float = 0.5,  # Changed from 0.7 - better for text-embedding-3-small
     ) -> List[Dict[str, Any]]:
         """
         Retrieve context from specific documents only.
@@ -250,7 +267,7 @@ class RetrievalService:
             question=question,
             top_k=top_k,
             similarity_threshold=similarity_threshold,
-            document_ids=document_ids
+            document_ids=document_ids,
         )
 
     async def get_similar_chunks(
@@ -258,7 +275,7 @@ class RetrievalService:
         text: str,
         top_k: int = 5,
         similarity_threshold: float = 0.5,  # Changed from 0.7 - better for text-embedding-3-small
-        exclude_document_id: Optional[uuid.UUID] = None
+        exclude_document_id: Optional[uuid.UUID] = None,
     ) -> List[Dict[str, Any]]:
         """
         Find similar text chunks across all documents.
@@ -285,7 +302,7 @@ class RetrievalService:
             search_results = await self.embedding_repo.search_by_embedding(
                 query_embedding=text_embedding,
                 limit=top_k,
-                similarity_threshold=similarity_threshold
+                similarity_threshold=similarity_threshold,
             )
 
             if not search_results:
@@ -303,14 +320,16 @@ class RetrievalService:
                 if not document:
                     continue
 
-                similar_chunks.append({
-                    "chunk_text": embedding.chunk_text,
-                    "document_id": str(embedding.document_id),
-                    "document_name": document.original_filename,
-                    "chunk_index": embedding.chunk_index,
-                    "similarity_score": round(similarity, 3),
-                    "metadata": embedding.chunk_metadata or {}
-                })
+                similar_chunks.append(
+                    {
+                        "chunk_text": embedding.chunk_text,
+                        "document_id": str(embedding.document_id),
+                        "document_name": document.original_filename,
+                        "chunk_index": embedding.chunk_index,
+                        "similarity_score": round(similarity, 3),
+                        "metadata": embedding.chunk_metadata or {},
+                    }
+                )
 
             return similar_chunks
 

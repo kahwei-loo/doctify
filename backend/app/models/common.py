@@ -24,7 +24,9 @@ class SuccessResponse(BaseModel, Generic[DataT]):
     success: bool = Field(True, description="Operation success status")
     message: Optional[str] = Field(None, description="Optional success message")
     data: Optional[DataT] = Field(None, description="Response data")
-    timestamp: datetime = Field(default_factory=datetime.utcnow, description="Response timestamp")
+    timestamp: datetime = Field(
+        default_factory=datetime.utcnow, description="Response timestamp"
+    )
 
     class Config:
         json_encoders = {
@@ -49,9 +51,13 @@ class ErrorResponse(BaseModel):
 
     success: bool = Field(False, description="Operation success status")
     error: str = Field(..., description="Error message")
-    details: Optional[Dict[str, Any]] = Field(None, description="Additional error details")
+    details: Optional[Dict[str, Any]] = Field(
+        None, description="Additional error details"
+    )
     errors: Optional[List[ErrorDetail]] = Field(None, description="Validation errors")
-    timestamp: datetime = Field(default_factory=datetime.utcnow, description="Error timestamp")
+    timestamp: datetime = Field(
+        default_factory=datetime.utcnow, description="Error timestamp"
+    )
 
     class Config:
         json_encoders = {
@@ -80,7 +86,9 @@ class PaginatedResponse(BaseModel, Generic[DataT]):
     success: bool = Field(True, description="Operation success status")
     data: List[DataT] = Field(..., description="List of items")
     pagination: PaginationMeta = Field(..., description="Pagination metadata")
-    timestamp: datetime = Field(default_factory=datetime.utcnow, description="Response timestamp")
+    timestamp: datetime = Field(
+        default_factory=datetime.utcnow, description="Response timestamp"
+    )
 
     class Config:
         json_encoders = {
@@ -93,7 +101,9 @@ class MessageResponse(BaseModel):
 
     success: bool = Field(True, description="Operation success status")
     message: str = Field(..., description="Response message")
-    timestamp: datetime = Field(default_factory=datetime.utcnow, description="Response timestamp")
+    timestamp: datetime = Field(
+        default_factory=datetime.utcnow, description="Response timestamp"
+    )
 
     class Config:
         json_encoders = {
@@ -106,7 +116,9 @@ class StatusResponse(BaseModel):
 
     status: str = Field(..., description="Service status")
     version: str = Field(..., description="API version")
-    timestamp: datetime = Field(default_factory=datetime.utcnow, description="Response timestamp")
+    timestamp: datetime = Field(
+        default_factory=datetime.utcnow, description="Response timestamp"
+    )
 
     class Config:
         json_encoders = {
@@ -117,6 +129,7 @@ class StatusResponse(BaseModel):
 # =============================================================================
 # Response Helper Functions
 # =============================================================================
+
 
 def success_response(
     data: Optional[Any] = None,
@@ -227,6 +240,7 @@ def message_response(message: str) -> Dict[str, Any]:
 # Request Models
 # =============================================================================
 
+
 class PaginationParams(BaseModel):
     """Common pagination parameters."""
 
@@ -246,7 +260,9 @@ class SortParams(BaseModel):
     """Common sorting parameters."""
 
     sort_by: str = Field("created_at", description="Field to sort by")
-    sort_order: int = Field(-1, description="Sort order (1 for ascending, -1 for descending)")
+    sort_order: int = Field(
+        -1, description="Sort order (1 for ascending, -1 for descending)"
+    )
 
 
 class FilterParams(BaseModel):
@@ -262,12 +278,15 @@ class FilterParams(BaseModel):
 # WebSocket Message Models
 # =============================================================================
 
+
 class WebSocketMessage(BaseModel):
     """WebSocket message format."""
 
     type: str = Field(..., description="Message type")
     data: Dict[str, Any] = Field(..., description="Message data")
-    timestamp: datetime = Field(default_factory=datetime.utcnow, description="Message timestamp")
+    timestamp: datetime = Field(
+        default_factory=datetime.utcnow, description="Message timestamp"
+    )
 
     class Config:
         json_encoders = {
@@ -280,7 +299,9 @@ class WebSocketError(BaseModel):
 
     type: str = Field("error", description="Message type")
     error: str = Field(..., description="Error message")
-    timestamp: datetime = Field(default_factory=datetime.utcnow, description="Error timestamp")
+    timestamp: datetime = Field(
+        default_factory=datetime.utcnow, description="Error timestamp"
+    )
 
     class Config:
         json_encoders = {

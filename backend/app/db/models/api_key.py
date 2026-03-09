@@ -117,4 +117,6 @@ class ApiKey(BaseModel):
         return scope in self.scopes.split(",")
 
     def __repr__(self) -> str:
-        return f"<ApiKey(id={self.id}, prefix={self.key_prefix}, user_id={self.user_id})>"
+        return (
+            f"<ApiKey(id={self.id}, prefix={self.key_prefix}, user_id={self.user_id})>"
+        )

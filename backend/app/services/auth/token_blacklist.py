@@ -120,13 +120,12 @@ class TokenBlacklistService:
             if not jti:
                 raise AuthenticationError(
                     "Token missing JTI field - cannot revoke",
-                    details={"token_version": "legacy (no jti)"}
+                    details={"token_version": "legacy (no jti)"},
                 )
 
             if not exp:
                 raise AuthenticationError(
-                    "Token missing expiration - cannot revoke",
-                    details={"jti": jti}
+                    "Token missing expiration - cannot revoke", details={"jti": jti}
                 )
 
             # Calculate remaining TTL for token
@@ -142,11 +141,7 @@ class TokenBlacklistService:
             redis_client = await get_redis()
             key = TokenBlacklistService._get_blacklist_key(jti)
 
-            await redis_client.setex(
-                key,
-                remaining_ttl,
-                "revoked"
-            )
+            await redis_client.setex(key, remaining_ttl, "revoked")
 
             logger.info(f"Token {jti} revoked, blacklist TTL: {remaining_ttl}s")
             return True
@@ -241,9 +236,7 @@ class TokenBlacklistService:
                 if remaining_ttl > 0:
                     blacklist_key = TokenBlacklistService._get_blacklist_key(jti)
                     await redis_client.setex(
-                        blacklist_key,
-                        remaining_ttl,
-                        f"revoked:{reason}"
+                        blacklist_key, remaining_ttl, f"revoked:{reason}"
                     )
                     revoked_count += 1
 
@@ -284,10 +277,7 @@ class TokenBlacklistService:
             )
 
             # Decode bytes if needed and return as list
-            return [
-                t.decode("utf-8") if isinstance(t, bytes) else t
-                for t in tokens
-            ]
+            return [t.decode("utf-8") if isinstance(t, bytes) else t for t in tokens]
 
         except Exception as e:
             logger.error(f"Failed to get user tokens: {e}")

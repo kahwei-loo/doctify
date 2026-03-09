@@ -60,52 +60,78 @@ class WebSocketManager:
             conversation_id: Optional conversation ID for conversation-specific updates
         """
         logger.info("🔌 [WS MANAGER] connect() method called")
-        logger.info(f"🔌 [WS MANAGER] Parameters - user_id: {user_id}, project_id: {project_id}, document_id: {document_id}")
-        logger.info(f"🔌 [WS MANAGER] WebSocket state BEFORE accept(): {websocket.client_state}")
+        logger.info(
+            f"🔌 [WS MANAGER] Parameters - user_id: {user_id}, project_id: {project_id}, document_id: {document_id}"
+        )
+        logger.info(
+            f"🔌 [WS MANAGER] WebSocket state BEFORE accept(): {websocket.client_state}"
+        )
 
         logger.info("🔌 [WS MANAGER] CALLING websocket.accept()...")
         await websocket.accept()
         logger.info(f"✅ [WS MANAGER] websocket.accept() COMPLETED successfully")
-        logger.info(f"✅ [WS MANAGER] WebSocket state AFTER accept(): {websocket.client_state}")
+        logger.info(
+            f"✅ [WS MANAGER] WebSocket state AFTER accept(): {websocket.client_state}"
+        )
 
         # Register user connection
-        logger.info(f"🔌 [WS MANAGER] Registering user connection for user_id: {user_id}")
+        logger.info(
+            f"🔌 [WS MANAGER] Registering user connection for user_id: {user_id}"
+        )
         if user_id not in self.active_connections:
             self.active_connections[user_id] = set()
         self.active_connections[user_id].add(websocket)
-        logger.info(f"✅ [WS MANAGER] User connection registered. Total connections for user: {len(self.active_connections[user_id])}")
+        logger.info(
+            f"✅ [WS MANAGER] User connection registered. Total connections for user: {len(self.active_connections[user_id])}"
+        )
 
         # Register project connection if provided
         if project_id:
-            logger.info(f"🔌 [WS MANAGER] Registering project connection for project_id: {project_id}")
+            logger.info(
+                f"🔌 [WS MANAGER] Registering project connection for project_id: {project_id}"
+            )
             if project_id not in self.project_connections:
                 self.project_connections[project_id] = set()
             self.project_connections[project_id].add(websocket)
-            logger.info(f"✅ [WS MANAGER] Project connection registered. Total connections for project: {len(self.project_connections[project_id])}")
+            logger.info(
+                f"✅ [WS MANAGER] Project connection registered. Total connections for project: {len(self.project_connections[project_id])}"
+            )
 
         # Register document connection if provided
         if document_id:
-            logger.info(f"🔌 [WS MANAGER] Registering document connection for document_id: {document_id}")
+            logger.info(
+                f"🔌 [WS MANAGER] Registering document connection for document_id: {document_id}"
+            )
             if document_id not in self.document_connections:
                 self.document_connections[document_id] = set()
             self.document_connections[document_id].add(websocket)
-            logger.info(f"✅ [WS MANAGER] Document connection registered. Total connections for document: {len(self.document_connections[document_id])}")
+            logger.info(
+                f"✅ [WS MANAGER] Document connection registered. Total connections for document: {len(self.document_connections[document_id])}"
+            )
 
         # Register assistant connection if provided
         if assistant_id:
-            logger.info(f"🔌 [WS MANAGER] Registering assistant connection for assistant_id: {assistant_id}")
+            logger.info(
+                f"🔌 [WS MANAGER] Registering assistant connection for assistant_id: {assistant_id}"
+            )
             if assistant_id not in self.assistant_connections:
                 self.assistant_connections[assistant_id] = set()
             self.assistant_connections[assistant_id].add(websocket)
-            logger.info(f"✅ [WS MANAGER] Assistant connection registered. Total connections for assistant: {len(self.assistant_connections[assistant_id])}")
+            logger.info(
+                f"✅ [WS MANAGER] Assistant connection registered. Total connections for assistant: {len(self.assistant_connections[assistant_id])}"
+            )
 
         # Register conversation connection if provided
         if conversation_id:
-            logger.info(f"🔌 [WS MANAGER] Registering conversation connection for conversation_id: {conversation_id}")
+            logger.info(
+                f"🔌 [WS MANAGER] Registering conversation connection for conversation_id: {conversation_id}"
+            )
             if conversation_id not in self.conversation_connections:
                 self.conversation_connections[conversation_id] = set()
             self.conversation_connections[conversation_id].add(websocket)
-            logger.info(f"✅ [WS MANAGER] Conversation connection registered. Total connections for conversation: {len(self.conversation_connections[conversation_id])}")
+            logger.info(
+                f"✅ [WS MANAGER] Conversation connection registered. Total connections for conversation: {len(self.conversation_connections[conversation_id])}"
+            )
 
         logger.info("✅ [WS MANAGER] connect() method completed successfully")
 
@@ -130,48 +156,70 @@ class WebSocketManager:
             conversation_id: Optional conversation ID
         """
         logger.info("🔌 [WS MANAGER] disconnect() method called")
-        logger.info(f"🔌 [WS MANAGER] Parameters - user_id: {user_id}, project_id: {project_id}, document_id: {document_id}")
+        logger.info(
+            f"🔌 [WS MANAGER] Parameters - user_id: {user_id}, project_id: {project_id}, document_id: {document_id}"
+        )
 
         # Remove from user connections
         if user_id in self.active_connections:
             logger.info(f"🔌 [WS MANAGER] Removing connection from user: {user_id}")
             self.active_connections[user_id].discard(websocket)
             if not self.active_connections[user_id]:
-                logger.info(f"🔌 [WS MANAGER] No more connections for user {user_id}, removing user entry")
+                logger.info(
+                    f"🔌 [WS MANAGER] No more connections for user {user_id}, removing user entry"
+                )
                 del self.active_connections[user_id]
             else:
-                logger.info(f"🔌 [WS MANAGER] User {user_id} still has {len(self.active_connections[user_id])} connections")
+                logger.info(
+                    f"🔌 [WS MANAGER] User {user_id} still has {len(self.active_connections[user_id])} connections"
+                )
 
         # Remove from project connections
         if project_id and project_id in self.project_connections:
-            logger.info(f"🔌 [WS MANAGER] Removing connection from project: {project_id}")
+            logger.info(
+                f"🔌 [WS MANAGER] Removing connection from project: {project_id}"
+            )
             self.project_connections[project_id].discard(websocket)
             if not self.project_connections[project_id]:
-                logger.info(f"🔌 [WS MANAGER] No more connections for project {project_id}, removing project entry")
+                logger.info(
+                    f"🔌 [WS MANAGER] No more connections for project {project_id}, removing project entry"
+                )
                 del self.project_connections[project_id]
 
         # Remove from document connections
         if document_id and document_id in self.document_connections:
-            logger.info(f"🔌 [WS MANAGER] Removing connection from document: {document_id}")
+            logger.info(
+                f"🔌 [WS MANAGER] Removing connection from document: {document_id}"
+            )
             self.document_connections[document_id].discard(websocket)
             if not self.document_connections[document_id]:
-                logger.info(f"🔌 [WS MANAGER] No more connections for document {document_id}, removing document entry")
+                logger.info(
+                    f"🔌 [WS MANAGER] No more connections for document {document_id}, removing document entry"
+                )
                 del self.document_connections[document_id]
 
         # Remove from assistant connections
         if assistant_id and assistant_id in self.assistant_connections:
-            logger.info(f"🔌 [WS MANAGER] Removing connection from assistant: {assistant_id}")
+            logger.info(
+                f"🔌 [WS MANAGER] Removing connection from assistant: {assistant_id}"
+            )
             self.assistant_connections[assistant_id].discard(websocket)
             if not self.assistant_connections[assistant_id]:
-                logger.info(f"🔌 [WS MANAGER] No more connections for assistant {assistant_id}, removing assistant entry")
+                logger.info(
+                    f"🔌 [WS MANAGER] No more connections for assistant {assistant_id}, removing assistant entry"
+                )
                 del self.assistant_connections[assistant_id]
 
         # Remove from conversation connections
         if conversation_id and conversation_id in self.conversation_connections:
-            logger.info(f"🔌 [WS MANAGER] Removing connection from conversation: {conversation_id}")
+            logger.info(
+                f"🔌 [WS MANAGER] Removing connection from conversation: {conversation_id}"
+            )
             self.conversation_connections[conversation_id].discard(websocket)
             if not self.conversation_connections[conversation_id]:
-                logger.info(f"🔌 [WS MANAGER] No more connections for conversation {conversation_id}, removing conversation entry")
+                logger.info(
+                    f"🔌 [WS MANAGER] No more connections for conversation {conversation_id}, removing conversation entry"
+                )
                 del self.conversation_connections[conversation_id]
 
         logger.info("✅ [WS MANAGER] disconnect() method completed")
@@ -364,11 +412,21 @@ class WebSocketManager:
         Returns:
             Dictionary with connection statistics
         """
-        total_user_connections = sum(len(conns) for conns in self.active_connections.values())
-        total_project_connections = sum(len(conns) for conns in self.project_connections.values())
-        total_document_connections = sum(len(conns) for conns in self.document_connections.values())
-        total_assistant_connections = sum(len(conns) for conns in self.assistant_connections.values())
-        total_conversation_connections = sum(len(conns) for conns in self.conversation_connections.values())
+        total_user_connections = sum(
+            len(conns) for conns in self.active_connections.values()
+        )
+        total_project_connections = sum(
+            len(conns) for conns in self.project_connections.values()
+        )
+        total_document_connections = sum(
+            len(conns) for conns in self.document_connections.values()
+        )
+        total_assistant_connections = sum(
+            len(conns) for conns in self.assistant_connections.values()
+        )
+        total_conversation_connections = sum(
+            len(conns) for conns in self.conversation_connections.values()
+        )
 
         return {
             "total_users": len(self.active_connections),
@@ -686,7 +744,9 @@ class WebSocketNotificationService:
         message = self._create_message("conversation.updated", data)
 
         sent_count = await self.manager.send_assistant_message(message, assistant_id)
-        sent_count += await self.manager.send_conversation_message(message, conversation_id)
+        sent_count += await self.manager.send_conversation_message(
+            message, conversation_id
+        )
 
         if user_id:
             sent_count += await self.manager.send_personal_message(message, user_id)
@@ -726,10 +786,14 @@ class WebSocketNotificationService:
             },
         )
 
-        sent_count = await self.manager.send_conversation_message(message, conversation_id)
+        sent_count = await self.manager.send_conversation_message(
+            message, conversation_id
+        )
 
         if assistant_id:
-            sent_count += await self.manager.send_assistant_message(message, assistant_id)
+            sent_count += await self.manager.send_assistant_message(
+                message, assistant_id
+            )
 
         if user_id:
             sent_count += await self.manager.send_personal_message(message, user_id)

@@ -206,7 +206,9 @@ class AssistantMessage(BaseModel):
     )
 
     def __repr__(self) -> str:
-        content_preview = self.content[:50] + "..." if len(self.content) > 50 else self.content
+        content_preview = (
+            self.content[:50] + "..." if len(self.content) > 50 else self.content
+        )
         return f"<AssistantMessage(id={self.id}, role='{self.role}', content='{content_preview}')>"
 
     def to_response_dict(self) -> Dict[str, Any]:

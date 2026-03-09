@@ -30,7 +30,19 @@ class SettingsService:
 
     # Valid values for validation
     VALID_THEMES = {"light", "dark", "system"}
-    VALID_LANGUAGES = {"en", "zh-CN", "ms", "es", "fr", "de", "ja", "ko", "pt", "it", "ru"}
+    VALID_LANGUAGES = {
+        "en",
+        "zh-CN",
+        "ms",
+        "es",
+        "fr",
+        "de",
+        "ja",
+        "ko",
+        "pt",
+        "it",
+        "ru",
+    }
     VALID_DENSITIES = {"compact", "comfortable", "spacious"}
     VALID_DATE_FORMATS = {"YYYY-MM-DD", "DD/MM/YYYY", "MM/DD/YYYY", "DD-MM-YYYY"}
 
@@ -117,13 +129,21 @@ class SettingsService:
             if value is not None:
                 # Validate values
                 if field == "theme" and value not in self.VALID_THEMES:
-                    raise ValueError(f"Invalid theme: {value}. Valid: {self.VALID_THEMES}")
+                    raise ValueError(
+                        f"Invalid theme: {value}. Valid: {self.VALID_THEMES}"
+                    )
                 if field == "language" and value not in self.VALID_LANGUAGES:
-                    raise ValueError(f"Invalid language: {value}. Valid: {self.VALID_LANGUAGES}")
+                    raise ValueError(
+                        f"Invalid language: {value}. Valid: {self.VALID_LANGUAGES}"
+                    )
                 if field == "display_density" and value not in self.VALID_DENSITIES:
-                    raise ValueError(f"Invalid density: {value}. Valid: {self.VALID_DENSITIES}")
+                    raise ValueError(
+                        f"Invalid density: {value}. Valid: {self.VALID_DENSITIES}"
+                    )
                 if field == "date_format" and value not in self.VALID_DATE_FORMATS:
-                    raise ValueError(f"Invalid date format: {value}. Valid: {self.VALID_DATE_FORMATS}")
+                    raise ValueError(
+                        f"Invalid date format: {value}. Valid: {self.VALID_DATE_FORMATS}"
+                    )
 
                 setattr(settings, field, value)
 

@@ -169,7 +169,9 @@ class ApiKeyService(BaseService[ApiKey, ApiKeyRepository]):
                 "last_used_at": key.last_used_at,
                 "expires_at": key.expires_at,
                 "is_active": key.is_active,
-                "is_expired": key.expires_at < datetime.utcnow() if key.expires_at else False,
+                "is_expired": (
+                    key.expires_at < datetime.utcnow() if key.expires_at else False
+                ),
             }
             for key in api_keys
         ]
@@ -323,8 +325,7 @@ class ApiKeyService(BaseService[ApiKey, ApiKeyRepository]):
 
         active_keys = [k for k in all_keys if k.is_active]
         expired_keys = [
-            k for k in all_keys
-            if k.expires_at and k.expires_at < datetime.utcnow()
+            k for k in all_keys if k.expires_at and k.expires_at < datetime.utcnow()
         ]
         revoked_keys = [k for k in all_keys if not k.is_active]
 
@@ -333,10 +334,13 @@ class ApiKeyService(BaseService[ApiKey, ApiKeyRepository]):
             "active_keys": len(active_keys),
             "expired_keys": len(expired_keys),
             "revoked_keys": len(revoked_keys),
-            "recently_used": len([
-                k for k in active_keys
-                if k.last_used_at and (datetime.utcnow() - k.last_used_at).days < 7
-            ]),
+            "recently_used": len(
+                [
+                    k
+                    for k in active_keys
+                    if k.last_used_at and (datetime.utcnow() - k.last_used_at).days < 7
+                ]
+            ),
         }
 
     async def cleanup_expired_keys(

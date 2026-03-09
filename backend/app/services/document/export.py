@@ -171,14 +171,20 @@ class DocumentExportService(BaseService[Document, DocumentRepository]):
             # Get confidence scores from extraction metadata
             confidence_scores = {}
             if document.extraction_metadata:
-                confidence_scores = document.extraction_metadata.get("confidence_scores", {})
+                confidence_scores = document.extraction_metadata.get(
+                    "confidence_scores", {}
+                )
 
             export_data["metadata"] = {
                 "document_id": str(document.id),
                 "filename": document.original_filename,
                 "file_size": document.file_size,
                 "file_type": document.file_type,
-                "processed_at": document.processing_completed_at.isoformat() if document.processing_completed_at else None,
+                "processed_at": (
+                    document.processing_completed_at.isoformat()
+                    if document.processing_completed_at
+                    else None
+                ),
                 "confidence_scores": confidence_scores,
             }
 
@@ -208,11 +214,13 @@ class DocumentExportService(BaseService[Document, DocumentRepository]):
         # Add metadata if present
         if "metadata" in data:
             metadata = data["metadata"]
-            flat_data.update({
-                f"meta_{key}": value
-                for key, value in metadata.items()
-                if key != "confidence_scores"
-            })
+            flat_data.update(
+                {
+                    f"meta_{key}": value
+                    for key, value in metadata.items()
+                    if key != "confidence_scores"
+                }
+            )
 
         # Write CSV
         writer = csv.DictWriter(output, fieldnames=flat_data.keys())
@@ -239,11 +247,13 @@ class DocumentExportService(BaseService[Document, DocumentRepository]):
             # Add metadata if present
             if "metadata" in data:
                 metadata = data["metadata"]
-                flat_data.update({
-                    f"meta_{key}": value
-                    for key, value in metadata.items()
-                    if key != "confidence_scores"
-                })
+                flat_data.update(
+                    {
+                        f"meta_{key}": value
+                        for key, value in metadata.items()
+                        if key != "confidence_scores"
+                    }
+                )
 
             all_fields.update(flat_data.keys())
             flat_data_list.append(flat_data)
@@ -366,7 +376,9 @@ class DocumentExportService(BaseService[Document, DocumentRepository]):
                         lines.extend(self._dict_to_xml(item, indent + 4))
                         lines.append(f"{indent_str}  </item>")
                     else:
-                        lines.append(f"{indent_str}  <item>{self._escape_xml(str(item))}</item>")
+                        lines.append(
+                            f"{indent_str}  <item>{self._escape_xml(str(item))}</item>"
+                        )
                 lines.append(f"{indent_str}</{safe_key}>")
             else:
                 escaped_value = self._escape_xml(str(value))

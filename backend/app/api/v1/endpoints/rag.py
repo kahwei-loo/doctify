@@ -249,8 +249,10 @@ async def get_query_history(
         rag_query_repo = RAGQueryRepository(db)
 
         # Get total count
-        count_stmt = select(func.count()).select_from(RAGQuery).where(
-            RAGQuery.user_id == current_user.id
+        count_stmt = (
+            select(func.count())
+            .select_from(RAGQuery)
+            .where(RAGQuery.user_id == current_user.id)
         )
         total_result = await db.execute(count_stmt)
         total = total_result.scalar() or 0
@@ -385,8 +387,10 @@ async def get_rag_stats(
     """
     try:
         # Total queries
-        queries_count_stmt = select(func.count()).select_from(RAGQuery).where(
-            RAGQuery.user_id == current_user.id
+        queries_count_stmt = (
+            select(func.count())
+            .select_from(RAGQuery)
+            .where(RAGQuery.user_id == current_user.id)
         )
         queries_count_result = await db.execute(queries_count_stmt)
         total_queries = queries_count_result.scalar() or 0
@@ -406,9 +410,13 @@ async def get_rag_stats(
         avg_rating_result = await db.execute(avg_rating_stmt)
         average_rating = avg_rating_result.scalar()
 
-        feedback_count_stmt = select(func.count()).select_from(RAGQuery).where(
-            RAGQuery.user_id == current_user.id,
-            RAGQuery.feedback_rating.isnot(None),
+        feedback_count_stmt = (
+            select(func.count())
+            .select_from(RAGQuery)
+            .where(
+                RAGQuery.user_id == current_user.id,
+                RAGQuery.feedback_rating.isnot(None),
+            )
         )
         feedback_count_result = await db.execute(feedback_count_stmt)
         queries_with_feedback = feedback_count_result.scalar() or 0
@@ -543,7 +551,9 @@ async def list_conversations(
     """List conversations for the current user."""
     try:
         conv_repo = RAGConversationRepository(db)
-        convs = await conv_repo.get_by_user_id(current_user.id, limit=limit, offset=offset)
+        convs = await conv_repo.get_by_user_id(
+            current_user.id, limit=limit, offset=offset
+        )
         total = await conv_repo.count({"user_id": current_user.id})
         return RAGConversationListResponse(
             items=[RAGConversationResponse.model_validate(c) for c in convs],
@@ -574,9 +584,11 @@ async def get_conversation(
             raise HTTPException(status_code=404, detail="Conversation not found")
 
         rag_query_repo = RAGQueryRepository(db)
-        queries_stmt = select(RAGQuery).where(
-            RAGQuery.conversation_id == conversation_id
-        ).order_by(RAGQuery.created_at)
+        queries_stmt = (
+            select(RAGQuery)
+            .where(RAGQuery.conversation_id == conversation_id)
+            .order_by(RAGQuery.created_at)
+        )
         result = await db.execute(queries_stmt)
         queries = list(result.scalars().all())
 
@@ -674,8 +686,10 @@ async def get_evaluations(
     try:
         from app.db.models.rag import RAGEvaluation
 
-        count_stmt = select(func.count()).select_from(RAGEvaluation).where(
-            RAGEvaluation.user_id == current_user.id
+        count_stmt = (
+            select(func.count())
+            .select_from(RAGEvaluation)
+            .where(RAGEvaluation.user_id == current_user.id)
         )
         total_result = await db.execute(count_stmt)
         total = total_result.scalar() or 0
@@ -761,6 +775,7 @@ async def trigger_evaluation(
 # Unified Knowledge Query (RAG + Analytics)
 # ===========================
 
+
 @router.post(
     "/knowledge-bases/{kb_id}/unified-query",
     response_model=UnifiedQueryResponse,
@@ -791,6 +806,7 @@ async def unified_query(
     try:
         # Build data source info for the classifier
         from app.db.repositories.knowledge_base import DataSourceRepository
+
         ds_repo = DataSourceRepository(db)
         db_sources = await ds_repo.list_by_kb(kb_id)
 
@@ -801,12 +817,14 @@ async def unified_query(
                 schema = ds.config.get("schema_definition", {})
                 columns = [c["name"] for c in schema.get("columns", [])]
 
-            data_sources.append(DataSourceInfo(
-                id=str(ds.id),
-                type=ds.type,
-                name=ds.name,
-                columns=columns,
-            ))
+            data_sources.append(
+                DataSourceInfo(
+                    id=str(ds.id),
+                    type=ds.type,
+                    name=ds.name,
+                    columns=columns,
+                )
+            )
 
         # Build conversation context for stickiness
         conversation_context = None
@@ -818,7 +836,9 @@ async def unified_query(
             if last_query and last_query.intent_type:
                 conversation_context = {
                     "last_intent": last_query.intent_type,
-                    "last_dataset_id": str(last_query.dataset_id) if last_query.dataset_id else None,
+                    "last_dataset_id": (
+                        str(last_query.dataset_id) if last_query.dataset_id else None
+                    ),
                 }
 
         # Route query
@@ -913,6 +933,7 @@ async def unified_query_stream(
     """Stream unified query response as Server-Sent Events."""
     # Build data source info for the classifier
     from app.db.repositories.knowledge_base import DataSourceRepository
+
     ds_repo = DataSourceRepository(db)
     db_sources = await ds_repo.list_by_kb(kb_id)
 
@@ -923,24 +944,26 @@ async def unified_query_stream(
             schema = ds.config.get("schema_definition", {})
             columns = [c["name"] for c in schema.get("columns", [])]
 
-        data_sources.append(DataSourceInfo(
-            id=str(ds.id),
-            type=ds.type,
-            name=ds.name,
-            columns=columns,
-        ))
+        data_sources.append(
+            DataSourceInfo(
+                id=str(ds.id),
+                type=ds.type,
+                name=ds.name,
+                columns=columns,
+            )
+        )
 
     # Build conversation context for stickiness
     conversation_context = None
     if request.conversation_id:
         query_repo = RAGQueryRepository(db)
-        last_query = await query_repo.get_last_by_conversation(
-            request.conversation_id
-        )
+        last_query = await query_repo.get_last_by_conversation(request.conversation_id)
         if last_query and last_query.intent_type:
             conversation_context = {
                 "last_intent": last_query.intent_type,
-                "last_dataset_id": str(last_query.dataset_id) if last_query.dataset_id else None,
+                "last_dataset_id": (
+                    str(last_query.dataset_id) if last_query.dataset_id else None
+                ),
             }
 
     pipeline = PipelineRouter(db)

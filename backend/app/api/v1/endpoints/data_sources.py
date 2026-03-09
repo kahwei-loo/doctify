@@ -14,7 +14,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.v1.deps import get_current_user, get_db
 from app.db.models.user import User
-from app.db.repositories.knowledge_base import KnowledgeBaseRepository, DataSourceRepository
+from app.db.repositories.knowledge_base import (
+    KnowledgeBaseRepository,
+    DataSourceRepository,
+)
 from app.schemas.data_source import (
     DataSourceCreate,
     DataSourceUpdate,
@@ -39,7 +42,9 @@ router = APIRouter()
 async def list_data_sources(
     kb_id: uuid.UUID,
     skip: int = Query(0, ge=0, description="Number of records to skip"),
-    limit: int = Query(50, ge=1, le=100, description="Maximum number of records to return"),
+    limit: int = Query(
+        50, ge=1, le=100, description="Maximum number of records to return"
+    ),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> DataSourceListResponse:
@@ -204,17 +209,25 @@ async def create_data_source(
         if data.type in ("text", "qa_pairs"):
             try:
                 from app.tasks.knowledge_base import generate_embeddings_task
+
                 generate_embeddings_task.delay(str(ds.id))
-                logger.info(f"Auto-triggered embedding generation for {data.type} data source {ds.id}")
+                logger.info(
+                    f"Auto-triggered embedding generation for {data.type} data source {ds.id}"
+                )
             except Exception as e:
-                logger.warning(f"Failed to auto-trigger embeddings for data source {ds.id}: {e}")
+                logger.warning(
+                    f"Failed to auto-trigger embeddings for data source {ds.id}: {e}"
+                )
         elif data.type == "website":
             try:
                 from app.tasks.knowledge_base import crawl_website_task
+
                 crawl_website_task.delay(str(ds.id))
                 logger.info(f"Auto-triggered crawl for website data source {ds.id}")
             except Exception as e:
-                logger.warning(f"Failed to auto-trigger crawl for data source {ds.id}: {e}")
+                logger.warning(
+                    f"Failed to auto-trigger crawl for data source {ds.id}: {e}"
+                )
 
         # Set counts to 0 for new data source
         ds.document_count = 0
@@ -350,6 +363,7 @@ async def upload_documents_to_data_source(
                 if file_extension == ".pdf":
                     import io
                     from PyPDF2 import PdfReader
+
                     pdf_reader = PdfReader(io.BytesIO(content))
                     text_parts = []
                     for page in pdf_reader.pages:
@@ -357,10 +371,19 @@ async def upload_documents_to_data_source(
                         if page_text:
                             text_parts.append(page_text)
                     extracted_text = "\n\n".join(text_parts) if text_parts else None
-                elif file_extension in (".txt", ".md", ".csv", ".json", ".xml", ".html"):
+                elif file_extension in (
+                    ".txt",
+                    ".md",
+                    ".csv",
+                    ".json",
+                    ".xml",
+                    ".html",
+                ):
                     extracted_text = content.decode("utf-8", errors="replace")
             except Exception as text_err:
-                logger.warning(f"Failed to extract text from {file.filename}: {text_err}")
+                logger.warning(
+                    f"Failed to extract text from {file.filename}: {text_err}"
+                )
 
             # Create document record
             document = Document(
@@ -383,12 +406,14 @@ async def upload_documents_to_data_source(
 
             doc_id_str = str(document.id)
             document_ids.append(doc_id_str)
-            documents_meta.append({
-                "id": doc_id_str,
-                "filename": file.filename or "unknown",
-                "size": file_size,
-                "type": file.content_type or "application/octet-stream",
-            })
+            documents_meta.append(
+                {
+                    "id": doc_id_str,
+                    "filename": file.filename or "unknown",
+                    "size": file_size,
+                    "type": file.content_type or "application/octet-stream",
+                }
+            )
 
         # Update data source config with document IDs and metadata
         current_config = ds.config or {}
@@ -412,7 +437,9 @@ async def upload_documents_to_data_source(
             generate_embeddings_task.delay(str(ds.id))
             logger.info(f"Triggered embedding generation for data source {ds.id}")
         except Exception as e:
-            logger.warning(f"Failed to trigger embedding generation for data source {ds.id}: {e}")
+            logger.warning(
+                f"Failed to trigger embedding generation for data source {ds.id}: {e}"
+            )
 
         return {
             "document_ids": document_ids,
@@ -751,6 +778,7 @@ async def trigger_crawl(
 
         # Trigger Celery task for website crawling
         from app.tasks.knowledge_base import crawl_website_task
+
         task = crawl_website_task.delay(str(ds_id))
         task_id = task.id
 
@@ -852,8 +880,12 @@ async def get_crawl_status(
             else:
                 status_value = task_status.lower()
 
-            pages_crawled = task_info.get("pages_crawled", 0) if isinstance(task_info, dict) else 0
-            total_pages = task_info.get("total_pages") if isinstance(task_info, dict) else None
+            pages_crawled = (
+                task_info.get("pages_crawled", 0) if isinstance(task_info, dict) else 0
+            )
+            total_pages = (
+                task_info.get("total_pages") if isinstance(task_info, dict) else None
+            )
             error = task_info.get("error") if isinstance(task_info, dict) else None
         else:
             # Use data source status if no task_id provided
@@ -899,7 +931,9 @@ async def get_crawl_status(
 async def upload_structured_data(
     kb_id: uuid.UUID,
     file: UploadFile = File(..., description="CSV or XLSX file"),
-    name: Optional[str] = Query(None, description="Data source name (defaults to filename)"),
+    name: Optional[str] = Query(
+        None, description="Data source name (defaults to filename)"
+    ),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -964,12 +998,16 @@ async def upload_structured_data(
                 "columns": [
                     {
                         "name": col.name,
-                        "dtype": col.dtype if isinstance(col.dtype, str) else col.dtype.value,
+                        "dtype": (
+                            col.dtype if isinstance(col.dtype, str) else col.dtype.value
+                        ),
                         "aliases": col.aliases or [],
                         "description": col.description or "",
                         "is_metric": col.is_metric or False,
                         "is_dimension": col.is_dimension or False,
-                        "default_agg": col.default_agg.value if col.default_agg else None,
+                        "default_agg": (
+                            col.default_agg.value if col.default_agg else None
+                        ),
                         "sample_values": col.sample_values or [],
                     }
                     for col in schema_def.columns
@@ -987,13 +1025,15 @@ async def upload_structured_data(
 
         # Create the data source record
         ds_repo = DataSourceRepository(db)
-        ds = await ds_repo.create({
-            "knowledge_base_id": kb_id,
-            "type": "structured_data",
-            "name": ds_name,
-            "config": config,
-            "status": "active",
-        })
+        ds = await ds_repo.create(
+            {
+                "knowledge_base_id": kb_id,
+                "type": "structured_data",
+                "name": ds_name,
+                "config": config,
+                "status": "active",
+            }
+        )
 
         logger.info(
             f"Created structured_data source {ds.id} for KB {kb_id} "

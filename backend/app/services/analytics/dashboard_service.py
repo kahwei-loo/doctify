@@ -93,6 +93,7 @@ class DashboardService:
     async def _compute_dashboard_stats(self, user_id: str) -> DashboardStats:
         """Compute dashboard stats from database."""
         from uuid import UUID
+
         user_uuid = UUID(user_id) if isinstance(user_id, str) else user_id
 
         # Document status counts
@@ -116,40 +117,38 @@ class DashboardService:
         total_documents = sum(status_counts.values())
 
         # Project count
-        project_query = (
-            select(func.count(Project.id))
-            .where(
-                and_(
-                    Project.user_id == user_uuid,
-                    Project.is_active == True,
-                )
+        project_query = select(func.count(Project.id)).where(
+            and_(
+                Project.user_id == user_uuid,
+                Project.is_active == True,
             )
         )
         result = await self.session.execute(project_query)
         total_projects = result.scalar() or 0
 
         # Token usage
-        token_query = (
-            select(func.coalesce(func.sum(Document.tokens_used), 0))
-            .where(
-                and_(
-                    Document.user_id == user_uuid,
-                    Document.is_archived == False,
-                )
+        token_query = select(func.coalesce(func.sum(Document.tokens_used), 0)).where(
+            and_(
+                Document.user_id == user_uuid,
+                Document.is_archived == False,
             )
         )
         result = await self.session.execute(token_query)
         total_tokens = result.scalar() or 0
 
         # Calculate stats
-        processed_count = status_counts.get("completed", 0) + status_counts.get("processed", 0)
+        processed_count = status_counts.get("completed", 0) + status_counts.get(
+            "processed", 0
+        )
         pending_count = status_counts.get("pending", 0)
         processing_count = status_counts.get("processing", 0)
         failed_count = status_counts.get("failed", 0)
 
         # Success rate
         total_processed = processed_count + failed_count
-        success_rate = (processed_count / total_processed) if total_processed > 0 else 0.0
+        success_rate = (
+            (processed_count / total_processed) if total_processed > 0 else 0.0
+        )
 
         # Estimated cost
         estimated_cost = (total_tokens / 1000) * self.TOKEN_COST_PER_1K
@@ -213,6 +212,7 @@ class DashboardService:
     async def _compute_trends(self, user_id: str, days: int) -> TrendData:
         """Compute trend data from database."""
         from uuid import UUID
+
         user_uuid = UUID(user_id) if isinstance(user_id, str) else user_id
 
         end_date = datetime.utcnow().date()
@@ -316,6 +316,7 @@ class DashboardService:
             List of recent documents
         """
         from uuid import UUID
+
         user_uuid = UUID(user_id) if isinstance(user_id, str) else user_id
 
         query = (
@@ -367,6 +368,7 @@ class DashboardService:
             List of project distribution data
         """
         from uuid import UUID
+
         user_uuid = UUID(user_id) if isinstance(user_id, str) else user_id
 
         # Query for document counts per project
@@ -376,10 +378,13 @@ class DashboardService:
                 Project.name,
                 func.count(Document.id).label("doc_count"),
             )
-            .outerjoin(Document, and_(
-                Document.project_id == Project.id,
-                Document.is_archived == False,
-            ))
+            .outerjoin(
+                Document,
+                and_(
+                    Document.project_id == Project.id,
+                    Document.is_archived == False,
+                ),
+            )
             .where(
                 and_(
                     Project.user_id == user_uuid,
@@ -423,7 +428,9 @@ class DashboardService:
         if self.redis:
             pattern = f"dashboard:*:{user_id}*"
             deleted = await self.redis.delete_pattern(pattern)
-            logger.debug(f"Invalidated {deleted} dashboard cache keys for user {user_id}")
+            logger.debug(
+                f"Invalidated {deleted} dashboard cache keys for user {user_id}"
+            )
 
     async def get_unified_stats(
         self,
@@ -466,6 +473,7 @@ class DashboardService:
 
         # Get Assistant stats
         from uuid import UUID
+
         user_uuid = UUID(user_id) if isinstance(user_id, str) else user_id
         assistant_repo = AssistantRepository(self.session)
         assistant_stats = await assistant_repo.get_user_stats(user_uuid)
@@ -519,6 +527,7 @@ class DashboardService:
             TrendComparison with document and conversation trends
         """
         from uuid import UUID
+
         user_uuid = UUID(user_id) if isinstance(user_id, str) else user_id
 
         today = datetime.utcnow().date()
@@ -529,30 +538,24 @@ class DashboardService:
         last_week_end = today - timedelta(days=7)
 
         # Documents this week
-        docs_this_week_query = (
-            select(func.count(Document.id))
-            .where(
-                and_(
-                    Document.user_id == user_uuid,
-                    Document.is_archived == False,
-                    func.date(Document.created_at) >= this_week_start,
-                    func.date(Document.created_at) <= today,
-                )
+        docs_this_week_query = select(func.count(Document.id)).where(
+            and_(
+                Document.user_id == user_uuid,
+                Document.is_archived == False,
+                func.date(Document.created_at) >= this_week_start,
+                func.date(Document.created_at) <= today,
             )
         )
         result = await self.session.execute(docs_this_week_query)
         docs_this_week = result.scalar() or 0
 
         # Documents last week
-        docs_last_week_query = (
-            select(func.count(Document.id))
-            .where(
-                and_(
-                    Document.user_id == user_uuid,
-                    Document.is_archived == False,
-                    func.date(Document.created_at) >= last_week_start,
-                    func.date(Document.created_at) <= last_week_end,
-                )
+        docs_last_week_query = select(func.count(Document.id)).where(
+            and_(
+                Document.user_id == user_uuid,
+                Document.is_archived == False,
+                func.date(Document.created_at) >= last_week_start,
+                func.date(Document.created_at) <= last_week_end,
             )
         )
         result = await self.session.execute(docs_last_week_query)
@@ -560,9 +563,8 @@ class DashboardService:
 
         # Get user's assistant IDs for conversation queries
         from app.db.models.assistant import Assistant
-        assistant_ids_query = (
-            select(Assistant.id).where(Assistant.user_id == user_uuid)
-        )
+
+        assistant_ids_query = select(Assistant.id).where(Assistant.user_id == user_uuid)
         result = await self.session.execute(assistant_ids_query)
         assistant_ids = [row[0] for row in result.fetchall()]
 
@@ -571,27 +573,21 @@ class DashboardService:
         convs_last_week = 0
 
         if assistant_ids:
-            convs_this_week_query = (
-                select(func.count(AssistantConversation.id))
-                .where(
-                    and_(
-                        AssistantConversation.assistant_id.in_(assistant_ids),
-                        func.date(AssistantConversation.created_at) >= this_week_start,
-                        func.date(AssistantConversation.created_at) <= today,
-                    )
+            convs_this_week_query = select(func.count(AssistantConversation.id)).where(
+                and_(
+                    AssistantConversation.assistant_id.in_(assistant_ids),
+                    func.date(AssistantConversation.created_at) >= this_week_start,
+                    func.date(AssistantConversation.created_at) <= today,
                 )
             )
             result = await self.session.execute(convs_this_week_query)
             convs_this_week = result.scalar() or 0
 
-            convs_last_week_query = (
-                select(func.count(AssistantConversation.id))
-                .where(
-                    and_(
-                        AssistantConversation.assistant_id.in_(assistant_ids),
-                        func.date(AssistantConversation.created_at) >= last_week_start,
-                        func.date(AssistantConversation.created_at) <= last_week_end,
-                    )
+            convs_last_week_query = select(func.count(AssistantConversation.id)).where(
+                and_(
+                    AssistantConversation.assistant_id.in_(assistant_ids),
+                    func.date(AssistantConversation.created_at) >= last_week_start,
+                    func.date(AssistantConversation.created_at) <= last_week_end,
                 )
             )
             result = await self.session.execute(convs_last_week_query)
@@ -606,10 +602,14 @@ class DashboardService:
         return TrendComparison(
             documents_this_week=docs_this_week,
             documents_last_week=docs_last_week,
-            documents_change_percent=calc_percent_change(docs_this_week, docs_last_week),
+            documents_change_percent=calc_percent_change(
+                docs_this_week, docs_last_week
+            ),
             conversations_this_week=convs_this_week,
             conversations_last_week=convs_last_week,
-            conversations_change_percent=calc_percent_change(convs_this_week, convs_last_week),
+            conversations_change_percent=calc_percent_change(
+                convs_this_week, convs_last_week
+            ),
         )
 
     async def get_recent_activity(
@@ -631,6 +631,7 @@ class DashboardService:
             List of RecentActivity items sorted by timestamp descending
         """
         from uuid import UUID
+
         user_uuid = UUID(user_id) if isinstance(user_id, str) else user_id
 
         activities: List[RecentActivity] = []
@@ -665,16 +666,20 @@ class DashboardService:
                     timestamp=doc.created_at,
                     metadata={
                         "project_id": str(doc.project_id) if doc.project_id else None,
-                        "processed_at": doc.processing_completed_at.isoformat() if doc.processing_completed_at else None,
+                        "processed_at": (
+                            doc.processing_completed_at.isoformat()
+                            if doc.processing_completed_at
+                            else None
+                        ),
                     },
                 )
             )
 
         # Get recent conversations
         from app.db.models.assistant import Assistant
-        assistant_ids_query = (
-            select(Assistant.id, Assistant.name)
-            .where(Assistant.user_id == user_uuid)
+
+        assistant_ids_query = select(Assistant.id, Assistant.name).where(
+            Assistant.user_id == user_uuid
         )
         result = await self.session.execute(assistant_ids_query)
         assistant_map = {row[0]: row[1] for row in result.fetchall()}
@@ -692,7 +697,9 @@ class DashboardService:
             conversations = result.scalars().all()
 
             for conv in conversations:
-                assistant_name = assistant_map.get(conv.assistant_id, "Unknown Assistant")
+                assistant_name = assistant_map.get(
+                    conv.assistant_id, "Unknown Assistant"
+                )
                 activities.append(
                     RecentActivity(
                         activity_id=str(conv.id),

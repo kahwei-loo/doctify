@@ -68,7 +68,10 @@ class DatasetService:
             abs_path = os.path.abspath(os.path.normpath(parquet_path))
             abs_upload_dir = os.path.abspath(os.path.normpath(INSIGHTS_UPLOAD_DIR))
             # Ensure the path is within the allowed directory
-            return abs_path.startswith(abs_upload_dir + os.sep) or abs_path == abs_upload_dir
+            return (
+                abs_path.startswith(abs_upload_dir + os.sep)
+                or abs_path == abs_upload_dir
+            )
         except Exception:
             return False
 
@@ -114,23 +117,40 @@ class DatasetService:
         return None
 
     @staticmethod
-    def _suggest_aggregation(col_name: str, dtype: DataType) -> Optional[AggregationType]:
+    def _suggest_aggregation(
+        col_name: str, dtype: DataType
+    ) -> Optional[AggregationType]:
         """Suggest default aggregation based on column name and type."""
         name_lower = col_name.lower()
 
         # Count patterns
-        if any(kw in name_lower for kw in ['count', 'quantity', 'qty', 'num', '数量']):
+        if any(kw in name_lower for kw in ["count", "quantity", "qty", "num", "数量"]):
             return AggregationType.SUM
 
         # Sum patterns (money, amount)
-        if any(kw in name_lower for kw in [
-            'amount', 'total', 'sum', 'price', 'cost', 'revenue',
-            'sales', '金额', '总额', '价格', '成本', '收入'
-        ]):
+        if any(
+            kw in name_lower
+            for kw in [
+                "amount",
+                "total",
+                "sum",
+                "price",
+                "cost",
+                "revenue",
+                "sales",
+                "金额",
+                "总额",
+                "价格",
+                "成本",
+                "收入",
+            ]
+        ):
             return AggregationType.SUM
 
         # Average patterns
-        if any(kw in name_lower for kw in ['avg', 'average', 'mean', 'rate', '平均', '率']):
+        if any(
+            kw in name_lower for kw in ["avg", "average", "mean", "rate", "平均", "率"]
+        ):
             return AggregationType.AVG
 
         # Default for numeric types
@@ -149,8 +169,21 @@ class DatasetService:
 
         # Explicit metric patterns
         metric_keywords = [
-            'amount', 'total', 'sum', 'price', 'cost', 'revenue', 'sales',
-            'count', 'quantity', 'qty', '金额', '总额', '价格', '数量', '收入'
+            "amount",
+            "total",
+            "sum",
+            "price",
+            "cost",
+            "revenue",
+            "sales",
+            "count",
+            "quantity",
+            "qty",
+            "金额",
+            "总额",
+            "价格",
+            "数量",
+            "收入",
         ]
         if any(kw in name_lower for kw in metric_keywords):
             return True
@@ -162,14 +195,27 @@ class DatasetService:
         return False
 
     @staticmethod
-    def _is_likely_dimension(col_name: str, dtype: DataType, unique_ratio: float) -> bool:
+    def _is_likely_dimension(
+        col_name: str, dtype: DataType, unique_ratio: float
+    ) -> bool:
         """Determine if column is likely a dimension."""
         name_lower = col_name.lower()
 
         # Explicit dimension patterns
         dimension_keywords = [
-            'category', 'type', 'name', 'status', 'region', 'country',
-            'city', 'department', 'product', '分类', '类型', '名称', '状态'
+            "category",
+            "type",
+            "name",
+            "status",
+            "region",
+            "country",
+            "city",
+            "department",
+            "product",
+            "分类",
+            "类型",
+            "名称",
+            "状态",
         ]
         if any(kw in name_lower for kw in dimension_keywords):
             return True
@@ -183,7 +229,7 @@ class DatasetService:
             return True
 
         # ID columns are dimensions
-        if 'id' in name_lower or '_id' in name_lower:
+        if "id" in name_lower or "_id" in name_lower:
             return True
 
         return False
@@ -194,7 +240,7 @@ class DatasetService:
         file_content: bytes,
         filename: str,
         name: str,
-        description: Optional[str] = None
+        description: Optional[str] = None,
     ) -> Tuple[UUID, SchemaDefinition]:
         """
         Upload and process a dataset file (CSV/XLSX).
@@ -213,30 +259,33 @@ class DatasetService:
 
         # Determine file type
         file_ext = os.path.splitext(filename)[1].lower()
-        if file_ext not in ['.csv', '.xlsx', '.xls']:
+        if file_ext not in [".csv", ".xlsx", ".xls"]:
             raise ValueError(f"Unsupported file type: {file_ext}. Supported: CSV, XLSX")
 
         # Generate unique filename
         timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
-        safe_name = "".join(c if c.isalnum() else "_" for c in os.path.splitext(filename)[0])
+        safe_name = "".join(
+            c if c.isalnum() else "_" for c in os.path.splitext(filename)[0]
+        )
         parquet_filename = f"{user_id}_{timestamp}_{safe_name}.parquet"
         parquet_path = os.path.join(INSIGHTS_UPLOAD_DIR, parquet_filename)
 
         # Read file into pandas
         try:
-            if file_ext == '.csv':
+            if file_ext == ".csv":
                 # Try different encodings
-                for encoding in ['utf-8', 'gbk', 'gb2312', 'latin1']:
+                for encoding in ["utf-8", "gbk", "gb2312", "latin1"]:
                     try:
                         df = pd.read_csv(
-                            pd.io.common.BytesIO(file_content),
-                            encoding=encoding
+                            pd.io.common.BytesIO(file_content), encoding=encoding
                         )
                         break
                     except UnicodeDecodeError:
                         continue
                 else:
-                    raise ValueError("Unable to decode CSV file with supported encodings")
+                    raise ValueError(
+                        "Unable to decode CSV file with supported encodings"
+                    )
             else:  # Excel
                 df = pd.read_excel(pd.io.common.BytesIO(file_content))
         except Exception as e:
@@ -269,7 +318,11 @@ class DatasetService:
                 is_dimension=self._is_likely_dimension(str(col), dtype, unique_ratio),
                 default_agg=self._suggest_aggregation(str(col), dtype),
                 sample_values=self._get_sample_values(series),
-                unique_values=self._get_unique_values(series) if dtype == DataType.STRING else None
+                unique_values=(
+                    self._get_unique_values(series)
+                    if dtype == DataType.STRING
+                    else None
+                ),
             )
             columns.append(col_def)
 
@@ -297,28 +350,28 @@ class DatasetService:
             "storage_path": parquet_path,
             "size_bytes": len(file_content),
             "row_count": row_count,
-            "uploaded_at": datetime.utcnow().isoformat()
+            "uploaded_at": datetime.utcnow().isoformat(),
         }
 
         # Create dataset using repository
-        dataset = await self.dataset_repo.create({
-            "user_id": user_id,
-            "name": name,
-            "description": description,
-            "file_info": file_info,
-            "schema_definition": schema.model_dump(),
-            "status": DatasetStatus.READY.value,
-            "row_count": row_count,
-            "error_message": None,
-        })
+        dataset = await self.dataset_repo.create(
+            {
+                "user_id": user_id,
+                "name": name,
+                "description": description,
+                "file_info": file_info,
+                "schema_definition": schema.model_dump(),
+                "status": DatasetStatus.READY.value,
+                "row_count": row_count,
+                "error_message": None,
+            }
+        )
 
         logger.info(f"Created dataset: {dataset.id}")
         return dataset.id, schema
 
     async def get_dataset(
-        self,
-        dataset_id: UUID,
-        user_id: UUID
+        self, dataset_id: UUID, user_id: UUID
     ) -> Optional[InsightsDataset]:
         """Get dataset by ID for a specific user."""
         return await self.dataset_repo.get_by_id_and_user(dataset_id, user_id)
@@ -328,7 +381,7 @@ class DatasetService:
         user_id: UUID,
         skip: int = 0,
         limit: int = 20,
-        status: Optional[str] = None
+        status: Optional[str] = None,
     ) -> DatasetListResponse:
         """List user's datasets with pagination."""
         user_id_str = str(user_id)
@@ -349,27 +402,26 @@ class DatasetService:
             file_info = DatasetFileInfo(**ds.file_info)
             schema_def = SchemaDefinition(**ds.schema_definition)
 
-            dataset_responses.append(DatasetResponse(
-                id=str(ds.id),
-                user_id=str(ds.user_id),
-                name=ds.name,
-                description=ds.description,
-                file_info=file_info,
-                schema_definition=schema_def,
-                status=DatasetStatus(ds.status),
-                row_count=ds.row_count,
-                error_message=ds.error_message,
-                created_at=ds.created_at,
-                updated_at=ds.updated_at
-            ))
+            dataset_responses.append(
+                DatasetResponse(
+                    id=str(ds.id),
+                    user_id=str(ds.user_id),
+                    name=ds.name,
+                    description=ds.description,
+                    file_info=file_info,
+                    schema_definition=schema_def,
+                    status=DatasetStatus(ds.status),
+                    row_count=ds.row_count,
+                    error_message=ds.error_message,
+                    created_at=ds.created_at,
+                    updated_at=ds.updated_at,
+                )
+            )
 
         return DatasetListResponse(datasets=dataset_responses, total=total)
 
     async def update_schema(
-        self,
-        dataset_id: UUID,
-        user_id: UUID,
-        column_updates: List[ColumnUpdate]
+        self, dataset_id: UUID, user_id: UUID, column_updates: List[ColumnUpdate]
     ) -> SchemaDefinition:
         """Update dataset schema with user-defined semantics."""
         dataset = await self.get_dataset(dataset_id, user_id)
@@ -396,19 +448,15 @@ class DatasetService:
         updated_schema = SchemaDefinition(columns=updated_columns)
 
         # Save to database using repository
-        await self.dataset_repo.update(dataset_id, {
-            "schema_definition": updated_schema.model_dump()
-        })
+        await self.dataset_repo.update(
+            dataset_id, {"schema_definition": updated_schema.model_dump()}
+        )
 
         logger.info(f"Updated schema for dataset: {dataset_id}")
         return updated_schema
 
     async def get_preview(
-        self,
-        dataset_id: UUID,
-        user_id: UUID,
-        limit: int = 100,
-        offset: int = 0
+        self, dataset_id: UUID, user_id: UUID, limit: int = 100, offset: int = 0
     ) -> DatasetPreviewResponse:
         """Get data preview from dataset."""
         dataset = await self.get_dataset(dataset_id, user_id)
@@ -430,7 +478,7 @@ class DatasetService:
         total_rows = len(df)
 
         # Apply offset and limit
-        df_slice = df.iloc[offset:offset + limit]
+        df_slice = df.iloc[offset : offset + limit]
 
         # Convert to response format
         columns = df_slice.columns.tolist()
@@ -439,24 +487,19 @@ class DatasetService:
         # Convert any numpy types to Python types
         rows = [
             [
-                v.isoformat() if hasattr(v, 'isoformat') else
-                (None if pd.isna(v) else v)
+                (
+                    v.isoformat()
+                    if hasattr(v, "isoformat")
+                    else (None if pd.isna(v) else v)
+                )
                 for v in row
             ]
             for row in rows
         ]
 
-        return DatasetPreviewResponse(
-            columns=columns,
-            rows=rows,
-            total_rows=total_rows
-        )
+        return DatasetPreviewResponse(columns=columns, rows=rows, total_rows=total_rows)
 
-    async def delete_dataset(
-        self,
-        dataset_id: UUID,
-        user_id: UUID
-    ) -> bool:
+    async def delete_dataset(self, dataset_id: UUID, user_id: UUID) -> bool:
         """Delete a dataset and its associated data."""
         dataset = await self.get_dataset(dataset_id, user_id)
         if not dataset:
@@ -483,9 +526,7 @@ class DatasetService:
         return result
 
     async def infer_schema_semantics(
-        self,
-        dataset_id: UUID,
-        user_id: UUID
+        self, dataset_id: UUID, user_id: UUID
     ) -> SchemaInferenceResponse:
         """Use rule-based inference to suggest semantic definitions for columns."""
         dataset = await self.get_dataset(dataset_id, user_id)
@@ -502,16 +543,16 @@ class DatasetService:
 
             # Generate aliases based on column name
             aliases = []
-            if 'amount' in name_lower or 'total' in name_lower:
-                aliases.extend(['金额', '总额', '销售额'])
-            elif 'date' in name_lower or 'time' in name_lower:
-                aliases.extend(['日期', '时间'])
-            elif 'product' in name_lower:
-                aliases.extend(['产品', '商品'])
-            elif 'customer' in name_lower:
-                aliases.extend(['客户', '顾客'])
-            elif 'category' in name_lower:
-                aliases.extend(['分类', '类别'])
+            if "amount" in name_lower or "total" in name_lower:
+                aliases.extend(["金额", "总额", "销售额"])
+            elif "date" in name_lower or "time" in name_lower:
+                aliases.extend(["日期", "时间"])
+            elif "product" in name_lower:
+                aliases.extend(["产品", "商品"])
+            elif "customer" in name_lower:
+                aliases.extend(["客户", "顾客"])
+            elif "category" in name_lower:
+                aliases.extend(["分类", "类别"])
 
             # Generate description
             description = f"Column containing {col.dtype.value} data"
@@ -528,7 +569,7 @@ class DatasetService:
                 is_likely_metric=col.is_metric,
                 is_likely_dimension=col.is_dimension,
                 suggested_agg=col.default_agg,
-                confidence=0.7 if aliases else 0.5
+                confidence=0.7 if aliases else 0.5,
             )
             suggestions.append(suggestion)
 
@@ -538,7 +579,9 @@ class DatasetService:
         self,
         dataset_id: UUID,
         status: DatasetStatus,
-        error_message: Optional[str] = None
+        error_message: Optional[str] = None,
     ) -> Optional[InsightsDataset]:
         """Update dataset status."""
-        return await self.dataset_repo.update_status(dataset_id, status.value, error_message)
+        return await self.dataset_repo.update_status(
+            dataset_id, status.value, error_message
+        )

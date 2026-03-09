@@ -41,8 +41,7 @@ def _get_env_defaults() -> Dict[str, str]:
     """Return a dict of purpose → env-var model name."""
     settings = get_settings()
     return {
-        purpose: getattr(settings, field)
-        for purpose, field in _PURPOSE_ENV_MAP.items()
+        purpose: getattr(settings, field) for purpose, field in _PURPOSE_ENV_MAP.items()
     }
 
 
@@ -64,20 +63,24 @@ class AIModelSettingsService:
         for purpose in ModelPurpose:
             db_row = db_by_purpose.get(purpose.value)
             if db_row:
-                settings_list.append(AIModelSettingResponse(
-                    purpose=db_row.purpose,
-                    model_name=db_row.model_name,
-                    display_name=db_row.display_name,
-                    description=db_row.description,
-                    is_active=db_row.is_active,
-                    source="database",
-                ))
+                settings_list.append(
+                    AIModelSettingResponse(
+                        purpose=db_row.purpose,
+                        model_name=db_row.model_name,
+                        display_name=db_row.display_name,
+                        description=db_row.description,
+                        is_active=db_row.is_active,
+                        source="database",
+                    )
+                )
             else:
-                settings_list.append(AIModelSettingResponse(
-                    purpose=purpose.value,
-                    model_name=env_defaults.get(purpose.value, ""),
-                    source="env_default",
-                ))
+                settings_list.append(
+                    AIModelSettingResponse(
+                        purpose=purpose.value,
+                        model_name=env_defaults.get(purpose.value, ""),
+                        source="env_default",
+                    )
+                )
 
         return AIModelSettingsListResponse(
             settings=settings_list,
@@ -131,7 +134,9 @@ class AIModelSettingsService:
             for row in rows
         ]
 
-    async def create_catalog_entry(self, data: CreateModelCatalogEntry) -> ModelCatalogEntry:
+    async def create_catalog_entry(
+        self, data: CreateModelCatalogEntry
+    ) -> ModelCatalogEntry:
         """Add a new model to the catalog. Raises 409 on duplicate model_id."""
         existing = await self._catalog_repo.get_by_model_id(data.model_id)
         if existing:
@@ -140,12 +145,14 @@ class AIModelSettingsService:
                 detail=f"Model '{data.model_id}' already exists in the catalog.",
             )
 
-        row = await self._catalog_repo.create({
-            "model_id": data.model_id,
-            "display_name": data.display_name,
-            "provider": data.provider,
-            "purposes": data.purposes,
-        })
+        row = await self._catalog_repo.create(
+            {
+                "model_id": data.model_id,
+                "display_name": data.display_name,
+                "provider": data.provider,
+                "purposes": data.purposes,
+            }
+        )
         return ModelCatalogEntry(
             id=row.id,
             model_id=row.model_id,
@@ -156,7 +163,9 @@ class AIModelSettingsService:
         )
 
     async def update_catalog_entry(
-        self, entry_id: uuid.UUID, data: UpdateModelCatalogEntry,
+        self,
+        entry_id: uuid.UUID,
+        data: UpdateModelCatalogEntry,
     ) -> ModelCatalogEntry:
         """Partially update a catalog entry."""
         update_fields = data.model_dump(exclude_unset=True)

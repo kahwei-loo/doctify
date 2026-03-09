@@ -21,37 +21,27 @@ class UserPreferencesSchema(BaseModel):
 
     # Allowed preference fields
     language: Optional[str] = Field(
-        None,
-        pattern="^(en|zh|es|fr|de|ja)$",
-        description="User interface language"
+        None, pattern="^(en|zh|es|fr|de|ja)$", description="User interface language"
     )
     timezone: Optional[str] = Field(
-        None,
-        max_length=50,
-        description="User timezone (IANA format)"
+        None, max_length=50, description="User timezone (IANA format)"
     )
     theme: Optional[str] = Field(
-        None,
-        pattern="^(light|dark|auto)$",
-        description="UI theme preference"
+        None, pattern="^(light|dark|auto)$", description="UI theme preference"
     )
     notifications_enabled: Optional[bool] = Field(
-        None,
-        description="Whether notifications are enabled"
+        None, description="Whether notifications are enabled"
     )
     email_notifications: Optional[bool] = Field(
-        None,
-        description="Whether email notifications are enabled"
+        None, description="Whether email notifications are enabled"
     )
     date_format: Optional[str] = Field(
         None,
         pattern="^(YYYY-MM-DD|DD/MM/YYYY|MM/DD/YYYY)$",
-        description="Date format preference"
+        description="Date format preference",
     )
     time_format: Optional[str] = Field(
-        None,
-        pattern="^(12h|24h)$",
-        description="Time format preference"
+        None, pattern="^(12h|24h)$", description="Time format preference"
     )
 
     class Config:
@@ -65,19 +55,21 @@ class UserPreferencesSchema(BaseModel):
                 "notifications_enabled": True,
                 "email_notifications": False,
                 "date_format": "YYYY-MM-DD",
-                "time_format": "24h"
+                "time_format": "24h",
             }
         }
 
-    @validator('*', pre=True)
+    @validator("*", pre=True)
     def prevent_dangerous_values(cls, v):
         """Prevent dangerous values in any field."""
         if isinstance(v, str):
             # Block potential injection attempts
-            dangerous_patterns = ['__', 'admin', 'role', 'permission', 'sudo', 'root']
+            dangerous_patterns = ["__", "admin", "role", "permission", "sudo", "root"]
             v_lower = v.lower()
             if any(pattern in v_lower for pattern in dangerous_patterns):
-                raise ValueError(f"Invalid preference value: contains restricted pattern")
+                raise ValueError(
+                    f"Invalid preference value: contains restricted pattern"
+                )
         return v
 
 
@@ -85,17 +77,13 @@ class UpdateUserRequest(BaseModel):
     """Request model for updating user profile."""
 
     full_name: Optional[str] = Field(
-        None,
-        min_length=1,
-        max_length=100,
-        description="User's full name"
+        None, min_length=1, max_length=100, description="User's full name"
     )
     preferences: Optional[UserPreferencesSchema] = Field(
-        None,
-        description="User preferences (validated against whitelist)"
+        None, description="User preferences (validated against whitelist)"
     )
 
-    @validator('preferences')
+    @validator("preferences")
     def validate_preferences(cls, v):
         """Additional validation for preferences."""
         if v is not None:
@@ -107,10 +95,7 @@ class UpdateUserRequest(BaseModel):
         json_schema_extra = {
             "example": {
                 "full_name": "John Doe",
-                "preferences": {
-                    "language": "en",
-                    "theme": "dark"
-                }
+                "preferences": {"language": "en", "theme": "dark"},
             }
         }
 
@@ -139,10 +124,7 @@ class UserResponse(BaseModel):
                 "is_active": True,
                 "is_verified": True,
                 "role": "user",
-                "preferences": {
-                    "language": "en",
-                    "theme": "dark"
-                },
-                "created_at": "2024-01-15T10:00:00Z"
+                "preferences": {"language": "en", "theme": "dark"},
+                "created_at": "2024-01-15T10:00:00Z",
             }
         }

@@ -17,7 +17,10 @@ from app.db.repositories.assistant_conversation_repository import (
     AssistantConversationRepository,
     AssistantMessageRepository,
 )
-from app.db.repositories.knowledge_base import KnowledgeBaseRepository, DataSourceRepository
+from app.db.repositories.knowledge_base import (
+    KnowledgeBaseRepository,
+    DataSourceRepository,
+)
 from app.services.ai import get_ai_gateway
 from app.services.rag.generation_service import GenerationService
 from app.core.exceptions import NotFoundError, ValidationError
@@ -132,10 +135,12 @@ class PublicChatService:
         if system_prompt:
             messages.append({"role": "system", "content": system_prompt})
         else:
-            messages.append({
-                "role": "system",
-                "content": "You are a helpful AI assistant.",
-            })
+            messages.append(
+                {
+                    "role": "system",
+                    "content": "You are a helpful AI assistant.",
+                }
+            )
         messages.append({"role": "user", "content": content})
 
         response = await self.gateway.acompletion(
@@ -212,13 +217,18 @@ class PublicChatService:
                 )
 
                 # If RAG found no relevant docs, fall back to direct LLM
-                if rag_response.confidence_score == 0.0 or rag_response.model_used == "none":
-                    response_content, model_used, tokens_used = await self._direct_llm_chat(
-                        content=content,
-                        model_name=model_name,
-                        system_prompt=system_prompt,
-                        temperature=temperature,
-                        max_tokens=max_tokens,
+                if (
+                    rag_response.confidence_score == 0.0
+                    or rag_response.model_used == "none"
+                ):
+                    response_content, model_used, tokens_used = (
+                        await self._direct_llm_chat(
+                            content=content,
+                            model_name=model_name,
+                            system_prompt=system_prompt,
+                            temperature=temperature,
+                            max_tokens=max_tokens,
+                        )
                     )
                 else:
                     response_content = rag_response.answer
@@ -236,7 +246,9 @@ class PublicChatService:
 
         except Exception as e:
             logger.error(f"AI generation failed: {e}")
-            response_content = "I'm sorry, I couldn't process your request. Please try again."
+            response_content = (
+                "I'm sorry, I couldn't process your request. Please try again."
+            )
             model_used = None
             tokens_used = None
 
@@ -329,13 +341,18 @@ class PublicChatService:
                 )
 
                 # If RAG found no relevant docs, fall back to direct LLM
-                if rag_response.confidence_score == 0.0 or rag_response.model_used == "none":
-                    response_content, model_used, tokens_used = await self._direct_llm_chat(
-                        content=content,
-                        model_name=model_name,
-                        system_prompt=system_prompt,
-                        temperature=temperature,
-                        max_tokens=max_tokens,
+                if (
+                    rag_response.confidence_score == 0.0
+                    or rag_response.model_used == "none"
+                ):
+                    response_content, model_used, tokens_used = (
+                        await self._direct_llm_chat(
+                            content=content,
+                            model_name=model_name,
+                            system_prompt=system_prompt,
+                            temperature=temperature,
+                            max_tokens=max_tokens,
+                        )
                     )
                 else:
                     response_content = rag_response.answer
@@ -359,7 +376,9 @@ class PublicChatService:
 
         except Exception as e:
             logger.error(f"AI generation failed: {e}")
-            response_content = "I'm sorry, I couldn't process your request. Please try again."
+            response_content = (
+                "I'm sorry, I couldn't process your request. Please try again."
+            )
             model_used = None
             tokens_used = None
             yield {"type": "chunk", "data": response_content}
@@ -387,5 +406,5 @@ class PublicChatService:
                 "conversation_id": str(conversation.id),
                 "message_id": str(assistant_message.id),
                 "model_used": model_used,
-            }
+            },
         }

@@ -119,7 +119,11 @@ class ProjectRepository(BaseRepository[Project]):
             )
 
             if exclude_project_id:
-                project_uuid = uuid.UUID(exclude_project_id) if isinstance(exclude_project_id, str) else exclude_project_id
+                project_uuid = (
+                    uuid.UUID(exclude_project_id)
+                    if isinstance(exclude_project_id, str)
+                    else exclude_project_id
+                )
                 stmt = stmt.where(Project.id != project_uuid)
 
             result = await self.session.execute(stmt)
@@ -287,7 +291,9 @@ class ProjectRepository(BaseRepository[Project]):
             },
         )
 
-    async def count_by_user(self, user_id: str, is_active: Optional[bool] = None) -> int:
+    async def count_by_user(
+        self, user_id: str, is_active: Optional[bool] = None
+    ) -> int:
         """
         Count projects for a user.
 
@@ -468,7 +474,9 @@ class ProjectRepository(BaseRepository[Project]):
             from app.db.models.document import Document
             from sqlalchemy import func
 
-            project_uuid = uuid.UUID(project_id) if isinstance(project_id, str) else project_id
+            project_uuid = (
+                uuid.UUID(project_id) if isinstance(project_id, str) else project_id
+            )
 
             # Get project
             project = await self.get_by_id(project_id)
@@ -476,13 +484,10 @@ class ProjectRepository(BaseRepository[Project]):
                 return None
 
             # Get document count
-            stmt = (
-                select(func.count(Document.id))
-                .where(
-                    and_(
-                        Document.project_id == project_uuid,
-                        Document.is_archived == False,
-                    )
+            stmt = select(func.count(Document.id)).where(
+                and_(
+                    Document.project_id == project_uuid,
+                    Document.is_archived == False,
                 )
             )
 
@@ -523,10 +528,10 @@ class ProjectRepository(BaseRepository[Project]):
 
         # Check if new owner has a project with the same name
         if await self.name_exists(new_user_id, project.name):
-            raise ConflictError(
-                f"User already has a project named '{project.name}'"
-            )
+            raise ConflictError(f"User already has a project named '{project.name}'")
 
-        new_user_uuid = uuid.UUID(new_user_id) if isinstance(new_user_id, str) else new_user_id
+        new_user_uuid = (
+            uuid.UUID(new_user_id) if isinstance(new_user_id, str) else new_user_id
+        )
 
         return await self.update(project_id, {"user_id": new_user_uuid})

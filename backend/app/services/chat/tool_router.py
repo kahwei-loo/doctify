@@ -20,10 +20,7 @@ class ToolRouter:
         self.document_repo = DocumentRepository(session)
 
     async def execute_tool(
-        self,
-        intent: IntentType,
-        user_message: str,
-        context: List[Dict[str, str]]
+        self, intent: IntentType, user_message: str, context: List[Dict[str, str]]
     ) -> Dict[str, Any]:
         """
         Execute appropriate tool based on intent.
@@ -51,30 +48,37 @@ class ToolRouter:
             }
 
         else:
-            return {"response": "I'm still learning how to handle that type of request."}
+            return {
+                "response": "I'm still learning how to handle that type of request."
+            }
 
     async def _handle_document_search(self, user_message: str) -> Dict[str, Any]:
         """Search for documents by name/metadata."""
         # Simplified: Extract search term and query documents
         # In production, use NER or LLM to extract search criteria
-        search_term = user_message.lower().replace("find", "").replace("show me", "").strip()
+        search_term = (
+            user_message.lower().replace("find", "").replace("show me", "").strip()
+        )
 
         # Search documents (simplified)
         documents = await self.document_repo.list(limit=10)
         matching_docs = [
-            doc for doc in documents
-            if search_term in doc.filename.lower()
+            doc for doc in documents if search_term in doc.filename.lower()
         ]
 
         if matching_docs:
-            doc_list = "\n".join([f"- {doc.filename} (ID: {doc.id})" for doc in matching_docs[:5]])
+            doc_list = "\n".join(
+                [f"- {doc.filename} (ID: {doc.id})" for doc in matching_docs[:5]]
+            )
             response = f"I found {len(matching_docs)} matching documents:\n{doc_list}"
         else:
             response = f"No documents found matching '{search_term}'."
 
         return {
             "response": response,
-            "documents": [{"id": str(doc.id), "name": doc.filename} for doc in matching_docs[:5]]
+            "documents": [
+                {"id": str(doc.id), "name": doc.filename} for doc in matching_docs[:5]
+            ],
         }
 
     async def _handle_document_operation(self, user_message: str) -> Dict[str, Any]:

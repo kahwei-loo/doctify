@@ -21,6 +21,7 @@ from dataclasses import dataclass
 @dataclass
 class LocalizationConfig:
     """Configuration for regional document processing."""
+
     region: str = "MY"  # Malaysia default
     language_hints: List[str] = None
     currency: str = "MYR"
@@ -33,16 +34,16 @@ class LocalizationConfig:
 
 # Malaysia-specific constants
 MALAYSIA_SST_RATES = {
-    "service_tax": 0.06,      # 6% Service Tax
-    "sales_tax_5": 0.05,      # 5% Sales Tax (general)
-    "sales_tax_10": 0.10,     # 10% Sales Tax (specific goods)
-    "exempt": 0.0,            # SST Exempt
+    "service_tax": 0.06,  # 6% Service Tax
+    "sales_tax_5": 0.05,  # 5% Sales Tax (general)
+    "sales_tax_10": 0.10,  # 10% Sales Tax (specific goods)
+    "exempt": 0.0,  # SST Exempt
 }
 
 MALAYSIA_COMPANY_PATTERNS = {
-    "ssm_new": r"^\d{12}$",           # New format: 12 digits (e.g., 202401012345)
-    "ssm_old": r"^\d{6,7}-[A-Z]$",    # Old format: 6-7 digits + letter (e.g., 123456-A)
-    "roc": r"^[A-Z]{2}\d{7}$",        # ROC format (e.g., SA1234567)
+    "ssm_new": r"^\d{12}$",  # New format: 12 digits (e.g., 202401012345)
+    "ssm_old": r"^\d{6,7}-[A-Z]$",  # Old format: 6-7 digits + letter (e.g., 123456-A)
+    "roc": r"^[A-Z]{2}\d{7}$",  # ROC format (e.g., SA1234567)
 }
 
 
@@ -114,11 +115,19 @@ class PromptTemplateEngine:
                 "name_zh": "发票",
                 "name_ms": "Invois",
                 "priority_fields": [
-                    "document_number", "date", "due_date",
-                    "vendor_name", "vendor_address", "vendor_tax_id",
-                    "customer_name", "customer_address",
-                    "subtotal", "tax_amount", "total_amount",
-                    "line_items", "payment_terms",
+                    "document_number",
+                    "date",
+                    "due_date",
+                    "vendor_name",
+                    "vendor_address",
+                    "vendor_tax_id",
+                    "customer_name",
+                    "customer_address",
+                    "subtotal",
+                    "tax_amount",
+                    "total_amount",
+                    "line_items",
+                    "payment_terms",
                 ],
                 "hints": (
                     "INVOICE SPECIFIC:\n"
@@ -135,8 +144,13 @@ class PromptTemplateEngine:
                 "name_zh": "收据",
                 "name_ms": "Resit",
                 "priority_fields": [
-                    "date", "time", "vendor_name", "vendor_address",
-                    "total_amount", "payment_method", "change",
+                    "date",
+                    "time",
+                    "vendor_name",
+                    "vendor_address",
+                    "total_amount",
+                    "payment_method",
+                    "change",
                     "line_items",
                 ],
                 "hints": (
@@ -154,9 +168,14 @@ class PromptTemplateEngine:
                 "name_zh": "账单",
                 "name_ms": "Bil",
                 "priority_fields": [
-                    "date", "due_date", "account_number",
-                    "vendor_name", "customer_name",
-                    "previous_balance", "current_charges", "total_due",
+                    "date",
+                    "due_date",
+                    "account_number",
+                    "vendor_name",
+                    "customer_name",
+                    "previous_balance",
+                    "current_charges",
+                    "total_due",
                 ],
                 "hints": (
                     "BILL SPECIFIC (Utility/Service):\n"
@@ -173,9 +192,13 @@ class PromptTemplateEngine:
                 "name_zh": "费用报告",
                 "name_ms": "Laporan Perbelanjaan",
                 "priority_fields": [
-                    "date", "employee_name", "department",
-                    "expense_category", "total_amount",
-                    "line_items", "approval_status",
+                    "date",
+                    "employee_name",
+                    "department",
+                    "expense_category",
+                    "total_amount",
+                    "line_items",
+                    "approval_status",
                 ],
                 "hints": (
                     "EXPENSE REPORT SPECIFIC:\n"
@@ -192,10 +215,14 @@ class PromptTemplateEngine:
                 "name_zh": "银行对账单",
                 "name_ms": "Penyata Bank",
                 "priority_fields": [
-                    "account_number", "account_holder",
-                    "statement_period_start", "statement_period_end",
-                    "opening_balance", "closing_balance",
-                    "total_credits", "total_debits",
+                    "account_number",
+                    "account_holder",
+                    "statement_period_start",
+                    "statement_period_end",
+                    "opening_balance",
+                    "closing_balance",
+                    "total_credits",
+                    "total_debits",
                     "transactions",
                 ],
                 "hints": (
@@ -213,10 +240,18 @@ class PromptTemplateEngine:
                 "name_zh": "工资单",
                 "name_ms": "Slip Gaji",
                 "priority_fields": [
-                    "employee_name", "employee_id", "pay_period",
-                    "basic_salary", "allowances", "deductions",
-                    "gross_salary", "net_salary",
-                    "epf_employee", "epf_employer", "socso", "eis",
+                    "employee_name",
+                    "employee_id",
+                    "pay_period",
+                    "basic_salary",
+                    "allowances",
+                    "deductions",
+                    "gross_salary",
+                    "net_salary",
+                    "epf_employee",
+                    "epf_employer",
+                    "socso",
+                    "eis",
                 ],
                 "hints": (
                     "PAYSLIP SPECIFIC (Malaysia):\n"
@@ -235,10 +270,17 @@ class PromptTemplateEngine:
                 "name_zh": "采购订单",
                 "name_ms": "Pesanan Pembelian",
                 "priority_fields": [
-                    "po_number", "date", "vendor_name",
-                    "ship_to_address", "bill_to_address",
-                    "line_items", "subtotal", "tax", "total",
-                    "delivery_date", "payment_terms",
+                    "po_number",
+                    "date",
+                    "vendor_name",
+                    "ship_to_address",
+                    "bill_to_address",
+                    "line_items",
+                    "subtotal",
+                    "tax",
+                    "total",
+                    "delivery_date",
+                    "payment_terms",
                 ],
                 "hints": (
                     "PURCHASE ORDER SPECIFIC:\n"
@@ -255,9 +297,15 @@ class PromptTemplateEngine:
                 "name_zh": "报价单",
                 "name_ms": "Sebut Harga",
                 "priority_fields": [
-                    "quote_number", "date", "valid_until",
-                    "vendor_name", "customer_name",
-                    "line_items", "subtotal", "tax", "total",
+                    "quote_number",
+                    "date",
+                    "valid_until",
+                    "vendor_name",
+                    "customer_name",
+                    "line_items",
+                    "subtotal",
+                    "tax",
+                    "total",
                 ],
                 "hints": (
                     "QUOTATION SPECIFIC:\n"
@@ -274,9 +322,13 @@ class PromptTemplateEngine:
                 "name_zh": "送货单",
                 "name_ms": "Nota Penghantaran",
                 "priority_fields": [
-                    "document_number", "date", "vendor_name",
-                    "delivery_address", "receiver_name",
-                    "line_items", "reference_po",
+                    "document_number",
+                    "date",
+                    "vendor_name",
+                    "delivery_address",
+                    "receiver_name",
+                    "line_items",
+                    "reference_po",
                 ],
                 "hints": (
                     "DELIVERY NOTE SPECIFIC:\n"
@@ -293,9 +345,14 @@ class PromptTemplateEngine:
                 "name_zh": "贷项通知单",
                 "name_ms": "Nota Kredit",
                 "priority_fields": [
-                    "document_number", "date", "original_invoice",
-                    "vendor_name", "customer_name",
-                    "reason", "line_items", "credit_amount",
+                    "document_number",
+                    "date",
+                    "original_invoice",
+                    "vendor_name",
+                    "customer_name",
+                    "reason",
+                    "line_items",
+                    "credit_amount",
                 ],
                 "hints": (
                     "CREDIT NOTE SPECIFIC:\n"
@@ -311,9 +368,14 @@ class PromptTemplateEngine:
                 "name_zh": "借项通知单",
                 "name_ms": "Nota Debit",
                 "priority_fields": [
-                    "document_number", "date", "original_invoice",
-                    "vendor_name", "customer_name",
-                    "reason", "line_items", "debit_amount",
+                    "document_number",
+                    "date",
+                    "original_invoice",
+                    "vendor_name",
+                    "customer_name",
+                    "reason",
+                    "line_items",
+                    "debit_amount",
                 ],
                 "hints": (
                     "DEBIT NOTE SPECIFIC:\n"
@@ -329,8 +391,12 @@ class PromptTemplateEngine:
                 "name_zh": "合同",
                 "name_ms": "Kontrak",
                 "priority_fields": [
-                    "contract_number", "date", "effective_date",
-                    "parties", "contract_value", "duration",
+                    "contract_number",
+                    "date",
+                    "effective_date",
+                    "parties",
+                    "contract_value",
+                    "duration",
                     "terms_summary",
                 ],
                 "hints": (
@@ -345,12 +411,15 @@ class PromptTemplateEngine:
             },
         }
 
-        return templates.get(doc_type, {
-            "name": "Document",
-            "priority_fields": ["date", "total_amount"],
-            "hints": "",
-            "validation": [],
-        })
+        return templates.get(
+            doc_type,
+            {
+                "name": "Document",
+                "priority_fields": ["date", "total_amount"],
+                "hints": "",
+                "validation": [],
+            },
+        )
 
     def _get_localization_hints(self) -> str:
         """Get Malaysia-specific localization hints."""
@@ -387,7 +456,11 @@ class PromptTemplateEngine:
             parts.append(f"\n\nADDITIONAL GUIDANCE:\n{doc_type_hints}")
 
         # Add localization if not covered
-        if locale_hints and "MALAYSIA" not in base.upper() and "MYR" not in base.upper():
+        if (
+            locale_hints
+            and "MALAYSIA" not in base.upper()
+            and "MYR" not in base.upper()
+        ):
             parts.append(locale_hints)
 
         # Add retry guidance
@@ -430,7 +503,9 @@ class PromptTemplateEngine:
             retry_hints = self._get_retry_hints(retry_context)
             parts.append(retry_hints)
 
-        parts.append("\n\nRemember: Quality over assumptions. Only report what you can SEE.")
+        parts.append(
+            "\n\nRemember: Quality over assumptions. Only report what you can SEE."
+        )
 
         return "".join(parts)
 
@@ -459,7 +534,9 @@ class PromptTemplateEngine:
             for err in errors[:3]:
                 hints.append(f"  - {err.get('message', err.get('code', 'unknown'))}")
 
-        hints.append("\nPay extra attention to these areas and provide higher-quality extraction.")
+        hints.append(
+            "\nPay extra attention to these areas and provide higher-quality extraction."
+        )
 
         return "".join(hints)
 

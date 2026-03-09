@@ -54,15 +54,15 @@ def sanitize_query_params(params: Any) -> Any:
             if not isinstance(key, str):
                 raise ValidationError(
                     f"Query parameter keys must be strings, got {type(key).__name__}",
-                    details={"invalid_key_type": type(key).__name__}
+                    details={"invalid_key_type": type(key).__name__},
                 )
 
             # Block potentially dangerous keys
-            dangerous_keys = ['__proto__', 'constructor', 'prototype']
+            dangerous_keys = ["__proto__", "constructor", "prototype"]
             if key.lower() in dangerous_keys:
                 raise ValidationError(
                     f"Potentially dangerous key '{key}' not allowed in query",
-                    details={"blocked_key": key}
+                    details={"blocked_key": key},
                 )
 
             # Recursively sanitize the value
@@ -73,7 +73,7 @@ def sanitize_query_params(params: Any) -> Any:
     # For any other type, raise an error
     raise ValidationError(
         f"Unsupported parameter type: {type(params).__name__}",
-        details={"unsupported_type": type(params).__name__}
+        details={"unsupported_type": type(params).__name__},
     )
 
 
@@ -111,7 +111,9 @@ def safe_like_pattern(pattern: str, escape_char: str = "\\") -> str:
     return result
 
 
-def validate_sort_field(field_name: str, allowed_fields: Optional[List[str]] = None) -> str:
+def validate_sort_field(
+    field_name: str, allowed_fields: Optional[List[str]] = None
+) -> str:
     """
     Validate and sanitize sort field names.
 
@@ -140,10 +142,10 @@ def validate_sort_field(field_name: str, allowed_fields: Optional[List[str]] = N
         ValidationError: Sort field 'admin' not in allowed fields
     """
     # Check for valid characters (alphanumeric, underscore only for PostgreSQL columns)
-    if not re.match(r'^[a-zA-Z][a-zA-Z0-9_]*$', field_name):
+    if not re.match(r"^[a-zA-Z][a-zA-Z0-9_]*$", field_name):
         raise ValidationError(
             f"Invalid sort field: {field_name}",
-            details={"field_name": field_name, "reason": "invalid_characters"}
+            details={"field_name": field_name, "reason": "invalid_characters"},
         )
 
     # Check against whitelist if provided
@@ -151,7 +153,7 @@ def validate_sort_field(field_name: str, allowed_fields: Optional[List[str]] = N
         if field_name not in allowed_fields:
             raise ValidationError(
                 f"Sort field '{field_name}' not in allowed fields",
-                details={"field_name": field_name, "allowed_fields": allowed_fields}
+                details={"field_name": field_name, "allowed_fields": allowed_fields},
             )
 
     return field_name
@@ -179,23 +181,25 @@ def validate_column_name(column_name: str) -> str:
     """
     # PostgreSQL column names must start with letter or underscore,
     # followed by letters, digits, or underscores
-    if not re.match(r'^[a-zA-Z_][a-zA-Z0-9_]*$', column_name):
+    if not re.match(r"^[a-zA-Z_][a-zA-Z0-9_]*$", column_name):
         raise ValidationError(
             f"Invalid column name: {column_name}",
-            details={"column_name": column_name, "reason": "invalid_characters"}
+            details={"column_name": column_name, "reason": "invalid_characters"},
         )
 
     # Maximum length for PostgreSQL identifiers
     if len(column_name) > 63:
         raise ValidationError(
             f"Column name too long (max 63 characters): {column_name}",
-            details={"column_name": column_name, "length": len(column_name)}
+            details={"column_name": column_name, "length": len(column_name)},
         )
 
     return column_name
 
 
-def validate_table_name(table_name: str, allowed_tables: Optional[List[str]] = None) -> str:
+def validate_table_name(
+    table_name: str, allowed_tables: Optional[List[str]] = None
+) -> str:
     """
     Validate a table name for safe use in dynamic queries.
 
@@ -217,17 +221,17 @@ def validate_table_name(table_name: str, allowed_tables: Optional[List[str]] = N
         ValidationError: Table 'admin' not in allowed tables
     """
     # PostgreSQL table names follow same rules as column names
-    if not re.match(r'^[a-zA-Z_][a-zA-Z0-9_]*$', table_name):
+    if not re.match(r"^[a-zA-Z_][a-zA-Z0-9_]*$", table_name):
         raise ValidationError(
             f"Invalid table name: {table_name}",
-            details={"table_name": table_name, "reason": "invalid_characters"}
+            details={"table_name": table_name, "reason": "invalid_characters"},
         )
 
     # Maximum length for PostgreSQL identifiers
     if len(table_name) > 63:
         raise ValidationError(
             f"Table name too long (max 63 characters): {table_name}",
-            details={"table_name": table_name, "length": len(table_name)}
+            details={"table_name": table_name, "length": len(table_name)},
         )
 
     # Check against whitelist if provided
@@ -235,7 +239,7 @@ def validate_table_name(table_name: str, allowed_tables: Optional[List[str]] = N
         if table_name not in allowed_tables:
             raise ValidationError(
                 f"Table '{table_name}' not in allowed tables",
-                details={"table_name": table_name, "allowed_tables": allowed_tables}
+                details={"table_name": table_name, "allowed_tables": allowed_tables},
             )
 
     return table_name
@@ -269,11 +273,11 @@ def sanitize_text_search(search_term: str, max_length: int = 255) -> str:
     if len(search_term) > max_length:
         raise ValidationError(
             f"Search term too long (max {max_length} characters)",
-            details={"length": len(search_term), "max_length": max_length}
+            details={"length": len(search_term), "max_length": max_length},
         )
 
     # Remove null bytes
-    search_term = search_term.replace('\x00', '')
+    search_term = search_term.replace("\x00", "")
 
     return search_term
 
@@ -300,23 +304,19 @@ def validate_uuid(uuid_string: str) -> str:
     """
     # UUID v4 pattern (also matches other versions)
     uuid_pattern = re.compile(
-        r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$',
-        re.IGNORECASE
+        r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", re.IGNORECASE
     )
 
     if not uuid_pattern.match(uuid_string):
         raise ValidationError(
-            f"Invalid UUID format: {uuid_string}",
-            details={"value": uuid_string}
+            f"Invalid UUID format: {uuid_string}", details={"value": uuid_string}
         )
 
     return uuid_string.lower()
 
 
 def validate_pagination(
-    skip: int = 0,
-    limit: int = 100,
-    max_limit: int = 1000
+    skip: int = 0, limit: int = 100, max_limit: int = 1000
 ) -> tuple[int, int]:
     """
     Validate pagination parameters.
@@ -340,21 +340,15 @@ def validate_pagination(
         ValidationError: Skip must be non-negative
     """
     if skip < 0:
-        raise ValidationError(
-            "Skip must be non-negative",
-            details={"skip": skip}
-        )
+        raise ValidationError("Skip must be non-negative", details={"skip": skip})
 
     if limit < 1:
-        raise ValidationError(
-            "Limit must be at least 1",
-            details={"limit": limit}
-        )
+        raise ValidationError("Limit must be at least 1", details={"limit": limit})
 
     if limit > max_limit:
         raise ValidationError(
             f"Limit exceeds maximum allowed ({max_limit})",
-            details={"limit": limit, "max_limit": max_limit}
+            details={"limit": limit, "max_limit": max_limit},
         )
 
     return (skip, limit)

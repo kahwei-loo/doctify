@@ -175,7 +175,9 @@ class BaseRepository(Generic[ModelType]):
             if load_relationships:
                 for rel_name in load_relationships:
                     if hasattr(self.model_class, rel_name):
-                        stmt = stmt.options(selectinload(getattr(self.model_class, rel_name)))
+                        stmt = stmt.options(
+                            selectinload(getattr(self.model_class, rel_name))
+                        )
 
             # Apply sorting
             if sort_by:

@@ -12,13 +12,14 @@ from typing import Optional, List, Any, Dict
 from pydantic import BaseModel, Field, ConfigDict
 from enum import Enum
 
-
 # ============================================
 # Enums
 # ============================================
 
+
 class DataType(str, Enum):
     """Data type for columns."""
+
     STRING = "string"
     INTEGER = "integer"
     FLOAT = "float"
@@ -28,6 +29,7 @@ class DataType(str, Enum):
 
 class AggregationType(str, Enum):
     """Aggregation types for metrics."""
+
     SUM = "SUM"
     COUNT = "COUNT"
     AVG = "AVG"
@@ -38,6 +40,7 @@ class AggregationType(str, Enum):
 
 class ChartType(str, Enum):
     """Chart types for visualization."""
+
     METRIC_CARD = "metric_card"
     BAR = "bar"
     LINE = "line"
@@ -47,6 +50,7 @@ class ChartType(str, Enum):
 
 class DatasetStatus(str, Enum):
     """Dataset processing status."""
+
     PENDING = "pending"
     PROCESSING = "processing"
     READY = "ready"
@@ -55,6 +59,7 @@ class DatasetStatus(str, Enum):
 
 class QueryStatus(str, Enum):
     """Query execution status."""
+
     PENDING = "pending"
     PROCESSING = "processing"
     COMPLETED = "completed"
@@ -65,8 +70,10 @@ class QueryStatus(str, Enum):
 # Schema Definition Models
 # ============================================
 
+
 class ColumnDefinition(BaseModel):
     """Column definition with semantic information."""
+
     name: str
     dtype: DataType
     aliases: List[str] = []
@@ -81,6 +88,7 @@ class ColumnDefinition(BaseModel):
 
 class SchemaDefinition(BaseModel):
     """Complete schema definition for a dataset."""
+
     columns: List[ColumnDefinition]
 
 
@@ -88,8 +96,10 @@ class SchemaDefinition(BaseModel):
 # Dataset API Models
 # ============================================
 
+
 class DatasetFileInfo(BaseModel):
     """File information for uploaded dataset."""
+
     original_name: str
     storage_path: str
     size_bytes: int
@@ -99,12 +109,16 @@ class DatasetFileInfo(BaseModel):
 
 class DatasetCreate(BaseModel):
     """Request model for creating a dataset."""
+
     name: str = Field(..., min_length=1, max_length=100, description="Dataset name")
-    description: Optional[str] = Field(None, max_length=500, description="Dataset description")
+    description: Optional[str] = Field(
+        None, max_length=500, description="Dataset description"
+    )
 
 
 class DatasetResponse(BaseModel):
     """Response model for dataset."""
+
     id: str = Field(..., description="Dataset UUID")
     user_id: str = Field(..., description="Owner user UUID")
     name: str = Field(..., description="Dataset name")
@@ -122,12 +136,14 @@ class DatasetResponse(BaseModel):
 
 class DatasetListResponse(BaseModel):
     """Response model for listing datasets."""
+
     datasets: List[DatasetResponse]
     total: int
 
 
 class DatasetPreviewResponse(BaseModel):
     """Response model for data preview."""
+
     columns: List[str]
     rows: List[List[Any]]
     total_rows: int
@@ -137,8 +153,10 @@ class DatasetPreviewResponse(BaseModel):
 # Schema Update Models
 # ============================================
 
+
 class ColumnUpdate(BaseModel):
     """Request model for updating column definition."""
+
     name: str
     aliases: List[str] = []
     description: Optional[str] = None
@@ -149,6 +167,7 @@ class ColumnUpdate(BaseModel):
 
 class SchemaUpdateRequest(BaseModel):
     """Request model for updating schema."""
+
     columns: List[ColumnUpdate]
 
 
@@ -156,25 +175,31 @@ class SchemaUpdateRequest(BaseModel):
 # Conversation Models
 # ============================================
 
+
 class ConversationContext(BaseModel):
     """Context for multi-turn conversations."""
+
     last_query_intent: Optional[Dict[str, Any]] = None
     referenced_entities: Dict[str, Any] = {}
 
 
 class ConversationCreate(BaseModel):
     """Request model for creating a conversation."""
+
     dataset_id: str = Field(..., description="Dataset UUID to query")
     title: Optional[str] = Field(None, max_length=255, description="Conversation title")
 
 
 class ConversationResponse(BaseModel):
     """Response model for conversation."""
+
     id: str = Field(..., description="Conversation UUID")
     user_id: str = Field(..., description="Owner user UUID")
     dataset_id: str = Field(..., description="Dataset UUID")
     title: Optional[str] = Field(None, description="Conversation title")
-    context: Dict[str, Any] = Field(default_factory=dict, description="Conversation context")
+    context: Dict[str, Any] = Field(
+        default_factory=dict, description="Conversation context"
+    )
     created_at: datetime = Field(..., description="Creation timestamp")
     updated_at: datetime = Field(..., description="Last update timestamp")
 
@@ -183,6 +208,7 @@ class ConversationResponse(BaseModel):
 
 class ConversationListResponse(BaseModel):
     """Response model for listing conversations."""
+
     conversations: List[ConversationResponse]
     total: int
 
@@ -191,14 +217,19 @@ class ConversationListResponse(BaseModel):
 # Query Models
 # ============================================
 
+
 class QueryRequest(BaseModel):
     """Request model for sending a query."""
-    message: str = Field(..., min_length=1, max_length=1000, description="Natural language query")
+
+    message: str = Field(
+        ..., min_length=1, max_length=1000, description="Natural language query"
+    )
     language: str = Field("en", description="Query language (en, zh)")
 
 
 class ChartConfig(BaseModel):
     """Chart configuration for visualization."""
+
     type: ChartType
     config: Dict[str, Any] = {}
     data: Optional[List[Dict[str, Any]]] = None
@@ -206,6 +237,7 @@ class ChartConfig(BaseModel):
 
 class QueryIntent(BaseModel):
     """Parsed query intent."""
+
     query_type: str  # aggregation, breakdown, trend, comparison
     metrics: List[Dict[str, Any]] = []
     dimensions: List[str] = []
@@ -218,6 +250,7 @@ class QueryIntent(BaseModel):
 
 class TokenUsage(BaseModel):
     """Token usage for LLM calls."""
+
     prompt_tokens: int = 0
     completion_tokens: int = 0
     total_tokens: int = 0
@@ -225,12 +258,17 @@ class TokenUsage(BaseModel):
 
 class QueryResponse(BaseModel):
     """Response model for a query."""
+
     id: str = Field(..., description="Query UUID")
     conversation_id: str = Field(..., description="Conversation UUID")
     user_input: str = Field(..., description="Original user query")
     response_text: Optional[str] = Field(None, description="Natural language response")
-    response_chart: Optional[ChartConfig] = Field(None, description="Chart configuration")
-    response_insights: Optional[List[str]] = Field(None, description="Generated insights")
+    response_chart: Optional[ChartConfig] = Field(
+        None, description="Chart configuration"
+    )
+    response_insights: Optional[List[str]] = Field(
+        None, description="Generated insights"
+    )
     result: Optional[Dict[str, Any]] = Field(None, description="Query result data")
     generated_sql: Optional[str] = Field(None, description="Generated SQL (debug mode)")
     status: QueryStatus = Field(..., description="Query status")
@@ -243,6 +281,7 @@ class QueryResponse(BaseModel):
 
 class QueryHistoryItem(BaseModel):
     """Single item in query history."""
+
     id: str
     user_input: str
     response_text: Optional[str]
@@ -253,6 +292,7 @@ class QueryHistoryItem(BaseModel):
 
 class QueryHistoryResponse(BaseModel):
     """Response model for query history."""
+
     queries: List[QueryHistoryItem]
     total: int
 
@@ -261,8 +301,10 @@ class QueryHistoryResponse(BaseModel):
 # Schema Inference Models
 # ============================================
 
+
 class ColumnSuggestion(BaseModel):
     """AI-suggested column definition."""
+
     name: str
     inferred_type: DataType
     suggested_aliases: List[str] = []
@@ -275,4 +317,5 @@ class ColumnSuggestion(BaseModel):
 
 class SchemaInferenceResponse(BaseModel):
     """Response model for schema inference."""
+
     suggestions: List[ColumnSuggestion]

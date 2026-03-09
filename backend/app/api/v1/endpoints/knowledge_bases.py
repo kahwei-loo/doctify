@@ -13,7 +13,10 @@ from pydantic import BaseModel, Field
 
 from app.api.v1.deps import get_current_user, get_db
 from app.db.models.user import User
-from app.db.repositories.knowledge_base import KnowledgeBaseRepository, DataSourceRepository
+from app.db.repositories.knowledge_base import (
+    KnowledgeBaseRepository,
+    DataSourceRepository,
+)
 from app.db.repositories.rag import DocumentEmbeddingRepository
 from app.schemas.knowledge_base import (
     KnowledgeBaseCreate,
@@ -74,7 +77,9 @@ async def get_kb_stats(
 )
 async def list_knowledge_bases(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
-    limit: int = Query(50, ge=1, le=100, description="Maximum number of records to return"),
+    limit: int = Query(
+        50, ge=1, le=100, description="Maximum number of records to return"
+    ),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> KnowledgeBaseListResponse:
@@ -471,6 +476,7 @@ async def delete_knowledge_base(
 # Test Query Models & Endpoint
 # ===========================
 
+
 class TestQueryRequest(BaseModel):
     """Request model for testing knowledge base queries."""
 
@@ -511,7 +517,9 @@ class TestQueryResponse(BaseModel):
 
     results: List[TestQueryResult] = Field(..., description="Search results")
     total_embeddings: int = Field(..., description="Total embeddings searched")
-    query_embedding_generated: bool = Field(..., description="Whether query embedding was generated")
+    query_embedding_generated: bool = Field(
+        ..., description="Whether query embedding was generated"
+    )
 
 
 @router.post(

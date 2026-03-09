@@ -60,7 +60,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         self.csp_directives = csp_directives or {
             "default-src": ["'self'"],
             "script-src": ["'self'", "'unsafe-inline'"],  # Adjust for your needs
-            "style-src": ["'self'", "'unsafe-inline'"],   # Adjust for your needs
+            "style-src": ["'self'", "'unsafe-inline'"],  # Adjust for your needs
             "img-src": ["'self'", "data:", "https:"],
             "font-src": ["'self'", "data:"],
             "connect-src": ["'self'"],
@@ -191,10 +191,9 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         # Import Redis here to avoid import errors if Redis not installed
         try:
             import redis.asyncio as aioredis
+
             self.redis = aioredis.from_url(
-                redis_url or settings.REDIS_URL,
-                encoding="utf-8",
-                decode_responses=True
+                redis_url or settings.REDIS_URL, encoding="utf-8", decode_responses=True
             )
         except ImportError:
             raise ImportError(
@@ -204,6 +203,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         except Exception as e:
             # Log error but don't crash - gracefully degrade
             import logging
+
             logger = logging.getLogger(__name__)
             logger.error(f"Failed to initialize Redis for rate limiting: {e}")
             self.redis = None
@@ -222,10 +222,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         return f"rate_limit:{identifier}:{endpoint}"
 
     async def check_rate_limit(
-        self,
-        key: str,
-        max_requests: int,
-        window: int
+        self, key: str, max_requests: int, window: int
     ) -> tuple[bool, dict]:
         """
         Check rate limit using sliding window algorithm.
@@ -243,11 +240,12 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             return True, {
                 "limit": max_requests,
                 "remaining": max_requests,
-                "reset": window
+                "reset": window,
             }
 
         try:
             import time
+
             current_time = time.time()
             window_start = current_time - window
 
@@ -270,7 +268,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                 return False, {
                     "limit": max_requests,
                     "remaining": 0,
-                    "reset": max(int(reset_time), 0)
+                    "reset": max(int(reset_time), 0),
                 }
 
             # Add current request
@@ -282,18 +280,19 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             return True, {
                 "limit": max_requests,
                 "remaining": max_requests - request_count - 1,
-                "reset": window
+                "reset": window,
             }
 
         except Exception as e:
             # Log error and allow request (fail open for availability)
             import logging
+
             logger = logging.getLogger(__name__)
             logger.error(f"Rate limit check failed: {e}")
             return True, {
                 "limit": max_requests,
                 "remaining": max_requests,
-                "reset": window
+                "reset": window,
             }
 
     def get_rate_limit_config(self, path: str) -> tuple[int, int]:
@@ -348,6 +347,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         api_key = request.headers.get("X-API-Key")
         if api_key:
             import hashlib
+
             # Hash API key for privacy
             hashed_key = hashlib.sha256(api_key.encode()).hexdigest()[:16]
             return f"apikey:{hashed_key}"
@@ -405,9 +405,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
         # Check rate limit
         is_allowed, rate_info = await self.check_rate_limit(
-            rate_limit_key,
-            max_requests,
-            window
+            rate_limit_key, max_requests, window
         )
 
         # Return 429 if rate limit exceeded
@@ -417,14 +415,14 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                 content={
                     "error": "Rate limit exceeded",
                     "message": f"Too many requests. Please try again in {rate_info['reset']} seconds.",
-                    "retry_after": rate_info["reset"]
+                    "retry_after": rate_info["reset"],
                 },
                 headers={
                     "X-RateLimit-Limit": str(rate_info["limit"]),
                     "X-RateLimit-Remaining": str(rate_info["remaining"]),
                     "X-RateLimit-Reset": str(rate_info["reset"]),
-                    "Retry-After": str(rate_info["reset"])
-                }
+                    "Retry-After": str(rate_info["reset"]),
+                },
             )
 
         # Process request
@@ -598,6 +596,7 @@ class CSRFProtectionMiddleware(BaseHTTPMiddleware):
         if not header_value:
             # Log CSRF violation attempt
             import logging
+
             logger = logging.getLogger(__name__)
             logger.warning(
                 f"CSRF protection: Missing {self.required_header} header",
@@ -606,7 +605,7 @@ class CSRFProtectionMiddleware(BaseHTTPMiddleware):
                     "method": request.method,
                     "origin": request.headers.get("origin"),
                     "referer": request.headers.get("referer"),
-                }
+                },
             )
 
             return JSONResponse(
@@ -614,7 +613,7 @@ class CSRFProtectionMiddleware(BaseHTTPMiddleware):
                 content={
                     "error": "CSRFError",
                     "message": "CSRF validation failed. Missing required header.",
-                }
+                },
             )
 
         # Optionally validate header value
@@ -624,7 +623,7 @@ class CSRFProtectionMiddleware(BaseHTTPMiddleware):
                 content={
                     "error": "CSRFError",
                     "message": "CSRF validation failed. Invalid header value.",
-                }
+                },
             )
 
         return await call_next(request)

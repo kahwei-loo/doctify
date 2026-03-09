@@ -45,6 +45,7 @@ router = APIRouter()
 # Service Dependency
 # =============================================================================
 
+
 async def get_assistant_service(
     session: AsyncSession = Depends(get_db_session),
 ) -> AssistantService:
@@ -55,6 +56,7 @@ async def get_assistant_service(
 # =============================================================================
 # Assistant Stats Endpoints (MUST be before /{assistant_id} to avoid conflict)
 # =============================================================================
+
 
 @router.get("/stats")
 async def get_assistant_stats(
@@ -92,6 +94,7 @@ async def get_assistant_stats(
 # =============================================================================
 # Assistant CRUD Endpoints
 # =============================================================================
+
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_assistant(
@@ -274,6 +277,7 @@ async def delete_assistant(
 # Assistant Analytics Endpoints
 # =============================================================================
 
+
 @router.get("/{assistant_id}/analytics")
 async def get_assistant_analytics(
     assistant_id: str = Path(..., description="Assistant ID"),
@@ -321,10 +325,13 @@ async def get_assistant_analytics(
 # Conversation Endpoints
 # =============================================================================
 
+
 @router.get("/{assistant_id}/conversations")
 async def list_conversations(
     assistant_id: str = Path(..., description="Assistant ID"),
-    status: Optional[str] = Query(None, description="Filter by status (unresolved, in_progress, resolved)"),
+    status: Optional[str] = Query(
+        None, description="Filter by status (unresolved, in_progress, resolved)"
+    ),
     search: Optional[str] = Query(None, description="Search in message preview"),
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(50, ge=1, le=100, description="Maximum records to return"),
@@ -444,7 +451,9 @@ async def update_conversation_status(
         )
 
 
-@router.delete("/conversations/{conversation_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/conversations/{conversation_id}", status_code=status.HTTP_204_NO_CONTENT
+)
 async def delete_conversation(
     conversation_id: str = Path(..., description="Conversation ID"),
     current_user: User = Depends(get_current_verified_user),
@@ -477,6 +486,7 @@ async def delete_conversation(
 # =============================================================================
 # Message Endpoints
 # =============================================================================
+
 
 @router.get("/conversations/{conversation_id}/messages")
 async def list_messages(
@@ -520,7 +530,9 @@ async def list_messages(
         )
 
 
-@router.post("/conversations/{conversation_id}/messages", status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/conversations/{conversation_id}/messages", status_code=status.HTTP_201_CREATED
+)
 async def send_message(
     data: SendMessageRequest,
     conversation_id: str = Path(..., description="Conversation ID"),

@@ -89,17 +89,23 @@ class AssistantRepository(BaseRepository[Assistant]):
         result = []
         for assistant in assistants:
             # Total conversations
-            total_stmt = select(func.count()).select_from(AssistantConversation).where(
-                AssistantConversation.assistant_id == assistant.id
+            total_stmt = (
+                select(func.count())
+                .select_from(AssistantConversation)
+                .where(AssistantConversation.assistant_id == assistant.id)
             )
             total_result = await self.session.execute(total_stmt)
             total_conversations = total_result.scalar() or 0
 
             # Unresolved conversations
-            unresolved_stmt = select(func.count()).select_from(AssistantConversation).where(
-                and_(
-                    AssistantConversation.assistant_id == assistant.id,
-                    AssistantConversation.status == "unresolved",
+            unresolved_stmt = (
+                select(func.count())
+                .select_from(AssistantConversation)
+                .where(
+                    and_(
+                        AssistantConversation.assistant_id == assistant.id,
+                        AssistantConversation.status == "unresolved",
+                    )
                 )
             )
             unresolved_result = await self.session.execute(unresolved_stmt)
@@ -125,17 +131,23 @@ class AssistantRepository(BaseRepository[Assistant]):
             Dictionary with aggregate stats
         """
         # Total assistants
-        total_stmt = select(func.count()).select_from(Assistant).where(
-            Assistant.user_id == user_id
+        total_stmt = (
+            select(func.count())
+            .select_from(Assistant)
+            .where(Assistant.user_id == user_id)
         )
         total_result = await self.session.execute(total_stmt)
         total_assistants = total_result.scalar() or 0
 
         # Active assistants
-        active_stmt = select(func.count()).select_from(Assistant).where(
-            and_(
-                Assistant.user_id == user_id,
-                Assistant.is_active == True,
+        active_stmt = (
+            select(func.count())
+            .select_from(Assistant)
+            .where(
+                and_(
+                    Assistant.user_id == user_id,
+                    Assistant.is_active == True,
+                )
             )
         )
         active_result = await self.session.execute(active_stmt)
@@ -151,16 +163,22 @@ class AssistantRepository(BaseRepository[Assistant]):
         unresolved_conversations = 0
 
         if assistant_ids:
-            total_conv_stmt = select(func.count()).select_from(AssistantConversation).where(
-                AssistantConversation.assistant_id.in_(assistant_ids)
+            total_conv_stmt = (
+                select(func.count())
+                .select_from(AssistantConversation)
+                .where(AssistantConversation.assistant_id.in_(assistant_ids))
             )
             total_conv_result = await self.session.execute(total_conv_stmt)
             total_conversations = total_conv_result.scalar() or 0
 
-            unresolved_conv_stmt = select(func.count()).select_from(AssistantConversation).where(
-                and_(
-                    AssistantConversation.assistant_id.in_(assistant_ids),
-                    AssistantConversation.status == "unresolved",
+            unresolved_conv_stmt = (
+                select(func.count())
+                .select_from(AssistantConversation)
+                .where(
+                    and_(
+                        AssistantConversation.assistant_id.in_(assistant_ids),
+                        AssistantConversation.status == "unresolved",
+                    )
                 )
             )
             unresolved_conv_result = await self.session.execute(unresolved_conv_stmt)
@@ -193,21 +211,29 @@ class AssistantRepository(BaseRepository[Assistant]):
         period_start = datetime.utcnow() - timedelta(days=period_days)
 
         # Conversations in period
-        conversations_stmt = select(func.count()).select_from(AssistantConversation).where(
-            and_(
-                AssistantConversation.assistant_id == assistant_id,
-                AssistantConversation.created_at >= period_start,
+        conversations_stmt = (
+            select(func.count())
+            .select_from(AssistantConversation)
+            .where(
+                and_(
+                    AssistantConversation.assistant_id == assistant_id,
+                    AssistantConversation.created_at >= period_start,
+                )
             )
         )
         conversations_result = await self.session.execute(conversations_stmt)
         conversations_in_period = conversations_result.scalar() or 0
 
         # Resolved conversations in period
-        resolved_stmt = select(func.count()).select_from(AssistantConversation).where(
-            and_(
-                AssistantConversation.assistant_id == assistant_id,
-                AssistantConversation.created_at >= period_start,
-                AssistantConversation.status == "resolved",
+        resolved_stmt = (
+            select(func.count())
+            .select_from(AssistantConversation)
+            .where(
+                and_(
+                    AssistantConversation.assistant_id == assistant_id,
+                    AssistantConversation.created_at >= period_start,
+                    AssistantConversation.status == "resolved",
+                )
             )
         )
         resolved_result = await self.session.execute(resolved_stmt)

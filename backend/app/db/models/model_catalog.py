@@ -18,9 +18,16 @@ class ModelCatalog(BaseModel):
     __tablename__ = "model_catalog"
 
     model_id: Mapped[str] = mapped_column(
-        String(200), unique=True, nullable=False, index=True,
+        String(200),
+        unique=True,
+        nullable=False,
+        index=True,
     )
     display_name: Mapped[str] = mapped_column(String(100), nullable=False)
     provider: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
-    purposes: Mapped[list] = mapped_column(JSONB, server_default="'[]'::jsonb", nullable=False)
-    is_active: Mapped[bool] = mapped_column(Boolean, server_default="true", nullable=False)
+    purposes: Mapped[list] = mapped_column(
+        JSONB, server_default="'[]'::jsonb", nullable=False
+    )
+    is_active: Mapped[bool] = mapped_column(
+        Boolean, server_default="true", nullable=False
+    )

@@ -28,10 +28,7 @@ class KnowledgeBaseRepository(BaseRepository[KnowledgeBase]):
         super().__init__(session, KnowledgeBase)
 
     async def get_by_user(
-        self,
-        user_id: uuid.UUID | str,
-        skip: int = 0,
-        limit: int = 100
+        self, user_id: uuid.UUID | str, skip: int = 0, limit: int = 100
     ) -> List[KnowledgeBase]:
         """
         Get all knowledge bases for a user ordered by creation date.
@@ -49,13 +46,14 @@ class KnowledgeBaseRepository(BaseRepository[KnowledgeBase]):
                 user_id = uuid.UUID(user_id)
 
             # Query with data_sources relationship eagerly loaded for counting
-            stmt = select(KnowledgeBase).where(
-                KnowledgeBase.user_id == user_id
-            ).options(
-                selectinload(KnowledgeBase.data_sources)
-            ).order_by(
-                KnowledgeBase.created_at.desc()
-            ).offset(skip).limit(limit)
+            stmt = (
+                select(KnowledgeBase)
+                .where(KnowledgeBase.user_id == user_id)
+                .options(selectinload(KnowledgeBase.data_sources))
+                .order_by(KnowledgeBase.created_at.desc())
+                .offset(skip)
+                .limit(limit)
+            )
 
             result = await self.session.execute(stmt)
             kbs = list(result.scalars().all())
@@ -67,7 +65,9 @@ class KnowledgeBaseRepository(BaseRepository[KnowledgeBase]):
                 # Count total embeddings across all data sources
                 embedding_count_query = select(func.count(DocumentEmbedding.id)).where(
                     DocumentEmbedding.data_source_id.in_(
-                        select(DataSource.id).where(DataSource.knowledge_base_id == kb.id)
+                        select(DataSource.id).where(
+                            DataSource.knowledge_base_id == kb.id
+                        )
                     )
                 )
                 embedding_result = await self.session.execute(embedding_count_query)
@@ -105,8 +105,7 @@ class KnowledgeBaseRepository(BaseRepository[KnowledgeBase]):
 
             # Count processing knowledge bases
             processing_query = select(func.count(KnowledgeBase.id)).where(
-                KnowledgeBase.user_id == user_id,
-                KnowledgeBase.status == "processing"
+                KnowledgeBase.user_id == user_id, KnowledgeBase.status == "processing"
             )
             processing_result = await self.session.execute(processing_query)
             processing_count = processing_result.scalar() or 0
@@ -125,7 +124,9 @@ class KnowledgeBaseRepository(BaseRepository[KnowledgeBase]):
                 DocumentEmbedding.data_source_id.in_(
                     select(DataSource.id).where(
                         DataSource.knowledge_base_id.in_(
-                            select(KnowledgeBase.id).where(KnowledgeBase.user_id == user_id)
+                            select(KnowledgeBase.id).where(
+                                KnowledgeBase.user_id == user_id
+                            )
                         )
                     )
                 )
@@ -144,8 +145,7 @@ class KnowledgeBaseRepository(BaseRepository[KnowledgeBase]):
             raise DatabaseError(f"Failed to get knowledge base stats: {str(e)}")
 
     async def get_by_id_with_sources(
-        self,
-        kb_id: uuid.UUID | str
+        self, kb_id: uuid.UUID | str
     ) -> Optional[KnowledgeBase]:
         """
         Get a knowledge base by ID with data sources eagerly loaded.
@@ -160,10 +160,10 @@ class KnowledgeBaseRepository(BaseRepository[KnowledgeBase]):
             if isinstance(kb_id, str):
                 kb_id = uuid.UUID(kb_id)
 
-            stmt = select(KnowledgeBase).where(
-                KnowledgeBase.id == kb_id
-            ).options(
-                selectinload(KnowledgeBase.data_sources)
+            stmt = (
+                select(KnowledgeBase)
+                .where(KnowledgeBase.id == kb_id)
+                .options(selectinload(KnowledgeBase.data_sources))
             )
 
             result = await self.session.execute(stmt)
@@ -176,7 +176,9 @@ class KnowledgeBaseRepository(BaseRepository[KnowledgeBase]):
                 # Count total embeddings
                 embedding_count_query = select(func.count(DocumentEmbedding.id)).where(
                     DocumentEmbedding.data_source_id.in_(
-                        select(DataSource.id).where(DataSource.knowledge_base_id == kb.id)
+                        select(DataSource.id).where(
+                            DataSource.knowledge_base_id == kb.id
+                        )
                     )
                 )
                 embedding_result = await self.session.execute(embedding_count_query)
@@ -195,10 +197,7 @@ class DataSourceRepository(BaseRepository[DataSource]):
         super().__init__(session, DataSource)
 
     async def list_by_kb(
-        self,
-        kb_id: uuid.UUID | str,
-        skip: int = 0,
-        limit: int = 100
+        self, kb_id: uuid.UUID | str, skip: int = 0, limit: int = 100
     ) -> List[DataSource]:
         """
         Get all data sources for a knowledge base ordered by creation date.
@@ -215,11 +214,13 @@ class DataSourceRepository(BaseRepository[DataSource]):
             if isinstance(kb_id, str):
                 kb_id = uuid.UUID(kb_id)
 
-            stmt = select(DataSource).where(
-                DataSource.knowledge_base_id == kb_id
-            ).order_by(
-                DataSource.created_at.desc()
-            ).offset(skip).limit(limit)
+            stmt = (
+                select(DataSource)
+                .where(DataSource.knowledge_base_id == kb_id)
+                .order_by(DataSource.created_at.desc())
+                .offset(skip)
+                .limit(limit)
+            )
 
             result = await self.session.execute(stmt)
             data_sources = list(result.scalars().all())
@@ -238,8 +239,7 @@ class DataSourceRepository(BaseRepository[DataSource]):
             raise DatabaseError(f"Failed to get data sources by KB: {str(e)}")
 
     async def get_by_id_with_embeddings_count(
-        self,
-        ds_id: uuid.UUID | str
+        self, ds_id: uuid.UUID | str
     ) -> Optional[DataSource]:
         """
         Get a data source by ID with embedding count.
@@ -270,10 +270,7 @@ class DataSourceRepository(BaseRepository[DataSource]):
             raise DatabaseError(f"Failed to get data source by ID: {str(e)}")
 
     async def update_status(
-        self,
-        ds_id: uuid.UUID | str,
-        status: str,
-        error_message: Optional[str] = None
+        self, ds_id: uuid.UUID | str, status: str, error_message: Optional[str] = None
     ) -> Optional[DataSource]:
         """
         Update data source status and error message.
@@ -300,8 +297,7 @@ class DataSourceRepository(BaseRepository[DataSource]):
             raise DatabaseError(f"Failed to update data source status: {str(e)}")
 
     async def update_sync_timestamp(
-        self,
-        ds_id: uuid.UUID | str
+        self, ds_id: uuid.UUID | str
     ) -> Optional[DataSource]:
         """
         Update the last_synced_at timestamp to now.
@@ -314,8 +310,7 @@ class DataSourceRepository(BaseRepository[DataSource]):
         """
         try:
             return await self.update(
-                ds_id,
-                {"last_synced_at": datetime.utcnow().isoformat()}
+                ds_id, {"last_synced_at": datetime.utcnow().isoformat()}
             )
 
         except Exception as e:

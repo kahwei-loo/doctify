@@ -15,7 +15,10 @@ from app.db.repositories.document import DocumentRepository
 from app.db.models.document import Document
 from app.services.document.processing import DocumentProcessingService
 from app.services.ocr.orchestrator import OCROrchestrator
-from app.services.notification.redis_events import RedisEventService, RedisNotificationService
+from app.services.notification.redis_events import (
+    RedisEventService,
+    RedisNotificationService,
+)
 from app.core.exceptions import (
     ValidationError,
     FileProcessingError,
@@ -31,6 +34,7 @@ logger = logging.getLogger(__name__)
 # =============================================================================
 # Task Helper Functions
 # =============================================================================
+
 
 async def get_services():
     """
@@ -64,6 +68,7 @@ async def get_services():
 # =============================================================================
 # OCR Processing Tasks
 # =============================================================================
+
 
 @celery_app.task(
     bind=True,
@@ -184,7 +189,9 @@ async def _process_document_async(
         Processing result dictionary
     """
     # Get services
-    processing_service, ocr_orchestrator, notification_service, session = await get_services()
+    processing_service, ocr_orchestrator, notification_service, session = (
+        await get_services()
+    )
 
     try:
         async with session:
@@ -200,7 +207,7 @@ async def _process_document_async(
                     "status": "processing",
                     "processing_started_at": datetime.now(timezone.utc),
                     "celery_task_id": task_id,
-                }
+                },
             )
 
             # Notify status change
@@ -210,7 +217,9 @@ async def _process_document_async(
                 data={
                     "status": "processing",
                     "user_id": str(document.user_id),
-                    "project_id": str(document.project_id) if document.project_id else None,
+                    "project_id": (
+                        str(document.project_id) if document.project_id else None
+                    ),
                 },
             )
 
@@ -225,6 +234,7 @@ async def _process_document_async(
             if document.project_id:
                 # Fetch project config if available
                 from app.db.repositories.project import ProjectRepository
+
                 project_repo = ProjectRepository(session)
                 project = await project_repo.get_by_id(str(document.project_id))
                 if project and project.config:
@@ -239,7 +249,9 @@ async def _process_document_async(
                 enable_validation=True,
                 region="MY",  # Malaysia localization
                 document_id=document_id,  # Pass document_id for logging
-                user_id=str(document.user_id) if document.user_id else None,  # Pass user_id for logging
+                user_id=(
+                    str(document.user_id) if document.user_id else None
+                ),  # Pass user_id for logging
             )
 
             # Convert L2.5 result to extraction result format
@@ -280,21 +292,31 @@ async def _process_document_async(
                     "status": "completed",
                     "processing_completed_at": datetime.now(timezone.utc),
                     "extracted_data": extracted_data_content,
-                    "extracted_text": extracted_text_content if extracted_text_content else None,
+                    "extracted_text": (
+                        extracted_text_content if extracted_text_content else None
+                    ),
                     "extraction_metadata": {
                         "confidence": extraction_result.get("confidence", 0.0),
                         "document_type": extraction_result.get("document_type"),
-                        "document_type_confidence": extraction_result.get("document_type_confidence"),
-                        "field_confidences": extraction_result.get("field_confidences", {}),
+                        "document_type_confidence": extraction_result.get(
+                            "document_type_confidence"
+                        ),
+                        "field_confidences": extraction_result.get(
+                            "field_confidences", {}
+                        ),
                         "token_usage": extraction_result.get("token_usage", {}),
-                        "total_token_usage": extraction_result.get("total_token_usage", {}),
+                        "total_token_usage": extraction_result.get(
+                            "total_token_usage", {}
+                        ),
                         "l25_metadata": extraction_result.get("l25_metadata", {}),
                         "errors": extraction_result.get("errors", []),
                         "process_time": extraction_result.get("process_time", 0),
                         "model": extraction_result.get("metadata", {}).get("model"),
-                        "provider": extraction_result.get("metadata", {}).get("provider"),
+                        "provider": extraction_result.get("metadata", {}).get(
+                            "provider"
+                        ),
                     },
-                }
+                },
             )
 
             # Notify completion
@@ -304,7 +326,9 @@ async def _process_document_async(
                 data={
                     "status": "completed",
                     "user_id": str(document.user_id),
-                    "project_id": str(document.project_id) if document.project_id else None,
+                    "project_id": (
+                        str(document.project_id) if document.project_id else None
+                    ),
                     "confidence": extraction_result.get("confidence", 0.0),
                 },
             )
@@ -314,21 +338,23 @@ async def _process_document_async(
             # Phase 11: Trigger embedding generation after successful OCR completion
             # Only trigger if document has extracted_text
             # Refetch document to get updated data including extracted_text if it was set
-            updated_document = await processing_service.repository.get_by_id(document_id)
+            updated_document = await processing_service.repository.get_by_id(
+                document_id
+            )
             if updated_document and updated_document.extracted_text:
                 logger.info(
                     f"Triggering embedding generation for document {document_id}",
                     extra={
                         "document_id": document_id,
                         "extracted_text_length": len(updated_document.extracted_text),
-                    }
+                    },
                 )
                 # Queue embedding generation task (async, non-blocking)
                 generate_document_embeddings_task.delay(document_id)
             else:
                 logger.warning(
                     f"Document {document_id} completed OCR but has no extracted_text, skipping embedding generation",
-                    extra={"document_id": document_id}
+                    extra={"document_id": document_id},
                 )
 
             return {
@@ -368,7 +394,7 @@ async def _mark_document_failed(
                     "status": "failed",
                     "processing_error": error_message,
                     "processing_completed_at": datetime.now(timezone.utc),
-                }
+                },
             )
 
             # Get document for notification
@@ -382,7 +408,11 @@ async def _mark_document_failed(
                     "status": "failed",
                     "error": error_message,
                     "user_id": str(document.user_id) if document else None,
-                    "project_id": str(document.project_id) if document and document.project_id else None,
+                    "project_id": (
+                        str(document.project_id)
+                        if document and document.project_id
+                        else None
+                    ),
                 },
             )
 
@@ -395,6 +425,7 @@ async def _mark_document_failed(
 # =============================================================================
 # Batch Processing Tasks
 # =============================================================================
+
 
 @celery_app.task(
     bind=True,
@@ -427,10 +458,12 @@ def batch_process_documents(
             document_id=document_id,
             extraction_config=extraction_config,
         )
-        task_ids.append({
-            "document_id": document_id,
-            "task_id": result.id,
-        })
+        task_ids.append(
+            {
+                "document_id": document_id,
+                "task_id": result.id,
+            }
+        )
 
     logger.info(
         f"Queued {len(task_ids)} OCR processing tasks",
@@ -447,6 +480,7 @@ def batch_process_documents(
 # =============================================================================
 # Retry and Cleanup Tasks
 # =============================================================================
+
 
 @celery_app.task(
     bind=True,
@@ -521,10 +555,12 @@ async def _retry_failed_documents_async(
                 result = process_document_ocr.delay(
                     document_id=str(document.id),
                 )
-                task_ids.append({
-                    "document_id": str(document.id),
-                    "task_id": result.id,
-                })
+                task_ids.append(
+                    {
+                        "document_id": str(document.id),
+                        "task_id": result.id,
+                    }
+                )
 
             return {
                 "retried_count": len(task_ids),

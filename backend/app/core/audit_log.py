@@ -132,8 +132,8 @@ class AuditLogger:
                 log_message,
                 extra={
                     "audit_event": log_entry,
-                    "event_json": json.dumps(log_entry, default=str)
-                }
+                    "event_json": json.dumps(log_entry, default=str),
+                },
             )
         else:
             logger.log(
@@ -141,8 +141,8 @@ class AuditLogger:
                 f"{log_message} FAILED",
                 extra={
                     "audit_event": log_entry,
-                    "event_json": json.dumps(log_entry, default=str)
-                }
+                    "event_json": json.dumps(log_entry, default=str),
+                },
             )
 
     @staticmethod

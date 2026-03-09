@@ -42,7 +42,9 @@ router = APIRouter()
 async def create_project(
     name: str = Body(..., description="Project name"),
     description: Optional[str] = Body(None, description="Project description"),
-    extraction_config: Optional[dict] = Body(None, description="Default extraction configuration"),
+    extraction_config: Optional[dict] = Body(
+        None, description="Default extraction configuration"
+    ),
     current_user: User = Depends(get_current_verified_user),
     project_repository: ProjectRepository = Depends(get_project_repository),
 ):
@@ -205,8 +207,7 @@ async def list_projects(
 
         # Get actual total count from repository
         total = await project_repository.count_by_user(
-            str(current_user.id),
-            is_active=None if include_archived else True
+            str(current_user.id), is_active=None if include_archived else True
         )
 
         return paginated_response(
@@ -283,7 +284,9 @@ async def update_project(
 @router.delete("/{project_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_project(
     project_id: str = Path(..., description="Project ID"),
-    permanent: bool = Query(False, description="Permanently delete instead of archiving"),
+    permanent: bool = Query(
+        False, description="Permanently delete instead of archiving"
+    ),
     current_user: User = Depends(get_current_verified_user),
     project_repository: ProjectRepository = Depends(get_project_repository),
     document_repository: DocumentRepository = Depends(get_document_repository),
@@ -310,10 +313,7 @@ async def delete_project(
             await project_repository.delete(project_id)
         else:
             # Archive (soft delete)
-            await project_repository.update(
-                project_id,
-                {"is_archived": True}
-            )
+            await project_repository.update(project_id, {"is_archived": True})
 
         return None
 
@@ -386,7 +386,9 @@ async def get_project_statistics(
 @router.put("/{project_id}/config")
 async def update_extraction_config(
     project_id: str = Path(..., description="Project ID"),
-    config_update: ProjectConfigUpdate = Body(..., description="Updated extraction configuration"),
+    config_update: ProjectConfigUpdate = Body(
+        ..., description="Updated extraction configuration"
+    ),
     current_user: User = Depends(get_current_verified_user),
     project_repository: ProjectRepository = Depends(get_project_repository),
     _: bool = Depends(verify_project_ownership),
@@ -410,10 +412,7 @@ async def update_extraction_config(
         config_dict = config_update.config.model_dump()
 
         # Update project configuration
-        project = await project_repository.update(
-            project_id,
-            {"config": config_dict}
-        )
+        project = await project_repository.update(project_id, {"config": config_dict})
 
         if not project:
             raise NotFoundError("Project not found")
@@ -512,8 +511,7 @@ async def add_extraction_field(
 
         # Update project
         updated_project = await project_repository.update(
-            project_id,
-            {"config": config}
+            project_id, {"config": config}
         )
 
         return success_response(
@@ -527,7 +525,7 @@ async def add_extraction_field(
     except ValidationError as e:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=e.message if hasattr(e, 'message') else str(e),
+            detail=e.message if hasattr(e, "message") else str(e),
         )
     except NotFoundError as e:
         raise HTTPException(
@@ -573,8 +571,7 @@ async def remove_extraction_field(
 
         # Update project
         updated_project = await project_repository.update(
-            project_id,
-            {"config": config}
+            project_id, {"config": config}
         )
 
         return success_response(
@@ -628,8 +625,7 @@ async def add_extraction_table(
 
         # Update project
         updated_project = await project_repository.update(
-            project_id,
-            {"config": config}
+            project_id, {"config": config}
         )
 
         return success_response(
@@ -643,7 +639,7 @@ async def add_extraction_table(
     except ValidationError as e:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=e.message if hasattr(e, 'message') else str(e),
+            detail=e.message if hasattr(e, "message") else str(e),
         )
     except NotFoundError as e:
         raise HTTPException(
@@ -689,8 +685,7 @@ async def remove_extraction_table(
 
         # Update project
         updated_project = await project_repository.update(
-            project_id,
-            {"config": config}
+            project_id, {"config": config}
         )
 
         return success_response(
@@ -737,8 +732,7 @@ async def update_sample_output(
 
         # Update project
         updated_project = await project_repository.update(
-            project_id,
-            {"config": config}
+            project_id, {"config": config}
         )
 
         return success_response(
@@ -759,7 +753,9 @@ async def update_sample_output(
 @router.put("/{project_id}/config/message-content")
 async def update_message_content(
     project_id: str = Path(..., description="Project ID"),
-    message_content: Optional[str] = Body(None, embed=True, description="Custom extraction prompt"),
+    message_content: Optional[str] = Body(
+        None, embed=True, description="Custom extraction prompt"
+    ),
     current_user: User = Depends(get_current_verified_user),
     project_repository: ProjectRepository = Depends(get_project_repository),
     _: bool = Depends(verify_project_ownership),
@@ -785,8 +781,7 @@ async def update_message_content(
 
         # Update project
         updated_project = await project_repository.update(
-            project_id,
-            {"config": config}
+            project_id, {"config": config}
         )
 
         return success_response(

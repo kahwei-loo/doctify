@@ -11,8 +11,30 @@ from fastapi.responses import JSONResponse
 import logging
 
 from app.core.config import get_settings
-from app.middleware import SecurityHeadersMiddleware, RateLimitMiddleware, get_security_middleware_config
-from app.api.v1.endpoints import auth, documents, projects, dashboard, settings, templates, edit_history, insights, rag, chat, websockets, knowledge_bases, data_sources, embeddings, assistants, public_chat, ai_model_settings
+from app.middleware import (
+    SecurityHeadersMiddleware,
+    RateLimitMiddleware,
+    get_security_middleware_config,
+)
+from app.api.v1.endpoints import (
+    auth,
+    documents,
+    projects,
+    dashboard,
+    settings,
+    templates,
+    edit_history,
+    insights,
+    rag,
+    chat,
+    websockets,
+    knowledge_bases,
+    data_sources,
+    embeddings,
+    assistants,
+    public_chat,
+    ai_model_settings,
+)
 from app.db.database import init_db, close_db
 from app.db.redis import init_redis, close_redis
 from app.core.exceptions import (
@@ -34,7 +56,7 @@ config = get_settings()
 # Configure logging
 logging.basicConfig(
     level=logging.INFO if not config.debug else logging.DEBUG,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -74,16 +96,16 @@ def create_application() -> FastAPI:
     # Security: Explicitly specify allowed headers instead of wildcard
     # This prevents potential header injection attacks
     allowed_headers = [
-        "Authorization",          # JWT Bearer token
-        "Content-Type",           # Request body type
-        "Accept",                 # Response type negotiation
-        "Accept-Language",        # Localization
-        "X-API-Key",              # API key authentication
-        "X-Request-ID",           # Request tracing
-        "X-Requested-With",       # AJAX detection (CSRF protection)
-        "Cache-Control",          # Caching directives
-        "If-None-Match",          # ETag caching
-        "If-Modified-Since",      # Conditional requests
+        "Authorization",  # JWT Bearer token
+        "Content-Type",  # Request body type
+        "Accept",  # Response type negotiation
+        "Accept-Language",  # Localization
+        "X-API-Key",  # API key authentication
+        "X-Request-ID",  # Request tracing
+        "X-Requested-With",  # AJAX detection (CSRF protection)
+        "Cache-Control",  # Caching directives
+        "If-None-Match",  # ETag caching
+        "If-Modified-Since",  # Conditional requests
     ]
 
     app.add_middleware(
@@ -143,6 +165,7 @@ def create_application() -> FastAPI:
         try:
             from app.db.database import get_session_factory
             from app.services.ai.gateway import load_settings_into_cache
+
             await load_settings_into_cache(get_session_factory())
         except Exception as e:
             logger.warning(f"AI model settings cache load skipped: {e}")
@@ -183,7 +206,7 @@ def create_application() -> FastAPI:
                 "service": config.project_name,
                 "version": "1.0.0",
                 "environment": config.environment,
-            }
+            },
         )
 
     @app.get("/")
@@ -198,7 +221,11 @@ def create_application() -> FastAPI:
             content={
                 "message": "Doctify API",
                 "version": "1.0.0",
-                "docs": "/docs" if not config.is_production else "Documentation disabled in production",
+                "docs": (
+                    "/docs"
+                    if not config.is_production
+                    else "Documentation disabled in production"
+                ),
             }
         )
 
@@ -213,17 +240,39 @@ def create_application() -> FastAPI:
     app.include_router(dashboard.router, prefix="/api/v1/dashboard", tags=["Dashboard"])
     app.include_router(settings.router, prefix="/api/v1/settings", tags=["Settings"])
     app.include_router(templates.router, prefix="/api/v1/templates", tags=["Templates"])
-    app.include_router(edit_history.router, prefix="/api/v1/edit-history", tags=["Edit History"])
+    app.include_router(
+        edit_history.router, prefix="/api/v1/edit-history", tags=["Edit History"]
+    )
     app.include_router(insights.router, prefix="/api/v1/insights", tags=["Insights"])
-    app.include_router(knowledge_bases.router, prefix="/api/v1", tags=["Knowledge Bases"])  # Phase 1: Knowledge Base endpoints
-    app.include_router(data_sources.router, prefix="/api/v1", tags=["Data Sources"])  # Phase 1: Data Source endpoints
-    app.include_router(embeddings.router, prefix="/api/v1", tags=["Embeddings"])  # Phase 1: Embedding endpoints
-    app.include_router(rag.router, prefix="/api/v1", tags=["RAG"])  # Phase 11: RAG endpoints
-    app.include_router(chat.router, prefix="/api/v1", tags=["Chat"])  # Phase 13: Chat endpoints
-    app.include_router(websockets.router, prefix="/api/v1", tags=["WebSockets"])  # Phase 11: Real-time WebSocket endpoints
-    app.include_router(assistants.router, prefix="/api/v1/assistants", tags=["AI Assistants"])  # Week 5: AI Assistants endpoints
-    app.include_router(public_chat.router, prefix="/api/v1", tags=["Public Chat"])  # Week 5: Public Chat Widget endpoints
-    app.include_router(ai_model_settings.router, prefix="/api/v1/admin/ai-models", tags=["AI Model Settings"])
+    app.include_router(
+        knowledge_bases.router, prefix="/api/v1", tags=["Knowledge Bases"]
+    )  # Phase 1: Knowledge Base endpoints
+    app.include_router(
+        data_sources.router, prefix="/api/v1", tags=["Data Sources"]
+    )  # Phase 1: Data Source endpoints
+    app.include_router(
+        embeddings.router, prefix="/api/v1", tags=["Embeddings"]
+    )  # Phase 1: Embedding endpoints
+    app.include_router(
+        rag.router, prefix="/api/v1", tags=["RAG"]
+    )  # Phase 11: RAG endpoints
+    app.include_router(
+        chat.router, prefix="/api/v1", tags=["Chat"]
+    )  # Phase 13: Chat endpoints
+    app.include_router(
+        websockets.router, prefix="/api/v1", tags=["WebSockets"]
+    )  # Phase 11: Real-time WebSocket endpoints
+    app.include_router(
+        assistants.router, prefix="/api/v1/assistants", tags=["AI Assistants"]
+    )  # Week 5: AI Assistants endpoints
+    app.include_router(
+        public_chat.router, prefix="/api/v1", tags=["Public Chat"]
+    )  # Week 5: Public Chat Widget endpoints
+    app.include_router(
+        ai_model_settings.router,
+        prefix="/api/v1/admin/ai-models",
+        tags=["AI Model Settings"],
+    )
 
     # ========================================================================
     # Exception Handlers
@@ -252,9 +301,18 @@ def create_application() -> FastAPI:
             return {k: v for k, v in details.items() if k in SAFE_DETAIL_KEYS}
         else:
             # In development, filter out potentially sensitive keys
-            sensitive_keys = {"sql", "query", "password", "token", "secret", "key", "trace"}
+            sensitive_keys = {
+                "sql",
+                "query",
+                "password",
+                "token",
+                "secret",
+                "key",
+                "trace",
+            }
             return {
-                k: v for k, v in details.items()
+                k: v
+                for k, v in details.items()
                 if not any(s in k.lower() for s in sensitive_keys)
             }
 
@@ -268,7 +326,7 @@ def create_application() -> FastAPI:
         # Log the full error for debugging
         logger.warning(
             f"AppException: {exc.__class__.__name__} - {exc.message}",
-            extra={"details": exc.details, "path": str(request.url)}
+            extra={"details": exc.details, "path": str(request.url)},
         )
 
         sanitized_details = sanitize_error_details(exc.details, config.is_production)
@@ -278,8 +336,8 @@ def create_application() -> FastAPI:
             content={
                 "error": exc.__class__.__name__,
                 "message": exc.message,
-                **({"details": sanitized_details} if sanitized_details else {})
-            }
+                **({"details": sanitized_details} if sanitized_details else {}),
+            },
         )
 
     @app.exception_handler(AuthenticationError)
@@ -287,7 +345,10 @@ def create_application() -> FastAPI:
         """Handle authentication errors with security-conscious messages."""
         logger.warning(
             f"Authentication failed: {exc.message}",
-            extra={"path": str(request.url), "ip": request.client.host if request.client else "unknown"}
+            extra={
+                "path": str(request.url),
+                "ip": request.client.host if request.client else "unknown",
+            },
         )
 
         # Generic message in production to prevent enumeration attacks
@@ -296,20 +357,19 @@ def create_application() -> FastAPI:
         return JSONResponse(
             status_code=401,
             content={"error": "AuthenticationError", "message": message},
-            headers={"WWW-Authenticate": "Bearer"}
+            headers={"WWW-Authenticate": "Bearer"},
         )
 
     @app.exception_handler(AuthorizationError)
     async def authorization_error_handler(request, exc: AuthorizationError):
         """Handle authorization errors."""
         logger.warning(
-            f"Authorization denied: {exc.message}",
-            extra={"path": str(request.url)}
+            f"Authorization denied: {exc.message}", extra={"path": str(request.url)}
         )
 
         return JSONResponse(
             status_code=403,
-            content={"error": "AuthorizationError", "message": "Access denied"}
+            content={"error": "AuthorizationError", "message": "Access denied"},
         )
 
     @app.exception_handler(DatabaseError)
@@ -322,7 +382,7 @@ def create_application() -> FastAPI:
         logger.error(
             f"Database error: {exc.message}",
             extra={"details": exc.details, "path": str(request.url)},
-            exc_info=True
+            exc_info=True,
         )
 
         # Always return generic message for database errors
@@ -330,8 +390,8 @@ def create_application() -> FastAPI:
             status_code=500,
             content={
                 "error": "DatabaseError",
-                "message": "A database error occurred. Please try again later."
-            }
+                "message": "A database error occurred. Please try again later.",
+            },
         )
 
     @app.exception_handler(ExternalServiceError)
@@ -339,15 +399,15 @@ def create_application() -> FastAPI:
         """Handle external service errors without exposing service details."""
         logger.error(
             f"External service error: {exc.message}",
-            extra={"details": exc.details, "path": str(request.url)}
+            extra={"details": exc.details, "path": str(request.url)},
         )
 
         return JSONResponse(
             status_code=503,
             content={
                 "error": "ExternalServiceError",
-                "message": "An external service is temporarily unavailable. Please try again later."
-            }
+                "message": "An external service is temporarily unavailable. Please try again later.",
+            },
         )
 
     @app.exception_handler(404)
@@ -355,7 +415,7 @@ def create_application() -> FastAPI:
         """Handle 404 errors."""
         return JSONResponse(
             status_code=404,
-            content={"error": "NotFoundError", "message": "Resource not found"}
+            content={"error": "NotFoundError", "message": "Resource not found"},
         )
 
     @app.exception_handler(500)
@@ -372,8 +432,8 @@ def create_application() -> FastAPI:
             status_code=500,
             content={
                 "error": "InternalServerError",
-                "message": "An unexpected error occurred. Please try again later."
-            }
+                "message": "An unexpected error occurred. Please try again later.",
+            },
         )
 
     @app.exception_handler(Exception)
@@ -386,15 +446,15 @@ def create_application() -> FastAPI:
         logger.error(
             f"Unhandled exception: {type(exc).__name__} - {str(exc)}",
             extra={"path": str(request.url)},
-            exc_info=True
+            exc_info=True,
         )
 
         return JSONResponse(
             status_code=500,
             content={
                 "error": "InternalServerError",
-                "message": "An unexpected error occurred. Please try again later."
-            }
+                "message": "An unexpected error occurred. Please try again later.",
+            },
         )
 
     logger.info(f"Application configuration complete. Debug mode: {config.debug}")

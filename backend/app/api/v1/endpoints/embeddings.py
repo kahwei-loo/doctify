@@ -12,7 +12,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.v1.deps import get_current_user, get_db
 from app.db.models.user import User
-from app.db.repositories.knowledge_base import KnowledgeBaseRepository, DataSourceRepository
+from app.db.repositories.knowledge_base import (
+    KnowledgeBaseRepository,
+    DataSourceRepository,
+)
 from app.db.repositories.rag import DocumentEmbeddingRepository
 from app.schemas.rag import EmbeddingResponse
 from app.core.exceptions import DatabaseError
@@ -23,11 +26,13 @@ router = APIRouter()
 
 class GenerateEmbeddingsRequest(BaseModel):
     """Request model for generating embeddings."""
+
     force_regenerate: bool = False
 
 
 class GenerateEmbeddingsResponse(BaseModel):
     """Response model for embedding generation."""
+
     task_id: str
     status: str
     message: str
@@ -35,6 +40,7 @@ class GenerateEmbeddingsResponse(BaseModel):
 
 class EmbeddingListResponse(BaseModel):
     """Response model for embedding list."""
+
     items: List[EmbeddingResponse]
     total: int
     limit: int
@@ -106,9 +112,9 @@ async def generate_embeddings(
 
         # Trigger Celery task for embedding generation
         from app.tasks.knowledge_base import generate_embeddings_task
+
         task = generate_embeddings_task.delay(
-            str(ds_id),
-            force_regenerate=data.force_regenerate
+            str(ds_id), force_regenerate=data.force_regenerate
         )
         task_id = task.id
 
@@ -144,7 +150,9 @@ async def generate_embeddings(
 async def list_embeddings(
     kb_id: uuid.UUID,
     skip: int = Query(0, ge=0, description="Number of records to skip"),
-    limit: int = Query(50, ge=1, le=100, description="Maximum number of records to return"),
+    limit: int = Query(
+        50, ge=1, le=100, description="Maximum number of records to return"
+    ),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> EmbeddingListResponse:
@@ -200,9 +208,7 @@ async def list_embeddings(
 
         # Get embeddings filtered by data_source_ids using repository method
         embeddings = await embedding_repo.get_by_data_source_ids(
-            data_source_ids=ds_ids,
-            skip=skip,
-            limit=limit
+            data_source_ids=ds_ids, skip=skip, limit=limit
         )
 
         # Get total count

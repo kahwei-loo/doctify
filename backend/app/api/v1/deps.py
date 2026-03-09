@@ -30,8 +30,14 @@ from app.services.document.processing import DocumentProcessingService
 from app.services.document.export import DocumentExportService
 from app.services.ocr.orchestrator import OCROrchestrator
 from app.services.storage.factory import get_storage_service
-from app.services.notification.websocket import WebSocketManager, WebSocketNotificationService
-from app.services.notification.redis_events import RedisEventService, RedisNotificationService
+from app.services.notification.websocket import (
+    WebSocketManager,
+    WebSocketNotificationService,
+)
+from app.services.notification.redis_events import (
+    RedisEventService,
+    RedisNotificationService,
+)
 from app.services.edit_history.edit_history_service import EditHistoryService
 from app.services.insights import DatasetService, QueryService
 
@@ -55,6 +61,7 @@ security = HTTPBearer(auto_error=False)
 # Database Dependencies
 # =============================================================================
 
+
 async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
     """
     Get async database session.
@@ -69,6 +76,7 @@ async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
 # =============================================================================
 # Repository Dependencies
 # =============================================================================
+
 
 async def get_document_repository(
     session: AsyncSession = Depends(get_db_session),
@@ -101,6 +109,7 @@ async def get_project_repository(
 # =============================================================================
 # Service Dependencies
 # =============================================================================
+
 
 async def get_auth_service(
     user_repository: UserRepository = Depends(get_user_repository),
@@ -216,6 +225,7 @@ async def get_redis_notification_service(
 # =============================================================================
 # Authentication Dependencies
 # =============================================================================
+
 
 async def get_current_user_from_token(
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
@@ -496,9 +506,13 @@ async def authenticate_websocket(
 
         user_id = payload.get("sub")
         if not user_id:
-            logger.warning("❌ [WS AUTH] Invalid token: missing subject - CALLING websocket.close()")
+            logger.warning(
+                "❌ [WS AUTH] Invalid token: missing subject - CALLING websocket.close()"
+            )
             await websocket.close(code=4001, reason="Invalid token: missing subject")
-            logger.warning("❌ [WS AUTH] websocket.close() completed - raising exception")
+            logger.warning(
+                "❌ [WS AUTH] websocket.close() completed - raising exception"
+            )
             raise WebSocketException(code=4001, reason="Invalid token")
 
         logger.info(f"🔐 [WS AUTH] Token subject (user_id): {user_id}")
@@ -510,23 +524,35 @@ async def authenticate_websocket(
             user = await user_repository.get_by_id(user_id)
 
             if not user:
-                logger.warning(f"❌ [WS AUTH] User not found: {user_id} - CALLING websocket.close()")
+                logger.warning(
+                    f"❌ [WS AUTH] User not found: {user_id} - CALLING websocket.close()"
+                )
                 await websocket.close(code=4001, reason="User not found")
-                logger.warning("❌ [WS AUTH] websocket.close() completed - raising exception")
+                logger.warning(
+                    "❌ [WS AUTH] websocket.close() completed - raising exception"
+                )
                 raise WebSocketException(code=4001, reason="User not found")
 
             if not user.is_active:
-                logger.warning(f"❌ [WS AUTH] User account inactive: {user.email} - CALLING websocket.close()")
+                logger.warning(
+                    f"❌ [WS AUTH] User account inactive: {user.email} - CALLING websocket.close()"
+                )
                 await websocket.close(code=4003, reason="User account is inactive")
-                logger.warning("❌ [WS AUTH] websocket.close() completed - raising exception")
+                logger.warning(
+                    "❌ [WS AUTH] websocket.close() completed - raising exception"
+                )
                 raise WebSocketException(code=4003, reason="User account is inactive")
 
-            logger.info(f"✅ [WS AUTH] Authentication successful for user: {user.email}")
+            logger.info(
+                f"✅ [WS AUTH] Authentication successful for user: {user.email}"
+            )
             logger.info("✅ [WS AUTH] Returning (user_id, user) tuple to endpoint")
             return (user_id, user)
 
     except AuthenticationError as e:
-        logger.error(f"❌ [WS AUTH] AuthenticationError: {e.message} - CALLING websocket.close()")
+        logger.error(
+            f"❌ [WS AUTH] AuthenticationError: {e.message} - CALLING websocket.close()"
+        )
         await websocket.close(code=4001, reason=str(e.message))
         logger.error("❌ [WS AUTH] websocket.close() completed - raising exception")
         raise WebSocketException(code=4001, reason="Authentication failed")
@@ -564,6 +590,7 @@ async def get_websocket_user_id(
 # Permission Dependencies
 # =============================================================================
 
+
 def require_permission(permission: str):
     """
     Create dependency for requiring specific permission.
@@ -577,11 +604,16 @@ def require_permission(permission: str):
     Usage:
         @router.get("/admin", dependencies=[Depends(require_permission("admin"))])
     """
+
     async def check_permission(
         current_user: User = Depends(get_current_active_user),
     ) -> User:
         if not current_user.is_superuser:
-            user_permissions = current_user.preferences.get("permissions", []) if current_user.preferences else []
+            user_permissions = (
+                current_user.preferences.get("permissions", [])
+                if current_user.preferences
+                else []
+            )
             if permission not in user_permissions:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
@@ -595,6 +627,7 @@ def require_permission(permission: str):
 # =============================================================================
 # Resource Ownership Dependencies
 # =============================================================================
+
 
 async def verify_document_ownership(
     document_id: str,
@@ -624,10 +657,14 @@ async def verify_document_ownership(
         )
 
     # Debug logging
-    logger.debug(f"Verifying document ownership: document_id={document_id}, document.user_id={document.user_id}, current_user.id={current_user.id}")
+    logger.debug(
+        f"Verifying document ownership: document_id={document_id}, document.user_id={document.user_id}, current_user.id={current_user.id}"
+    )
 
     if str(document.user_id) != str(current_user.id) and not current_user.is_superuser:
-        logger.error(f"Authorization failed: document.user_id={document.user_id} != current_user.id={current_user.id}")
+        logger.error(
+            f"Authorization failed: document.user_id={document.user_id} != current_user.id={current_user.id}"
+        )
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authorized to access this document",

@@ -29,18 +29,51 @@ class PasswordPolicy:
 
     # Common weak passwords (simplified list - in production, use a comprehensive wordlist)
     COMMON_PASSWORDS = [
-        'password', '123456', '12345678', 'qwerty', 'abc123', 'monkey',
-        'letmein', 'trustno1', 'dragon', 'baseball', 'iloveyou', 'master',
-        'sunshine', 'ashley', 'bailey', 'passw0rd', 'shadow', 'superman',
-        'qazwsx', 'michael', 'football', 'welcome', 'jesus', 'ninja',
-        'mustang', 'password1', '123123', 'admin', 'login', 'welcome123'
+        "password",
+        "123456",
+        "12345678",
+        "qwerty",
+        "abc123",
+        "monkey",
+        "letmein",
+        "trustno1",
+        "dragon",
+        "baseball",
+        "iloveyou",
+        "master",
+        "sunshine",
+        "ashley",
+        "bailey",
+        "passw0rd",
+        "shadow",
+        "superman",
+        "qazwsx",
+        "michael",
+        "football",
+        "welcome",
+        "jesus",
+        "ninja",
+        "mustang",
+        "password1",
+        "123123",
+        "admin",
+        "login",
+        "welcome123",
     ]
 
     # Common patterns to detect
     SEQUENTIAL_PATTERNS = [
-        'abcdefgh', 'bcdefghi', 'cdefghij', 'defghijk',
-        '12345678', '23456789', '01234567', '87654321',
-        'qwertyui', 'asdfghjk', 'zxcvbnm'
+        "abcdefgh",
+        "bcdefghi",
+        "cdefghij",
+        "defghijk",
+        "12345678",
+        "23456789",
+        "01234567",
+        "87654321",
+        "qwertyui",
+        "asdfghjk",
+        "zxcvbnm",
     ]
 
     @classmethod
@@ -70,13 +103,13 @@ class PasswordPolicy:
             errors.append(f"Password must be at most {cls.MAX_LENGTH} characters")
 
         # Complexity validation
-        if cls.REQUIRE_UPPERCASE and not re.search(r'[A-Z]', password):
+        if cls.REQUIRE_UPPERCASE and not re.search(r"[A-Z]", password):
             errors.append("Password must contain at least one uppercase letter")
 
-        if cls.REQUIRE_LOWERCASE and not re.search(r'[a-z]', password):
+        if cls.REQUIRE_LOWERCASE and not re.search(r"[a-z]", password):
             errors.append("Password must contain at least one lowercase letter")
 
-        if cls.REQUIRE_DIGIT and not re.search(r'\d', password):
+        if cls.REQUIRE_DIGIT and not re.search(r"\d", password):
             errors.append("Password must contain at least one digit")
 
         if cls.REQUIRE_SPECIAL and not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
@@ -87,7 +120,7 @@ class PasswordPolicy:
             errors.append("Password is too common, please choose a stronger one")
 
         # Repeated character check
-        if re.search(r'(.)\1{2,}', password):
+        if re.search(r"(.)\1{2,}", password):
             errors.append("Password should not contain repeated characters")
 
         # Sequential pattern check
@@ -164,10 +197,7 @@ class PasswordPolicy:
 
         if not is_valid:
             error_message = "Password validation failed: " + "; ".join(errors)
-            raise ValidationError(
-                error_message,
-                details={"password_errors": errors}
-            )
+            raise ValidationError(error_message, details={"password_errors": errors})
 
     @classmethod
     def get_password_requirements(cls) -> dict:
@@ -189,7 +219,7 @@ class PasswordPolicy:
             "require_lowercase": cls.REQUIRE_LOWERCASE,
             "require_digit": cls.REQUIRE_DIGIT,
             "require_special": cls.REQUIRE_SPECIAL,
-            "allowed_special_characters": "!@#$%^&*(),.?\":{}|<>",
+            "allowed_special_characters": '!@#$%^&*(),.?":{}|<>',
         }
 
     @classmethod

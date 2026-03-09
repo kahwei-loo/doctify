@@ -114,8 +114,7 @@ class PipelineRouter:
         else:
             # Scope to document sources in this KB
             doc_source_ids = [
-                uuid.UUID(ds.id) for ds in data_sources
-                if ds.type != "structured_data"
+                uuid.UUID(ds.id) for ds in data_sources if ds.type != "structured_data"
             ]
             response = await self._handle_rag(
                 query=query,
@@ -185,7 +184,10 @@ class PipelineRouter:
             # Emit intent event
             yield f"data: {json.dumps({'event': 'intent', 'intent_type': classification.intent.value, 'confidence': classification.confidence})}\n\n"
 
-            if classification.intent == IntentType.ANALYTICS and classification.dataset_id:
+            if (
+                classification.intent == IntentType.ANALYTICS
+                and classification.dataset_id
+            ):
                 # Analytics path: run synchronously and yield single result
                 try:
                     response = await self._handle_analytics(
@@ -204,11 +206,14 @@ class PipelineRouter:
                 response.intent_type = "rag"
                 # Scope to document sources in this KB
                 doc_source_ids = [
-                    uuid.UUID(ds.id) for ds in data_sources
+                    uuid.UUID(ds.id)
+                    for ds in data_sources
                     if ds.type != "structured_data"
                 ]
                 try:
-                    async for sse_event in self.generation_service.generate_answer_stream(
+                    async for (
+                        sse_event
+                    ) in self.generation_service.generate_answer_stream(
                         question=query,
                         data_source_ids=doc_source_ids or None,
                         user_id=user_id,
@@ -217,7 +222,7 @@ class PipelineRouter:
                     ):
                         # Re-emit generation_service SSE events in unified format
                         if sse_event.startswith("data: "):
-                            raw = sse_event[len("data: "):].strip()
+                            raw = sse_event[len("data: ") :].strip()
                             try:
                                 parsed = json.loads(raw)
                                 event_type = parsed.get("type", "")

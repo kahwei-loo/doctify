@@ -91,7 +91,9 @@ class UserEntity:
 
         return True
 
-    def record_failed_login_attempt(self, max_attempts: int = 5, lockout_minutes: int = 15) -> bool:
+    def record_failed_login_attempt(
+        self, max_attempts: int = 5, lockout_minutes: int = 15
+    ) -> bool:
         """
         Record a failed login attempt.
 

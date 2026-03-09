@@ -11,8 +11,15 @@ from datetime import datetime
 from typing import Optional, TYPE_CHECKING
 
 from sqlalchemy import (
-    String, Boolean, Integer, BigInteger, DateTime,
-    ForeignKey, Text, Index, Enum as SQLEnum
+    String,
+    Boolean,
+    Integer,
+    BigInteger,
+    DateTime,
+    ForeignKey,
+    Text,
+    Index,
+    Enum as SQLEnum,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID, JSON, ARRAY

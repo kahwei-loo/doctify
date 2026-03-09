@@ -28,6 +28,7 @@ _db_model_cache: dict[str, str] = {}
 
 class ModelPurpose(str, Enum):
     """Logical purpose for model selection."""
+
     CHAT = "chat"
     CHAT_FAST = "chat_fast"
     EMBEDDING = "embedding"
@@ -50,12 +51,24 @@ class AIGateway:
         # Model mapping from purpose → configured model name
         # DB cache takes priority over env-var defaults
         self._models = {
-            ModelPurpose.CHAT: _db_model_cache.get("chat", settings.AI_GATEWAY_CHAT_MODEL),
-            ModelPurpose.CHAT_FAST: _db_model_cache.get("chat_fast", settings.AI_GATEWAY_CHAT_FAST_MODEL),
-            ModelPurpose.EMBEDDING: _db_model_cache.get("embedding", settings.AI_GATEWAY_EMBEDDING_MODEL),
-            ModelPurpose.VISION: _db_model_cache.get("vision", settings.AI_GATEWAY_VISION_MODEL),
-            ModelPurpose.CLASSIFIER: _db_model_cache.get("classifier", settings.AI_GATEWAY_CLASSIFIER_MODEL),
-            ModelPurpose.RERANKER: _db_model_cache.get("reranker", settings.AI_GATEWAY_RERANKER_MODEL),
+            ModelPurpose.CHAT: _db_model_cache.get(
+                "chat", settings.AI_GATEWAY_CHAT_MODEL
+            ),
+            ModelPurpose.CHAT_FAST: _db_model_cache.get(
+                "chat_fast", settings.AI_GATEWAY_CHAT_FAST_MODEL
+            ),
+            ModelPurpose.EMBEDDING: _db_model_cache.get(
+                "embedding", settings.AI_GATEWAY_EMBEDDING_MODEL
+            ),
+            ModelPurpose.VISION: _db_model_cache.get(
+                "vision", settings.AI_GATEWAY_VISION_MODEL
+            ),
+            ModelPurpose.CLASSIFIER: _db_model_cache.get(
+                "classifier", settings.AI_GATEWAY_CLASSIFIER_MODEL
+            ),
+            ModelPurpose.RERANKER: _db_model_cache.get(
+                "reranker", settings.AI_GATEWAY_RERANKER_MODEL
+            ),
         }
 
         # Store API credentials for passing to litellm calls
@@ -77,7 +90,11 @@ class AIGateway:
     def get_vision_escalation_chain(self) -> List[str]:
         """Get the vision model escalation chain as a list."""
         settings = get_settings()
-        return [m.strip() for m in settings.AI_GATEWAY_VISION_ESCALATION.split(",") if m.strip()]
+        return [
+            m.strip()
+            for m in settings.AI_GATEWAY_VISION_ESCALATION.split(",")
+            if m.strip()
+        ]
 
     async def acompletion(
         self,
@@ -218,7 +235,10 @@ async def load_settings_into_cache(session_factory) -> None:
     """Pre-load DB model settings into module cache (called at startup)."""
     try:
         async with session_factory() as session:
-            from app.db.repositories.ai_model_settings_repository import AIModelSettingsRepository
+            from app.db.repositories.ai_model_settings_repository import (
+                AIModelSettingsRepository,
+            )
+
             repo = AIModelSettingsRepository(session)
             rows = await repo.get_all_active()
             for row in rows:

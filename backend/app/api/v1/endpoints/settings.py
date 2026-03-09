@@ -24,6 +24,7 @@ router = APIRouter()
 # Dependencies
 # =============================================================================
 
+
 async def get_settings_service(
     db: AsyncSession = Depends(get_db),
 ) -> SettingsService:
@@ -34,6 +35,7 @@ async def get_settings_service(
 # =============================================================================
 # Settings Endpoints
 # =============================================================================
+
 
 @router.get("", response_model=SettingsApiResponse)
 async def get_settings(

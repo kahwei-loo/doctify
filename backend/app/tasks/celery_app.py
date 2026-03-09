@@ -9,7 +9,13 @@ import asyncio
 import logging
 from typing import Optional
 from celery import Celery, Task
-from celery.signals import task_prerun, task_postrun, task_failure, task_retry, worker_init
+from celery.signals import (
+    task_prerun,
+    task_postrun,
+    task_failure,
+    task_retry,
+    worker_init,
+)
 from kombu import Queue, Exchange
 
 from app.core.config import get_settings
@@ -36,38 +42,31 @@ celery_app.conf.update(
     result_serializer="json",
     timezone="UTC",
     enable_utc=True,
-
     # Task result settings
     result_expires=3600,  # Results expire after 1 hour
     result_backend_transport_options={
         "master_name": "mymaster",
         "visibility_timeout": 3600,
     },
-
     # Task routing and queues
     task_default_queue="default",
     task_default_exchange="doctify",
     task_default_exchange_type="topic",
     task_default_routing_key="task.default",
-
     # Worker settings
     worker_prefetch_multiplier=1,  # Disable prefetching for fair distribution
     worker_max_tasks_per_child=1000,  # Restart worker after 1000 tasks
     worker_disable_rate_limits=False,
-
     # Task time limits
     task_soft_time_limit=3600,  # 1 hour soft limit
     task_time_limit=3900,  # 1 hour 5 minutes hard limit
-
     # Retry settings
     task_acks_late=True,  # Acknowledge task after execution
     task_reject_on_worker_lost=True,
-
     # Monitoring and logging
     task_send_sent_event=True,
     worker_send_task_events=True,
     task_track_started=True,
-
     # Error handling
     task_annotations={
         "*": {
@@ -98,7 +97,6 @@ celery_app.conf.task_queues = (
         routing_key="task.default",
         queue_arguments={"x-max-priority": 10},
     ),
-
     # High-priority OCR processing queue
     Queue(
         "ocr_queue",
@@ -106,7 +104,6 @@ celery_app.conf.task_queues = (
         routing_key="task.ocr.#",
         queue_arguments={"x-max-priority": 10},
     ),
-
     # Export generation queue
     Queue(
         "export_queue",
@@ -114,7 +111,6 @@ celery_app.conf.task_queues = (
         routing_key="task.export.#",
         queue_arguments={"x-max-priority": 5},
     ),
-
     # Low-priority cleanup queue
     Queue(
         "cleanup_queue",
@@ -132,14 +128,12 @@ celery_app.conf.task_routes = {
         "exchange": "doctify.ocr",
         "routing_key": "task.ocr.process",
     },
-
     # Export tasks route to export_queue
     "app.tasks.document.export.*": {
         "queue": "export_queue",
         "exchange": "doctify.export",
         "routing_key": "task.export.generate",
     },
-
     # Cleanup tasks route to cleanup_queue
     "app.tasks.cleanup.*": {
         "queue": "cleanup_queue",
@@ -152,6 +146,7 @@ celery_app.conf.task_routes = {
 # =============================================================================
 # Custom Task Base Class
 # =============================================================================
+
 
 class BaseTask(Task):
     """
@@ -287,11 +282,15 @@ def worker_init_handler(**kwargs):
     try:
         ensure_db_initialized()
     except Exception as e:
-        logger.warning(f"Database initialization in worker_init failed, will retry on first task: {e}")
+        logger.warning(
+            f"Database initialization in worker_init failed, will retry on first task: {e}"
+        )
 
 
 @task_prerun.connect
-def task_prerun_handler(sender=None, task_id=None, task=None, args=None, kwargs=None, **extra):
+def task_prerun_handler(
+    sender=None, task_id=None, task=None, args=None, kwargs=None, **extra
+):
     """
     Handler called before task execution.
     Ensures database is initialized before any task runs.
@@ -319,7 +318,7 @@ def task_postrun_handler(
     kwargs=None,
     retval=None,
     state=None,
-    **extra
+    **extra,
 ):
     """
     Handler called after task execution.
@@ -345,7 +344,7 @@ def task_failure_handler(
     kwargs=None,
     traceback=None,
     einfo=None,
-    **extra
+    **extra,
 ):
     """
     Handler called when task fails.
@@ -365,13 +364,7 @@ def task_failure_handler(
 
 
 @task_retry.connect
-def task_retry_handler(
-    sender=None,
-    task_id=None,
-    reason=None,
-    einfo=None,
-    **extra
-):
+def task_retry_handler(sender=None, task_id=None, reason=None, einfo=None, **extra):
     """
     Handler called when task is retried.
     """
@@ -397,10 +390,10 @@ celery_app.autodiscover_tasks(["app.tasks.document", "app.tasks.rag"])
 # Explicitly import standalone task modules (not subpackages)
 import app.tasks.knowledge_base  # noqa: F401 - KB embedding & crawl tasks
 
-
 # =============================================================================
 # Utility Functions
 # =============================================================================
+
 
 def get_task_info(task_id: str) -> Optional[dict]:
     """
@@ -475,8 +468,7 @@ def get_queue_length(queue_name: str) -> int:
     try:
         with celery_app.connection_or_acquire() as conn:
             return conn.default_channel.queue_declare(
-                queue=queue_name,
-                passive=True
+                queue=queue_name, passive=True
             ).message_count
     except Exception as e:
         logger.error(f"Error getting queue length for {queue_name}: {e}")

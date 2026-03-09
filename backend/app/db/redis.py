@@ -358,6 +358,7 @@ async def close_redis() -> None:
 # Cache Key Generators
 # =============================================================================
 
+
 class CacheKeys:
     """Cache key generators for consistent key naming."""
 
@@ -400,6 +401,7 @@ class CacheKeys:
 # =============================================================================
 # Cache TTL Constants
 # =============================================================================
+
 
 class CacheTTL:
     """Cache TTL constants in seconds."""

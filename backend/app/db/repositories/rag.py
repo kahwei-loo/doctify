@@ -25,7 +25,9 @@ class DocumentEmbeddingRepository(BaseRepository[DocumentEmbedding]):
     def __init__(self, session: AsyncSession):
         super().__init__(session, DocumentEmbedding)
 
-    async def create_bulk(self, embeddings: List[DocumentEmbedding]) -> List[DocumentEmbedding]:
+    async def create_bulk(
+        self, embeddings: List[DocumentEmbedding]
+    ) -> List[DocumentEmbedding]:
         """Bulk insert embeddings for efficiency."""
         try:
             self.session.add_all(embeddings)
@@ -35,15 +37,19 @@ class DocumentEmbeddingRepository(BaseRepository[DocumentEmbedding]):
             await self.session.rollback()
             raise DatabaseError(f"Failed to bulk create embeddings: {str(e)}")
 
-    async def get_by_document_id(self, document_id: uuid.UUID | str) -> List[DocumentEmbedding]:
+    async def get_by_document_id(
+        self, document_id: uuid.UUID | str
+    ) -> List[DocumentEmbedding]:
         """Get all embeddings for a document ordered by chunk index."""
         try:
             if isinstance(document_id, str):
                 document_id = uuid.UUID(document_id)
 
-            stmt = select(DocumentEmbedding).where(
-                DocumentEmbedding.document_id == document_id
-            ).order_by(DocumentEmbedding.chunk_index)
+            stmt = (
+                select(DocumentEmbedding)
+                .where(DocumentEmbedding.document_id == document_id)
+                .order_by(DocumentEmbedding.chunk_index)
+            )
 
             result = await self.session.execute(stmt)
             return list(result.scalars().all())
@@ -78,7 +84,7 @@ class DocumentEmbeddingRepository(BaseRepository[DocumentEmbedding]):
             params = {
                 "query_embedding": embedding_str,
                 "threshold": similarity_threshold,
-                "limit": limit
+                "limit": limit,
             }
 
             # Add document_ids filter if provided
@@ -105,8 +111,8 @@ class DocumentEmbeddingRepository(BaseRepository[DocumentEmbedding]):
                     "results_count": len(rows),
                     "threshold": similarity_threshold,
                     "top_score": rows[0].similarity if rows else 0.0,
-                    "scores": [round(row.similarity, 3) for row in rows[:5]]
-                }
+                    "scores": [round(row.similarity, 3) for row in rows[:5]],
+                },
             )
 
             embeddings_with_scores = []
@@ -251,19 +257,21 @@ class DocumentEmbeddingRepository(BaseRepository[DocumentEmbedding]):
                 extra={
                     "results_count": len(rows),
                     "top_rrf_score": rows[0].rrf_score if rows else 0.0,
-                }
+                },
             )
 
             results = []
             for row in rows:
                 embedding = await self.get_by_id(row.id)
                 if embedding:
-                    results.append((
-                        embedding,
-                        float(row.rrf_score),
-                        float(row.vector_score),
-                        float(row.text_score),
-                    ))
+                    results.append(
+                        (
+                            embedding,
+                            float(row.rrf_score),
+                            float(row.vector_score),
+                            float(row.text_score),
+                        )
+                    )
 
             return results
 
@@ -292,19 +300,20 @@ class DocumentEmbeddingRepository(BaseRepository[DocumentEmbedding]):
             raise DatabaseError(f"Failed to count embeddings: {str(e)}")
 
     async def get_by_data_source_id(
-        self,
-        data_source_id: uuid.UUID | str,
-        skip: int = 0,
-        limit: int = 1000
+        self, data_source_id: uuid.UUID | str, skip: int = 0, limit: int = 1000
     ) -> List[DocumentEmbedding]:
         """Get all embeddings for a data source ordered by chunk index."""
         try:
             if isinstance(data_source_id, str):
                 data_source_id = uuid.UUID(data_source_id)
 
-            stmt = select(DocumentEmbedding).where(
-                DocumentEmbedding.data_source_id == data_source_id
-            ).order_by(DocumentEmbedding.chunk_index).offset(skip).limit(limit)
+            stmt = (
+                select(DocumentEmbedding)
+                .where(DocumentEmbedding.data_source_id == data_source_id)
+                .order_by(DocumentEmbedding.chunk_index)
+                .offset(skip)
+                .limit(limit)
+            )
 
             result = await self.session.execute(stmt)
             return list(result.scalars().all())
@@ -320,7 +329,9 @@ class DocumentEmbeddingRepository(BaseRepository[DocumentEmbedding]):
             result = await self.delete_many({"data_source_id": data_source_id})
             return result
         except Exception as e:
-            raise DatabaseError(f"Failed to delete embeddings by data_source_id: {str(e)}")
+            raise DatabaseError(
+                f"Failed to delete embeddings by data_source_id: {str(e)}"
+            )
 
     async def count_by_data_source_id(self, data_source_id: uuid.UUID | str) -> int:
         """Count embeddings for a data source."""
@@ -330,13 +341,12 @@ class DocumentEmbeddingRepository(BaseRepository[DocumentEmbedding]):
 
             return await self.count({"data_source_id": data_source_id})
         except Exception as e:
-            raise DatabaseError(f"Failed to count embeddings by data_source_id: {str(e)}")
+            raise DatabaseError(
+                f"Failed to count embeddings by data_source_id: {str(e)}"
+            )
 
     async def get_by_data_source_ids(
-        self,
-        data_source_ids: List[uuid.UUID | str],
-        skip: int = 0,
-        limit: int = 1000
+        self, data_source_ids: List[uuid.UUID | str], skip: int = 0, limit: int = 1000
     ) -> List[DocumentEmbedding]:
         """Get embeddings for multiple data sources."""
         try:
@@ -348,19 +358,26 @@ class DocumentEmbeddingRepository(BaseRepository[DocumentEmbedding]):
                 else:
                     uuid_ids.append(ds_id)
 
-            stmt = select(DocumentEmbedding).where(
-                DocumentEmbedding.data_source_id.in_(uuid_ids)
-            ).order_by(
-                DocumentEmbedding.data_source_id,
-                DocumentEmbedding.chunk_index
-            ).offset(skip).limit(limit)
+            stmt = (
+                select(DocumentEmbedding)
+                .where(DocumentEmbedding.data_source_id.in_(uuid_ids))
+                .order_by(
+                    DocumentEmbedding.data_source_id, DocumentEmbedding.chunk_index
+                )
+                .offset(skip)
+                .limit(limit)
+            )
 
             result = await self.session.execute(stmt)
             return list(result.scalars().all())
         except Exception as e:
-            raise DatabaseError(f"Failed to get embeddings by data_source_ids: {str(e)}")
+            raise DatabaseError(
+                f"Failed to get embeddings by data_source_ids: {str(e)}"
+            )
 
-    async def count_by_data_source_ids(self, data_source_ids: List[uuid.UUID | str]) -> int:
+    async def count_by_data_source_ids(
+        self, data_source_ids: List[uuid.UUID | str]
+    ) -> int:
         """Count embeddings for multiple data sources."""
         try:
             # Convert string IDs to UUIDs
@@ -378,7 +395,9 @@ class DocumentEmbeddingRepository(BaseRepository[DocumentEmbedding]):
             result = await self.session.execute(stmt)
             return result.scalar() or 0
         except Exception as e:
-            raise DatabaseError(f"Failed to count embeddings by data_source_ids: {str(e)}")
+            raise DatabaseError(
+                f"Failed to count embeddings by data_source_ids: {str(e)}"
+            )
 
 
 class RAGQueryRepository(BaseRepository[RAGQuery]):
@@ -388,10 +407,7 @@ class RAGQueryRepository(BaseRepository[RAGQuery]):
         super().__init__(session, RAGQuery)
 
     async def get_by_user_id(
-        self,
-        user_id: uuid.UUID | str,
-        limit: int = 50,
-        offset: int = 0
+        self, user_id: uuid.UUID | str, limit: int = 50, offset: int = 0
     ) -> List[RAGQuery]:
         """Get query history for a user ordered by most recent."""
         try:
@@ -403,15 +419,13 @@ class RAGQueryRepository(BaseRepository[RAGQuery]):
                 skip=offset,
                 limit=limit,
                 sort_by="created_at",
-                sort_order="desc"
+                sort_order="desc",
             )
         except Exception as e:
             raise DatabaseError(f"Failed to get queries by user_id: {str(e)}")
 
     async def get_recent_queries(
-        self,
-        user_id: uuid.UUID | str,
-        hours: int = 24
+        self, user_id: uuid.UUID | str, hours: int = 24
     ) -> List[RAGQuery]:
         """Get recent queries within time window."""
         try:
@@ -420,10 +434,11 @@ class RAGQueryRepository(BaseRepository[RAGQuery]):
 
             cutoff = datetime.utcnow() - timedelta(hours=hours)
 
-            stmt = select(RAGQuery).where(
-                RAGQuery.user_id == user_id,
-                RAGQuery.created_at >= cutoff
-            ).order_by(RAGQuery.created_at.desc())
+            stmt = (
+                select(RAGQuery)
+                .where(RAGQuery.user_id == user_id, RAGQuery.created_at >= cutoff)
+                .order_by(RAGQuery.created_at.desc())
+            )
 
             result = await self.session.execute(stmt)
             return list(result.scalars().all())
@@ -435,16 +450,12 @@ class RAGQueryRepository(BaseRepository[RAGQuery]):
         self,
         query_id: uuid.UUID | str,
         rating: int,
-        feedback_text: Optional[str] = None
+        feedback_text: Optional[str] = None,
     ) -> Optional[RAGQuery]:
         """Update user feedback for a query."""
         try:
             return await self.update(
-                query_id,
-                {
-                    "feedback_rating": rating,
-                    "feedback_text": feedback_text
-                }
+                query_id, {"feedback_rating": rating, "feedback_text": feedback_text}
             )
         except Exception as e:
             raise DatabaseError(f"Failed to update feedback: {str(e)}")
@@ -455,7 +466,11 @@ class RAGQueryRepository(BaseRepository[RAGQuery]):
     ) -> Optional[RAGQuery]:
         """Get the most recent query in a conversation."""
         try:
-            conv_uuid = uuid.UUID(conversation_id) if isinstance(conversation_id, str) else conversation_id
+            conv_uuid = (
+                uuid.UUID(conversation_id)
+                if isinstance(conversation_id, str)
+                else conversation_id
+            )
             stmt = (
                 select(RAGQuery)
                 .where(RAGQuery.conversation_id == conv_uuid)
@@ -467,7 +482,9 @@ class RAGQueryRepository(BaseRepository[RAGQuery]):
         except Exception as e:
             raise DatabaseError(f"Failed to get last query by conversation: {str(e)}")
 
-    async def get_average_rating(self, user_id: Optional[uuid.UUID] = None) -> Optional[float]:
+    async def get_average_rating(
+        self, user_id: Optional[uuid.UUID] = None
+    ) -> Optional[float]:
         """Get average feedback rating, optionally filtered by user."""
         try:
             stmt = select(func.avg(RAGQuery.feedback_rating)).where(
