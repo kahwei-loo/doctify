@@ -170,7 +170,9 @@ class ApiKeyService(BaseService[ApiKey, ApiKeyRepository]):
                 "expires_at": key.expires_at,
                 "is_active": key.is_active,
                 "is_expired": (
-                    key.expires_at < datetime.utcnow() if key.expires_at else False
+                    key.expires_at < datetime.now(tz=key.expires_at.tzinfo)
+                    if key.expires_at
+                    else False
                 ),
             }
             for key in api_keys

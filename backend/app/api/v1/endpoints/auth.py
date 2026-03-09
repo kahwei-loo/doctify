@@ -534,18 +534,19 @@ async def list_api_keys(
             include_revoked=include_revoked,
         )
 
-        # Convert to response format
-        api_key_list = [
-            {
-                "api_key_id": str(key.id),
-                "name": key.name,
-                "created_at": key.created_at,
-                "expires_at": key.expires_at,
-                "last_used_at": key.last_used_at,
-                "is_revoked": key.is_revoked,
-            }
-            for key in api_keys
-        ]
+        # Service returns list of dicts
+        api_key_list = []
+        for key in api_keys:
+            api_key_list.append(
+                {
+                    "api_key_id": key.get("api_key_id") or str(key.get("id", "")),
+                    "name": key.get("name", ""),
+                    "created_at": key.get("created_at"),
+                    "expires_at": key.get("expires_at"),
+                    "last_used_at": key.get("last_used_at"),
+                    "is_active": key.get("is_active", True),
+                }
+            )
 
         return success_response(
             data={"api_keys": api_key_list, "total": len(api_key_list)}

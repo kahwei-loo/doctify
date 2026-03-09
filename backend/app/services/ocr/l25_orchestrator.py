@@ -670,6 +670,7 @@ def compute_document_confidence(
         # Required keys are in camelCase, but std_output is normalized to snake_case
         # Convert to snake_case to match normalized data
         snake_key = _to_snake_case(key)
+        canonical_key = None
 
         # Try snake_case first (most common after normalization)
         val = std_output.get(snake_key)

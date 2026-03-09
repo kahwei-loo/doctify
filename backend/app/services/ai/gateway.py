@@ -157,10 +157,16 @@ class AIGateway:
         """
         model_name = model or self._models[ModelPurpose.EMBEDDING]
 
+        # Workaround for LiteLLM bug (github.com/BerriAI/litellm/issues/17773):
+        # openrouter/ prefix is not properly routed for embedding endpoints.
+        # Strip the prefix and use api_base to reach OpenRouter directly,
+        # so LiteLLM treats it as an OpenAI-compatible call.
+        if model_name.startswith("openrouter/"):
+            model_name = model_name[len("openrouter/"):]
+
         call_kwargs = {
             "model": model_name,
             "input": input_text,
-            "encoding_format": encoding_format,
             "api_key": self._openai_api_key,
         }
 

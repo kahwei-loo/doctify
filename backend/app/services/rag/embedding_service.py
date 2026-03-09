@@ -336,7 +336,10 @@ class EmbeddingService:
         try:
             response = await self.gateway.aembedding(input_text=text)
 
-            embedding = response.data[0].embedding
+            item = response.data[0]
+            embedding = (
+                item.embedding if hasattr(item, "embedding") else item["embedding"]
+            )
 
             # Validate dimension
             if len(embedding) != self.EMBEDDING_DIMENSION:
