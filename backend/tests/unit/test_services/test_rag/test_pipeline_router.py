@@ -80,9 +80,13 @@ class TestPipelineRouter:
 
     @pytest.fixture
     def router(self, mock_session):
-        with patch("app.services.rag.pipeline_router.IntentClassifier") as MockClassifier, \
-             patch("app.services.rag.pipeline_router.GenerationService") as MockGen, \
-             patch("app.services.rag.pipeline_router.RAGQueryRepository") as MockRepo:
+        with (
+            patch(
+                "app.services.rag.pipeline_router.IntentClassifier"
+            ) as MockClassifier,
+            patch("app.services.rag.pipeline_router.GenerationService") as MockGen,
+            patch("app.services.rag.pipeline_router.RAGQueryRepository") as MockRepo,
+        ):
 
             MockClassifier.return_value = AsyncMock()
             MockGen.return_value = AsyncMock()
@@ -162,9 +166,7 @@ class TestPipelineRouter:
 
         mock_analytics_result = _make_analytics_result()
 
-        with patch(
-            "app.services.insights.query_service.QueryService"
-        ) as MockQS:
+        with patch("app.services.insights.query_service.QueryService") as MockQS:
             MockQS.return_value.process_query = AsyncMock(
                 return_value=mock_analytics_result
             )
@@ -232,7 +234,9 @@ class TestPipelineRouter:
 
     # ── Conversation Stickiness ───────────────────────────────────
 
-    async def test_conversation_context_passed_to_classifier(self, router, mock_session):
+    async def test_conversation_context_passed_to_classifier(
+        self, router, mock_session
+    ):
         """Conversation context should be forwarded to the classifier."""
         context = {"last_intent": "analytics", "last_dataset_id": "ds-3"}
         router.classifier.classify = AsyncMock(
