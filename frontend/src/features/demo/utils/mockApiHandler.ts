@@ -626,18 +626,28 @@ export const mockApiHandler = async (endpoint: string, args?: any): Promise<Mock
 
     const start = (page - 1) * perPage;
     const end = start + perPage;
-    const paginatedTemplates = filteredTemplates.slice(start, end);
+    const paginatedTemplates = filteredTemplates.slice(start, end).map((t) => ({
+      id: t.template_id,
+      name: t.name,
+      description: t.description,
+      document_type: t.document_type,
+      visibility: "private" as const,
+      category: null,
+      tags: null,
+      usage_count: t.usage_count,
+      average_rating: t.accuracy_rate * 5,
+      created_at: t.created_at,
+      updated_at: t.updated_at,
+    }));
 
     return {
       data: {
         success: true,
         data: paginatedTemplates,
-        pagination: {
-          total: filteredTemplates.length,
-          page,
-          per_page: perPage,
-          total_pages: Math.ceil(filteredTemplates.length / perPage),
-        },
+        total: filteredTemplates.length,
+        page,
+        page_size: perPage,
+        total_pages: Math.ceil(filteredTemplates.length / perPage),
       },
     };
   }
@@ -645,13 +655,28 @@ export const mockApiHandler = async (endpoint: string, args?: any): Promise<Mock
   // Single template
   if (path.match(/\/templates\/[\w-]+$/)) {
     const templateId = path.split("/").pop();
-    const template = DEMO_TEMPLATES.find((t) => t.template_id === templateId);
+    const t = DEMO_TEMPLATES.find((t) => t.template_id === templateId);
 
-    if (template) {
+    if (t) {
       return {
         data: {
           success: true,
-          data: template,
+          data: {
+            id: t.template_id,
+            name: t.name,
+            description: t.description,
+            user_id: "demo-user-001",
+            document_type: t.document_type,
+            visibility: "private" as const,
+            extraction_config: { fields: t.fields, tables: [] },
+            category: null,
+            tags: null,
+            version: 1,
+            usage_count: t.usage_count,
+            average_rating: t.accuracy_rate * 5,
+            created_at: t.created_at,
+            updated_at: t.updated_at,
+          },
         },
       };
     } else {
