@@ -903,6 +903,8 @@ class QueryService:
         query_record = await self.query_repo.create(
             {
                 "conversation_id": conversation_id,
+                "dataset_id": conversation.dataset_id,
+                "user_id": user_id,
                 "user_input": message,
                 "language": language,
                 "status": QueryStatus.PROCESSING.value,

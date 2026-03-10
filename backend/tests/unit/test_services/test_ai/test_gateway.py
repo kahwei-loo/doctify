@@ -147,7 +147,6 @@ class TestAIGateway:
         mock_litellm.aembedding.assert_awaited_once_with(
             model="openai/text-embedding-3-small",
             input="test input",
-            encoding_format="float",
             api_key="sk-test-key",
         )
         assert result == {"data": []}

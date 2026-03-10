@@ -149,8 +149,9 @@ export const KBListPanel: React.FC<KBListPanelProps> = ({
   const handleCreateSuccess = (newKb: KnowledgeBase) => {
     // Refresh the KB list
     loadKBs();
-    // Optionally select the new KB
+    // Navigate to the new KB detail page to avoid stale OverallViewPage state
     onSelectKb(newKb.id);
+    navigate(`/knowledge-base/${newKb.id}`);
   };
 
   if (collapsed) {

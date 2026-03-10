@@ -113,6 +113,7 @@ const DashboardPage: React.FC = () => {
     isFetching: isFetchingStats,
   } = useGetUnifiedStatsQuery(undefined, {
     pollingInterval: 30000, // 30 seconds auto-refresh
+    refetchOnMountOrArgChange: true, // Fresh data when navigating to dashboard
   });
 
   const { data: trendsResponse, isLoading: isLoadingTrends } = useGetDashboardTrendsQuery({

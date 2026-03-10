@@ -165,7 +165,7 @@ const DocumentsPage: React.FC = () => {
 
   // WebSocket for real-time document updates
   const { isConnected: wsConnected } = useDocumentListWebSocket({
-    enabled: true,
+    enabled: !isDemoMode,
     onDocumentUpdate: useCallback(
       (document: DocumentListItem) => {
         // Filter by current project if one is selected
@@ -455,26 +455,28 @@ const DocumentsPage: React.FC = () => {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {/* WebSocket connection indicator */}
-              <div
-                className={cn(
-                  "flex items-center gap-1.5 px-2 py-1 rounded-full text-xs",
-                  wsConnected
-                    ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                    : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
-                )}
-                title={
-                  wsConnected ? "Real-time updates active" : "Connecting to real-time updates..."
-                }
-              >
-                <span
+              {/* WebSocket connection indicator (hidden in demo mode) */}
+              {!isDemoMode && (
+                <div
                   className={cn(
-                    "w-2 h-2 rounded-full",
-                    wsConnected ? "bg-green-500" : "bg-yellow-500 animate-pulse"
+                    "flex items-center gap-1.5 px-2 py-1 rounded-full text-xs",
+                    wsConnected
+                      ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                      : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
                   )}
-                />
-                {wsConnected ? "Live" : "Connecting"}
-              </div>
+                  title={
+                    wsConnected ? "Real-time updates active" : "Connecting to real-time updates..."
+                  }
+                >
+                  <span
+                    className={cn(
+                      "w-2 h-2 rounded-full",
+                      wsConnected ? "bg-green-500" : "bg-yellow-500 animate-pulse"
+                    )}
+                  />
+                  {wsConnected ? "Live" : "Connecting"}
+                </div>
+              )}
               <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
                 <RefreshCw className={cn("mr-2 h-4 w-4", isFetching && "animate-spin")} />
                 Refresh
@@ -494,41 +496,39 @@ const DocumentsPage: React.FC = () => {
           </div>
 
           {/* Upload Zone */}
-          {selectedProjectId ? (
-            isDemoMode ? (
-              <Card className="border-dashed border-yellow-400 bg-yellow-50 dark:bg-yellow-900/10">
-                <CardContent className="py-6">
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-4">
-                      <div className="p-3 rounded-full bg-yellow-100 dark:bg-yellow-900/30">
-                        <Upload className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-lg text-yellow-900 dark:text-yellow-100">
-                          File uploads are disabled in demo mode
-                        </p>
-                        <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                          Sign up to upload and process your own documents
-                        </p>
-                      </div>
+          {isDemoMode ? (
+            <Card className="border-dashed border-yellow-400 bg-yellow-50 dark:bg-yellow-900/10">
+              <CardContent className="py-6">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 rounded-full bg-yellow-100 dark:bg-yellow-900/30">
+                      <Upload className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
                     </div>
-                    <Button
-                      onClick={() => (window.location.href = "/auth/register")}
-                      className="bg-yellow-600 hover:bg-yellow-700 text-white"
-                    >
-                      Sign Up to Upload
-                    </Button>
+                    <div>
+                      <p className="font-medium text-lg text-yellow-900 dark:text-yellow-100">
+                        File uploads are disabled in demo mode
+                      </p>
+                      <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                        Sign up to upload and process your own documents
+                      </p>
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <DocumentUploadZone
-                onFilesAccepted={handleFilesAccepted}
-                onFilesRejected={handleFilesRejected}
-                disabled={isUploading}
-                compact={documents.length > 0}
-              />
-            )
+                  <Button
+                    onClick={() => (window.location.href = "/auth/register")}
+                    className="bg-yellow-600 hover:bg-yellow-700 text-white"
+                  >
+                    Sign Up to Upload
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ) : selectedProjectId ? (
+            <DocumentUploadZone
+              onFilesAccepted={handleFilesAccepted}
+              onFilesRejected={handleFilesRejected}
+              disabled={isUploading}
+              compact={documents.length > 0}
+            />
           ) : (
             <Card className="border-dashed border-primary/50 bg-primary/5">
               <CardContent className="py-6">

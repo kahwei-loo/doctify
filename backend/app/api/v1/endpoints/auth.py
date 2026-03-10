@@ -5,6 +5,7 @@ Handles user authentication, registration, password management, and API key oper
 """
 
 from typing import Optional
+from pydantic import BaseModel
 from fastapi import APIRouter, Depends, Body, HTTPException, status, Query, Request
 
 from app.api.v1.deps import (
@@ -34,6 +35,10 @@ from app.core.exceptions import (
 from app.core.audit_log import AuditLogger, AuditEventType
 
 router = APIRouter()
+
+
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
 
 
 # =============================================================================
@@ -140,7 +145,7 @@ async def login(
 
 @router.post("/refresh")
 async def refresh_token(
-    refresh_token: str = Body(..., description="Refresh token"),
+    request: RefreshTokenRequest,
     auth_service: AuthenticationService = Depends(get_auth_service),
 ):
     """
@@ -151,7 +156,7 @@ async def refresh_token(
     Returns new access token and refresh token.
     """
     try:
-        result = await auth_service.refresh_access_token(refresh_token)
+        result = await auth_service.refresh_access_token(request.refresh_token)
 
         return success_response(
             data=result,
@@ -534,18 +539,19 @@ async def list_api_keys(
             include_revoked=include_revoked,
         )
 
-        # Convert to response format
-        api_key_list = [
-            {
-                "api_key_id": str(key.id),
-                "name": key.name,
-                "created_at": key.created_at,
-                "expires_at": key.expires_at,
-                "last_used_at": key.last_used_at,
-                "is_revoked": key.is_revoked,
-            }
-            for key in api_keys
-        ]
+        # Service returns list of dicts
+        api_key_list = []
+        for key in api_keys:
+            api_key_list.append(
+                {
+                    "api_key_id": key.get("api_key_id") or str(key.get("id", "")),
+                    "name": key.get("name", ""),
+                    "created_at": key.get("created_at"),
+                    "expires_at": key.get("expires_at"),
+                    "last_used_at": key.get("last_used_at"),
+                    "is_active": key.get("is_active", True),
+                }
+            )
 
         return success_response(
             data={"api_keys": api_key_list, "total": len(api_key_list)}

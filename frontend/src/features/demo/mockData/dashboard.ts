@@ -11,11 +11,15 @@ const generateTrendData = () => {
     const date = new Date(now);
     date.setDate(date.getDate() - i);
 
+    const uploaded = Math.floor(Math.random() * 10) + 5; // 5-15 per day
+    const failed = Math.random() < 0.15 ? Math.floor(Math.random() * 2) + 1 : 0;
+    const processed = uploaded - failed;
+
     data.push({
       date: date.toISOString().split("T")[0],
-      documents_processed: Math.floor(Math.random() * 10) + 5, // 5-15 per day
-      success_rate: 0.85 + Math.random() * 0.1, // 85-95%
-      avg_processing_time: 2000 + Math.random() * 2000, // 2-4 seconds
+      uploaded,
+      processed,
+      failed,
     });
   }
 

@@ -60,6 +60,18 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Initialize Sentry error tracking (if configured)
+if config.SENTRY_DSN:
+    import sentry_sdk
+
+    sentry_sdk.init(
+        dsn=config.SENTRY_DSN,
+        environment=config.environment,
+        traces_sample_rate=0.1 if config.is_production else 1.0,
+        send_default_pii=False,
+    )
+    logger.info("Sentry error tracking initialized")
+
 # ============================================================================
 # Application Factory
 # ============================================================================

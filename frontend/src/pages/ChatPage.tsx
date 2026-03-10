@@ -19,7 +19,8 @@ import {
 export default function ChatPage() {
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
 
-  const { data: conversations = [] } = useGetConversationsQuery({ limit: 50 });
+  const { data: rawConversations } = useGetConversationsQuery({ limit: 50 });
+  const conversations = Array.isArray(rawConversations) ? rawConversations : [];
   const [createConversation] = useCreateConversationMutation();
 
   const { data: messages = [] } = useGetConversationMessagesQuery(
