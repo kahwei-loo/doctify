@@ -7,10 +7,10 @@ upload, processing, and retrieval.
 
 Usage:
     # Basic load test (Web UI)
-    locust -f tests/performance/locustfile.py --host http://localhost:8000
+    locust -f scripts/performance/locustfile.py --host http://localhost:8000
 
     # Headless mode (100 users, 10/second spawn rate, 5 minutes)
-    locust -f tests/performance/locustfile.py \
+    locust -f scripts/performance/locustfile.py \
            --host http://localhost:8000 \
            --users 100 \
            --spawn-rate 10 \
@@ -18,12 +18,12 @@ Usage:
            --headless
 
     # Distributed load test (master)
-    locust -f tests/performance/locustfile.py \
+    locust -f scripts/performance/locustfile.py \
            --host http://localhost:8000 \
            --master
 
     # Distributed load test (worker)
-    locust -f tests/performance/locustfile.py \
+    locust -f scripts/performance/locustfile.py \
            --worker --master-host=localhost
 """
 

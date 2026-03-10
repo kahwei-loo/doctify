@@ -11,25 +11,25 @@
  *
  * Usage:
  *   # Basic load test
- *   k6 run tests/performance/k6-test.js
+ *   k6 run scripts/performance/k6-test.js
  *
  *   # With custom VUs and duration
- *   k6 run --vus 100 --duration 5m tests/performance/k6-test.js
+ *   k6 run --vus 100 --duration 5m scripts/performance/k6-test.js
  *
  *   # Smoke test
- *   k6 run --vus 1 --duration 1m tests/performance/k6-test.js
+ *   k6 run --vus 1 --duration 1m scripts/performance/k6-test.js
  *
  *   # Load test
- *   k6 run --vus 100 --duration 10m tests/performance/k6-test.js
+ *   k6 run --vus 100 --duration 10m scripts/performance/k6-test.js
  *
  *   # Stress test
- *   k6 run --stage 2m:10 --stage 5m:100 --stage 2m:200 --stage 5m:0 tests/performance/k6-test.js
+ *   k6 run --stage 2m:10 --stage 5m:100 --stage 2m:200 --stage 5m:0 scripts/performance/k6-test.js
  *
  *   # Spike test
- *   k6 run --stage 1m:10 --stage 1m:100 --stage 1m:10 tests/performance/k6-test.js
+ *   k6 run --stage 1m:10 --stage 1m:100 --stage 1m:10 scripts/performance/k6-test.js
  *
  *   # With InfluxDB output for Grafana visualization
- *   k6 run --out influxdb=http://localhost:8086/k6 tests/performance/k6-test.js
+ *   k6 run --out influxdb=http://localhost:8086/k6 scripts/performance/k6-test.js
  */
 
 import http from 'k6/http';

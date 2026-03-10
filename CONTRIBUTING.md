@@ -4,7 +4,7 @@ First off, thank you for considering contributing to Doctify! It's people like y
 
 ## Code of Conduct
 
-This project and everyone participating in it is governed by our Code of Conduct. By participating, you are expected to uphold this code. Please report unacceptable behavior to security@doctify.dev.
+This project and everyone participating in it is governed by our Code of Conduct. By participating, you are expected to uphold this code. Please report unacceptable behavior via [GitHub Issues](https://github.com/kahwei-loo/doctify/issues).
 
 ## How Can I Contribute?
 
@@ -260,7 +260,7 @@ Please familiarize yourself with these patterns before contributing.
 - **Documentation**: Check [docs/](./docs/) directory
 - **Issues**: Browse existing [GitHub Issues](https://github.com/kahwei-loo/doctify/issues)
 - **Discussions**: Join [GitHub Discussions](https://github.com/kahwei-loo/doctify/discussions)
-- **Email**: Contact security@doctify.dev
+- **Email**: Contact via [GitHub Issues](https://github.com/kahwei-loo/doctify/issues)
 
 ## Recognition
 

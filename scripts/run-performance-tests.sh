@@ -19,7 +19,7 @@ NC='\033[0m' # No Color
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
-PERFORMANCE_DIR="$PROJECT_ROOT/tests/performance"
+PERFORMANCE_DIR="$PROJECT_ROOT/scripts/performance"
 REPORT_DIR="$PROJECT_ROOT/performance-reports"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 

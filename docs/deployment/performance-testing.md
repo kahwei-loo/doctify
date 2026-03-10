@@ -388,7 +388,7 @@ performance-test:
 **Web UI** (real-time monitoring):
 ```bash
 # Start Locust with Web UI
-locust -f tests/performance/locustfile.py --host http://localhost:8000
+locust -f scripts/performance/locustfile.py --host http://localhost:8000
 
 # Open browser to http://localhost:8089
 ```
