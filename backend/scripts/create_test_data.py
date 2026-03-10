@@ -16,9 +16,14 @@ from sqlalchemy import select
 import openai
 import os
 
-# OpenRouter API configuration
-os.environ["OPENAI_API_KEY"] = "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"
-os.environ["OPENAI_BASE_URL"] = "https://openrouter.ai/api/v1"
+# OpenRouter API configuration — set these environment variables before running:
+#   export OPENAI_API_KEY=your-key-here
+#   export OPENAI_BASE_URL=https://openrouter.ai/api/v1
+if not os.environ.get("OPENAI_API_KEY"):
+    print("ERROR: OPENAI_API_KEY environment variable is required.")
+    print("  export OPENAI_API_KEY=your-key-here")
+    print("  export OPENAI_BASE_URL=https://openrouter.ai/api/v1")
+    sys.exit(1)
 
 async def create_test_data():
     """Create test project, document, and embeddings"""
