@@ -5,6 +5,7 @@ Handles user authentication, registration, password management, and API key oper
 """
 
 from typing import Optional
+from pydantic import BaseModel
 from fastapi import APIRouter, Depends, Body, HTTPException, status, Query, Request
 
 from app.api.v1.deps import (
@@ -34,6 +35,10 @@ from app.core.exceptions import (
 from app.core.audit_log import AuditLogger, AuditEventType
 
 router = APIRouter()
+
+
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
 
 
 # =============================================================================
@@ -140,7 +145,7 @@ async def login(
 
 @router.post("/refresh")
 async def refresh_token(
-    refresh_token: str = Body(..., description="Refresh token"),
+    request: RefreshTokenRequest,
     auth_service: AuthenticationService = Depends(get_auth_service),
 ):
     """
@@ -151,7 +156,7 @@ async def refresh_token(
     Returns new access token and refresh token.
     """
     try:
-        result = await auth_service.refresh_access_token(refresh_token)
+        result = await auth_service.refresh_access_token(request.refresh_token)
 
         return success_response(
             data=result,

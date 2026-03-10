@@ -218,10 +218,20 @@ export function useAssistantWebSocket({
       return;
     }
 
+    // Track whether this effect instance has been cleaned up (StrictMode guard)
+    let cancelled = false;
     shouldConnectRef.current = true;
-    connect();
+
+    // Defer connect to next tick so StrictMode cleanup can cancel before WS opens
+    const connectTimeout = setTimeout(() => {
+      if (!cancelled) {
+        connect();
+      }
+    }, 0);
 
     return () => {
+      cancelled = true;
+      clearTimeout(connectTimeout);
       shouldConnectRef.current = false;
       disconnect();
     };
