@@ -86,85 +86,12 @@ export default defineConfig({
     // Rollup options for code splitting
     rollupOptions: {
       output: {
-        // Manual chunk splitting strategy
-        manualChunks: (id) => {
-          // Vendor chunks - React ecosystem
-          if (id.includes("node_modules/react") || id.includes("node_modules/react-dom")) {
-            return "vendor-react";
-          }
-
-          // Vendor chunks - Redux ecosystem
-          if (
-            id.includes("node_modules/@reduxjs") ||
-            id.includes("node_modules/redux") ||
-            id.includes("node_modules/react-redux")
-          ) {
-            return "vendor-redux";
-          }
-
-          // Vendor chunks - Router
-          if (id.includes("node_modules/react-router")) {
-            return "vendor-router";
-          }
-
-          // Vendor chunks - UI libraries
-          if (
-            id.includes("node_modules/@mui") ||
-            id.includes("node_modules/@emotion") ||
-            id.includes("node_modules/framer-motion")
-          ) {
-            return "vendor-ui";
-          }
-
-          // Vendor chunks - Utilities
-          if (
-            id.includes("node_modules/axios") ||
-            id.includes("node_modules/lodash") ||
-            id.includes("node_modules/date-fns")
-          ) {
-            return "vendor-utils";
-          }
-
-          // Vendor chunks - Charts (if used)
-          if (
-            id.includes("node_modules/recharts") ||
-            id.includes("node_modules/chart.js") ||
-            id.includes("node_modules/d3")
-          ) {
-            return "vendor-charts";
-          }
-
-          // All other node_modules
-          if (id.includes("node_modules")) {
-            return "vendor-other";
-          }
-
-          // Feature-based code splitting
-          if (id.includes("/src/features/auth/")) {
-            return "feature-auth";
-          }
-          if (id.includes("/src/features/documents/")) {
-            return "feature-documents";
-          }
-          if (id.includes("/src/features/projects/")) {
-            return "feature-projects";
-          }
-          if (id.includes("/src/features/dashboard/")) {
-            return "feature-dashboard";
-          }
-
-          // Shared components
-          if (id.includes("/src/shared/components/")) {
-            return "shared-components";
-          }
-
-          // Store and services
-          if (id.includes("/src/store/")) {
-            return "app-store";
-          }
-          if (id.includes("/src/services/")) {
-            return "app-services";
-          }
+        // Manual chunk splitting strategy (object form avoids circular reference issues)
+        manualChunks: {
+          "vendor-react": ["react", "react-dom"],
+          "vendor-redux": ["@reduxjs/toolkit", "react-redux", "redux"],
+          "vendor-router": ["react-router-dom"],
+          "vendor-charts": ["recharts"],
         },
 
         // Asset file naming
