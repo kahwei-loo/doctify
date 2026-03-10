@@ -15,7 +15,6 @@ import { useGetCurrentUserQuery } from "../store/api/authApi";
 // Lazy load pages for code splitting
 const LandingPage = lazy(() => import("../pages/landing"));
 const LoginPage = lazy(() => import("../pages/LoginPage"));
-const RegisterPage = lazy(() => import("../pages/RegisterPage"));
 const DashboardPage = lazy(() => import("../pages/DashboardPage"));
 const DocumentsPage = lazy(() => import("../pages/DocumentsPage"));
 const DocumentDetailPage = lazy(() => import("../pages/DocumentDetailPage"));
@@ -240,11 +239,7 @@ const router = createBrowserRouter([
       },
       {
         path: "register",
-        element: (
-          <Suspense fallback={<PageLoader />}>
-            <RegisterPage />
-          </Suspense>
-        ),
+        element: <Navigate to="/auth/login" replace />,
       },
     ],
   },
@@ -254,7 +249,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/register",
-    element: <Navigate to="/auth/register" replace />,
+    element: <Navigate to="/auth/login" replace />,
   },
   // Public chat widget demo (no authentication required)
   {

@@ -1,5 +1,4 @@
 import React, { Suspense, lazy, useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { motion, useInView } from "framer-motion";
 import { Sparkles, ArrowRight, Shield, Brain, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -68,7 +67,6 @@ function formatStat(value: number, _target: number, suffix: string) {
 }
 
 const HeroSection: React.FC<HeroSectionProps> = ({ onTryDemo }) => {
-  const navigate = useNavigate();
   const mockupRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(mockupRef, { once: true });
   const [animateChart, setAnimateChart] = useState(false);
@@ -133,10 +131,10 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onTryDemo }) => {
               <Button
                 size="lg"
                 variant="outline"
-                onClick={() => navigate("/auth/register")}
+                onClick={() => window.open("https://github.com/kahwei-loo", "_blank")}
                 className="border border-border hover:bg-accent transition-all duration-300"
               >
-                Sign Up Free
+                Request Access
               </Button>
             </motion.div>
 

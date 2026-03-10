@@ -1,5 +1,4 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,7 +9,6 @@ interface CTASectionProps {
 }
 
 const CTASection: React.FC<CTASectionProps> = ({ onTryDemo }) => {
-  const navigate = useNavigate();
 
   return (
     <section className="relative py-24 sm:py-32 overflow-hidden bg-gradient-to-b from-slate-100 via-slate-50 to-white dark:from-[#1a1035] dark:via-[#0d1f3c] dark:to-[#0a0a1a]">
@@ -37,7 +35,7 @@ const CTASection: React.FC<CTASectionProps> = ({ onTryDemo }) => {
             variants={blurFadeUp}
             className="mt-4 text-lg text-muted-foreground dark:text-white/60 max-w-lg mx-auto"
           >
-            Try the demo with sample data or create your free account.
+            Try the demo with sample data, or reach out to request an account.
           </motion.p>
           <motion.div
             variants={blurFadeUp}
@@ -54,10 +52,10 @@ const CTASection: React.FC<CTASectionProps> = ({ onTryDemo }) => {
             <Button
               size="lg"
               variant="outline"
-              onClick={() => navigate("/auth/register")}
+              onClick={() => window.open("https://github.com/kahwei-loo", "_blank")}
               className="w-full sm:w-auto border-border dark:border-white/30 bg-transparent dark:bg-white/5 hover:bg-accent dark:hover:bg-white/10 transition-colors"
             >
-              Sign Up Free
+              Request Access
             </Button>
           </motion.div>
         </motion.div>
