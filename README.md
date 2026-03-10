@@ -27,7 +27,7 @@ Doctify is a full-stack SaaS platform that processes business documents through 
 3. **Organize** — Build knowledge bases with vector embeddings and semantic search
 4. **Ask** — RAG-powered Q&A with source citations and groundedness verification
 
-> **Try it out**: Clone the repo, run `docker-compose up -d`, and visit `localhost:3003`. Use the **Try Demo** button on the landing page to explore with sample data — no API keys needed.
+> **Live Demo**: [doctify.itskw.dev](https://doctify.itskw.dev) — or clone and run locally with Docker (see [Quick Start](#quick-start)). Use the **Try Demo** button to explore with sample data — no API keys needed.
 
 ## Key Features
 
@@ -99,18 +99,6 @@ graph TB
 **Backend**: FastAPI, SQLAlchemy 2.0 (async), Repository Pattern, DDD, Celery, LiteLLM gateway
 **Frontend**: React 18, TypeScript, Vite, TailwindCSS, shadcn/ui, RTK Query, Recharts
 **Infrastructure**: Docker Compose, PostgreSQL 15 + pgvector, Redis 7, GitHub Actions
-
-## Project Scale
-
-| Metric | Value |
-|--------|-------|
-| Total Lines of Code | ~84K (37K frontend + 47K backend) |
-| Source Files | 447 (296 TS/TSX + 151 Python) |
-| API Endpoints | 150+ |
-| Database Models | 16 |
-| Alembic Migrations | 19 |
-| React Components | 114 + 28 UI primitives |
-| Feature Modules | 12 |
 
 ## Quick Start
 
