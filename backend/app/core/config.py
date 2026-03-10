@@ -390,6 +390,10 @@ class Settings(BaseSettings):
 
     PROMETHEUS_PORT: int = Field(default=9090, description="Prometheus metrics port")
 
+    SENTRY_DSN: Optional[str] = Field(
+        default=None, description="Sentry DSN for backend error tracking"
+    )
+
     # ============================================================================
     # Validators
     # ============================================================================
