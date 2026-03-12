@@ -53,6 +53,7 @@ RUN apt-get update && apt-get install -y \
     poppler-utils \
     curl \
     dumb-init \
+    libmagic1 \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
@@ -68,6 +69,10 @@ RUN mkdir -p logs uploads temp_uploads && \
 
 # Copy application code
 COPY --chown=appuser:appuser ./app ./app
+
+# Copy Alembic migration files (required for schema upgrades in production)
+COPY --chown=appuser:appuser ./alembic.ini ./alembic.ini
+COPY --chown=appuser:appuser ./alembic ./alembic
 
 # Switch to non-root user
 USER appuser
