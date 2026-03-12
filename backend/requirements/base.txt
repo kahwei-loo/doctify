@@ -13,6 +13,7 @@ python-multipart==0.0.6
 sqlalchemy[asyncio]==2.0.25  # SQLAlchemy ORM with async support
 asyncpg==0.29.0  # PostgreSQL async driver for FastAPI
 psycopg2-binary==2.9.9  # PostgreSQL sync driver (for Alembic migrations)
+alembic==1.13.1  # Database migration tool (required in production for schema upgrades)
 pgvector==0.2.5  # Vector extension for RAG/AI features
 
 # Data Validation and Settings
