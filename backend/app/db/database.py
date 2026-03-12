@@ -146,7 +146,13 @@ async def close_db() -> None:
 
     if _engine is not None:
         logger.info("Closing PostgreSQL database connection...")
-        await _engine.dispose()
+        try:
+            await _engine.dispose()
+        except RuntimeError:
+            # Swallow "Event loop is closed" errors that occur in Celery prefork
+            # workers when the engine's asyncpg connections are bound to a prior
+            # event loop that asyncio.run() has already closed.
+            pass
         _engine = None
         _async_session_factory = None
         logger.info("Database connection closed")
