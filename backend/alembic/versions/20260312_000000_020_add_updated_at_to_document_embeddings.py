@@ -16,7 +16,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = "020_document_embeddings_updated_at"
-down_revision = "019_add_model_catalog"
+down_revision = "019_model_catalog"
 branch_labels = None
 depends_on = None
 
